@@ -90,6 +90,7 @@ the 'top' class includes the photo and underlined heading components
   background-color: white;
   width: 100%;
   list-style-type: none;
+  margin-top: 0;
 }
 
 
