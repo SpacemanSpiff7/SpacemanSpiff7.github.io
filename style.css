@@ -4,8 +4,10 @@
 }
 
 body {
-    background-color: lightblue;
+  background-color: lightblue;
   font-family:'Bungee', cursive;
+  padding: 0;
+  margin: 0;
 
 }
 h1 {
