@@ -81,16 +81,33 @@ the 'top' class includes the photo and underlined heading components
   float: left;
 }
 
-#navigation_bar {
-  clear: none;
-  float: left;
-  position: sticky;
-  z-index: 10;
-  top: 0;
-  background-color: white;
-  width: 100%;
-  list-style-type: none;
-  margin-top: 0;
+@media (min-width: 1200px) {
+  #navigation_bar {
+    clear: none;
+    float: left;
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    background-color: white;
+    width: 100%;
+    list-style-type: none;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  #navigation_bar {
+    clear: none;
+    float: left;
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    background-color: white;
+    width: 100%;
+    list-style-type: none;
+    margin-top: 0;
+    display: block;
+  }
 }
 
 
