@@ -1,12 +1,12 @@
 body {
     background-color: lightblue;
   font-family:'Bungee', cursive;
-  
+
 }
 h1 {
-  
+
   font-size: 50px;
-  position: sticky;
+  position: relative;
   z-index:1;
   top: 0;
   height: 90px;
@@ -14,71 +14,107 @@ h1 {
   width: 100%;
   font-family:'Bungee', cursive;
   vertical-align: text-top;
-  
+
 }
 
 h2 {
-  
+
   border-bottom: 10px dashed black;
   color: black;
   font-weight: 100;
   font-size: 22px;
   line-height: 24px;
-  
+
   width: 25%;
   font-family:'Bungee', cursive;
   padding: 20px;
-  
-  
+
+
 }
 
 .simoPhoto {
-  width: 70px;
+
+  width: 90px;
   margin-right: 30px;
-  margin-top: 200px;
   border: 2px solid black;
-  white-space: nowrap;
   position: relative;
   bottom: 0px;
   left: 0px;
   margin-left: 20px;
+  box-shadow: 5px 7px 8px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
 }
 
 .main_heading {
-  position: absolute;
-  top: 200px;
-  left: 100px;
-  padding-bottom: 35px;
+  position: relative;
+  width: 400px;
+  bottom: 0px;
   text-align: left;
-  margin-top: 200px;
-  margin-bottom: 100px;
-  margin-right: 20px;
+  font-size: 28px;
+  padding-bottom: 17px;
+
 }
 
+/*
+the 'top' class includes the photo and underlined heading components
+*/
 .top{
-  margin-bottom: 100px;
+  margin: 200px 0px 500px 0px;
+  display: inline-block;
+  clear: none;
+  float: left;
+}
+
+#navigation_bar {
+  clear: none;
+  float: left;
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  background-color: white;
+  width: 100%;
+  list-style-type: none;
+}
+
+
+.nav_item {
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+  display: inline-block;
+  font-size: 25px;
+  clear: none;
+  float: left;
+  padding: 10px 20px;
+  position: sticky;
+
+
+}
+
+.nav_item a {
+  text-decoration: none;
+  color: black;
+  padding: 10px 20px;
+}
+
+.nav_item a:hover {
+  background-color: coral;
+}
+
+.break {
+  margin-bottom: 500px;
+  clear: left;
 }
 
 p {
+  clear: left;
   font-family: 'Montserrat', sans-serif;
   font-size: 20px;
 }
 
-.button {
-  background-color: 'white'; /* Green */
-    font-family: 'Montserrat', sans-serif;
-    font-size: 20px;
-    border: 1px black;
-    color: black;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-}
-
-#myFunction {
-  padding: 25px;
-  width: 250px;
-  height: 250px;
+a.menu {
+  text-decoration: none;
+  font-color: black;
+  margin: 0;
+  padding: 0;
 }
