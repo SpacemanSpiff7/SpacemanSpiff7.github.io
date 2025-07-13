@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered shopping research prompt generator. Create comprehensive research prompts for finding the best deals and making informed purchase decisions.">
+    <meta name="keywords" content="shopping research, AI prompts, deal finding, purchase research, product comparison">
+    <meta name="author" content="Simone Longo">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://spacemanspiff7.github.io/shopping-research.html">
+    <meta property="og:title" content="Shopping Research Generator - Simone Longo">
+    <meta property="og:description" content="AI-powered shopping research prompt generator for comprehensive product research and deal finding.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://spacemanspiff7.github.io/shopping-research.html">
+    <meta property="twitter:title" content="Shopping Research Generator - Simone Longo">
+    <meta property="twitter:description" content="AI-powered shopping research prompt generator for comprehensive product research and deal finding.">
+    
+    <title>Shopping Research Generator - Simone Longo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="resources/simone_pic.png">
+    <style>
+        /* Shopping Research Page Specific Styles */
+        .shopping-container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 120px 24px 60px;
+        }
+
+        .shopping-header {
+            margin-bottom: 64px;
+        }
+
+        .shopping-header h1 {
+            font-family: 'Crimson Text', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .shopping-header p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            font-weight: 300;
+        }
+
+        .form-container {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 48px;
+            margin-bottom: 48px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .form-group:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        .optional {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            transition: all 0.2s ease;
+            font-weight: 300;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+
+        .field-help {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 6px;
+            font-weight: 300;
+        }
+
+        .clear-btn {
+            background: #f9fafb;
+            color: #6b7280;
+            padding: 12px 24px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 16px;
+        }
+
+        .clear-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            margin-top: 32px;
+        }
+
+        .generate-btn {
+            background: #1a1a1a;
+            color: white;
+            padding: 12px 24px;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .generate-btn:hover {
+            background: #374151;
+        }
+
+        .generate-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-container {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 48px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 48px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .result-header h2 {
+            font-family: 'Crimson Text', serif;
+            color: #1a1a1a;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .copy-btn {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .copy-btn.copied {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .prompt-output {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 32px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+            color: #374151;
+            font-weight: 300;
+        }
+
+        .prompt-output:empty::before {
+            content: "Your generated prompt will appear here...";
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .shopping-container {
+                padding: 100px 20px 40px;
+            }
+            
+            .form-container, .result-container {
+                padding: 32px 24px;
+            }
+            
+            .shopping-header h1 {
+                font-size: 2rem;
+            }
+            
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .prompt-output {
+                font-size: 0.8rem;
+                max-height: 400px;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" aria-label="Back to portfolio">Simone Longo</a>
+            <ul class="nav-links">
+                <li><a href="index.html" aria-label="Back to portfolio">← Back to Portfolio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="shopping-container">
+        <div class="shopping-header">
+            <h1>Shopping Research Generator</h1>
+            <p>Create comprehensive research prompts for finding the best deals</p>
+        </div>
+
+        <div class="form-container">
+            <form id="promptForm" role="form" aria-labelledby="form-title">
+                <div class="form-group">
+                    <label for="location">Your Location <span class="required">*</span></label>
+                    <input type="text" id="location" class="form-control" placeholder="e.g., Santa Monica, California" required aria-describedby="location-help">
+                </div>
+
+                <div class="form-group">
+                    <label for="item">What are you shopping for? <span class="required">*</span></label>
+                    <input type="text" id="item" class="form-control" placeholder="e.g., propane grill, stand mixer, laptop, exercise bike" required aria-describedby="item-help">
+                </div>
+
+                <div class="form-group">
+                    <label for="useArea">Where will you use it? <span class="optional">(Optional)</span></label>
+                    <input type="text" id="useArea" class="form-control" placeholder="e.g., small kitchen, balcony, home office, garage">
+                </div>
+
+                <div class="form-group">
+                    <label for="useActivity">What will you use it for? <span class="optional">(Optional)</span></label>
+                    <input type="text" id="useActivity" class="form-control" placeholder="e.g., weekly baking, entertaining guests, daily commute">
+                </div>
+
+                <div class="form-group">
+                    <label for="customSources">Custom Sources to Include <span class="optional">(Optional)</span></label>
+                    <input type="text" id="customSources" class="form-control" placeholder="e.g., specific websites, forums, or experts you want researched" aria-describedby="sources-help">
+                    <div id="sources-help" class="field-help">The AI will research these sources in addition to finding the best ones automatically</div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="clear-btn" id="clearBtn" aria-label="Clear all form fields">Clear All</button>
+                    <button type="button" class="generate-btn" id="generateBtn" aria-label="Generate research prompt">Generate Research Prompt</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="result-container" id="resultContainer" aria-labelledby="result-title" aria-live="polite">
+            <div class="result-header">
+                <h2 id="result-title">Your Custom Research Prompt</h2>
+                <button type="button" class="copy-btn" id="copyBtn" aria-label="Copy prompt to clipboard">Copy to Clipboard</button>
+            </div>
+            <div class="prompt-output" id="promptOutput" role="textbox" aria-label="Generated research prompt"></div>
+        </div>
+    </div>
+
+    <script>
+        // Shopping Prompt Generator Class
+        class ShoppingPromptGenerator {
+            constructor() {
+                this.defaultUseArea = 'general use';
+                this.defaultActivity = 'everyday use';
+            }
+
+            generatePrompt(userInputs) {
+                const {
+                    location = "your local area",
+                    item = "the product you're looking for",
+                    useArea = null,
+                    useActivity = null,
+                    customSources = null
+                } = userInputs;
+
+                const finalUseArea = useArea || this.defaultUseArea;
+                const finalActivity = useActivity || this.defaultActivity;
+
+                // Build custom sources instruction if provided
+                const customSourcesInstruction = customSources ? 
+                    `\n\n**CUSTOM SOURCES TO RESEARCH:** Make sure to specifically investigate and include insights from: ${customSources}` : '';
+
+                return `**COMPREHENSIVE SHOPPING RESEARCH & DEAL ANALYSIS REQUEST**
+
+I need expert help with purchasing: ${item}
+
+**My situation:**
+- Location: ${location}
+- Intended use: ${finalActivity}
+- Use location/area: ${finalUseArea}
+
+I want a strong focus on getting the best possible value and identifying all available deals.${customSourcesInstruction}
+
+**STEP 1: AUTHORITATIVE SOURCE IDENTIFICATION & LOCATION INTELLIGENCE**
+
+**First, identify and verify the most credible sources for ${item} research:**
+- Research and identify the top 5-7 most authoritative professional review sources that specialize in ${item} testing, evaluation, and deal tracking
+- Prioritize sources with rigorous testing methodologies, independence from manufacturers, transparent review processes, and recent publications (2024-2025)
+- Identify 3-4 most active and knowledgeable community forums/subreddits where experienced users discuss ${item} experiences, problems, and deals
+- Find specialized deal-tracking websites and price comparison platforms that monitor ${item} pricing
+
+**Then, conduct comprehensive ${location} analysis:**
+- Research local climate, environmental factors, and regional considerations that affect ${item} performance and longevity
+- Identify regional pricing patterns, local retailer landscape, and seasonal sale trends
+- Investigate local regulations, restrictions, building codes, or considerations that might affect product choice
+- Analyze ${location}-specific challenges, advantages, and user experiences related to this use case
+
+**STEP 2: MARKET RESEARCH & CONCERN DISCOVERY**
+
+**Using your identified authoritative sources, research and determine:**
+- The key performance criteria, features, and specifications that matter most for this intended use
+- Common problems, failure points, complaints, and long-term reliability issues that users experience
+- Current market trends, new technologies, and emerging features in the ${item} category
+- Price ranges across market segments (budget, mid-range, premium) and what drives value differences
+- Total cost of ownership including maintenance, repairs, accessories, and replacement cycles
+
+**STEP 3: COMPREHENSIVE DEAL ANALYSIS & PRICE OPTIMIZATION**
+
+**Execute thorough deal-hunting and price analysis:**
+- Find current active discount codes, promotional offers, and manufacturer rebates for top ${item} options
+- Research upcoming sales events, seasonal discount patterns, and optimal purchase timing for ${item}
+- Identify retailers with price-matching policies and catalog requirements for price match requests
+- Investigate coupon stacking opportunities, loyalty program benefits, credit card rewards, and cashback possibilities
+- Analyze historical pricing data to determine if current prices represent good value
+- Check for bundle deals, package offers, or complementary products that provide additional value
+
+**Source Quality Standards:**
+- Only cite sources with rigorous, transparent testing methodologies and recent content
+- Cross-reference findings across multiple professional sources for consistency
+- Include both expert analysis AND extensive real-user experiences, especially regarding long-term ownership
+- Verify all current pricing, availability, discount codes, and promotional offer accuracy
+- Prioritize information from the last 12 months while noting significant historical patterns
+
+**STEP 4: COMPREHENSIVE RECOMMENDATIONS & PURCHASE STRATEGY**
+
+**Provide detailed analysis and actionable recommendations:**
+
+1. **Source Credibility Summary:** List the authoritative sources used and explain why they're reliable for ${item} research
+2. **Location-Specific Analysis:** Key factors in ${location} that affect product choice, performance, and maintenance for this use case
+3. **Top 3 Recommendations:** Specific models with detailed reasoning across different price points, including:
+   - Why each option excels for the intended use and location
+   - Current best prices and where to find them
+   - Available discounts, promotional codes, and deal opportunities
+   - Expected lifespan and long-term value proposition
+4. **Deal Optimization Strategy:** 
+   - Best current deals and where to find them
+   - Upcoming sales events worth waiting for
+   - Price-matching opportunities and required documentation
+   - Coupon stacking and discount combination strategies
+5. **Purchase Timing Analysis:** 
+   - Whether to buy now or wait for better deals
+   - Seasonal pricing patterns and optimal purchase windows
+   - Risk assessment of waiting vs. immediate purchase
+6. **Complete Purchase Guide:** 
+   - Where to buy (local vs. online options in ${location})
+   - Current pricing and availability status
+   - Warranty considerations and extended protection options
+   - Setup, delivery, and installation requirements
+
+**STEP 5: QUALITY CONTROL & VERIFICATION**
+
+After completing your research and recommendations, perform a comprehensive review and include a final verification section addressing:
+
+1. **Source Verification:** Are all sources credible, recent, and properly cited with direct links?
+2. **Deal Accuracy:** Are all discount codes, prices, and promotional offers currently valid and accurately represented?
+3. **Fact Consistency:** Are there any contradictions between sources that need resolution or explanation?
+4. **Completeness Assessment:** Have I addressed all critical aspects for this specific use case and location?
+5. **Relevance Check:** Do all recommendations truly fit the specific use case, location requirements, and value priorities?
+6. **Timing Verification:** Is the purchase timing advice sound based on current market conditions and deal cycles?
+7. **Gap Analysis:** What important information might be missing, unclear, or require additional research?
+
+**Include this quality control review as a final section with any corrections, clarifications, or additional recommendations.**
+
+Begin your research systematically: identify sources → analyze location factors → research products and concerns → find deals and optimize pricing → provide comprehensive recommendations → verify everything for accuracy.`;
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const generator = new ShoppingPromptGenerator();
+            
+            // Get elements
+            const generateBtn = document.getElementById('generateBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const outputDiv = document.getElementById('promptOutput');
+            
+            // Clear button functionality
+            clearBtn.addEventListener('click', function() {
+                document.getElementById('location').value = '';
+                document.getElementById('item').value = '';
+                document.getElementById('useArea').value = '';
+                document.getElementById('useActivity').value = '';
+                document.getElementById('customSources').value = '';
+                outputDiv.textContent = '';
+                
+                // Focus on first input
+                document.getElementById('location').focus();
+            });
+            
+            // Generate button click handler
+            generateBtn.addEventListener('click', function() {
+                // Get form values
+                const location = document.getElementById('location').value.trim();
+                const item = document.getElementById('item').value.trim();
+                const useArea = document.getElementById('useArea').value.trim();
+                const useActivity = document.getElementById('useActivity').value.trim();
+                const customSources = document.getElementById('customSources').value.trim();
+                
+                // Validate
+                if (!location || !item) {
+                    alert('Please fill in your location and what you\'re shopping for.');
+                    return;
+                }
+                
+                // Generate prompt
+                const userInputs = {
+                    location: location,
+                    item: item,
+                    useArea: useArea || null,
+                    useActivity: useActivity || null,
+                    customSources: customSources || null
+                };
+                
+                const prompt = generator.generatePrompt(userInputs);
+                outputDiv.textContent = prompt;
+                
+                // Scroll to output
+                outputDiv.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Copy button click handler
+            copyBtn.addEventListener('click', function() {
+                const text = outputDiv.textContent;
+                
+                if (!text || text.includes('Your generated prompt will appear here')) {
+                    alert('Generate a prompt first!');
+                    return;
+                }
+                
+                // Copy to clipboard
+                navigator.clipboard.writeText(text).then(function() {
+                    copyBtn.textContent = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    
+                    setTimeout(function() {
+                        copyBtn.textContent = 'Copy to Clipboard';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(function() {
+                    // Fallback
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    
+                    copyBtn.textContent = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    
+                    setTimeout(function() {
+                        copyBtn.textContent = 'Copy to Clipboard';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + Enter to generate
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    generateBtn.click();
+                }
+                
+                // Escape to clear
+                if (e.key === 'Escape') {
+                    clearBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

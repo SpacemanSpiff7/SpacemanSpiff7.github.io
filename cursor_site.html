@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simone Longo - Developer & Researcher</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fafaf9;
+            color: #1a1a1a;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(250, 250, 249, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #1a1a1a;
+        }
+
+        /* Sections */
+        .section {
+            padding: 120px 0;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section:first-child {
+            padding-top: 200px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .hero h1 {
+            font-family: 'Crimson Text', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 12px 24px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.025em;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background: #374151;
+            color: white;
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            gap: 32px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 32px;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .card p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .tech-tag {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* About Section */
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-content h2 {
+            font-family: 'Crimson Text', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: #1a1a1a;
+        }
+
+        .about-content p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            text-align: center;
+            padding: 32px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .contact-item h3 {
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .contact-item a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .contact-item a:hover {
+            color: #1a1a1a;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 16px 20px;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 80px 0;
+            }
+
+            .section:first-child {
+                padding-top: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">Simone Longo</a>
+            <ul class="nav-links">
+                <li><a href="#" data-section="home" class="nav-link active">Home</a></li>
+                <li><a href="#" data-section="projects" class="nav-link">Projects</a></li>
+                <li><a href="#" data-section="about" class="nav-link">About</a></li>
+                <li><a href="#" data-section="contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="section active">
+        <div class="container">
+            <div class="hero">
+                <h1>Developer & Researcher</h1>
+                <p>Building tools and exploring data at the intersection of technology and science. Based in Los Angeles, working on computational biology, command-line utilities, and AI-powered applications.</p>
+                <div class="hero-links">
+                    <a href="https://github.com/SpacemanSpiff7" class="btn" target="_blank">GitHub</a>
+                    <a href="#" data-section="projects" class="btn btn-primary nav-link">View Projects</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <div class="container">
+            <div class="about-content">
+                <h2>Projects</h2>
+                <p>A collection of tools and applications I've built, ranging from command-line utilities to web applications and research tools.</p>
+            </div>
+
+            <div class="grid grid-3">
+                <!-- Shopping Research Tool -->
+                <div class="card">
+                    <h3>Shopping Research Generator</h3>
+                    <p>AI prompt generator for comprehensive shopping research. Creates detailed prompts for finding the best deals, comparing products, and making informed purchase decisions with quality control checkpoints.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">AI Prompts</span>
+                        <span class="tech-tag">Web App</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="shopping-research.html" class="btn btn-primary">Use Tool</a>
+                    </div>
+                </div>
+
+                <!-- ESKeDiT -->
+                <div class="card">
+                    <h3>ESKeDiT</h3>
+                    <p>Expanded Sequence Kmer Diagnostic Tool - A Python-based bioinformatics tool for analyzing and diagnosing sequence k-mer patterns in genomic data.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Bioinformatics</span>
+                        <span class="tech-tag">CLI</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="https://github.com/SpacemanSpiff7/ESKeDiT" class="btn" target="_blank">View Code</a>
+                    </div>
+                </div>
+
+                <!-- bedprep -->
+                <div class="card">
+                    <h3>bedprep</h3>
+                    <p>Command line tool for compressing and indexing BED files efficiently. Streamlines genomic data processing workflows with optimized file handling.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">Shell</span>
+                        <span class="tech-tag">Genomics</span>
+                        <span class="tech-tag">CLI</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="https://github.com/SpacemanSpiff7/bedprep" class="btn" target="_blank">View Code</a>
+                    </div>
+                </div>
+
+                <!-- svdawg -->
+                <div class="card">
+                    <h3>svdawg</h3>
+                    <p>Python library for exploring singular value decompositions (SVDs) graphically. Provides intuitive visualizations for understanding matrix decompositions and their applications.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Data Science</span>
+                        <span class="tech-tag">Visualization</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="https://github.com/SpacemanSpiff7/svdawg" class="btn" target="_blank">View Code</a>
+                    </div>
+                </div>
+
+                <!-- nsplitter -->
+                <div class="card">
+                    <h3>nsplitter</h3>
+                    <p>Command line tool for splitting a file into n equal parts. A surprisingly useful utility that fills a gap in standard Unix tools for parallel processing workflows.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">Shell</span>
+                        <span class="tech-tag">CLI</span>
+                        <span class="tech-tag">Utilities</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="https://github.com/SpacemanSpiff7/nsplitter" class="btn" target="_blank">View Code</a>
+                    </div>
+                </div>
+
+                <!-- plt-hist -->
+                <div class="card">
+                    <h3>plt-hist</h3>
+                    <p>Bash tool for plotting histograms directly from the command line. Enables quick data visualization without leaving the terminal environment.</p>
+                    <div class="card-footer">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Bash</span>
+                        <span class="tech-tag">Data Viz</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="https://github.com/SpacemanSpiff7/plt-hist" class="btn" target="_blank">View Code</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <div class="about-content">
+                <h2>About</h2>
+                <p>I'm a developer and researcher based in Los Angeles, working at the intersection of computational biology and software engineering. My work focuses on creating tools that make complex data analysis more accessible and efficient.</p>
+                
+                <p>With experience in bioinformatics, command-line utilities, and web applications, I enjoy building solutions that solve real-world problems. Whether it's processing genomic data, automating workflows, or creating user-friendly interfaces, I'm passionate about crafting tools that work reliably and elegantly.</p>
+                
+                <p>When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or diving into the latest research in computational methods and AI applications.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <div class="about-content">
+                <h2>Get In Touch</h2>
+                <p>Interested in collaborating or just want to say hello? I'd love to hear from you.</p>
+                
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <h3>GitHub</h3>
+                        <a href="https://github.com/SpacemanSpiff7" target="_blank">@SpacemanSpiff7</a>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Twitter</h3>
+                        <a href="https://twitter.com/smoneylongo" target="_blank">@smoneylongo</a>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Location</h3>
+                        <p>Los Angeles, CA</p>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Work</h3>
+                        <p>Magnite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const targetSection = link.getAttribute('data-section');
+                
+                // Remove active class from all nav links and sections
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked nav link and target section
+                link.classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
