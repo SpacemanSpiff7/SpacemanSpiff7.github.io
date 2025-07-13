@@ -306,45 +306,92 @@ body {
 /* Contact Section */
 .contact-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
     margin-top: 3rem;
 }
 
 .contact-item {
     text-align: center;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     background: white;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    transition: all 0.2s ease;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1a1a1a, #6b7280);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
 .contact-item:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    border-color: #d1d5db;
+}
+
+.contact-item:hover::before {
+    transform: scaleX(1);
+}
+
+.contact-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+    background: #f9fafb;
+    border-radius: 50%;
+    color: #6b7280;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover .contact-icon {
+    background: #1a1a1a;
+    color: white;
+    transform: scale(1.1);
 }
 
 .contact-item h3 {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     color: #1a1a1a;
     font-weight: 600;
+    font-size: 1.125rem;
 }
 
 .contact-item a {
     color: #6b7280;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
     font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
 }
 
 .contact-item a:hover {
     color: #1a1a1a;
+    background: #f3f4f6;
+    transform: translateY(-1px);
 }
 
 .contact-item p {
     color: #6b7280;
     margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 /* Shopping Research Page Styles */
