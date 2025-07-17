@@ -1,157 +1,322 @@
-// Component loading functionality
-async function loadComponent(componentName) {
-    try {
-        const response = await fetch(`components/${componentName}.html`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const html = await response.text();
-        return html;
-    } catch (error) {
-        console.error(`Error loading component ${componentName}:`, error);
-        return '';
-    }
+// Component loading system
+document.addEventListener('DOMContentLoaded', function() {
+    // Load components
+    loadComponent('nav-container', 'components/nav.html');
+    loadComponent('home-container', 'components/home.html');
+    loadComponent('projects-container', 'components/projects.html');
+    loadComponent('about-container', 'components/about.html');
+    loadComponent('contact-container', 'components/contact.html');
+    
+    // Initialize after components are loaded
+    setTimeout(initializeApp, 100);
+});
+
+function loadComponent(containerId, componentPath) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    fetch(componentPath)
+        .then(response => response.text())
+        .then(html => {
+            container.innerHTML = html;
+            
+            // Trigger custom event for component loaded
+            const event = new CustomEvent('componentLoaded', {
+                detail: { containerId, componentPath }
+            });
+            document.dispatchEvent(event);
+        })
+        .catch(error => {
+            console.error(`Error loading component ${componentPath}:`, error);
+        });
 }
 
-// Load all components on page load
-async function loadAllComponents() {
-    const components = ['nav', 'home', 'projects', 'about', 'contact'];
+function initializeApp() {
+    // Navigation functionality
+    setupNavigation();
     
-    for (const component of components) {
-        const html = await loadComponent(component);
-        if (html) {
-            // Insert component into the appropriate place
-            if (component === 'nav') {
-                document.body.insertAdjacentHTML('afterbegin', html);
-            } else {
-                document.getElementById('main-content').insertAdjacentHTML('beforeend', html);
-            }
-        }
-    }
+    // Shopping research tool functionality
+    setupShoppingTool();
     
-    // Initialize navigation after components are loaded
-    initializeNavigation();
-    addKeyboardNavigation();
-    addSmoothScrolling();
+    // Smooth scrolling
+    setupSmoothScrolling();
+    
+    // Intersection Observer for animations
+    setupAnimations();
+    
+    // Copy functionality
+    setupCopyButtons();
 }
 
-// Navigation functionality with improved accessibility and performance
-function initializeNavigation() {
+function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.section');
-
+    
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             
             const targetSection = link.getAttribute('data-section');
-            if (!targetSection) return;
             
-            // Update navigation state
-            updateActiveSection(targetSection);
+            // Remove active class from all nav links and sections
+            navLinks.forEach(l => l.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
             
-            // Update URL hash for bookmarking
-            history.pushState(null, null, `#${targetSection}`);
+            // Add active class to clicked nav link and target section
+            link.classList.add('active');
+            const targetElement = document.getElementById(targetSection);
+            if (targetElement) {
+                targetElement.classList.add('active');
+                
+                // Smooth scroll to section
+                targetElement.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
     });
+    
+    // Handle direct navigation to sections
+    const hash = window.location.hash.substring(1);
+    if (hash && document.getElementById(hash)) {
+        setTimeout(() => {
+            const targetLink = document.querySelector(`[data-section="${hash}"]`);
+            if (targetLink) {
+                targetLink.click();
+            }
+        }, 100);
+    }
+}
 
-    // Handle browser back/forward buttons
-    window.addEventListener('popstate', function() {
-        const hash = window.location.hash.slice(1) || 'home';
-        updateActiveSection(hash);
+function setupShoppingTool() {
+    const form = document.getElementById('shopping-form');
+    const resultContainer = document.getElementById('result-container');
+    const promptOutput = document.getElementById('prompt-output');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    
+    if (!form) return;
+    
+    // Generate button functionality
+    generateBtn.addEventListener('click', function() {
+        generatePrompt();
     });
-
-    // Handle direct links with hash
-    if (window.location.hash) {
-        const hash = window.location.hash.slice(1);
-        if (document.getElementById(hash)) {
-            updateActiveSection(hash);
+    
+    // Clear button functionality
+    clearBtn.addEventListener('click', function() {
+        clearForm();
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        generatePrompt();
+    });
+    
+    function generatePrompt() {
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        
+        // Show loading state
+        generateBtn.textContent = 'Generating...';
+        generateBtn.disabled = true;
+        
+        // Generate the prompt
+        const prompt = createShoppingPrompt(data);
+        
+        // Display result with animation
+        setTimeout(() => {
+            promptOutput.textContent = prompt;
+            resultContainer.style.display = 'block';
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            // Reset button
+            generateBtn.textContent = 'Generate Prompt';
+            generateBtn.disabled = false;
+        }, 500);
+    }
+    
+    function clearForm() {
+        form.reset();
+        promptOutput.textContent = '';
+        resultContainer.style.display = 'none';
+    }
+    
+    function createShoppingPrompt(data) {
+        const {
+            product_type,
+            budget_range,
+            specific_features,
+            use_case,
+            quality_preference,
+            timeline,
+            additional_requirements
+        } = data;
+        
+        let prompt = `I need help researching the best ${product_type} within a budget of ${budget_range}. `;
+        
+        if (specific_features) {
+            prompt += `Key features I'm looking for include: ${specific_features}. `;
         }
+        
+        if (use_case) {
+            prompt += `Primary use case: ${use_case}. `;
+        }
+        
+        if (quality_preference) {
+            prompt += `Quality preference: ${quality_preference}. `;
+        }
+        
+        if (timeline) {
+            prompt += `Timeline: ${timeline}. `;
+        }
+        
+        if (additional_requirements) {
+            prompt += `Additional requirements: ${additional_requirements}. `;
+        }
+        
+        prompt += `\n\nPlease provide:\n`;
+        prompt += `1. Top 3-5 recommendations with pros/cons\n`;
+        prompt += `2. Price comparison across different retailers\n`;
+        prompt += `3. Best time to buy (if applicable)\n`;
+        prompt += `4. Alternative options to consider\n`;
+        prompt += `5. Quality control checkpoints for final decision\n`;
+        prompt += `6. Warranty and return policy considerations\n`;
+        prompt += `7. User reviews and reliability data\n`;
+        prompt += `8. Future-proofing considerations\n`;
+        
+        return prompt;
     }
 }
 
-function updateActiveSection(sectionId) {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section');
-    const targetSection = document.getElementById(sectionId);
-    
-    if (!targetSection) return;
-
-    // Remove active class from all nav links and sections
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        link.removeAttribute('aria-current');
-    });
-    sections.forEach(section => {
-        section.classList.remove('active');
-        section.setAttribute('aria-hidden', 'true');
-    });
-    
-    // Add active class to clicked nav link and target section
-    const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-        activeLink.setAttribute('aria-current', 'page');
-    }
-    
-    targetSection.classList.add('active');
-    targetSection.removeAttribute('aria-hidden');
-    
-    // Focus management for accessibility
-    targetSection.focus();
-}
-
-function addKeyboardNavigation() {
-    // Add keyboard navigation for cards
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.setAttribute('tabindex', '0');
-        card.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                const link = card.querySelector('a');
-                if (link) {
-                    link.click();
-                }
-            }
-        });
-    });
-}
-
-function addSmoothScrolling() {
-    // Smooth scroll to sections when navigating
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const targetSection = this.getAttribute('data-section');
-            const section = document.getElementById(targetSection);
+function setupSmoothScrolling() {
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
             
-            if (section) {
-                setTimeout(() => {
-                    section.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }, 100);
+            // Skip if href is just "#" (invalid selector)
+            if (href === '#') return;
+            
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }
         });
     });
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', loadAllComponents);
+function setupAnimations() {
+    // Intersection Observer for fade-in animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe elements for animation
+    document.querySelectorAll('.card, .preview-card, .contact-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+}
+
+function setupCopyButtons() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-btn')) {
+            const output = document.getElementById('prompt-output');
+            if (output && output.textContent.trim()) {
+                navigator.clipboard.writeText(output.textContent).then(() => {
+                    // Show copied state
+                    e.target.textContent = 'Copied!';
+                    e.target.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        e.target.textContent = 'Copy';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+        }
+    });
+}
+
+// Handle component loading events
+document.addEventListener('componentLoaded', function(e) {
+    const { containerId } = e.detail;
+    
+    // Re-initialize navigation if nav component is loaded
+    if (containerId === 'nav-container') {
+        setTimeout(setupNavigation, 50);
+    }
+    
+    // Re-initialize shopping tool if home component is loaded
+    if (containerId === 'home-container') {
+        setTimeout(setupShoppingTool, 50);
+    }
+});
+
+// Performance optimization: Lazy load images
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src || img.src;
+                    img.classList.remove('lazy');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+    }
+});
+
+// Handle window resize for responsive design
+window.addEventListener('resize', function() {
+    // Debounce resize events
+    clearTimeout(window.resizeTimeout);
+    window.resizeTimeout = setTimeout(() => {
+        // Recalculate any layout-dependent elements
+        setupAnimations();
+    }, 250);
+});
 
 // Add loading states and error handling
 window.addEventListener('error', function(e) {
-    console.error('Page error:', e.error);
-    // Could add user-friendly error messaging here
+    console.error('Application error:', e.error);
 });
 
-// Add performance monitoring
-window.addEventListener('load', function() {
-    // Log performance metrics
-    if ('performance' in window) {
-        const perfData = performance.getEntriesByType('navigation')[0];
-        console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
-    }
-});
+// Service Worker registration for PWA capabilities (commented out until sw.js is created)
+// if ('serviceWorker' in navigator) {
+//     window.addEventListener('load', function() {
+//         navigator.serviceWorker.register('/sw.js')
+//             .then(function(registration) {
+//                 console.log('SW registered: ', registration);
+//             })
+//             .catch(function(registrationError) {
+//                 console.log('SW registration failed: ', registrationError);
+//             });
+//     });
+// }
