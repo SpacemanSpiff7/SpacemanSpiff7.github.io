@@ -1,5 +1,7 @@
 // Component loading system
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, starting component loading...');
+    
     // Load components
     loadComponent('nav-container', 'components/nav.html');
     loadComponent('home-container', 'components/home.html');
@@ -7,16 +9,24 @@ document.addEventListener('DOMContentLoaded', function() {
     loadComponent('about-container', 'components/about.html');
     loadComponent('contact-container', 'components/contact.html');
     
-    // Initialize after components are loaded
-    setTimeout(initializeApp, 100);
+    // Initialize after components are loaded with a longer delay
+    setTimeout(initializeApp, 200);
 });
 
 function loadComponent(containerId, componentPath) {
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+        console.error(`Container with id '${containerId}' not found`);
+        return;
+    }
     
     fetch(componentPath)
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
         .then(html => {
             container.innerHTML = html;
             
@@ -32,6 +42,8 @@ function loadComponent(containerId, componentPath) {
 }
 
 function initializeApp() {
+    console.log('Initializing app...');
+    
     // Navigation functionality
     setupNavigation();
     
@@ -46,11 +58,40 @@ function initializeApp() {
     
     // Copy functionality
     setupCopyButtons();
+    
+    console.log('App initialization complete');
 }
 
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.section');
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinksContainer = document.querySelector('.nav-links');
+    
+    // Mobile navigation toggle
+    if (navToggle && navLinksContainer) {
+        navToggle.addEventListener('click', () => {
+            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', !isExpanded);
+            navLinksContainer.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a link
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinksContainer.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navToggle.contains(e.target) && !navLinksContainer.contains(e.target)) {
+                navLinksContainer.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
     
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
