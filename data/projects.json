@@ -1,8 +1,8 @@
 {
   "featured": [
+    "public-art-submission",
     "dodgers-notifications",
-    "shopping-research",
-    "public-art-submission"
+    "shopping-research"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",

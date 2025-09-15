@@ -484,55 +484,103 @@
             transform: none;
         }
         
-        /* Tags styling */
-        .tags-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: var(--space-3);
-            margin-top: var(--space-2);
+        
+        /* Next Steps Section Styling */
+        .next-steps-section {
+            background: var(--color-surface);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            border: 1px solid var(--color-border-light);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
         }
         
-        .tag-option {
+        .next-steps-info {
+            text-align: center;
+        }
+        
+        .step-indicator {
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: var(--space-2);
-            padding: var(--space-3) var(--space-4);
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--text-sm);
+            border: 2px solid var(--color-border);
             background: var(--color-background);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            user-select: none;
+            color: var(--color-text-secondary);
         }
         
-        .tag-option:hover {
+        .step.current .step-number {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
             border-color: var(--color-primary);
-            background: rgba(0, 212, 255, 0.05);
+            color: white;
         }
         
-        .tag-option input[type="checkbox"] {
-            margin: 0;
-            width: 16px;
-            height: 16px;
-            accent-color: var(--color-primary);
+        .step-text {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            font-weight: 500;
         }
         
-        .tag-option input[type="checkbox"]:checked + .tag-label {
-            color: var(--color-primary);
+        .step.current .step-text {
+            color: var(--color-text-primary);
             font-weight: 600;
         }
         
-        .tag-option:has(input[type="checkbox"]:checked) {
-            border-color: var(--color-primary);
-            background: rgba(0, 212, 255, 0.1);
+        .step-arrow {
+            font-size: var(--text-lg);
+            color: var(--color-text-tertiary);
+            font-weight: bold;
         }
         
-        .tag-label {
-            font-size: var(--text-sm);
+        .next-steps-description {
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Ready Info Section */
+        .ready-info {
+            text-align: left;
+        }
+        
+        .ready-info p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+        }
+        
+        .ready-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .ready-list li {
+            padding: var(--space-3) 0;
             color: var(--color-text-primary);
-            transition: all var(--transition-fast);
+            font-size: var(--text-sm);
+            line-height: 1.5;
         }
-        
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .submission-container {
@@ -568,8 +616,8 @@
         <div class="submission-container">
             <!-- Header -->
             <div class="submission-header">
-                <h1>Public Art Submission</h1>
-                <p>Share your public art installation with location and photo data. Optimized for mobile devices.</p>
+                <h1>Public Art Finder</h1>
+                <p>Step 1: Get your precise location and select art categories. We'll then take you to the Google Form to upload photos and add details.</p>
             </div>
             
             <!-- Permission Banner -->
@@ -611,133 +659,62 @@
                 </div>
             </div>
             
-            <!-- Photo Section -->
-            <div class="photo-section">
+            <!-- Next Steps Section -->
+            <div class="next-steps-section">
                 <h2 class="section-title">
                     <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21,15 16,10 5,21"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6"/>
+                        <path d="m15.14 7.14-4.28 4.28"/>
+                        <path d="m9.14 15.14 4.28-4.28"/>
                     </svg>
-                    Photo
+                    Next: Photo & Description
                 </h2>
                 
-                <div class="photo-upload-area" id="photo-upload-area">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21,15 16,10 5,21"/>
-                    </svg>
-                    <div class="upload-text">Tap to take a photo or choose from library</div>
-                    <div class="upload-subtext">Recommended: High quality photo showing the art installation</div>
-                </div>
-                
-                <img id="photo-preview" class="photo-preview" alt="Photo preview">
-                
-                <div class="camera-buttons" id="camera-buttons">
-                    <button type="button" id="camera-btn" class="camera-btn primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                            <circle cx="12" cy="13" r="4"/>
-                        </svg>
-                        <span>Take Photo</span>
-                    </button>
-                    
-                    <button type="button" id="library-btn" class="camera-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21,15 16,10 5,21"/>
-                        </svg>
-                        <span>Choose from Library</span>
-                    </button>
-                </div>
-                
-                <div class="camera-buttons" id="retake-buttons" style="display: none;">
-                    <button type="button" id="retake-btn" class="camera-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                            <circle cx="12" cy="13" r="4"/>
-                        </svg>
-                        <span>Retake Photo</span>
-                    </button>
-                    
-                    <button type="button" id="change-photo-btn" class="camera-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21,15 16,10 5,21"/>
-                        </svg>
-                        <span>Change Photo</span>
-                    </button>
-                </div>
-                
-                <input type="file" id="camera-input" class="file-input" accept="image/*" capture="environment">
-                <input type="file" id="library-input" class="file-input" accept="image/*">
-            </div>
-            
-            <!-- Details Section -->
-            <div class="details-section">
-                <h2 class="section-title">
-                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
-                    </svg>
-                    Additional Details
-                </h2>
-                
-                <div class="form-group">
-                    <label for="art-description">Description and Notes</label>
-                    <textarea id="art-description" class="form-control" rows="4" placeholder="Describe the art piece, its significance, or any other relevant details"></textarea>
-                    <div class="field-help">Share details about the art installation, artist information, or any other notes.</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="art-tags" class="required">Tags</label>
-                    <div class="tags-container">
-                        <label class="tag-option">
-                            <input type="checkbox" name="art-tags" value="Mural">
-                            <span class="tag-label">Mural</span>
-                        </label>
-                        <label class="tag-option">
-                            <input type="checkbox" name="art-tags" value="Graffiti">
-                            <span class="tag-label">Graffiti</span>
-                        </label>
-                        <label class="tag-option">
-                            <input type="checkbox" name="art-tags" value="Sculpture">
-                            <span class="tag-label">Sculpture</span>
-                        </label>
-                        <label class="tag-option">
-                            <input type="checkbox" name="art-tags" value="Mosaic">
-                            <span class="tag-label">Mosaic</span>
-                        </label>
-                        <label class="tag-option">
-                            <input type="checkbox" name="art-tags" value="__other_option__" id="other-tag-checkbox">
-                            <span class="tag-label">Other</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Custom tag input (hidden by default) -->
-                    <div class="form-group" id="custom-tag-group" style="display: none;">
-                        <label for="custom-tag-input">Custom Tag</label>
-                        <input type="text" id="custom-tag-input" class="form-control" placeholder="Enter your custom tag" maxlength="30">
-                        <div class="field-help">
-                            Enter a custom tag (max 30 characters)
-                            <span id="char-count" style="float: right; color: var(--color-text-tertiary);">0/30</span>
+                <div class="next-steps-info">
+                    <div class="step-indicator">
+                        <div class="step current">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Get Location</span>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span class="step-text">Complete Form</span>
                         </div>
                     </div>
                     
-                    <div class="field-help">Select all that apply to categorize the art piece.</div>
+                    <p class="next-steps-description">
+                        Once you have your precise location, you'll be taken to the Google Form to upload your photo, add descriptions, and select categories. Your location will be automatically filled in.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Ready Section -->
+            <div class="details-section">
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Ready to Continue
+                </h2>
+                
+                <div class="ready-info">
+                    <p>Once you have your precise location, you'll be taken to the Google Form where you can:</p>
+                    <ul class="ready-list">
+                        <li>📸 Upload photos of the art installation</li>
+                        <li>📝 Add descriptions and details</li>
+                        <li>🏷️ Select categories and tags</li>
+                        <li>📍 Your location will be automatically filled in</li>
+                    </ul>
                 </div>
             </div>
             
             <!-- Submit Section -->
             <div class="submit-section">
                 <button type="button" id="submit-btn" class="submit-btn" disabled>
-                    <span id="submit-text">Submit Art Installation</span>
+                    <span id="submit-text">Continue to Google Form</span>
                     <div class="loading-spinner" id="submit-spinner"></div>
                 </button>
                 
@@ -781,19 +758,14 @@
         class PublicArtSubmission {
             constructor() {
                 this.locationData = null;
-                this.photoFile = null;
                 this.isSubmitting = false;
                 
                 // Google Form configuration
                 this.googleFormUrl = 'https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/formResponse';
                 
-                // Field ID mapping - All field IDs confirmed working from Google Form
-                // Form fields: Location (required), Description and Notes, Tags (multiple choice), Picture (file upload)
+                // Field ID mapping for pre-filling Google Form
                 this.fieldIds = {
-                    location: 'entry.977326473',     // Location field (required) - CONFIRMED WORKING
-                    description: 'entry.676487869',  // Description and Notes field - CONFIRMED WORKING
-                    tags: 'entry.996424713',         // Tags multiple choice field - CONFIRMED WORKING
-                    picture: 'entry.1863059002'      // Picture file upload field - CONFIRMED WORKING
+                    location: '977326473'      // Location field (required) 
                 };
                 
                 this.init();
@@ -815,79 +787,8 @@
                     });
                 }
                 
-                // Camera buttons
-                document.getElementById('camera-btn').addEventListener('click', () => {
-                    document.getElementById('camera-input').click();
-                });
-                
-                document.getElementById('library-btn').addEventListener('click', () => {
-                    document.getElementById('library-input').click();
-                });
-                
-                // File inputs
-                document.getElementById('camera-input').addEventListener('change', (e) => {
-                    this.handleFileSelect(e.target.files[0]);
-                });
-                
-                document.getElementById('library-input').addEventListener('change', (e) => {
-                    this.handleFileSelect(e.target.files[0]);
-                });
-                
-                // Retake buttons
-                document.getElementById('retake-btn').addEventListener('click', () => {
-                    document.getElementById('camera-input').click();
-                });
-                
-                document.getElementById('change-photo-btn').addEventListener('click', () => {
-                    document.getElementById('library-input').click();
-                });
-                
-                // Upload area click
-                document.getElementById('photo-upload-area').addEventListener('click', () => {
-                    document.getElementById('camera-input').click();
-                });
-                
                 // Form validation
-                ['manual-address', 'art-description'].forEach(id => {
-                    document.getElementById(id).addEventListener('input', () => {
-                        this.updateSubmitButton();
-                    });
-                });
-                
-                // Tags validation
-                document.querySelectorAll('input[name="art-tags"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', () => {
-                        this.updateSubmitButton();
-                    });
-                });
-                
-                // Custom tag input handling
-                document.getElementById('other-tag-checkbox').addEventListener('change', (e) => {
-                    const customTagGroup = document.getElementById('custom-tag-group');
-                    if (e.target.checked) {
-                        customTagGroup.style.display = 'block';
-                    } else {
-                        customTagGroup.style.display = 'none';
-                        document.getElementById('custom-tag-input').value = '';
-                    }
-                    this.updateSubmitButton();
-                });
-                
-                // Custom tag input validation and character count
-                document.getElementById('custom-tag-input').addEventListener('input', (e) => {
-                    const charCount = e.target.value.length;
-                    const charCountElement = document.getElementById('char-count');
-                    charCountElement.textContent = `${charCount}/30`;
-                    
-                    // Change color based on character count
-                    if (charCount > 25) {
-                        charCountElement.style.color = 'var(--color-warning)';
-                    } else if (charCount > 20) {
-                        charCountElement.style.color = 'var(--color-text-secondary)';
-                    } else {
-                        charCountElement.style.color = 'var(--color-text-tertiary)';
-                    }
-                    
+                document.getElementById('manual-address').addEventListener('input', () => {
                     this.updateSubmitButton();
                 });
                 
@@ -914,26 +815,6 @@
                 // Close modal when clicking overlay
                 document.getElementById('status-overlay').addEventListener('click', () => {
                     this.hideStatusModal();
-                });
-                
-                // Drag and drop
-                const uploadArea = document.getElementById('photo-upload-area');
-                uploadArea.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    uploadArea.classList.add('dragover');
-                });
-                
-                uploadArea.addEventListener('dragleave', () => {
-                    uploadArea.classList.remove('dragover');
-                });
-                
-                uploadArea.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    uploadArea.classList.remove('dragover');
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        this.handleFileSelect(files[0]);
-                    }
                 });
             }
             
@@ -1257,111 +1138,10 @@
                 document.getElementById('location-info').style.display = 'block';
             }
             
-            async handleFileSelect(file) {
-                if (!file) return;
-                
-                if (!file.type.startsWith('image/')) {
-                    this.showError('Please select an image file.');
-                    return;
-                }
-                
-                // Check file size (max 10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    this.showError('File size too large. Please select an image smaller than 10MB.');
-                    return;
-                }
-                
-                // Show loading state
-                const uploadArea = document.getElementById('photo-upload-area');
-                const originalContent = uploadArea.innerHTML;
-                uploadArea.innerHTML = `
-                    <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
-                    <div class="upload-text">Processing image...</div>
-                `;
-                
-                try {
-                    // Compress image for better performance
-                    const compressedFile = await this.compressImage(file);
-                    this.photoFile = compressedFile;
-                    
-                    // Show preview
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const preview = document.getElementById('photo-preview');
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                        
-                        // Hide upload area and show retake buttons
-                        uploadArea.style.display = 'none';
-                        document.getElementById('camera-buttons').style.display = 'none';
-                        document.getElementById('retake-buttons').style.display = 'flex';
-                    };
-                    reader.readAsDataURL(compressedFile);
-                    
-                    this.updateSubmitButton();
-                    
-                } catch (error) {
-                    console.error('Image processing error:', error);
-                    uploadArea.innerHTML = originalContent;
-                    this.showError('Failed to process image. Please try again.');
-                }
-            }
-            
-            async compressImage(file) {
-                return new Promise((resolve) => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const img = new Image();
-                    
-                    img.onload = () => {
-                        // Calculate new dimensions (max 1920x1080)
-                        const maxWidth = 1920;
-                        const maxHeight = 1080;
-                        let { width, height } = img;
-                        
-                        if (width > height) {
-                            if (width > maxWidth) {
-                                height = (height * maxWidth) / width;
-                                width = maxWidth;
-                            }
-                        } else {
-                            if (height > maxHeight) {
-                                width = (width * maxHeight) / height;
-                                height = maxHeight;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        // Draw and compress
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob((blob) => {
-                            // Create a new file with the compressed blob
-                            const compressedFile = new File([blob], file.name, {
-                                type: 'image/jpeg',
-                                lastModified: Date.now()
-                            });
-                            resolve(compressedFile);
-                        }, 'image/jpeg', 0.8); // 80% quality
-                    };
-                    
-                    img.src = URL.createObjectURL(file);
-                });
-            }
             
             updateSubmitButton() {
                 const hasLocation = this.locationData || document.getElementById('manual-address').value.trim();
-                const hasPhoto = this.photoFile !== null;
-                const hasTags = document.querySelectorAll('input[name="art-tags"]:checked').length > 0;
-                
-                // Check if "Other" is selected and if custom tag is provided
-                const otherCheckbox = document.getElementById('other-tag-checkbox');
-                const customTagInput = document.getElementById('custom-tag-input');
-                const hasValidCustomTag = !otherCheckbox.checked || (otherCheckbox.checked && customTagInput.value.trim().length > 0);
-                
-                const canSubmit = hasLocation && hasPhoto && hasTags && hasValidCustomTag && !this.isSubmitting;
+                const canSubmit = hasLocation && !this.isSubmitting;
                 
                 const submitBtn = document.getElementById('submit-btn');
                 submitBtn.disabled = !canSubmit;
@@ -1373,136 +1153,62 @@
                 }
             }
             
-            async submitForm() {
+            submitForm() {
                 if (this.isSubmitting) return;
                 
                 this.isSubmitting = true;
                 this.hideMessages();
-                
-                // Show loading modal
-                this.showStatusModal('loading', 'Submitting...', 'Please wait while we submit your art installation.');
                 
                 const submitBtn = document.getElementById('submit-btn');
                 const submitText = document.getElementById('submit-text');
                 const submitSpinner = document.getElementById('submit-spinner');
                 
                 submitBtn.disabled = true;
-                submitText.textContent = 'Submitting...';
+                submitText.textContent = 'Opening Google Form...';
                 submitSpinner.style.display = 'inline-block';
                 
                 try {
-                    // Prepare form data
-                    const formData = new FormData();
-                    
-                    // Add photo
-                    if (this.photoFile) {
-                        formData.append(this.fieldIds.picture, this.photoFile);
-                    }
-                    
-                    // Add location data
+                    // Get location data
                     const locationString = this.locationData 
                         ? `${this.locationData.address} (${this.locationData.latitude}, ${this.locationData.longitude})`
-                        : document.getElementById('manual-address').value;
+                        : document.getElementById('manual-address').value.trim();
                     
-                    formData.append(this.fieldIds.location, locationString);
-                    
-                    // Add description
-                    formData.append(this.fieldIds.description, document.getElementById('art-description').value);
-                    
-                    // Add tags (Google Forms expects each selected option as a separate entry)
-                    const selectedTags = Array.from(document.querySelectorAll('input[name="art-tags"]:checked'))
-                        .map(checkbox => checkbox.value);
-                    
-                    // Handle custom tag if "Other" is selected
-                    const otherCheckbox = document.getElementById('other-tag-checkbox');
-                    const customTagInput = document.getElementById('custom-tag-input');
-                    if (otherCheckbox.checked && customTagInput.value.trim()) {
-                        // Replace the __other_option__ with the custom tag value
-                        const customTag = customTagInput.value.trim();
-                        const otherIndex = selectedTags.indexOf('__other_option__');
-                        if (otherIndex !== -1) {
-                            selectedTags[otherIndex] = customTag;
-                        }
+                    if (!locationString) {
+                        throw new Error('Location is required');
                     }
                     
-                    // For multiple choice checkboxes, we need to append each selected value separately
-                    selectedTags.forEach(tag => {
-                        formData.append(this.fieldIds.tags, tag);
-                    });
+                    // Build pre-filled Google Form URL
+                    const baseUrl = 'https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/viewform';
+                    const params = new URLSearchParams();
                     
-                    // Log form data for debugging
-                    console.log('Submitting form data:');
-                    for (let [key, value] of formData.entries()) {
-                        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-                    }
+                    // Pre-fill location field
+                    params.append(`entry.${this.fieldIds.location}`, locationString);
                     
-                    // Submit to Google Forms with timeout
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    const prefilledUrl = `${baseUrl}?${params.toString()}`;
                     
-                    const response = await fetch(this.googleFormUrl, {
-                        method: 'POST',
-                        body: formData,
-                        mode: 'no-cors', // Required for Google Forms
-                        signal: controller.signal
-                    });
+                    console.log('Generated pre-filled URL:', prefilledUrl);
+                    console.log('Location:', locationString);
                     
-                    clearTimeout(timeoutId);
+                    // Open Google Form in new tab
+                    window.open(prefilledUrl, '_blank');
                     
-                    // With no-cors mode, we can't check response status
-                    // Show a more honest message about the uncertainty
-                    this.showStatusModal('success', 'Submission Sent', 'Your form data has been sent to Google Forms. Please check the form responses to confirm it was received successfully.');
-                    
-                    // Don't reset form immediately - let user verify first
-                    // this.resetForm();
+                    // Show success message
+                    this.showStatusModal('success', 'Google Form Opened!', 'The Google Form has opened in a new tab with your location pre-filled. Complete the form by uploading your photo, adding a description, and selecting categories.');
                     
                 } catch (error) {
-                    console.error('Submission error:', error);
-                    
-                    // Provide more specific error messages based on error type
-                    let errorMessage = 'We encountered an error while submitting your art installation.';
-                    
-                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                        errorMessage = 'Network error. Please check your internet connection and try again.';
-                    } else if (error.name === 'AbortError') {
-                        errorMessage = 'Submission was cancelled. Please try again.';
-                    } else if (error.message.includes('timeout')) {
-                        errorMessage = 'Submission timed out. Please check your connection and try again.';
-                    }
-                    
-                    this.showStatusModal('error', 'Submission Failed', errorMessage);
+                    console.error('Form opening error:', error);
+                    this.showStatusModal('error', 'Error', error.message);
                 } finally {
                     this.isSubmitting = false;
                     submitBtn.disabled = false;
-                    submitText.textContent = 'Submit Art Installation';
+                    submitText.textContent = 'Continue to Google Form';
                     submitSpinner.style.display = 'none';
                 }
             }
             
             resetForm() {
-                // Reset all form fields
-                document.getElementById('art-description').value = '';
+                // Reset form fields
                 document.getElementById('manual-address').value = '';
-                
-                // Reset tags
-                document.querySelectorAll('input[name="art-tags"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                
-                // Reset custom tag input
-                document.getElementById('custom-tag-group').style.display = 'none';
-                document.getElementById('custom-tag-input').value = '';
-                document.getElementById('char-count').textContent = '0/30';
-                document.getElementById('char-count').style.color = 'var(--color-text-tertiary)';
-                
-                // Reset photo
-                this.photoFile = null;
-                document.getElementById('photo-preview').style.display = 'none';
-                document.getElementById('photo-upload-area').style.display = 'block';
-                document.getElementById('camera-buttons').style.display = 'flex';
-                document.getElementById('retake-buttons').style.display = 'none';
-                document.getElementById('camera-input').value = '';
-                document.getElementById('library-input').value = '';
                 
                 // Reset location
                 this.locationData = null;
