@@ -756,6 +756,7 @@
         <div id="status-actions" style="display: none;">
             <button class="btn btn-primary" id="status-ok-btn">OK</button>
             <button class="btn btn-secondary" id="status-retry-btn" style="display: none;">Try Again</button>
+            <button class="btn btn-secondary" id="status-reset-btn" style="display: none;">Reset Form</button>
         </div>
     </div>
     
@@ -903,6 +904,11 @@
                 document.getElementById('status-retry-btn').addEventListener('click', () => {
                     this.hideStatusModal();
                     this.submitForm();
+                });
+                
+                document.getElementById('status-reset-btn').addEventListener('click', () => {
+                    this.hideStatusModal();
+                    this.resetForm();
                 });
                 
                 // Close modal when clicking overlay
@@ -1424,6 +1430,12 @@
                         formData.append(this.fieldIds.tags, tag);
                     });
                     
+                    // Log form data for debugging
+                    console.log('Submitting form data:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
+                    }
+                    
                     // Submit to Google Forms with timeout
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
@@ -1437,12 +1449,12 @@
                     
                     clearTimeout(timeoutId);
                     
-                    // Since we're using no-cors, we can't check the response status
-                    // But if we get here without an error, it likely succeeded
-                    this.showStatusModal('success', 'Success!', 'Your art installation has been submitted successfully. Thank you for your contribution!');
+                    // With no-cors mode, we can't check response status
+                    // Show a more honest message about the uncertainty
+                    this.showStatusModal('success', 'Submission Sent', 'Your form data has been sent to Google Forms. Please check the form responses to confirm it was received successfully.');
                     
-                    // Reset form
-                    this.resetForm();
+                    // Don't reset form immediately - let user verify first
+                    // this.resetForm();
                     
                 } catch (error) {
                     console.error('Submission error:', error);
@@ -1544,14 +1556,29 @@
                 modal.className = 'submission-status';
                 if (type === 'success') {
                     modal.classList.add('success');
-                    icon.textContent = '✅';
+                    icon.textContent = '📤';
                     actions.style.display = 'block';
                     retryBtn.style.display = 'none';
+                    document.getElementById('status-reset-btn').style.display = 'inline-flex';
+                    okBtn.textContent = 'Check Responses';
+                    
+                    // Add click handler to check Google Form responses
+                    okBtn.onclick = () => {
+                        window.open('https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/edit#responses', '_blank');
+                        this.hideStatusModal();
+                    };
                 } else if (type === 'error') {
+                    document.getElementById('status-reset-btn').style.display = 'none';
                     modal.classList.add('error');
                     icon.textContent = '❌';
                     actions.style.display = 'block';
                     retryBtn.style.display = 'inline-flex';
+                    okBtn.textContent = 'OK';
+                    
+                    // Reset OK button handler
+                    okBtn.onclick = () => {
+                        this.hideStatusModal();
+                    };
                 } else if (type === 'loading') {
                     icon.textContent = '⏳';
                     actions.style.display = 'none';
