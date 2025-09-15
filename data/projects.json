@@ -1,0 +1,120 @@
+{
+  "featured": [
+    "dodgers-notifications",
+    "shopping-research",
+    "public-art-submission"
+  ],
+  "featuredConfig": {
+    "sectionTitle": "Tools",
+    "sectionDescription": null,
+    "maxItems": 4,
+    "showCategory": true,
+    "showDescription": true
+  },
+  "projects": [
+    {
+      "id": "shopping-research",
+      "title": "Shopping Research Generator",
+      "shortDescription": "Because googling 'best [thing] 2024' apparently isn't good enough anymore",
+      "description": "A glorified form that generates overly detailed shopping research prompts. Perfect for when you want to spend 3 hours researching a $20 purchase like the responsible adult you pretend to be.",
+      "category": "AI Prompts",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "tags": ["JavaScript", "AI Prompts", "Web App"],
+      "actions": [
+        {
+          "text": "Use Tool",
+          "url": "tools/shopping-research.html",
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "stock-analytics",
+      "title": "Stock Analytics Widget", 
+      "shortDescription": "Fancy graphs that make losing money look scientific",
+      "description": "A stock analysis tool with more buttons and charts than I know what to do with. Features Monte Carlo simulations because apparently regular mistakes weren't random enough. Helps you lose money with confidence and statistical backing.",
+      "category": "Financial",
+      "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Financial Analytics", "Monte Carlo", "React"],
+      "actions": [
+        {
+          "text": "Use Tool",
+          "url": "https://spacemanspiff7.github.io/lil-stock-widget/",
+          "type": "primary",
+          "external": true
+        },
+        {
+          "text": "View Code", 
+          "url": "https://github.com/SpacemanSpiff7/lil-stock-widget",
+          "type": "secondary",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "monte-carlo-simulation",
+      "title": "Monte Carlo Particle Simulation",
+      "shortDescription": "My attempt to make chemistry look like a screensaver",
+      "description": "3D particle simulation that bounces dots around the screen while pretending to do actual science. Uses the Metropolis algorithm, which sounds way more impressive than it actually is. Perfect for when you want to feel smart about physics you half-remember from college.",
+      "category": "Physics Simulation", 
+      "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Particle Physics", "3D Visualization", "JavaScript"],
+      "actions": [
+        {
+          "text": "Use Tool",
+          "url": "tools/monte-carlo-sim-optimized.html",
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "dodgers-notifications",
+      "title": "Dodgers Win = Cheap Panda Express",
+      "shortDescription": "The most important public service I've ever provided",
+      "description": "Dodgers win at home = free orange chicken at Panda Express. This is literally the only sports betting tip that actually matters. Sign up to get notified when your local Panda Express becomes a goldmine of free mediocre Chinese food.",
+      "category": "Public Service",
+      "image": "assets/images/dodgers-image.jpg",
+      "tags": ["Baseball", "Food Deals", "Public Service"],
+      "actions": [
+        {
+          "text": "Sign Up",
+          "url": "https://docs.google.com/forms/d/e/1FAIpQLSetWqGm38ikUq30kZ6osUY525_reyPu1Z0XJigzqb34x5e3Dw/viewform",
+          "type": "primary",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "public-art-submission",
+      "title": "Public Art Submission Form",
+      "shortDescription": "For when you see something cool and want to tell the internet about it",
+      "description": "A mobile-friendly form that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Results may vary.",
+      "category": "Public Art",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Public Art", "Mobile App", "Location Services"],
+      "actions": [
+        {
+          "text": "Submit Art",
+          "url": "tools/public-art-submission.html",
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "public-art-map",
+      "title": "Public Art Interactive Map",
+      "shortDescription": "All the cool art stuff people found, on a map that might actually work",
+      "description": "An interactive map that shows all the street art and murals people have submitted. Built with Google Maps because I wasn't brave enough to make my own mapping system. Sometimes the photos load, sometimes they don't—it's a fun surprise every time.",
+      "category": "Public Art",
+      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Public Art", "Google Maps", "Interactive Map"],
+      "actions": [
+        {
+          "text": "View Map",
+          "url": "tools/location-map.html", 
+          "type": "primary"
+        }
+      ]
+    }
+  ]
+}

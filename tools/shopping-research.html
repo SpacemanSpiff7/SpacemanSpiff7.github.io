@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered shopping research prompt generator for comprehensive product analysis and informed decision making.">
+    <meta name="keywords" content="shopping research, AI prompts, product analysis, decision making, shopping tools, consumer research">
+    <meta name="author" content="Simone Longo">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simonelongo.com/tools/shopping-research.html">
+    <meta property="og:title" content="Shopping Research Generator - Simone Longo">
+    <meta property="og:description" content="Generate intelligent prompts for comprehensive product research and informed decision making.">
+    
+    <title>Shopping Research Generator - Simone Longo</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+</head>
+<body>
+    <div class="shopping-container">
+        <div class="shopping-header">
+            <h1>Shopping Research Generator</h1>
+            <p>Generate intelligent prompts for comprehensive product research and informed decision making</p>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="form-container">
+            <form id="shoppingForm">
+                <div class="form-group">
+                    <label for="location" class="required">Your Location</label>
+                    <input type="text" id="location" name="location" class="form-control" placeholder="e.g., Santa Monica, California" required>
+                    <div class="field-help">Enter your city and state for location-specific research</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="item" class="required">What are you shopping for?</label>
+                    <input type="text" id="item" name="item" class="form-control" placeholder="e.g., propane grill, stand mixer, laptop, exercise bike" required>
+                    <div class="field-help">Be specific about the product you're researching</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget" class="optional">Budget Range (Optional)</label>
+                    <select id="budget" name="budget" class="form-control">
+                        <option value="">Select budget range (or leave blank for all options)</option>
+                        <option value="low">Low Budget - Best value under $100</option>
+                        <option value="medium">Medium Budget - $100-$500 range</option>
+                        <option value="high">High Budget - $500+ premium options</option>
+                        <option value="unlimited">Unlimited - Best quality regardless of price</option>
+                        <option value="custom">Custom Range (specify below)</option>
+                    </select>
+                    <div class="field-help">Choose a budget range for targeted recommendations</div>
+                </div>
+                
+                <div class="form-group" id="customBudgetGroup" style="display: none;">
+                    <label for="customBudget" class="optional">Custom Budget Range</label>
+                    <input type="text" id="customBudget" name="customBudget" class="form-control" placeholder="e.g., $200-400, Under $150, $800-1200">
+                    <div class="field-help">Specify your exact budget range</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="useArea" class="optional">Where will you use it? (Optional)</label>
+                    <input type="text" id="useArea" name="useArea" class="form-control" placeholder="e.g., small kitchen, balcony, home office, garage">
+                    <div class="field-help">Describe the space or environment where you'll use this product</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="useActivity" class="optional">What will you use it for? (Optional)</label>
+                    <input type="text" id="useActivity" name="useActivity" class="form-control" placeholder="e.g., weekly baking, entertaining guests, daily commute">
+                    <div class="field-help">Describe the specific activities or use cases</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customSources" class="optional">Custom Sources to Include (Optional)</label>
+                    <input type="text" id="customSources" name="customSources" class="form-control" placeholder="e.g., specific websites, forums, or experts you want researched">
+                    <div class="field-help">The AI will research these sources in addition to finding the best ones automatically</div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="clear-btn" onclick="clearForm()">Clear Form</button>
+                    <button type="submit" class="generate-btn">Generate Research Prompt</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer" style="display: none;">
+            <div class="result-header">
+                <h2>Generated Research Prompt</h2>
+                <button class="copy-btn" onclick="copyToClipboard()">Copy Prompt</button>
+            </div>
+            <div class="prompt-output" id="promptOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        // Shopping Prompt Generator Class
+        class ShoppingPromptGenerator {
+            constructor() {
+                this.defaultUseArea = 'general use';
+                this.defaultActivity = 'everyday use';
+            }
+
+            getBudgetDescription(budget, customBudget) {
+                if (!budget) return 'all budget ranges';
+                
+                switch(budget) {
+                    case 'low':
+                        return 'low budget (under $100)';
+                    case 'medium':
+                        return 'medium budget ($100-$500)';
+                    case 'high':
+                        return 'high budget ($500+)';
+                    case 'unlimited':
+                        return 'unlimited budget (best quality)';
+                    case 'custom':
+                        return customBudget ? `custom budget (${customBudget})` : 'custom budget range';
+                    default:
+                        return 'all budget ranges';
+                }
+            }
+
+            generatePrompt(userInputs) {
+                const {
+                    location = "your local area",
+                    item = "the product you're looking for",
+                    budget = null,
+                    customBudget = null,
+                    useArea = null,
+                    useActivity = null,
+                    customSources = null
+                } = userInputs;
+
+                const finalUseArea = useArea || this.defaultUseArea;
+                const finalActivity = useActivity || this.defaultActivity;
+                const budgetDescription = this.getBudgetDescription(budget, customBudget);
+
+                // Build custom sources instruction if provided
+                const customSourcesInstruction = customSources ? 
+                    `\n\n**CUSTOM SOURCES TO RESEARCH:** Make sure to specifically investigate and include insights from: ${customSources}` : '';
+
+                // Build budget-specific instructions
+                const budgetInstructions = budget ? 
+                    `\n\n**BUDGET FOCUS:** Focus on ${budgetDescription} options. ${this.getBudgetSpecificInstructions(budget, customBudget)}` : '';
+
+                return `**COMPREHENSIVE SHOPPING RESEARCH & DEAL ANALYSIS REQUEST**
+
+I need expert help with purchasing: ${item}
+
+**My situation:**
+- Location: ${location}
+- Budget: ${budgetDescription}
+- Intended use: ${finalActivity}
+- Use location/area: ${finalUseArea}
+
+I want a strong focus on getting the best possible value and identifying all available deals.${budgetInstructions}${customSourcesInstruction}
+
+**STEP 1: AUTHORITATIVE SOURCE IDENTIFICATION & LOCATION INTELLIGENCE**
+
+**First, identify and verify the most credible sources for ${item} research:**
+- Research and identify the top 5-7 most authoritative professional review sources that specialize in ${item} testing, evaluation, and deal tracking
+- Prioritize sources with rigorous testing methodologies, independence from manufacturers, transparent review processes, and recent publications (2024-2025)
+- Identify 3-4 most active and knowledgeable community forums/subreddits where experienced users discuss ${item} experiences, problems, and deals
+- Find specialized deal-tracking websites and price comparison platforms that monitor ${item} pricing
+
+**Then, conduct comprehensive ${location} analysis:**
+- Research local climate, environmental factors, and regional considerations that affect ${item} performance and longevity
+- Identify regional pricing patterns, local retailer landscape, and seasonal sale trends
+- Investigate local regulations, restrictions, building codes, or considerations that might affect product choice
+- Analyze ${location}-specific challenges, advantages, and user experiences related to this use case
+
+**STEP 2: MARKET RESEARCH & CONCERN DISCOVERY**
+
+**Using your identified authoritative sources, research and determine:**
+- The key performance criteria, features, and specifications that matter most for this intended use
+- Common problems, failure points, complaints, and long-term reliability issues that users experience
+- Current market trends, new technologies, and emerging features in the ${item} category
+- Price ranges across market segments (budget, mid-range, premium) and what drives value differences
+- Total cost of ownership including maintenance, repairs, accessories, and replacement cycles
+
+**STEP 3: COMPREHENSIVE DEAL ANALYSIS & PRICE OPTIMIZATION**
+
+**Execute thorough deal-hunting and price analysis:**
+- Find current active discount codes, promotional offers, and manufacturer rebates for top ${item} options
+- Research upcoming sales events, seasonal discount patterns, and optimal purchase timing for ${item}
+- Identify retailers with price-matching policies and catalog requirements for price match requests
+- Investigate coupon stacking opportunities, loyalty program benefits, credit card rewards, and cashback possibilities
+- Analyze historical pricing data to determine if current prices represent good value
+- Check for bundle deals, package offers, or complementary products that provide additional value
+
+**Source Quality Standards:**
+- Only cite sources with rigorous, transparent testing methodologies and recent content
+- Cross-reference findings across multiple professional sources for consistency
+- Include both expert analysis AND extensive real-user experiences, especially regarding long-term ownership
+- Verify all current pricing, availability, discount codes, and promotional offer accuracy
+- Prioritize information from the last 12 months while noting significant historical patterns
+
+**STEP 4: COMPREHENSIVE RECOMMENDATIONS & PURCHASE STRATEGY**
+
+**Provide detailed analysis and actionable recommendations:**
+
+1. **Source Credibility Summary:** List the authoritative sources used and explain why they're reliable for ${item} research
+2. **Location-Specific Analysis:** Key factors in ${location} that affect product choice, performance, and maintenance for this use case
+3. **Top 3 Recommendations:** Specific models with detailed reasoning across different price points, including:
+   - Why each option excels for the intended use and location
+   - Current best prices and where to find them
+   - Available discounts, promotional codes, and deal opportunities
+   - Expected lifespan and long-term value proposition
+4. **Deal Optimization Strategy:** 
+   - Best current deals and where to find them
+   - Upcoming sales events worth waiting for
+   - Price-matching opportunities and required documentation
+   - Coupon stacking and discount combination strategies
+5. **Purchase Timing Analysis:** 
+   - Whether to buy now or wait for better deals
+   - Seasonal pricing patterns and optimal purchase windows
+   - Risk assessment of waiting vs. immediate purchase
+6. **Complete Purchase Guide:** 
+   - Where to buy (local vs. online options in ${location})
+   - Current pricing and availability status
+   - Warranty considerations and extended protection options
+   - Setup, delivery, and installation requirements
+
+**STEP 5: QUALITY CONTROL & VERIFICATION**
+
+After completing your research and recommendations, perform a comprehensive review and include a final verification section addressing:
+
+1. **Source Verification:** Are all sources credible, recent, and properly cited with direct links?
+2. **Deal Accuracy:** Are all discount codes, prices, and promotional offers currently valid and accurately represented?
+3. **Fact Consistency:** Are there any contradictions between sources that need resolution or explanation?
+4. **Completeness Assessment:** Have I addressed all critical aspects for this specific use case and location?
+5. **Relevance Check:** Do all recommendations truly fit the specific use case, location requirements, and value priorities?
+6. **Timing Verification:** Is the purchase timing advice sound based on current market conditions and deal cycles?
+7. **Gap Analysis:** What important information might be missing, unclear, or require additional research?
+
+**Include this quality control review as a final section with any corrections, clarifications, or additional recommendations.**
+
+Begin your research systematically: identify sources → analyze location factors → research products and concerns → find deals and optimize pricing → provide comprehensive recommendations → verify everything for accuracy.`;
+            }
+
+            getBudgetSpecificInstructions(budget, customBudget) {
+                switch(budget) {
+                    case 'low':
+                        return 'Prioritize finding the best value options under $100, focusing on essential features and reliability over premium extras. Look for hidden gems and lesser-known brands that offer good quality at lower prices.';
+                    case 'medium':
+                        return 'Focus on the $100-$500 range, balancing quality and features. Look for mid-range options that offer the best value proposition and consider both established brands and emerging competitors.';
+                    case 'high':
+                        return 'Concentrate on premium options $500+ with advanced features and superior quality. Research high-end brands, professional-grade options, and luxury alternatives.';
+                    case 'unlimited':
+                        return 'Research the absolute best options regardless of price, focusing on top-tier quality, advanced features, and premium user experience. Include luxury and professional-grade alternatives.';
+                    case 'custom':
+                        return customBudget ? `Focus specifically on options within your specified range: ${customBudget}. Provide detailed analysis of what's available at this price point.` : 'Provide options across your specified custom budget range.';
+                    default:
+                        return 'Provide recommendations across all budget ranges, clearly indicating which options fall into low, medium, and high budget categories.';
+                }
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const generator = new ShoppingPromptGenerator();
+            
+            // Handle budget selection change
+            document.getElementById('budget').addEventListener('change', function() {
+                const customBudgetGroup = document.getElementById('customBudgetGroup');
+                if (this.value === 'custom') {
+                    customBudgetGroup.style.display = 'block';
+                } else {
+                    customBudgetGroup.style.display = 'none';
+                    document.getElementById('customBudget').value = '';
+                }
+            });
+            
+            document.getElementById('shoppingForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const location = document.getElementById('location').value.trim();
+                const item = document.getElementById('item').value.trim();
+                const budget = document.getElementById('budget').value;
+                const customBudget = document.getElementById('customBudget').value.trim();
+                const useArea = document.getElementById('useArea').value.trim();
+                const useActivity = document.getElementById('useActivity').value.trim();
+                const customSources = document.getElementById('customSources').value.trim();
+                
+                // Validate
+                if (!location || !item) {
+                    alert('Please fill in your location and what you\'re shopping for.');
+                    return;
+                }
+                
+                // Validate custom budget if selected
+                if (budget === 'custom' && !customBudget) {
+                    alert('Please specify your custom budget range.');
+                    return;
+                }
+                
+                // Generate prompt
+                const userInputs = {
+                    location: location,
+                    item: item,
+                    budget: budget || null,
+                    customBudget: customBudget || null,
+                    useArea: useArea || null,
+                    useActivity: useActivity || null,
+                    customSources: customSources || null
+                };
+                
+                const prompt = generator.generatePrompt(userInputs);
+                document.getElementById('promptOutput').textContent = prompt;
+                document.getElementById('resultContainer').style.display = 'block';
+                
+                // Scroll to output
+                document.getElementById('resultContainer').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+
+        function clearForm() {
+            document.getElementById('shoppingForm').reset();
+            document.getElementById('customBudgetGroup').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'none';
+        }
+
+        function copyToClipboard() {
+            const promptText = document.getElementById('promptOutput').textContent;
+            navigator.clipboard.writeText(promptText).then(function() {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(function() {
+                    copyBtn.textContent = 'Copy Prompt';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html> 

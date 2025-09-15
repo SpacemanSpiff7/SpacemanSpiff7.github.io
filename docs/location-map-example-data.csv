@@ -1,0 +1,11 @@
+id,title,description,latitude,longitude,date_submitted,category,submitter_name,notes
+loc001,Golden Gate Bridge,Iconic suspension bridge connecting San Francisco to Marin County,37.8199,-122.4783,2024-01-15,landmark,John Doe,Beautiful sunset views
+loc002,Central Park,Large public park in Manhattan,40.7829,-73.9654,2024-01-16,park,Jane Smith,Great for morning runs
+loc003,Times Square,Bustling commercial intersection and tourist destination,40.7580,-73.9855,2024-01-17,landmark,Mike Johnson,Very crowded but amazing energy
+loc004,Brooklyn Bridge,Historic suspension bridge over East River,40.7061,-73.9969,2024-01-18,bridge,Sarah Wilson,Perfect for photography
+loc005,Statue of Liberty,Symbol of freedom on Liberty Island,40.6892,-74.0445,2024-01-19,monument,Tom Brown,Take the ferry for best experience
+loc006,Lombard Street,Steep one-block section known as most crooked street,37.8021,-122.4187,2024-01-20,street,Lisa Davis,Drive slowly and carefully
+loc007,Alcatraz Island,Former federal prison on island in San Francisco Bay,37.8267,-122.4233,2024-01-21,historic,Robert Miller,Book audio tour in advance
+loc008,High Line,Elevated linear park built on former railway,40.7480,-74.0048,2024-01-22,park,Emma Garcia,Best visited in spring or fall
+loc009,9/11 Memorial,Memorial to victims of September 11 attacks,40.7115,-74.0134,2024-01-23,memorial,David Chen,Moving and respectful experience
+loc010,Fisherman's Wharf,Waterfront area with shops and restaurants,37.8080,-122.4177,2024-01-24,attraction,Maria Rodriguez,Try the clam chowder

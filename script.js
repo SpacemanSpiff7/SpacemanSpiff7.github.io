@@ -1,13 +1,26 @@
 // Component loading system
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, starting component loading...');
+    // Skip if this is a standalone page
+    if (window.SKIP_MAIN_SCRIPT) {
+        return;
+    }
     
-    // Load components
-    loadComponent('nav-container', 'components/nav.html');
-    loadComponent('home-container', 'components/home.html');
-    loadComponent('projects-container', 'components/projects.html');
-    loadComponent('about-container', 'components/about.html');
-    loadComponent('contact-container', 'components/contact.html');
+    // Only load components if we're on the main site (not standalone pages)
+    if (document.getElementById('nav-container')) {
+        loadComponent('nav-container', 'components/nav.html');
+    }
+    if (document.getElementById('home-container')) {
+        loadComponent('home-container', 'components/home.html');
+    }
+    if (document.getElementById('projects-container')) {
+        loadComponent('projects-container', 'components/projects.html');
+    }
+    if (document.getElementById('about-container')) {
+        loadComponent('about-container', 'components/about.html');
+    }
+    if (document.getElementById('contact-container')) {
+        loadComponent('contact-container', 'components/contact.html');
+    }
     
     // Initialize after components are loaded with a longer delay
     setTimeout(initializeApp, 200);
@@ -16,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadComponent(containerId, componentPath) {
     const container = document.getElementById(containerId);
     if (!container) {
-        console.error(`Container with id '${containerId}' not found`);
         return;
     }
     
@@ -42,10 +54,11 @@ function loadComponent(containerId, componentPath) {
 }
 
 function initializeApp() {
-    console.log('Initializing app...');
-    
     // Navigation functionality
     setupNavigation();
+    
+    // Load projects dynamically
+    loadProjects();
     
     // Shopping research tool functionality
     setupShoppingTool();
@@ -58,8 +71,6 @@ function initializeApp() {
     
     // Copy functionality
     setupCopyButtons();
-    
-    console.log('App initialization complete');
 }
 
 function setupNavigation() {
@@ -137,7 +148,7 @@ function setupShoppingTool() {
     const generateBtn = document.getElementById('generate-btn');
     const clearBtn = document.getElementById('clear-btn');
     
-    if (!form) return;
+    if (!form || !generateBtn || !clearBtn) return;
     
     // Generate button functionality
     generateBtn.addEventListener('click', function() {
@@ -361,3 +372,77 @@ window.addEventListener('error', function(e) {
 //             });
 //     });
 // }
+
+// Project Management System
+async function loadProjects() {
+    try {
+        const response = await fetch('data/projects.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const projectData = await response.json();
+        
+        // Load featured projects on home page
+        const featuredContainer = document.getElementById('featured-tools-grid');
+        if (featuredContainer) {
+            const featuredProjects = projectData.projects.filter(project => 
+                projectData.featured.includes(project.id)
+            );
+            renderFeaturedProjects(featuredContainer, featuredProjects);
+        }
+        
+        // Load all projects on projects page
+        const allProjectsContainer = document.getElementById('all-projects-grid');
+        if (allProjectsContainer) {
+            renderAllProjects(allProjectsContainer, projectData.projects);
+        }
+        
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        // Fallback: show error message or keep existing static content
+    }
+}
+
+function renderFeaturedProjects(container, projects) {
+    container.innerHTML = projects.map(project => `
+        <div class="tool-card">
+            <div class="tool-image">
+                <img src="${project.image}" alt="${project.title}" loading="lazy">
+                <div class="tool-overlay">
+                    <span>${project.category}</span>
+                </div>
+            </div>
+            <div class="tool-content">
+                <h3>${project.title}</h3>
+                <p>${project.shortDescription}</p>
+                <a href="${project.actions[0].url}" class="tool-link" ${project.actions[0].external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                    <span>${project.actions[0].text}</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderAllProjects(container, projects) {
+    container.innerHTML = projects.map(project => `
+        <article class="card">
+            <h3>${project.title}</h3>
+            <p>${project.description}</p>
+            <div class="card-footer">
+                ${project.tags.map(tag => `<span class="tech-tag">${tag}</span>`).join('')}
+            </div>
+            <div class="card-actions">
+                ${project.actions.map(action => `
+                    <a href="${action.url}" 
+                       class="btn btn-${action.type}" 
+                       ${action.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                        ${action.text}
+                    </a>
+                `).join('')}
+            </div>
+        </article>
+    `).join('');
+}

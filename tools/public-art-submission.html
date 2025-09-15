@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Submit public art installations with location and photo data - optimized for mobile devices">
+    <meta name="keywords" content="public art, art submission, location, photo, mobile, iOS Safari">
+    <meta name="author" content="Simone Longo">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simonelongo.com/tools/public-art-submission.html">
+    <meta property="og:title" content="Public Art Submission | Simone Longo">
+    <meta property="og:description" content="Submit public art installations with location and photo data - optimized for mobile devices">
+    
+    <!-- iOS Safari specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    
+    <title>Public Art Submission | Simone Longo</title>
+    
+    <!-- Prevent loading main site script -->
+    <script>
+        window.SKIP_MAIN_SCRIPT = true;
+    </script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="../style.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    
+    <!-- Additional styles for public art submission page -->
+    <style>
+        /* Public Art Submission Specific Styles */
+        .submission-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--space-10);
+        }
+        
+        .submission-header {
+            text-align: center;
+            margin-bottom: var(--space-20);
+        }
+        
+        .submission-header h1 {
+            font-size: var(--text-5xl);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-6);
+            letter-spacing: -0.02em;
+        }
+        
+        .submission-header p {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+        
+        .permission-banner {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-8);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .permission-banner h3 {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+        
+        .permission-banner p {
+            font-size: var(--text-sm);
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .location-section, .photo-section, .details-section {
+            background: var(--color-surface);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            border: 1px solid var(--color-border-light);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .section-title {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--color-primary);
+        }
+        
+        .location-info {
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+        
+        .location-coords {
+            font-family: var(--font-family-mono);
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .location-address {
+            font-size: var(--text-base);
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+        
+        .location-accuracy {
+            font-size: var(--text-xs);
+            color: var(--color-text-tertiary);
+            margin-top: var(--space-2);
+        }
+        
+        .photo-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-border);
+            margin: var(--space-4) 0;
+            display: none;
+        }
+        
+        .photo-upload-area {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-12);
+            text-align: center;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            background: var(--color-background);
+        }
+        
+        .photo-upload-area:hover {
+            border-color: var(--color-primary);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .photo-upload-area.dragover {
+            border-color: var(--color-primary);
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--color-text-tertiary);
+            margin: 0 auto var(--space-4);
+        }
+        
+        .upload-text {
+            font-size: var(--text-lg);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .upload-subtext {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+        
+        .camera-buttons {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            margin-top: var(--space-6);
+        }
+        
+        .camera-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-xl);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            box-shadow: var(--shadow-md);
+            min-width: 140px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .camera-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .camera-btn.primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            border: none;
+            box-shadow: 
+                0 8px 32px rgba(0, 212, 255, 0.4),
+                0 4px 16px rgba(183, 148, 246, 0.3);
+        }
+        
+        .camera-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 40px rgba(0, 212, 255, 0.5),
+                0 8px 24px rgba(183, 148, 246, 0.4);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: rgba(252, 129, 129, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+            font-size: var(--text-sm);
+        }
+        
+        .success-message {
+            background: rgba(104, 211, 145, 0.1);
+            border: 1px solid var(--color-success);
+            color: var(--color-success);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .success-message::before {
+            content: '✅';
+            font-size: var(--text-lg);
+        }
+        
+        .error-message {
+            background: rgba(252, 129, 129, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .error-message::before {
+            content: '❌';
+            font-size: var(--text-lg);
+        }
+        
+        .loading-message {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .loading-message::before {
+            content: '⏳';
+            font-size: var(--text-lg);
+            animation: spin 1s linear infinite;
+        }
+        
+        .submission-status {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            display: none;
+        }
+        
+        .submission-status.show {
+            display: block;
+            animation: fadeInScale 0.3s ease-out;
+        }
+        
+        .submission-status.success {
+            border-color: var(--color-success);
+            box-shadow: 0 0 20px rgba(104, 211, 145, 0.3);
+        }
+        
+        .submission-status.error {
+            border-color: var(--color-error);
+            box-shadow: 0 0 20px rgba(252, 129, 129, 0.3);
+        }
+        
+        .submission-status h3 {
+            margin: 0 0 var(--space-4) 0;
+            font-size: var(--text-xl);
+            font-weight: 600;
+        }
+        
+        .submission-status p {
+            margin: 0 0 var(--space-6) 0;
+            color: var(--color-text-secondary);
+        }
+        
+        .submission-status .status-icon {
+            font-size: var(--text-4xl);
+            margin-bottom: var(--space-4);
+        }
+        
+        .submission-status .btn {
+            margin: 0 var(--space-2);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .overlay.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Accuracy feedback styling */
+        .accuracy-excellent {
+            color: var(--color-success);
+            font-weight: 600;
+        }
+        
+        .accuracy-good {
+            color: var(--color-success);
+            font-weight: 500;
+        }
+        
+        .accuracy-fair {
+            color: var(--color-warning);
+            font-weight: 500;
+        }
+        
+        .accuracy-poor {
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: var(--space-12);
+        }
+        
+        .submit-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-3);
+            padding: var(--space-6) var(--space-12);
+            border-radius: var(--radius-xl);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            box-shadow: var(--shadow-xl);
+            min-width: 200px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            box-shadow: 
+                0 12px 40px rgba(0, 212, 255, 0.4),
+                0 8px 24px rgba(183, 148, 246, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 16px 50px rgba(0, 212, 255, 0.5),
+                0 12px 32px rgba(183, 148, 246, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Tags styling */
+        .tags-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-3);
+            margin-top: var(--space-2);
+        }
+        
+        .tag-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            user-select: none;
+        }
+        
+        .tag-option:hover {
+            border-color: var(--color-primary);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .tag-option input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color-primary);
+        }
+        
+        .tag-option input[type="checkbox"]:checked + .tag-label {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+        
+        .tag-option:has(input[type="checkbox"]:checked) {
+            border-color: var(--color-primary);
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .tag-label {
+            font-size: var(--text-sm);
+            color: var(--color-text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .submission-container {
+                padding: var(--space-6);
+            }
+            
+            .camera-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .camera-btn {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .photo-upload-area {
+                padding: var(--space-8);
+            }
+            
+            .tags-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div id="nav-container"></div>
+    
+    <!-- Main Content -->
+    <main id="public-art-app">
+        <div class="submission-container">
+            <!-- Header -->
+            <div class="submission-header">
+                <h1>Public Art Submission</h1>
+                <p>Share your public art installation with location and photo data. Optimized for mobile devices.</p>
+            </div>
+            
+            <!-- Permission Banner -->
+            <div class="permission-banner" id="permission-banner">
+                <h3>Mobile Optimized</h3>
+                <p>This page works best on mobile devices with camera and location access enabled.</p>
+            </div>
+            
+            <!-- Location Section -->
+            <div class="location-section">
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Location
+                </h2>
+                
+                <div class="location-info" id="location-info" style="display: none;">
+                    <div class="location-coords" id="location-coords"></div>
+                    <div class="location-address" id="location-address"></div>
+                    <div class="location-accuracy" id="location-accuracy"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="manual-address" class="required">Address (if location access denied)</label>
+                    <input type="text" id="manual-address" class="form-control" placeholder="Enter the address of the art installation">
+                    <div class="field-help">You can manually enter the address if location access is not available.</div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" id="get-location-btn" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span>Get My Location</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Photo Section -->
+            <div class="photo-section">
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                    Photo
+                </h2>
+                
+                <div class="photo-upload-area" id="photo-upload-area">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                    <div class="upload-text">Tap to take a photo or choose from library</div>
+                    <div class="upload-subtext">Recommended: High quality photo showing the art installation</div>
+                </div>
+                
+                <img id="photo-preview" class="photo-preview" alt="Photo preview">
+                
+                <div class="camera-buttons" id="camera-buttons">
+                    <button type="button" id="camera-btn" class="camera-btn primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        <span>Take Photo</span>
+                    </button>
+                    
+                    <button type="button" id="library-btn" class="camera-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                        <span>Choose from Library</span>
+                    </button>
+                </div>
+                
+                <div class="camera-buttons" id="retake-buttons" style="display: none;">
+                    <button type="button" id="retake-btn" class="camera-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        <span>Retake Photo</span>
+                    </button>
+                    
+                    <button type="button" id="change-photo-btn" class="camera-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                        <span>Change Photo</span>
+                    </button>
+                </div>
+                
+                <input type="file" id="camera-input" class="file-input" accept="image/*" capture="environment">
+                <input type="file" id="library-input" class="file-input" accept="image/*">
+            </div>
+            
+            <!-- Details Section -->
+            <div class="details-section">
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    Additional Details
+                </h2>
+                
+                <div class="form-group">
+                    <label for="art-description">Description and Notes</label>
+                    <textarea id="art-description" class="form-control" rows="4" placeholder="Describe the art piece, its significance, or any other relevant details"></textarea>
+                    <div class="field-help">Share details about the art installation, artist information, or any other notes.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="art-tags" class="required">Tags</label>
+                    <div class="tags-container">
+                        <label class="tag-option">
+                            <input type="checkbox" name="art-tags" value="Mural">
+                            <span class="tag-label">Mural</span>
+                        </label>
+                        <label class="tag-option">
+                            <input type="checkbox" name="art-tags" value="Graffiti">
+                            <span class="tag-label">Graffiti</span>
+                        </label>
+                        <label class="tag-option">
+                            <input type="checkbox" name="art-tags" value="Sculpture">
+                            <span class="tag-label">Sculpture</span>
+                        </label>
+                        <label class="tag-option">
+                            <input type="checkbox" name="art-tags" value="Mosaic">
+                            <span class="tag-label">Mosaic</span>
+                        </label>
+                        <label class="tag-option">
+                            <input type="checkbox" name="art-tags" value="__other_option__" id="other-tag-checkbox">
+                            <span class="tag-label">Other</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Custom tag input (hidden by default) -->
+                    <div class="form-group" id="custom-tag-group" style="display: none;">
+                        <label for="custom-tag-input">Custom Tag</label>
+                        <input type="text" id="custom-tag-input" class="form-control" placeholder="Enter your custom tag" maxlength="30">
+                        <div class="field-help">
+                            Enter a custom tag (max 30 characters)
+                            <span id="char-count" style="float: right; color: var(--color-text-tertiary);">0/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="field-help">Select all that apply to categorize the art piece.</div>
+                </div>
+            </div>
+            
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <button type="button" id="submit-btn" class="submit-btn" disabled>
+                    <span id="submit-text">Submit Art Installation</span>
+                    <div class="loading-spinner" id="submit-spinner"></div>
+                </button>
+                
+                <div id="error-message" class="error-message" style="display: none;"></div>
+                <div id="success-message" class="success-message" style="display: none;"></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Submission Status Modal -->
+    <div class="overlay" id="status-overlay"></div>
+    <div class="submission-status" id="submission-status">
+        <div class="status-icon" id="status-icon">⏳</div>
+        <h3 id="status-title">Submitting...</h3>
+        <p id="status-message">Please wait while we submit your art installation.</p>
+        <div id="status-actions" style="display: none;">
+            <button class="btn btn-primary" id="status-ok-btn">OK</button>
+            <button class="btn btn-secondary" id="status-retry-btn" style="display: none;">Try Again</button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Minimal script for public art submission page
+        // Only load essential functionality, not the full site script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only initialize if we're on the public art submission page
+            if (document.getElementById('public-art-app')) {
+                // Wait for navigation to load first
+                setTimeout(() => {
+                    new PublicArtSubmission();
+                }, 100);
+            }
+        });
+    </script>
+    
+    <!-- Public Art Submission Script -->
+    <script>
+        // Public Art Submission Application
+        class PublicArtSubmission {
+            constructor() {
+                this.locationData = null;
+                this.photoFile = null;
+                this.isSubmitting = false;
+                
+                // Google Form configuration
+                this.googleFormUrl = 'https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/formResponse';
+                
+                // Field ID mapping - Confirmed working field IDs from Google Form
+                // Form fields: Location (required), Description and Notes, Tags (multiple choice), Picture (file upload)
+                this.fieldIds = {
+                    location: 'entry.977326473',     // Location field (required) - CONFIRMED WORKING
+                    description: 'entry.676487869',  // Description and Notes field - CONFIRMED WORKING
+                    tags: 'entry.996424713',         // Tags multiple choice field - CONFIRMED WORKING
+                    picture: 'entry.977326473'       // Picture file upload field (using same ID as location for now)
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.checkPermissions();
+                this.updateSubmitButton();
+            }
+            
+            setupEventListeners() {
+                // Location button
+                const locationBtn = document.getElementById('get-location-btn');
+                
+                if (locationBtn) {
+                    locationBtn.addEventListener('click', () => {
+                        this.getCurrentLocation();
+                    });
+                }
+                
+                // Camera buttons
+                document.getElementById('camera-btn').addEventListener('click', () => {
+                    document.getElementById('camera-input').click();
+                });
+                
+                document.getElementById('library-btn').addEventListener('click', () => {
+                    document.getElementById('library-input').click();
+                });
+                
+                // File inputs
+                document.getElementById('camera-input').addEventListener('change', (e) => {
+                    this.handleFileSelect(e.target.files[0]);
+                });
+                
+                document.getElementById('library-input').addEventListener('change', (e) => {
+                    this.handleFileSelect(e.target.files[0]);
+                });
+                
+                // Retake buttons
+                document.getElementById('retake-btn').addEventListener('click', () => {
+                    document.getElementById('camera-input').click();
+                });
+                
+                document.getElementById('change-photo-btn').addEventListener('click', () => {
+                    document.getElementById('library-input').click();
+                });
+                
+                // Upload area click
+                document.getElementById('photo-upload-area').addEventListener('click', () => {
+                    document.getElementById('camera-input').click();
+                });
+                
+                // Form validation
+                ['manual-address', 'art-description'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', () => {
+                        this.updateSubmitButton();
+                    });
+                });
+                
+                // Tags validation
+                document.querySelectorAll('input[name="art-tags"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.updateSubmitButton();
+                    });
+                });
+                
+                // Custom tag input handling
+                document.getElementById('other-tag-checkbox').addEventListener('change', (e) => {
+                    const customTagGroup = document.getElementById('custom-tag-group');
+                    if (e.target.checked) {
+                        customTagGroup.style.display = 'block';
+                    } else {
+                        customTagGroup.style.display = 'none';
+                        document.getElementById('custom-tag-input').value = '';
+                    }
+                    this.updateSubmitButton();
+                });
+                
+                // Custom tag input validation and character count
+                document.getElementById('custom-tag-input').addEventListener('input', (e) => {
+                    const charCount = e.target.value.length;
+                    const charCountElement = document.getElementById('char-count');
+                    charCountElement.textContent = `${charCount}/30`;
+                    
+                    // Change color based on character count
+                    if (charCount > 25) {
+                        charCountElement.style.color = 'var(--color-warning)';
+                    } else if (charCount > 20) {
+                        charCountElement.style.color = 'var(--color-text-secondary)';
+                    } else {
+                        charCountElement.style.color = 'var(--color-text-tertiary)';
+                    }
+                    
+                    this.updateSubmitButton();
+                });
+                
+                // Submit button
+                document.getElementById('submit-btn').addEventListener('click', () => {
+                    this.submitForm();
+                });
+                
+                // Status modal buttons
+                document.getElementById('status-ok-btn').addEventListener('click', () => {
+                    this.hideStatusModal();
+                });
+                
+                document.getElementById('status-retry-btn').addEventListener('click', () => {
+                    this.hideStatusModal();
+                    this.submitForm();
+                });
+                
+                // Close modal when clicking overlay
+                document.getElementById('status-overlay').addEventListener('click', () => {
+                    this.hideStatusModal();
+                });
+                
+                // Drag and drop
+                const uploadArea = document.getElementById('photo-upload-area');
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+                
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+                
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFileSelect(files[0]);
+                    }
+                });
+            }
+            
+            checkPermissions() {
+                // Check if we're on a mobile device
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    let bannerContent = `
+                        <h3>Mobile Device Detected</h3>
+                        <p>Great! This page is optimized for your mobile device. Enable location and camera access for the best experience.</p>
+                    `;
+                    
+                    if (isIOS && isSafari) {
+                        bannerContent = `
+                            <h3>iOS Safari Optimized</h3>
+                            <p>Perfect! This page is specifically optimized for iOS Safari. You'll get the best experience with camera and location access.</p>
+                        `;
+                    }
+                    
+                    document.getElementById('permission-banner').innerHTML = bannerContent;
+                } else {
+                    document.getElementById('permission-banner').innerHTML = `
+                        <h3>Desktop Browser</h3>
+                        <p>For the best experience, please use a mobile device with camera and location access. Desktop browsers have limited camera functionality.</p>
+                    `;
+                }
+                
+                // Check for HTTPS
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                    this.showStatusModal('error', 'Security Required', 'This page requires HTTPS for location and camera access. Please use a secure connection.');
+                }
+            }
+            
+            async getCurrentLocation() {
+                const button = document.getElementById('get-location-btn');
+                const originalText = button.innerHTML;
+                
+                button.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <span>Getting High-Accuracy Location...</span>
+                `;
+                button.disabled = true;
+                
+                try {
+                    if (!navigator.geolocation) {
+                        throw new Error('Geolocation is not supported by this browser.');
+                    }
+                    
+                    // Request high accuracy location multiple times if needed
+                    const position = await this.getHighAccuracyLocation();
+                    
+                    this.locationData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: position.timestamp
+                    };
+                    
+                    await this.reverseGeocode(this.locationData.latitude, this.locationData.longitude);
+                    this.displayLocationInfo();
+                    this.updateSubmitButton();
+                    
+                } catch (error) {
+                    console.error('Location error:', error);
+                    
+                    let errorMessage = 'Unable to get your location. Please enter the address manually.';
+                    
+                    // Provide more specific error messages
+                    if (error.code === 1) {
+                        errorMessage = 'Location access denied. Please enable location services and try again.';
+                    } else if (error.code === 2) {
+                        errorMessage = 'Location unavailable. Please check your GPS signal and try again.';
+                    } else if (error.code === 3) {
+                        errorMessage = 'Location request timed out. Please try again.';
+                    }
+                    
+                    this.showError(errorMessage);
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+            
+            async getHighAccuracyLocation() {
+                console.log('Requesting high accuracy location...');
+                
+                // First try with high accuracy
+                let position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 60000 // 1 minute
+                    });
+                });
+                
+                console.log('Initial accuracy:', Math.round(position.coords.accuracy), 'meters');
+                
+                // If accuracy is poor (> 50 meters), try to get a better reading
+                if (position.coords.accuracy > 50) {
+                    console.log('Accuracy poor, attempting to improve...');
+                    
+                    // Update button to show we're improving accuracy
+                    const button = document.getElementById('get-location-btn');
+                    button.innerHTML = `
+                        <div class="loading-spinner"></div>
+                        <span>Improving Accuracy... (${Math.round(position.coords.accuracy)}m)</span>
+                    `;
+                    
+                    try {
+                        // Watch position for a few seconds to get a better reading
+                        const betterPosition = await new Promise((resolve, reject) => {
+                            let watchId;
+                            let bestPosition = position;
+                            let attempts = 0;
+                            const maxAttempts = 5;
+                            
+                            watchId = navigator.geolocation.watchPosition(
+                                (pos) => {
+                                    attempts++;
+                                    console.log(`Attempt ${attempts}: accuracy ${Math.round(pos.coords.accuracy)}m`);
+                                    
+                                    // Keep the most accurate reading
+                                    if (pos.coords.accuracy < bestPosition.coords.accuracy) {
+                                        bestPosition = pos;
+                                    }
+                                    
+                                    // Stop if we get good accuracy or max attempts
+                                    if (pos.coords.accuracy <= 20 || attempts >= maxAttempts) {
+                                        navigator.geolocation.clearWatch(watchId);
+                                        resolve(bestPosition);
+                                    }
+                                },
+                                (error) => {
+                                    navigator.geolocation.clearWatch(watchId);
+                                    reject(error);
+                                },
+                                {
+                                    enableHighAccuracy: true,
+                                    timeout: 5000,
+                                    maximumAge: 0
+                                }
+                            );
+                            
+                            // Fallback timeout
+                            setTimeout(() => {
+                                navigator.geolocation.clearWatch(watchId);
+                                resolve(bestPosition);
+                            }, 8000);
+                        });
+                        
+                        position = betterPosition;
+                        console.log('Final accuracy:', Math.round(position.coords.accuracy), 'meters');
+                    } catch (error) {
+                        console.log('Watch position failed, using initial reading');
+                    }
+                }
+                
+                return position;
+            }
+            
+            async reverseGeocode(lat, lng) {
+                console.log('Reverse geocoding coordinates:', lat, lng);
+                
+                try {
+                    // Try multiple geocoding services for better accuracy
+                    let address = await this.tryMultipleGeocodingServices(lat, lng);
+                    
+                    if (!address) {
+                        // Fallback to coordinates
+                        address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    }
+                    
+                    this.locationData.address = address;
+                    console.log('Resolved address:', address);
+                    
+                } catch (error) {
+                    console.error('Reverse geocoding error:', error);
+                    this.locationData.address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                }
+            }
+            
+            async tryMultipleGeocodingServices(lat, lng) {
+                // Try BigDataCloud first (most detailed)
+                try {
+                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+                    const data = await response.json();
+                    
+                    console.log('BigDataCloud response:', data);
+                    
+                    // Build detailed address
+                    let addressParts = [];
+                    
+                    if (data.informative && data.informative.length > 0) {
+                        // Use the most specific informative address
+                        const detailedInfo = data.informative[0];
+                        if (detailedInfo.name) {
+                            addressParts.push(detailedInfo.name);
+                        }
+                    }
+                    
+                    // Add street/road if available
+                    if (data.localityInfo && data.localityInfo.administrative) {
+                        const admin = data.localityInfo.administrative;
+                        if (admin.find(a => a.name && a.adminLevel <= 8)) {
+                            const streetLevel = admin.find(a => a.name && a.adminLevel <= 8);
+                            if (streetLevel.name && !addressParts.includes(streetLevel.name)) {
+                                addressParts.push(streetLevel.name);
+                            }
+                        }
+                    }
+                    
+                    // Add locality/city
+                    if (data.locality && !addressParts.some(part => part.includes(data.locality))) {
+                        addressParts.push(data.locality);
+                    }
+                    
+                    // Add state/province
+                    if (data.principalSubdivision) {
+                        addressParts.push(data.principalSubdivision);
+                    }
+                    
+                    // Add country
+                    if (data.countryName) {
+                        addressParts.push(data.countryName);
+                    }
+                    
+                    if (addressParts.length > 0) {
+                        return addressParts.join(', ');
+                    }
+                } catch (error) {
+                    console.log('BigDataCloud failed, trying backup service...');
+                }
+                
+                // Fallback to Nominatim (OpenStreetMap)
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                    const data = await response.json();
+                    
+                    console.log('Nominatim response:', data);
+                    
+                    if (data.display_name) {
+                        return data.display_name;
+                    }
+                    
+                    // Build address from components
+                    const addr = data.address;
+                    if (addr) {
+                        let addressParts = [];
+                        
+                        // Add house number and street
+                        if (addr.house_number && addr.road) {
+                            addressParts.push(`${addr.house_number} ${addr.road}`);
+                        } else if (addr.road) {
+                            addressParts.push(addr.road);
+                        }
+                        
+                        // Add neighborhood/suburb
+                        if (addr.neighbourhood || addr.suburb) {
+                            addressParts.push(addr.neighbourhood || addr.suburb);
+                        }
+                        
+                        // Add city
+                        if (addr.city || addr.town || addr.village) {
+                            addressParts.push(addr.city || addr.town || addr.village);
+                        }
+                        
+                        // Add state
+                        if (addr.state) {
+                            addressParts.push(addr.state);
+                        }
+                        
+                        // Add country
+                        if (addr.country) {
+                            addressParts.push(addr.country);
+                        }
+                        
+                        if (addressParts.length > 0) {
+                            return addressParts.join(', ');
+                        }
+                    }
+                } catch (error) {
+                    console.log('Nominatim failed:', error);
+                }
+                
+                return null;
+            }
+            
+            displayLocationInfo() {
+                if (!this.locationData) return;
+                
+                const coords = `${this.locationData.latitude.toFixed(6)}, ${this.locationData.longitude.toFixed(6)}`;
+                const accuracy = Math.round(this.locationData.accuracy);
+                
+                // Color-code accuracy feedback
+                let accuracyClass = '';
+                let accuracyText = '';
+                if (accuracy <= 10) {
+                    accuracyClass = 'accuracy-excellent';
+                    accuracyText = `🎯 Excellent accuracy: ±${accuracy}m`;
+                } else if (accuracy <= 25) {
+                    accuracyClass = 'accuracy-good';
+                    accuracyText = `✅ Good accuracy: ±${accuracy}m`;
+                } else if (accuracy <= 50) {
+                    accuracyClass = 'accuracy-fair';
+                    accuracyText = `⚠️ Fair accuracy: ±${accuracy}m`;
+                } else {
+                    accuracyClass = 'accuracy-poor';
+                    accuracyText = `📍 Basic accuracy: ±${accuracy}m`;
+                }
+                
+                document.getElementById('location-coords').textContent = coords;
+                document.getElementById('location-address').textContent = this.locationData.address || 'Address not available';
+                
+                const accuracyElement = document.getElementById('location-accuracy');
+                accuracyElement.textContent = accuracyText;
+                accuracyElement.className = accuracyClass;
+                
+                document.getElementById('location-info').style.display = 'block';
+            }
+            
+            async handleFileSelect(file) {
+                if (!file) return;
+                
+                if (!file.type.startsWith('image/')) {
+                    this.showError('Please select an image file.');
+                    return;
+                }
+                
+                // Check file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showError('File size too large. Please select an image smaller than 10MB.');
+                    return;
+                }
+                
+                // Show loading state
+                const uploadArea = document.getElementById('photo-upload-area');
+                const originalContent = uploadArea.innerHTML;
+                uploadArea.innerHTML = `
+                    <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
+                    <div class="upload-text">Processing image...</div>
+                `;
+                
+                try {
+                    // Compress image for better performance
+                    const compressedFile = await this.compressImage(file);
+                    this.photoFile = compressedFile;
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const preview = document.getElementById('photo-preview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        
+                        // Hide upload area and show retake buttons
+                        uploadArea.style.display = 'none';
+                        document.getElementById('camera-buttons').style.display = 'none';
+                        document.getElementById('retake-buttons').style.display = 'flex';
+                    };
+                    reader.readAsDataURL(compressedFile);
+                    
+                    this.updateSubmitButton();
+                    
+                } catch (error) {
+                    console.error('Image processing error:', error);
+                    uploadArea.innerHTML = originalContent;
+                    this.showError('Failed to process image. Please try again.');
+                }
+            }
+            
+            async compressImage(file) {
+                return new Promise((resolve) => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        // Calculate new dimensions (max 1920x1080)
+                        const maxWidth = 1920;
+                        const maxHeight = 1080;
+                        let { width, height } = img;
+                        
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = (width * maxHeight) / height;
+                                height = maxHeight;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Draw and compress
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob((blob) => {
+                            // Create a new file with the compressed blob
+                            const compressedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, 'image/jpeg', 0.8); // 80% quality
+                    };
+                    
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+            
+            updateSubmitButton() {
+                const hasLocation = this.locationData || document.getElementById('manual-address').value.trim();
+                const hasPhoto = this.photoFile !== null;
+                const hasTags = document.querySelectorAll('input[name="art-tags"]:checked').length > 0;
+                
+                // Check if "Other" is selected and if custom tag is provided
+                const otherCheckbox = document.getElementById('other-tag-checkbox');
+                const customTagInput = document.getElementById('custom-tag-input');
+                const hasValidCustomTag = !otherCheckbox.checked || (otherCheckbox.checked && customTagInput.value.trim().length > 0);
+                
+                const canSubmit = hasLocation && hasPhoto && hasTags && hasValidCustomTag && !this.isSubmitting;
+                
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = !canSubmit;
+                
+                if (canSubmit) {
+                    submitBtn.style.opacity = '1';
+                } else {
+                    submitBtn.style.opacity = '0.6';
+                }
+            }
+            
+            async submitForm() {
+                if (this.isSubmitting) return;
+                
+                this.isSubmitting = true;
+                this.hideMessages();
+                
+                // Show loading modal
+                this.showStatusModal('loading', 'Submitting...', 'Please wait while we submit your art installation.');
+                
+                const submitBtn = document.getElementById('submit-btn');
+                const submitText = document.getElementById('submit-text');
+                const submitSpinner = document.getElementById('submit-spinner');
+                
+                submitBtn.disabled = true;
+                submitText.textContent = 'Submitting...';
+                submitSpinner.style.display = 'inline-block';
+                
+                try {
+                    // Prepare form data
+                    const formData = new FormData();
+                    
+                    // Add photo
+                    if (this.photoFile) {
+                        formData.append(this.fieldIds.picture, this.photoFile);
+                    }
+                    
+                    // Add location data
+                    const locationString = this.locationData 
+                        ? `${this.locationData.address} (${this.locationData.latitude}, ${this.locationData.longitude})`
+                        : document.getElementById('manual-address').value;
+                    
+                    formData.append(this.fieldIds.location, locationString);
+                    
+                    // Add description
+                    formData.append(this.fieldIds.description, document.getElementById('art-description').value);
+                    
+                    // Add tags (Google Forms expects each selected option as a separate entry)
+                    const selectedTags = Array.from(document.querySelectorAll('input[name="art-tags"]:checked'))
+                        .map(checkbox => checkbox.value);
+                    
+                    // Handle custom tag if "Other" is selected
+                    const otherCheckbox = document.getElementById('other-tag-checkbox');
+                    const customTagInput = document.getElementById('custom-tag-input');
+                    if (otherCheckbox.checked && customTagInput.value.trim()) {
+                        // Replace the __other_option__ with the custom tag value
+                        const customTag = customTagInput.value.trim();
+                        const otherIndex = selectedTags.indexOf('__other_option__');
+                        if (otherIndex !== -1) {
+                            selectedTags[otherIndex] = customTag;
+                        }
+                    }
+                    
+                    // For multiple choice checkboxes, we need to append each selected value separately
+                    selectedTags.forEach(tag => {
+                        formData.append(this.fieldIds.tags, tag);
+                    });
+                    
+                    // Submit to Google Forms with timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    
+                    const response = await fetch(this.googleFormUrl, {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors', // Required for Google Forms
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    // Since we're using no-cors, we can't check the response status
+                    // But if we get here without an error, it likely succeeded
+                    this.showStatusModal('success', 'Success!', 'Your art installation has been submitted successfully. Thank you for your contribution!');
+                    
+                    // Reset form
+                    this.resetForm();
+                    
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    
+                    // Provide more specific error messages based on error type
+                    let errorMessage = 'We encountered an error while submitting your art installation.';
+                    
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = 'Network error. Please check your internet connection and try again.';
+                    } else if (error.name === 'AbortError') {
+                        errorMessage = 'Submission was cancelled. Please try again.';
+                    } else if (error.message.includes('timeout')) {
+                        errorMessage = 'Submission timed out. Please check your connection and try again.';
+                    }
+                    
+                    this.showStatusModal('error', 'Submission Failed', errorMessage);
+                } finally {
+                    this.isSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitText.textContent = 'Submit Art Installation';
+                    submitSpinner.style.display = 'none';
+                }
+            }
+            
+            resetForm() {
+                // Reset all form fields
+                document.getElementById('art-description').value = '';
+                document.getElementById('manual-address').value = '';
+                
+                // Reset tags
+                document.querySelectorAll('input[name="art-tags"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Reset custom tag input
+                document.getElementById('custom-tag-group').style.display = 'none';
+                document.getElementById('custom-tag-input').value = '';
+                document.getElementById('char-count').textContent = '0/30';
+                document.getElementById('char-count').style.color = 'var(--color-text-tertiary)';
+                
+                // Reset photo
+                this.photoFile = null;
+                document.getElementById('photo-preview').style.display = 'none';
+                document.getElementById('photo-upload-area').style.display = 'block';
+                document.getElementById('camera-buttons').style.display = 'flex';
+                document.getElementById('retake-buttons').style.display = 'none';
+                document.getElementById('camera-input').value = '';
+                document.getElementById('library-input').value = '';
+                
+                // Reset location
+                this.locationData = null;
+                document.getElementById('location-info').style.display = 'none';
+                
+                this.updateSubmitButton();
+            }
+            
+            showError(message) {
+                const errorDiv = document.getElementById('error-message');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+            
+            showSuccess(message) {
+                const successDiv = document.getElementById('success-message');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 5000);
+            }
+            
+            hideMessages() {
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('success-message').style.display = 'none';
+            }
+            
+            showStatusModal(type, title, message) {
+                const modal = document.getElementById('submission-status');
+                const overlay = document.getElementById('status-overlay');
+                const icon = document.getElementById('status-icon');
+                const titleEl = document.getElementById('status-title');
+                const messageEl = document.getElementById('status-message');
+                const actions = document.getElementById('status-actions');
+                const okBtn = document.getElementById('status-ok-btn');
+                const retryBtn = document.getElementById('status-retry-btn');
+                
+                // Update content
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                // Update styling based on type
+                modal.className = 'submission-status';
+                if (type === 'success') {
+                    modal.classList.add('success');
+                    icon.textContent = '✅';
+                    actions.style.display = 'block';
+                    retryBtn.style.display = 'none';
+                } else if (type === 'error') {
+                    modal.classList.add('error');
+                    icon.textContent = '❌';
+                    actions.style.display = 'block';
+                    retryBtn.style.display = 'inline-flex';
+                } else if (type === 'loading') {
+                    icon.textContent = '⏳';
+                    actions.style.display = 'none';
+                }
+                
+                // Show modal
+                overlay.classList.add('show');
+                modal.classList.add('show');
+            }
+            
+            hideStatusModal() {
+                const modal = document.getElementById('submission-status');
+                const overlay = document.getElementById('status-overlay');
+                
+                overlay.classList.remove('show');
+                modal.classList.remove('show');
+            }
+        }
+        
+    </script>
+</body>
+</html>

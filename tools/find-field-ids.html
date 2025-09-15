@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form Field ID Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .method {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .method h3 {
+            margin-top: 0;
+            color: #007cba;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #007cba;
+        }
+        .code {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .warning {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Form Field ID Finder</h1>
+        <p>This tool helps you find the correct field IDs for your Google Form integration.</p>
+        
+        <div class="method">
+            <h3>Method 1: Browser Developer Tools (Recommended)</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Open the Google Form in a new tab
+                <div class="code">
+                    <a href="https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/preview" target="_blank">Open Google Form</a>
+                </div>
+            </div>
+            
+            <div class="step">
+                <strong>Step 2:</strong> Open Developer Tools
+                <ul>
+                    <li>Right-click anywhere on the page and select "Inspect" or "Inspect Element"</li>
+                    <li>Or press F12 (Windows) or Cmd+Option+I (Mac)</li>
+                </ul>
+            </div>
+            
+            <div class="step">
+                <strong>Step 3:</strong> Find the form element
+                <ul>
+                    <li>In the Elements tab, press Ctrl+F (or Cmd+F) to search</li>
+                    <li>Search for: <code>&lt;form</code></li>
+                    <li>Look for a form element with an action URL containing your form ID</li>
+                </ul>
+            </div>
+            
+            <div class="step">
+                <strong>Step 4:</strong> Look for input elements
+                <ul>
+                    <li>Inside the form, look for input elements with names like <code>entry.XXXXXXXXX</code></li>
+                    <li>Each field will have a unique entry ID</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="method">
+            <h3>Method 2: View Page Source</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Open the Google Form
+                <div class="code">
+                    <a href="https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/preview" target="_blank">Open Google Form</a>
+                </div>
+            </div>
+            
+            <div class="step">
+                <strong>Step 2:</strong> View page source
+                <ul>
+                    <li>Right-click on the page and select "View Page Source"</li>
+                    <li>Or press Ctrl+U (Windows) or Cmd+Option+U (Mac)</li>
+                </ul>
+            </div>
+            
+            <div class="step">
+                <strong>Step 3:</strong> Search for entry fields
+                <ul>
+                    <li>Press Ctrl+F (or Cmd+F) to search</li>
+                    <li>Search for: <code>entry.</code></li>
+                    <li>Look for patterns like <code>name="entry.123456789"</code></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="method">
+            <h3>Method 3: Network Tab Method</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Open Developer Tools and go to Network tab
+            </div>
+            
+            <div class="step">
+                <strong>Step 2:</strong> Fill out the form and submit it
+                <ul>
+                    <li>Fill in some test data in each field</li>
+                    <li>Submit the form</li>
+                    <li>Look for a POST request in the Network tab</li>
+                </ul>
+            </div>
+            
+            <div class="step">
+                <strong>Step 3:</strong> Check the request payload
+                <ul>
+                    <li>Click on the POST request</li>
+                    <li>Look at the "Form Data" or "Payload" section</li>
+                    <li>You'll see the field names and values</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h3>🔍 What to Look For</h3>
+            <p>Your form should have these field types with entry IDs:</p>
+            <ul>
+                <li><strong>Location:</strong> <code>entry.XXXXXXXXX</code> (short answer text)</li>
+                <li><strong>Description:</strong> <code>entry.XXXXXXXXX</code> (paragraph text)</li>
+                <li><strong>Tags:</strong> <code>entry.XXXXXXXXX</code> (multiple choice)</li>
+                <li><strong>Picture:</strong> <code>entry.XXXXXXXXX</code> (file upload)</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <h3>⚠️ Important Notes</h3>
+            <ul>
+                <li>Field IDs are unique to each form and change if you modify the form</li>
+                <li>File upload fields might not show entry IDs in the same way</li>
+                <li>If you can't find the IDs, try creating a new form with the same structure</li>
+            </ul>
+        </div>
+        
+        <div class="result" id="result" style="display: none;">
+            <h3>Found Field IDs</h3>
+            <p>Once you find the field IDs, update them in your code:</p>
+            <div class="code" id="code-output"></div>
+        </div>
+        
+        <button onclick="showCodeTemplate()">Show Code Template</button>
+        <button onclick="openForm()">Open Google Form</button>
+    </div>
+
+    <script>
+        function showCodeTemplate() {
+            const template = `// Update these field IDs in public-art-submission.html
+this.fieldIds = {
+    location: 'entry.XXXXXXXXX',     // Replace with actual Location field ID
+    description: 'entry.XXXXXXXXX',  // Replace with actual Description field ID
+    tags: 'entry.XXXXXXXXX',         // Replace with actual Tags field ID
+    picture: 'entry.XXXXXXXXX'       // Replace with actual Picture field ID
+};`;
+            
+            document.getElementById('code-output').textContent = template;
+            document.getElementById('result').style.display = 'block';
+        }
+        
+        function openForm() {
+            window.open('https://docs.google.com/forms/d/1_L6W_633GYs2vXTbNQBGhrOmm9GQtk3BLOYnTdv0F4A/preview', '_blank');
+        }
+        
+        // Add some helpful console commands
+        console.log('Google Form Field ID Finder loaded');
+        console.log('Try these commands in the console:');
+        console.log('1. document.querySelectorAll("input[name*=\\"entry.\\"]")');
+        console.log('2. document.querySelectorAll("textarea[name*=\\"entry.\\"]")');
+        console.log('3. document.querySelectorAll("select[name*=\\"entry.\\"]")');
+    </script>
+</body>
+</html>
