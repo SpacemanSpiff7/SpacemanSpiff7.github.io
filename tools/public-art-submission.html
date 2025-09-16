@@ -47,6 +47,7 @@
             max-width: 900px;
             margin: 0 auto;
             padding: var(--space-10);
+            padding-top: calc(var(--space-10) + 80px);
         }
         
         .submission-header {
@@ -742,6 +743,9 @@
         // Minimal script for public art submission page
         // Only load essential functionality, not the full site script
         document.addEventListener('DOMContentLoaded', function() {
+            // Load navigation
+            loadNavigation();
+            
             // Only initialize if we're on the public art submission page
             if (document.getElementById('public-art-app')) {
                 // Wait for navigation to load first
@@ -750,6 +754,46 @@
                 }, 100);
             }
         });
+        
+        // Load navigation component
+        function loadNavigation() {
+            fetch('../components/nav.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('nav-container').innerHTML = html;
+                    
+                    // Add navigation functionality
+                    const navToggle = document.querySelector('.nav-toggle');
+                    const navLinks = document.querySelector('.nav-links');
+                    
+                    if (navToggle && navLinks) {
+                        navToggle.addEventListener('click', function() {
+                            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                            navToggle.setAttribute('aria-expanded', !isExpanded);
+                            navLinks.classList.toggle('nav-links-open');
+                        });
+                        
+                        // Close menu when clicking on a link
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.addEventListener('click', function() {
+                                navToggle.setAttribute('aria-expanded', 'false');
+                                navLinks.classList.remove('nav-links-open');
+                            });
+                        });
+                        
+                        // Close menu when clicking outside
+                        document.addEventListener('click', function(e) {
+                            if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                                navToggle.setAttribute('aria-expanded', 'false');
+                                navLinks.classList.remove('nav-links-open');
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading navigation:', error);
+                });
+        }
     </script>
     
     <!-- Public Art Submission Script -->

@@ -78,6 +78,50 @@
             color: #1a1a1a;
         }
 
+        /* Mobile navigation */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .nav-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(250, 250, 249, 0.95);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid #e5e7eb;
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-links.nav-links-open {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
         /* Sections */
         .section {
             padding: 120px 0;
@@ -299,6 +343,13 @@
     <nav class="nav">
         <div class="nav-container">
             <a href="#" class="nav-logo">Simone Longo</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <ul class="nav-links">
                 <li><a href="#" data-section="home" class="nav-link active">Home</a></li>
                 <li><a href="#" data-section="projects" class="nav-link">Projects</a></li>
@@ -465,6 +516,17 @@
         // Navigation functionality
         const navLinks = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('.section');
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinksContainer = document.querySelector('.nav-links');
+
+        // Mobile navigation toggle
+        if (navToggle && navLinksContainer) {
+            navToggle.addEventListener('click', function() {
+                const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                navToggle.setAttribute('aria-expanded', !isExpanded);
+                navLinksContainer.classList.toggle('nav-links-open');
+            });
+        }
 
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
@@ -479,7 +541,23 @@
                 // Add active class to clicked nav link and target section
                 link.classList.add('active');
                 document.getElementById(targetSection).classList.add('active');
+                
+                // Close mobile menu
+                if (navLinksContainer) {
+                    navLinksContainer.classList.remove('nav-links-open');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                }
             });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (navToggle && navLinksContainer && 
+                !navToggle.contains(e.target) && 
+                !navLinksContainer.contains(e.target)) {
+                navLinksContainer.classList.remove('nav-links-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
         });
     </script>
 </body>

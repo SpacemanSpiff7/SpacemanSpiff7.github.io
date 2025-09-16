@@ -15,6 +15,10 @@
     <meta property="og:description" content="Interactive 3D Monte Carlo Metropolis simulation with accurate physics and real-time visualization">
     
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../style.css">
+    
     <style>
         * {
             margin: 0;
@@ -554,7 +558,27 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
+                <li><a href="../index.html#about" class="nav-link">About</a></li>
+                <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 80px;">
         <div class="header">
             <h1>3D Monte Carlo Metropolis Simulation</h1>
             <p>Advanced particle physics simulation with realistic 3D dynamics, proper energy minimization, and comprehensive real-time analysis</p>
@@ -1949,6 +1973,34 @@
         // Initialize simulation when page loads
         window.addEventListener('DOMContentLoaded', () => {
             new MonteCarloSimulation();
+            
+            // Navigation functionality
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', function() {
+                    const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                    navToggle.setAttribute('aria-expanded', !isExpanded);
+                    navLinks.classList.toggle('nav-links-open');
+                });
+                
+                // Close menu when clicking on a link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        navToggle.setAttribute('aria-expanded', 'false');
+                        navLinks.classList.remove('nav-links-open');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                        navToggle.setAttribute('aria-expanded', 'false');
+                        navLinks.classList.remove('nav-links-open');
+                    }
+                });
+            }
         });
     </script>
 </body>

@@ -3,7 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Runner Math</title>
+  <title>Runner Math - Simone Longo</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <style>
     :root {
       --bg: #0b0c10;
@@ -17,16 +28,44 @@
       --accent: #4d9cff;
     }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; height: 100%; overflow: hidden; }
-    #wrap { position: fixed; inset: 0; }
+    #wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
     #ui { position: absolute; top: 4px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2; }
     #score { font-weight: 900; font-size: clamp(28px, 7vw, 56px); text-shadow: 0 3px 10px rgba(0,0,0,0.65); letter-spacing: 0.5px; }
     #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: clamp(16px, 4vw, 24px); background: rgba(0,0,0,0.7); padding: 16px 20px; border-radius: 16px; display: none; box-shadow: 0 6px 24px rgba(0,0,0,0.6); z-index: 3; width: 400px; max-width: 90vw; }
     #btn { margin-top: 10px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 16px; }
-    canvas { position: absolute; inset: 0; width: 100vw; height: 100vh; background: var(--bg); }
+    canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: block; touch-action: none; }
+    
+    /* Mobile-specific fixes */
+    @media (max-width: 768px) {
+      #msg { width: 350px; max-width: 95vw; padding: 12px 16px; }
+      #msgText { font-size: clamp(14px, 3.5vw, 20px); }
+      #btn { padding: 12px 24px; font-size: 18px; }
+      #nameInput { font-size: 28px; width: 180px; padding: 10px 14px; }
+    }
   </style>
 </head>
 <body>
-  <div id="wrap">
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
+      <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
+        <li><a href="../index.html#about" class="nav-link">About</a></li>
+        <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="wrap" style="padding-top: 80px;">
     <canvas id="game" aria-label="Runner Math" role="img"></canvas>
     <div id="ui"><div id="score">Score 0</div></div>
   </div>
@@ -161,57 +200,47 @@
     nameEntryActive = true;
     pendingScore = score;
     currentName = '';
-    cursorVisible = true;
     msgText.textContent = 'Enter your name (5 chars):';
     msgText.style.textAlign = 'center';
     
-    const nameDisplay = document.createElement('div');
-    nameDisplay.id = 'nameDisplay';
-    nameDisplay.style.cssText = 'font-size: 32px; margin: 15px 0; letter-spacing: 4px; font-family: monospace; text-align: center; width: 100%; position: relative; min-height: 40px;';
-    nameDisplay.innerHTML = '<span id="nameText">_____</span><span id="cursor" style="color: #4d9cff; font-weight: bold; margin-left: 2px;">|</span>';
-    msgWrap.appendChild(nameDisplay);
+    const nameInput = document.createElement('input');
+    nameInput.id = 'nameInput';
+    nameInput.type = 'text';
+    nameInput.maxLength = 5;
+    nameInput.placeholder = '_____';
+    nameInput.style.cssText = 'font-size: 32px; margin: 15px 0; letter-spacing: 4px; font-family: monospace; text-align: center; width: 200px; padding: 8px 12px; border: 2px solid #4d9cff; border-radius: 8px; background: rgba(0,0,0,0.8); color: white; outline: none;';
+    nameInput.addEventListener('input', (e) => {
+      currentName = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      e.target.value = currentName;
+    });
+    msgWrap.appendChild(nameInput);
     restartBtn.textContent = 'Submit';
     restartBtn.style.display = 'block';
     restartBtn.style.margin = '10px auto';
     
-    // Start blinking cursor - slower blink
-    cursorTimer = setInterval(() => {
-      cursorVisible = !cursorVisible;
-      const cursor = document.getElementById('cursor');
-      if (cursor) {
-        cursor.style.opacity = cursorVisible ? '1' : '0.3';
-      }
-    }, 800);
+    // Focus the input to open mobile keyboard
+    setTimeout(() => {
+      nameInput.focus();
+    }, 100);
   }
   
   function updateNameDisplay() {
-    const nameText = document.getElementById('nameText');
-    const cursor = document.getElementById('cursor');
-    if (nameText) {
-      // Show only the characters typed so far, with underscores for remaining spaces
-      const typed = currentName;
-      const remaining = '_____'.substring(0, 5 - currentName.length);
-      nameText.textContent = typed + remaining;
-    }
-    if (cursor) {
-      // Position cursor right after the last typed character
-      cursor.style.display = currentName.length < 5 ? 'inline' : 'none';
-    }
+    // No longer needed - the input handles display automatically
   }
   
   function finishNameEntry() {
+    const nameInput = document.getElementById('nameInput');
+    if (nameInput) {
+      currentName = nameInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+    
     if (currentName.length === 0) currentName = 'ANON';
-    const finalName = (currentName + '_____').substring(0, 5).replace(/_/g, ' ').trim();
+    const finalName = currentName.padEnd(5, ' ').substring(0, 5);
     
     addScoreToLeaderboard(pendingScore, finalName);
     
     nameEntryActive = false;
-    if (cursorTimer) {
-      clearInterval(cursorTimer);
-      cursorTimer = null;
-    }
-    const nameDisplay = document.getElementById('nameDisplay');
-    if (nameDisplay) nameDisplay.remove();
+    if (nameInput) nameInput.remove();
     restartBtn.style.display = 'block';
     
     // Update game over message
@@ -237,18 +266,8 @@
         finishNameEntry();
         return;
       }
-      if (e.key === "Backspace") {
-        currentName = currentName.slice(0, -1);
-        updateNameDisplay();
-        return;
-      }
-      // Accept alphanumeric characters
-      if (/^[a-zA-Z0-9]$/.test(e.key) && currentName.length < 5) {
-        currentName += e.key.toUpperCase();
-        updateNameDisplay();
-        return;
-      }
-      return; // Block other keys during name entry
+      // Let the input handle other keys naturally
+      return;
     }
     
     if (!state.started && (e.key === " " || e.key === "Enter")) { start(); return; }
@@ -879,6 +898,36 @@
   testPercentLabels();
   testConstantVisualSpeed();
 })();
+
+// Navigation functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function() {
+      const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', !isExpanded);
+      navLinks.classList.toggle('nav-links-open');
+    });
+    
+    // Close menu when clicking on a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function() {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navLinks.classList.remove('nav-links-open');
+      });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navLinks.classList.remove('nav-links-open');
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>
