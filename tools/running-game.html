@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Runner Math</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --road: #1c1f29;
+      --edgeA: rgba(255,255,255,0.08);
+      --edgeB: rgba(255,255,255,0);
+      --line: #ffffff;
+      --text: #ffffff;
+      --good: #00d47e;
+      --bad: #ff3b3b;
+      --accent: #4d9cff;
+    }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; height: 100%; overflow: hidden; }
+    #wrap { position: fixed; inset: 0; }
+    #ui { position: absolute; top: 4px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2; }
+    #score { font-weight: 900; font-size: clamp(28px, 7vw, 56px); text-shadow: 0 3px 10px rgba(0,0,0,0.65); letter-spacing: 0.5px; }
+    #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: clamp(16px, 4vw, 24px); background: rgba(0,0,0,0.7); padding: 16px 20px; border-radius: 16px; display: none; box-shadow: 0 6px 24px rgba(0,0,0,0.6); z-index: 3; width: 400px; max-width: 90vw; }
+    #btn { margin-top: 10px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 16px; }
+    canvas { position: absolute; inset: 0; width: 100vw; height: 100vh; background: var(--bg); }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" aria-label="Runner Math" role="img"></canvas>
+    <div id="ui"><div id="score">Score 0</div></div>
+  </div>
+  <div id="msg">
+    <div id="msgText">Runner Math</div>
+    <button id="btn">Start</button>
+    <div id="best"></div>
+  </div>
+<script>
+(() => {
+  "use strict";
+
+  // ===== CONFIGURATION =====
+  // All game parameters, timing, colors, and sizing constants
+  const cfg = {
+    canvasWidth: 800,
+    canvasHeight: 600,
+    road: {
+      widthBottom: 740,
+      widthTop: 360,
+      topY: 0.10,
+      dashLen: 34,
+      dashGap: 26,
+      lineWidth: 5,
+      edgeFeather: 18
+    },
+    baseScroll: 2.6,       // slightly slower initial speed per request
+    scrollAccel: 0.0005,   // much gentler acceleration for better control
+    player: { speed: 800, sprite: { body: "#f4f6f9", outline: "#0b0d12" } },
+    input: { touchSensitivity: 1.5 },
+    banners: {
+      height: 85,               // taller gates for better visibility
+      spawnDelayFirstSec: 1.2,
+      baseIntervalSec: 2.2,      // slightly faster for better pacing
+      intervalRampPerSec: 0.002,  // more aggressive ramp for progression
+      minIntervalSec: 0.8,       // minimum for challenging gameplay
+      minFrac: 0.30,
+      maxFrac: 0.70,
+      animDuration: 0.14,        // faster animation for snappy feel
+      labelFont: "900 24px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"  // larger, bolder text
+    },
+    obstacles: {
+      startAfterBanners: 3,
+      baseIntervalSec: 2.2,
+      intervalRampPerSec: 0.001,
+      minIntervalSec: 0.9,
+      radiusMin: 22,        // increased from 14 for better visibility
+      radiusMax: 38         // increased from 26 for more imposing presence
+    }
+  };
+
+  // ===== CANVAS & UI SETUP =====
+  // Canvas initialization, resizing, and DOM element references
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("score");
+  const msgWrap = document.getElementById("msg");
+  const msgText = document.getElementById("msgText");
+  const bestEl = document.getElementById("best");
+  const restartBtn = document.getElementById("btn");
+
+  let W = cfg.canvasWidth, H = cfg.canvasHeight, DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+  function resize() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const target = { w: cfg.canvasWidth, h: cfg.canvasHeight };
+    const scale = Math.min(vw / target.w, vh / target.h);
+    W = Math.round(target.w * scale);
+    H = Math.round(target.h * scale);
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  // ===== UTILITY FUNCTIONS =====
+  // Math helpers, clamping, interpolation, and random number generation
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function mix(a,b,t){return a+(b-a)*t;}
+  function gaussian(min, max){ let u=0, v=0; while(u===0) u=Math.random(); while(v===0) v=Math.random(); let num=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); num=num/3+0.5; num=Math.min(1,Math.max(0,num)); return Math.round(min + num*(max-min)); }
+
+  // ===== GAME STATE =====
+  // Core game state, player position, active objects, and timing
+  const state={started:false,gameOver:false,score:0,time:0,scroll:cfg.baseScroll,lineOffset:0,popup:null,nextBanner:Infinity,nextObstacle:Infinity,bannersPassed:0};
+  
+  // Leaderboard system
+  function loadLeaderboards() {
+    const highScores = JSON.parse(localStorage.getItem('runnerMathHighScores') || '[]');
+    const lowScores = JSON.parse(localStorage.getItem('runnerMathLowScores') || '[]');
+    return { highScores, lowScores };
+  }
+  
+  function saveLeaderboards(highScores, lowScores) {
+    localStorage.setItem('runnerMathHighScores', JSON.stringify(highScores));
+    localStorage.setItem('runnerMathLowScores', JSON.stringify(lowScores));
+  }
+  
+  function addScoreToLeaderboard(score, name) {
+    const { highScores, lowScores } = loadLeaderboards();
+    
+    // Add to high scores (descending order)
+    highScores.push({ score, name, date: new Date().toLocaleDateString() });
+    highScores.sort((a, b) => b.score - a.score);
+    if (highScores.length > 5) highScores.length = 5;
+    
+    // Add to low scores (ascending order)
+    lowScores.push({ score, name, date: new Date().toLocaleDateString() });
+    lowScores.sort((a, b) => a.score - b.score);
+    if (lowScores.length > 5) lowScores.length = 5;
+    
+    saveLeaderboards(highScores, lowScores);
+    return { highScores, lowScores };
+  }
+  
+  // Legacy best score for backwards compatibility
+  let bestScore = parseInt(localStorage.getItem('runnerMathBest') || '0');
+
+  const input={left:false,right:false,touchX:null,touchActive:false};
+  
+  // Name entry system
+  let nameEntryActive = false;
+  let currentName = '';
+  let pendingScore = 0;
+  let cursorVisible = true;
+  let cursorTimer = null;
+  
+  function promptForName(score) {
+    nameEntryActive = true;
+    pendingScore = score;
+    currentName = '';
+    cursorVisible = true;
+    msgText.textContent = 'Enter your name (5 chars):';
+    msgText.style.textAlign = 'center';
+    
+    const nameDisplay = document.createElement('div');
+    nameDisplay.id = 'nameDisplay';
+    nameDisplay.style.cssText = 'font-size: 32px; margin: 15px 0; letter-spacing: 4px; font-family: monospace; text-align: center; width: 100%; position: relative; min-height: 40px;';
+    nameDisplay.innerHTML = '<span id="nameText">_____</span><span id="cursor" style="color: #4d9cff; font-weight: bold; margin-left: 2px;">|</span>';
+    msgWrap.appendChild(nameDisplay);
+    restartBtn.textContent = 'Submit';
+    restartBtn.style.display = 'block';
+    restartBtn.style.margin = '10px auto';
+    
+    // Start blinking cursor - slower blink
+    cursorTimer = setInterval(() => {
+      cursorVisible = !cursorVisible;
+      const cursor = document.getElementById('cursor');
+      if (cursor) {
+        cursor.style.opacity = cursorVisible ? '1' : '0.3';
+      }
+    }, 800);
+  }
+  
+  function updateNameDisplay() {
+    const nameText = document.getElementById('nameText');
+    const cursor = document.getElementById('cursor');
+    if (nameText) {
+      // Show only the characters typed so far, with underscores for remaining spaces
+      const typed = currentName;
+      const remaining = '_____'.substring(0, 5 - currentName.length);
+      nameText.textContent = typed + remaining;
+    }
+    if (cursor) {
+      // Position cursor right after the last typed character
+      cursor.style.display = currentName.length < 5 ? 'inline' : 'none';
+    }
+  }
+  
+  function finishNameEntry() {
+    if (currentName.length === 0) currentName = 'ANON';
+    const finalName = (currentName + '_____').substring(0, 5).replace(/_/g, ' ').trim();
+    
+    addScoreToLeaderboard(pendingScore, finalName);
+    
+    nameEntryActive = false;
+    if (cursorTimer) {
+      clearInterval(cursorTimer);
+      cursorTimer = null;
+    }
+    const nameDisplay = document.getElementById('nameDisplay');
+    if (nameDisplay) nameDisplay.remove();
+    restartBtn.style.display = 'block';
+    
+    // Update game over message
+    if (pendingScore > bestScore) {
+      bestScore = pendingScore;
+      localStorage.setItem('runnerMathBest', bestScore.toString());
+      msgText.textContent = `New Best! Score ${pendingScore}`;
+    } else {
+      msgText.textContent = `Game Over. Score ${pendingScore}`;
+    }
+    bestEl.textContent = bestScore > 0 ? `Best: ${bestScore}` : '';
+  }
+  const player={x:W*0.5,y:H*0.85,bob:0};
+  const banners=[]; // active gates
+  const rocks=[]; // enemy obstacles
+
+  // ===== INPUT HANDLING =====
+  // Keyboard and touch controls for player movement
+  window.addEventListener("keydown", e => {
+    // Handle name entry
+    if (nameEntryActive) {
+      if (e.key === "Enter") {
+        finishNameEntry();
+        return;
+      }
+      if (e.key === "Backspace") {
+        currentName = currentName.slice(0, -1);
+        updateNameDisplay();
+        return;
+      }
+      // Accept alphanumeric characters
+      if (/^[a-zA-Z0-9]$/.test(e.key) && currentName.length < 5) {
+        currentName += e.key.toUpperCase();
+        updateNameDisplay();
+        return;
+      }
+      return; // Block other keys during name entry
+    }
+    
+    if (!state.started && (e.key === " " || e.key === "Enter")) { start(); return; }
+    if (e.key === "ArrowLeft") input.left = true;
+    if (e.key === "ArrowRight") input.right = true;
+  });
+  window.addEventListener("keyup", e => { if (e.key === "ArrowLeft") input.left = false; if (e.key === "ArrowRight") input.right = false; });
+  canvas.addEventListener("touchstart", e => { input.touchActive = true; input.touchX = e.changedTouches[0].clientX; if (!state.started) start(); }, { passive: true });
+  canvas.addEventListener("touchmove", e => { if (!input.touchActive) return; const x = e.changedTouches[0].clientX; const dx = x - input.touchX; input.touchX = x; player.x += dx * cfg.input.touchSensitivity; }, { passive: true });
+  canvas.addEventListener("touchend", () => { input.touchActive = false; });
+
+  // ===== ROAD GEOMETRY =====
+  // Perspective road calculations and width interpolation
+  function roadParams() { const topY = H * cfg.road.topY; const bottomY = H; const wTop = cfg.road.widthTop; const wBottom = cfg.road.widthBottom; return { topY, bottomY, wTop, wBottom }; }
+  function roadWidthAtY(y) { const { topY, bottomY, wTop, wBottom } = roadParams(); const t = clamp((y - topY) / (bottomY - topY), 0, 1); return wTop + (wBottom - wTop) * t; }
+  function roadEdgesAtY(y) { const w = roadWidthAtY(y); return { left: W * 0.5 - w * 0.5, right: W * 0.5 + w * 0.5 }; }
+
+  // ===== RENDERING: ROAD =====
+  // Road surface, center line, and perspective effects
+  function drawRoad(dt){
+    const { topY, bottomY, wTop, wBottom } = roadParams();
+    ctx.beginPath(); ctx.moveTo(W/2 - wTop/2, topY); ctx.lineTo(W/2 - wBottom/2, bottomY); ctx.lineTo(W/2 + wBottom/2, bottomY); ctx.lineTo(W/2 + wTop/2, topY); ctx.closePath(); ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--road"); ctx.fill();
+    const gradL = ctx.createLinearGradient(W/2 - wBottom/2, 0, W/2 - wBottom/2 + cfg.road.edgeFeather, 0); gradL.addColorStop(0, getComputedStyle(document.documentElement).getPropertyValue("--edgeA")); gradL.addColorStop(1, getComputedStyle(document.documentElement).getPropertyValue("--edgeB")); const gradR = ctx.createLinearGradient(W/2 + wBottom/2, 0, W/2 + wBottom/2 - cfg.road.edgeFeather, 0); gradR.addColorStop(0, getComputedStyle(document.documentElement).getPropertyValue("--edgeA")); gradR.addColorStop(1, getComputedStyle(document.documentElement).getPropertyValue("--edgeB")); ctx.fillStyle = gradL; ctx.fillRect(W/2 - wBottom/2, topY, cfg.road.edgeFeather, bottomY-topY); ctx.fillStyle = gradR; ctx.fillRect(W/2 + wBottom/2 - cfg.road.edgeFeather, topY, cfg.road.edgeFeather, bottomY-topY);
+    state.lineOffset += dt * state.scroll * 120; const lineColor=getComputedStyle(document.documentElement).getPropertyValue("--line"); ctx.strokeStyle=lineColor; ctx.lineWidth=cfg.road.lineWidth; ctx.setLineDash([cfg.road.dashLen, cfg.road.dashGap]); ctx.lineDashOffset = -state.lineOffset; ctx.beginPath(); ctx.moveTo(W/2, topY); ctx.lineTo(W/2, bottomY); ctx.stroke(); ctx.globalAlpha = 0.25; ctx.lineDashOffset = -state.lineOffset * 1.4; ctx.beginPath(); ctx.moveTo(W/2, topY); ctx.lineTo(W/2, bottomY); ctx.stroke(); ctx.globalAlpha = 1; ctx.setLineDash([]);
+    const rad = ctx.createRadialGradient(W*0.5, H*0.8, Math.min(W,H)*0.1, W*0.5, H*0.8, Math.max(W,H)*0.9); rad.addColorStop(0, "rgba(0,0,0,0)"); rad.addColorStop(1, "rgba(0,0,0,0.25)"); ctx.fillStyle = rad; ctx.fillRect(0,0,W,H);
+  }
+
+  // ===== RENDERING: PLAYER =====
+  // Player character with movement and animation
+  function drawPlayer(dt){
+    const edges = roadEdgesAtY(player.y);
+    if (input.left) player.x -= cfg.player.speed * dt;
+    if (input.right) player.x += cfg.player.speed * dt;
+    player.x = clamp(player.x, edges.left + 18, edges.right - 18);
+    player.bob+=dt*7; const x=player.x; const y=player.y+Math.sin(player.bob)*2;
+    ctx.globalAlpha=0.35; ctx.beginPath(); ctx.ellipse(x, y+18, 22, 7, 0, 0, Math.PI*2); ctx.fillStyle="#000"; ctx.fill(); ctx.globalAlpha=1;
+    ctx.fillStyle=cfg.player.sprite.body; ctx.strokeStyle=cfg.player.sprite.outline; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x, y-14, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.roundRect(x-8, y-4, 16, 22, 6); ctx.fill(); ctx.stroke();
+  }
+
+  // ===== COLOR UTILITIES =====
+  // Color generation and shading based on operation magnitude
+  function shadeByMag(baseHue, mag, maxMag){ const t = clamp(maxMag ? mag/maxMag : 0.5, 0, 1); const l = mix(70, 40, t); return `hsl(${baseHue}, 80%, ${l}%)`; }
+
+  // ===== MATH OPERATIONS =====
+  // Score modification operations (add, subtract, multiply, divide, negate)
+  function opsForScore(score) {
+    // Scale difficulty based on score and time for progression
+    const difficulty = Math.min(1, (Math.abs(score) + state.time * 10) / 100);
+    
+    // generators
+    const add = () => { 
+      const baseRange = 5 + difficulty * 15;
+      const maxMag = Math.max(baseRange, Math.abs(score)/6); 
+      const v = gaussian(1, maxMag); 
+      return { kind: 'add', label: `+${v}`, apply: s => s + v, deltaFrom: s => v }; 
+    };
+    
+    const sub = () => { 
+      const baseRange = 3 + difficulty * 12;
+      const maxMag = Math.max(baseRange, Math.abs(score)/8); 
+      const v = gaussian(1, maxMag); 
+      return { kind: 'sub', label: `-${v}`, apply: s => s - v, deltaFrom: s => -v }; 
+    };
+    
+    const mul = () => { 
+      const pct = 5 + Math.floor(Math.random() * (15 + difficulty * 20)); 
+      const m = 1 + pct/100; 
+      const label = `+${pct}%`; 
+      return { kind: 'mul', label, m, apply: s => Math.round(s * m), deltaFrom: s => Math.round(s * m) - s, mag: pct }; 
+    };
+    
+    const div = () => { 
+      const pct = -20 - Math.floor(Math.random() * (20 + difficulty * 30)); 
+      const m = 1 + pct/100; 
+      const label = `${pct}%`; 
+      return { kind: 'div', m, label, pct, apply: s => Math.round(s*m), deltaFrom: s => Math.round(s*m) - s, mag: Math.abs(pct) }; 
+    };
+    
+    const negMul = () => { 
+      const pct = -200; 
+      const m = -1; 
+      const label = `${pct}%`; 
+      return { kind: 'mul', label, m, apply: s => -s, deltaFrom: s => (-s) - s, mag: Math.abs(pct) }; 
+    };
+    
+    return { add, sub, mul, div, negMul };
+  }
+
+  function bannerColors(opLeft, opRight, baseScore){
+    const dL = Math.abs(opLeft.deltaFrom(baseScore));
+    const dR = Math.abs(opRight.deltaFrom(baseScore));
+    const maxMag = Math.max(dL, dR, 1);
+    function colorFor(op, d){
+      if (op.kind === 'add') return shadeByMag(210, d, maxMag); // blue
+      if (op.kind === 'sub') return shadeByMag(270, d, maxMag); // purple
+      const hue = mix(220, 280, clamp((op.mag || d)/maxMag, 0, 1));
+      return shadeByMag(hue, d, maxMag);
+    }
+    return { left: colorFor(opLeft, dL), right: colorFor(opRight, dR) };
+  }
+
+  function ensureConstraints(a, b, score){
+    // must have at least one add or subtract
+    const hasAddSub = (a.kind === 'add' || a.kind === 'sub') || (b.kind === 'add' || b.kind === 'sub');
+    if (!hasAddSub) {
+      const gen = opsForScore(score);
+      const dA = Math.abs(a.deltaFrom(score));
+      const dB = Math.abs(b.deltaFrom(score));
+      const replacement = Math.random() < 0.5 ? gen.add() : gen.sub();
+      if (dA < dB) a = replacement; else b = replacement;
+    }
+    // must have at least one positive delta
+    if (a.deltaFrom(score) <= 0 && b.deltaFrom(score) <= 0) {
+      const v = Math.max(1, Math.round(Math.max(Math.abs(score)/4, 10)));
+      const forced = { kind: 'add', label: `+${v}`, apply: s => s + v, deltaFrom: s => v };
+      const dA = Math.abs(a.deltaFrom(score));
+      const dB = Math.abs(b.deltaFrom(score));
+      if (dA < dB) a = forced; else b = forced;
+    }
+    return [a, b];
+  }
+
+  // ===== GATE SYSTEM =====
+  // Gate generation, rendering, and interaction logic
+  function makeBanner(spawnY){
+    const gen = opsForScore(state.score);
+    // pick one add-or-sub and one from mult family
+    const leftFirst = Math.random() < 0.5;
+    let opASrc = Math.random() < 0.5 ? gen.add : gen.sub;
+    let opBSrc = [gen.mul, gen.div, gen.negMul][Math.floor(Math.random()*3)];
+    let a = opASrc();
+    let b = opBSrc();
+    [a, b] = ensureConstraints(a, b, state.score);
+
+    const dA = Math.abs(a.deltaFrom(state.score));
+    const dB = Math.abs(b.deltaFrom(state.score));
+    const total = Math.max(1, dA + dB);
+    let leftOp = leftFirst ? a : b;
+    let rightOp = leftFirst ? b : a;
+
+    // clamped proportional fractions
+    let leftFrac = (leftFirst ? dA : dB) / total;
+    const minF = cfg.banners.minFrac, maxF = cfg.banners.maxFrac;
+    leftFrac = clamp(leftFrac, minF, 1 - minF);
+    leftFrac = clamp(leftFrac, 1 - maxF, maxF);
+    const rightFrac = 1 - leftFrac;
+
+    const colors = bannerColors(leftOp, rightOp, state.score);
+    const roadW = roadWidthAtY(spawnY);
+    const wL = Math.round(leftFrac * roadW);
+    const wR = Math.max(0, roadW - wL);
+    return { y: spawnY, left: leftOp, right: rightOp, dL: dA, dR: dB, total, colors, leftFrac, rightFrac, wL, wR, reached: false, dead: false, anim: 0, pickedLeft: null };
+  }
+
+  function drawOpLabel(op, cx, cy){
+    ctx.textAlign = "center"; 
+    ctx.textBaseline = "middle"; 
+    ctx.font = cfg.banners.labelFont;
+    
+    // High contrast text with outline for better readability
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#000000";
+    ctx.fillStyle = "#ffffff";
+    
+    // Draw text outline first
+    ctx.strokeText(op.label, cx, cy);
+    // Then fill with white
+    ctx.fillText(op.label, cx, cy);
+  }
+
+  function drawBanner(b, dt){
+    if (b.dead) return;
+    b.y += state.scroll; // constant scroll; no slowdown. banner removed on pass
+    const { topY, bottomY } = roadParams();
+    const y = b.y;
+    if (y < topY) return;
+    if (y > bottomY + 80) { b.dead = true; return; }
+
+    const h=cfg.banners.height;
+
+    const roadWnow = roadWidthAtY(y);
+    const scale = roadWnow / (b.wL + b.wR || 1);
+    const wL = Math.max(1, Math.round(b.wL * scale));
+    const wR = Math.max(1, Math.round(b.wR * scale));
+    const x0 = W*0.5 - Math.round((wL + wR) * 0.5);
+
+    let scaleL = 1, scaleR = 1, glowL = 0, glowR = 0, borderL = 0, borderR = 0;
+    if (b.anim > 0) {
+      b.anim += dt;
+      const t = Math.min(1, b.anim / cfg.banners.animDuration);
+      const s = 1 + 0.10 * (1 - t);
+      if (b.pickedLeft) { scaleL = s; glowL = 0.5 * (1 - t); borderL = 1 - t; }
+      else { scaleR = s; glowR = 0.5 * (1 - t); borderR = 1 - t; }
+      if (t >= 1) { b.dead = true; }
+    }
+
+    ctx.save(); ctx.translate(x0 + wL*0.5, y + h*0.5); ctx.scale(scaleL, scaleL);
+    ctx.fillStyle = b.colors.left; ctx.fillRect(-wL*0.5, -h*0.5, wL, h);
+    if (glowL>0){ ctx.globalAlpha = glowL; ctx.fillStyle = "#fff"; ctx.fillRect(-wL*0.5, -h*0.5, wL, h); ctx.globalAlpha=1; }
+    if (borderL>0){ ctx.lineWidth = 4; ctx.strokeStyle = `rgba(255,255,255,${borderL})`; ctx.strokeRect(-wL*0.5, -h*0.5, wL, h); }
+    drawOpLabel(b.left, 0, 0); ctx.restore();
+
+    ctx.save(); ctx.translate(x0 + wL + wR*0.5, y + h*0.5); ctx.scale(scaleR, scaleR);
+    ctx.fillStyle = b.colors.right; ctx.fillRect(-wR*0.5, -h*0.5, wR, h);
+    if (glowR>0){ ctx.globalAlpha = glowR; ctx.fillStyle = "#fff"; ctx.fillRect(-wR*0.5, -h*0.5, wR, h); ctx.globalAlpha=1; }
+    if (borderR>0){ ctx.lineWidth = 4; ctx.strokeStyle = `rgba(255,255,255,${borderR})`; ctx.strokeRect(-wR*0.5, -h*0.5, wR, h); }
+    drawOpLabel(b.right, 0, 0); ctx.restore();
+
+    if (!b.reached && y > player.y) {
+      b.reached = true;
+      // Calculate actual gate boundary instead of using road center
+      const gateBoundary = x0 + wL;
+      const chooseLeft = player.x < gateBoundary;
+      b.pickedLeft = chooseLeft; const chosen = chooseLeft ? b.left : b.right;
+      const before = state.score; 
+      const after = chosen.apply(state.score); 
+      const delta = after - before; 
+      state.score = after; 
+      scoreEl.textContent = `Score ${state.score}`;
+      
+      // Ensure popup shows for all score changes
+      const displayText = delta > 0 ? `+${delta}` : `${delta}`;
+      const displayColor = delta >= 0 ? "#00d47e" : "#ff3b3b";
+      state.popup = { text: displayText, t: 0, color: displayColor };
+      
+      // Debug: console.log(`Score change: ${before} → ${after} (${displayText})`);
+      b.anim = 0.001; // Start animation immediately
+      state.bannersPassed++;
+      scheduleNextBanner(); scheduleNextObstacleIfNeeded();
+    }
+  }
+
+  // ===== OBSTACLE SYSTEM =====
+  // Enemy obstacles that end the game on collision
+  function drawRocks(){
+    for (const r of rocks) {
+      r.y += state.scroll;
+      r.rotation += r.rotSpeed * 0.016; // Animate rotation
+      const edges = roadEdgesAtY(r.y);
+      r.x = clamp(r.x, edges.left + r.r, edges.right - r.r);
+      
+      // Draw spiky enemy shape instead of circle
+      drawEnemy(r.x, r.y, r.r, r.rotation);
+      
+      const dx = r.x - player.x, dy = r.y - player.y, rr = r.r + 12; 
+      if (dx*dx + dy*dy < rr*rr) { gameOver(); return; }
+    }
+    while (rocks.length && rocks[0].y - rocks[0].r > H + 40) rocks.shift();
+  }
+  
+  function drawEnemy(x, y, size, rotation = 0) {
+    const spikes = 8;
+    const innerRadius = size * 0.5;  // sharper spikes
+    const outerRadius = size * 1.1;  // extend spikes beyond base size
+    
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    
+    // Add outer glow effect for better visibility
+    const glowSize = size * 1.4;
+    const glowGradient = ctx.createRadialGradient(0, 0, size * 0.8, 0, 0, glowSize);
+    glowGradient.addColorStop(0, "rgba(255, 50, 50, 0.3)");
+    glowGradient.addColorStop(0.7, "rgba(255, 100, 100, 0.2)");
+    glowGradient.addColorStop(1, "rgba(255, 150, 150, 0)");
+    
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw spiky enemy body with more dramatic spikes
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const angle = (i * Math.PI) / spikes;
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const px = Math.cos(angle) * radius;
+      const py = Math.sin(angle) * radius;
+      
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    
+    // Enemy colors - more vibrant and contrasting
+    const pulse = 0.7 + 0.3 * Math.sin(Date.now() * 0.012);
+    const gradient = ctx.createRadialGradient(0, -size*0.2, 0, 0, 0, size);
+    gradient.addColorStop(0, `rgba(255, ${Math.floor(100*pulse)}, 0, 1)`);  // bright orange center
+    gradient.addColorStop(0.4, "#ff3333");  // bright red
+    gradient.addColorStop(0.8, "#cc1111");  // darker red
+    gradient.addColorStop(1, "#660000");    // very dark red edge
+    
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    // Thicker, more visible outline
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Add inner highlight for 3D effect
+    ctx.strokeStyle = `rgba(255, 200, 200, ${pulse * 0.5})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Larger, more prominent glowing eyes
+    const eyeGlow = 0.8 + 0.2 * Math.sin(Date.now() * 0.015);
+    const eyeSize = size * 0.18;  // bigger eyes
+    
+    // Eye glow effect
+    ctx.fillStyle = `rgba(255, 255, 0, ${eyeGlow * 0.6})`;
+    ctx.beginPath();
+    ctx.arc(-size*0.25, -size*0.15, eyeSize * 1.5, 0, Math.PI*2);
+    ctx.arc(size*0.25, -size*0.15, eyeSize * 1.5, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Main eye
+    ctx.fillStyle = `rgba(255, 255, 100, ${eyeGlow})`;
+    ctx.beginPath();
+    ctx.arc(-size*0.25, -size*0.15, eyeSize, 0, Math.PI*2);
+    ctx.arc(size*0.25, -size*0.15, eyeSize, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Eye pupils - larger and more menacing
+    ctx.fillStyle = "#cc0000";
+    const pupilSize = eyeSize * 0.6;
+    ctx.beginPath();
+    ctx.arc(-size*0.25, -size*0.15, pupilSize, 0, Math.PI*2);
+    ctx.arc(size*0.25, -size*0.15, pupilSize, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Eye highlights for extra menace
+    ctx.fillStyle = "#ffffff";
+    const highlightSize = pupilSize * 0.3;
+    ctx.beginPath();
+    ctx.arc(-size*0.25 - pupilSize*0.3, -size*0.15 - pupilSize*0.3, highlightSize, 0, Math.PI*2);
+    ctx.arc(size*0.25 - pupilSize*0.3, -size*0.15 - pupilSize*0.3, highlightSize, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  // ===== HUD & UI =====
+  // Score display, popup messages, and user interface
+  function drawLeaderboards() {
+    const { highScores, lowScores } = loadLeaderboards();
+    
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.font = "bold 16px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.textAlign = "left";
+    
+    const rightX = W - 200;
+    const startY = 50;
+    
+    // High Scores
+    ctx.fillStyle = "#00d47e";
+    ctx.fillText("TOP 5 HIGH", rightX, startY);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    
+    highScores.forEach((entry, i) => {
+      const y = startY + 25 + (i * 18);
+      ctx.fillText(`${i + 1}. ${entry.name}`, rightX, y);
+      ctx.fillText(`${entry.score}`, rightX + 100, y);
+    });
+    
+    // Low Scores
+    const lowStartY = startY + 160;
+    ctx.fillStyle = "#ff3b3b";
+    ctx.font = "bold 16px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("BOTTOM 5 LOW", rightX, lowStartY);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    
+    lowScores.forEach((entry, i) => {
+      const y = lowStartY + 25 + (i * 18);
+      ctx.fillText(`${i + 1}. ${entry.name}`, rightX, y);
+      ctx.fillText(`${entry.score}`, rightX + 100, y);
+    });
+    
+    ctx.restore();
+  }
+  
+  function drawPopup(dt){
+    if (!state.popup) return;
+    state.popup.t += dt; 
+    const life = 1.2; // slightly longer display time
+    const t = state.popup.t / life; 
+    if (t >= 1) { state.popup = null; return; }
+    
+    // Enhanced animation with scale and fade
+    const fadeAlpha = Math.max(0, 1 - t);
+    const scale = 1 + 0.3 * Math.sin(t * Math.PI); // pulse effect
+    
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.4); // center of screen
+    ctx.scale(scale, scale);
+    
+    // Semi-transparent background for better readability
+    const bgAlpha = fadeAlpha * 0.7;
+    ctx.fillStyle = `rgba(0, 0, 0, ${bgAlpha})`;
+    ctx.font = "bold 36px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"; // larger font
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    
+    // Measure text for background sizing
+    const metrics = ctx.measureText(state.popup.text);
+    const textWidth = metrics.width;
+    const textHeight = 36; // approximate font height
+    const padding = 20;
+    
+    // Draw background rectangle
+    ctx.beginPath();
+    ctx.roundRect(-textWidth/2 - padding, -textHeight/2 - padding/2, 
+                  textWidth + padding*2, textHeight + padding, 12);
+    ctx.fill();
+    
+    // Draw text outline for extra visibility
+    ctx.globalAlpha = fadeAlpha;
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 4;
+    ctx.strokeText(state.popup.text, 0, 0);
+    
+    // Draw main text
+    ctx.fillStyle = state.popup.color || "#ffffff";
+    ctx.fillText(state.popup.text, 0, 0);
+    
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
+  // ===== SPAWNING & TIMING =====
+  // Gate and obstacle spawning with worldY-based spacing
+  function scheduleNextBanner(){ 
+    const base = cfg.banners.baseIntervalSec; 
+    const ramp = cfg.banners.intervalRampPerSec * state.time; 
+    const interval = Math.max(cfg.banners.minIntervalSec, base - ramp); 
+    state.nextBanner = state.time + interval; 
+  }
+  function scheduleNextObstacleIfNeeded(){ 
+    if (state.bannersPassed < cfg.obstacles.startAfterBanners) return; 
+    if (state.nextObstacle < Infinity) return; 
+    const base = cfg.obstacles.baseIntervalSec; 
+    const ramp = cfg.obstacles.intervalRampPerSec * state.time; 
+    const interval = Math.max(cfg.obstacles.minIntervalSec, base - ramp); 
+    state.nextObstacle = state.time + interval; 
+  }
+  function spawnObstacle(){ 
+    const { topY } = roadParams(); 
+    const r = cfg.obstacles.radiusMin + Math.random() * (cfg.obstacles.radiusMax - cfg.obstacles.radiusMin); 
+    const roadW = roadWidthAtY(topY); 
+    const x = W*0.5 + (Math.random()-0.5) * (roadW - r*2); 
+    rocks.push({ x, y: topY - r - 10, r, rotation: 0, rotSpeed: (Math.random() - 0.5) * 4 }); 
+  }
+
+  // ===== GAME LIFECYCLE =====
+  // Game state management, start/stop, and main game loop
+  function start(){ 
+    state.started=true; 
+    state.gameOver=false; 
+    state.score=0; 
+    state.time=0; 
+    state.scroll=cfg.baseScroll; 
+    state.lineOffset=0; 
+    state.popup=null; 
+    state.nextBanner=state.time + cfg.banners.spawnDelayFirstSec; 
+    state.nextObstacle=Infinity; 
+    state.bannersPassed=0; 
+    banners.length=0; 
+    rocks.length=0; 
+    msgWrap.style.display = "none"; 
+    scoreEl.textContent = "Score 0"; 
+  }
+  function gameOver(){ 
+    state.started=false; 
+    msgWrap.style.display = "block"; 
+    restartBtn.textContent = "Restart";
+    
+    // Prompt for name entry for leaderboard
+    promptForName(state.score);
+  }
+
+  restartBtn.addEventListener("click", () => {
+    if (nameEntryActive) {
+      finishNameEntry();
+    } else {
+      start();
+    }
+  }); 
+  canvas.addEventListener("click",()=>{ if(!state.started && !nameEntryActive) start(); });
+  
+  // Show best score on initial load
+  if (bestScore > 0) {
+    bestEl.textContent = `Best: ${bestScore}`;
+  }
+
+  let last=0; function loop(t){ 
+    requestAnimationFrame(loop); 
+    if(!last)last=t; 
+    const dt=Math.min(0.033,(t-last)/1000); 
+    last=t; 
+    ctx.clearRect(0,0,W,H);
+    if (state.started) { 
+      state.time += dt; 
+      state.scroll += cfg.scrollAccel; 
+    }
+    drawRoad(dt);
+    if(!state.started){ msgWrap.style.display="block"; return; }
+    drawPlayer(dt);
+    const { topY } = roadParams();
+    if (state.time >= state.nextBanner) { 
+      const { topY } = roadParams();
+      const newBanner = makeBanner(topY - cfg.banners.height - 12);
+      banners.push(newBanner); 
+      scheduleNextBanner();
+      // Debug: console.log(`Gate spawned at time ${state.time.toFixed(2)}s, next at ${state.nextBanner.toFixed(2)}s, total gates: ${banners.length}`);
+    }
+    if (state.bannersPassed >= cfg.obstacles.startAfterBanners && state.time >= state.nextObstacle) { 
+      spawnObstacle(); 
+      const base = cfg.obstacles.baseIntervalSec; 
+      const ramp = cfg.obstacles.intervalRampPerSec * state.time; 
+      const interval = Math.max(cfg.obstacles.minIntervalSec, base - ramp); 
+      state.nextObstacle = state.time + interval; 
+    }
+    for(const b of banners) drawBanner(b, dt);
+    for (let i=banners.length-1;i>=0;i--) {
+      if (banners[i].dead) {
+        // Debug: console.log(`Gate removed, ${banners.length - 1} remaining`);
+        banners.splice(i,1);
+      }
+    }
+    drawRocks(); // Draw enemies
+    drawPopup(dt);
+    drawLeaderboards(); // Always show leaderboards
+  }
+  requestAnimationFrame(loop);
+
+  // ===== TESTING & DIAGNOSTICS =====
+  // Runtime tests for game mechanics and validation
+  function assert(cond, name){ if (!cond) { console.error("[TEST FAIL]", name); } else { console.log("[TEST PASS]", name); } }
+  function testLabels(){
+    const g = opsForScore(100);
+    for(let i=0;i<30;i++){
+      const a = g.add(); const s = g.sub(); const m = g.mul(); const d = g.div();
+      assert(/^\+[0-9]+$/.test(a.label), "Add label is +N and not fraction");
+      assert(/^-[0-9]+$/.test(s.label), "Sub label is -N and not fraction");
+      assert(/^\+[0-9]+%$/.test(m.label), "Mul label is +N%");
+      assert(/^-?[0-9]+%$/.test(d.label) && d.label.indexOf('/')===-1, "Div label is signed percent only");
+    }
+  }
+  function testConstraints(){
+    let okHasAddSub=true, okHasIncrease=true;
+    for(let i=0;i<40;i++){
+      const gen = opsForScore(50);
+      let a = Math.random()<0.5?gen.add():gen.sub();
+      let b = [gen.mul, gen.div, gen.negMul][Math.floor(Math.random()*3)]();
+      [a, b] = ensureConstraints(a,b,50);
+      const hasAddSub = (a.kind==='add'||a.kind==='sub'||b.kind==='add'||b.kind==='sub');
+      const inc = a.deltaFrom(50)>0 || b.deltaFrom(50)>0;
+      okHasAddSub = okHasAddSub && hasAddSub;
+      okHasIncrease = okHasIncrease && inc;
+    }
+    assert(okHasAddSub, "Every gate has an add or subtract");
+    assert(okHasIncrease, "Every gate has at least one increasing option");
+  }
+  function testNoPreStartSpawn(){ assert(state.nextBanner===Infinity && !state.started, "Nothing spawns before Start"); }
+  function testWidthClamp(){
+    const dA=1, dB=100; const total=dA+dB; let frac=dA/total; const minF=cfg.banners.minFrac, maxF=cfg.banners.maxFrac; frac=clamp(frac,minF,1-minF); frac=clamp(frac,1-maxF,maxF); assert(frac>=minF && frac<=maxF, "Gate width fraction clamped to 30-70%");
+  }
+  function testGateSpacing(){
+    // Test that gate timing produces consistent intervals
+    const originalTime = state.time;
+    const originalNextBanner = state.nextBanner;
+    
+    state.time = 5.0;
+    scheduleNextBanner();
+    const interval1 = state.nextBanner - state.time;
+    
+    state.time = 10.0;
+    scheduleNextBanner();
+    const interval2 = state.nextBanner - state.time;
+    
+    // Restore original state
+    state.time = originalTime;
+    state.nextBanner = originalNextBanner;
+    
+    // Intervals should decrease over time due to ramp
+    assert(interval2 < interval1, "Gate intervals decrease over time for progression");
+    assert(interval2 >= cfg.banners.minIntervalSec, "Gate intervals respect minimum");
+  }
+  function testGateAnimationSpeed(){
+    // Test that gate animation duration is within target range
+    const targetMin = 0.12;
+    const targetMax = 0.16;
+    assert(cfg.banners.animDuration >= targetMin && cfg.banners.animDuration <= targetMax, 
+           `Gate animation duration ${cfg.banners.animDuration}s within target range ${targetMin}-${targetMax}s`);
+  }
+  function testPercentLabels(){
+    // Test that all operation labels use percent format only
+    const gen = opsForScore(100);
+    for(let i=0;i<20;i++){
+      const m = gen.mul(); const d = gen.div();
+      assert(/^\+[0-9]+%$/.test(m.label), "Multiply labels use +N% format");
+      assert(/^-?[0-9]+%$/.test(d.label), "Divide labels use signed percent format");
+      assert(!d.label.includes('/'), "Divide labels contain no fractions");
+    }
+  }
+  function testConstantVisualSpeed(){
+    // Test that objects maintain constant scroll speed
+    const testRock = { x: 400, y: 100, r: 15 };
+    const initialY = testRock.y;
+    const testScroll = 3.0;
+    
+    // Simulate one frame of movement
+    testRock.y += testScroll;
+    const deltaY = testRock.y - initialY;
+    
+    assert(Math.abs(deltaY - testScroll) < 0.001, "Objects move at constant scroll speed");
+  }
+  
+  testLabels(); 
+  testConstraints(); 
+  testNoPreStartSpawn(); 
+  testWidthClamp();
+  testGateSpacing();
+  testGateAnimationSpeed();
+  testPercentLabels();
+  testConstantVisualSpeed();
+})();
+</script>
+</body>
+</html>

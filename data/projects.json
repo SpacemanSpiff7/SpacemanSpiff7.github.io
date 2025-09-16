@@ -2,7 +2,7 @@
   "featured": [
     "public-art-submission",
     "dodgers-notifications",
-    "shopping-research"
+    "running-game"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",
@@ -87,7 +87,7 @@
     {
       "id": "public-art-submission",
       "title": "Public Art Submission Form",
-      "shortDescription": "For when you see something cool and want to help me witha personal project.",
+      "shortDescription": "For when you see something cool and want to help me with a personal project.",
       "description": "A mobile-friendly form that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Also help me collect data for my public art map project.",
       "category": "Public Art",
       "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center",
@@ -112,6 +112,22 @@
         {
           "text": "View Map",
           "url": "tools/location-map.html", 
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "running-game",
+      "title": "Running Game",
+      "shortDescription": "A simple running game that tests your reflexes and patience",
+      "description": "A simple running game that tests your reflexes and patience. Built with JavaScript.",
+      "category": "Public Art",
+      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Running", "Game", "JavaScript"],
+      "actions": [
+        {
+          "text": "Play Game",
+          "url": "tools/running-game.html", 
           "type": "primary"
         }
       ]
