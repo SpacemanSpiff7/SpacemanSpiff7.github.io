@@ -86,8 +86,8 @@
     canvasWidth: 800,
     canvasHeight: 600,
     road: {
-      widthBottom: 740,
-      widthTop: 360,
+      widthBottomRatio: 0.925, // 92.5% of screen width (was 740/800)
+      widthTopRatio: 0.45,     // 45% of screen width (was 360/800)
       topY: 0.10,
       dashLen: 34,
       dashGap: 26,
@@ -99,7 +99,7 @@
     player: { speed: 800, sprite: { body: "#f4f6f9", outline: "#0b0d12" } },
     input: { touchSensitivity: 1.5 },
     banners: {
-      height: 85,               // taller gates for better visibility
+      heightRatio: 0.1063,      // ~85px at 800px width, scales with screen
       spawnDelayFirstSec: 1.2,
       baseIntervalSec: 2.2,      // slightly faster for better pacing
       intervalRampPerSec: 0.002,  // more aggressive ramp for progression
@@ -114,8 +114,8 @@
       baseIntervalSec: 2.2,
       intervalRampPerSec: 0.001,
       minIntervalSec: 0.9,
-      radiusMin: 22,        // increased from 14 for better visibility
-      radiusMax: 38         // increased from 26 for more imposing presence
+      radiusMinRatio: 0.0275,  // ~22px at 800px width
+      radiusMaxRatio: 0.0475   // ~38px at 800px width
     }
   };
 
@@ -304,7 +304,7 @@
 
   // ===== ROAD GEOMETRY =====
   // Perspective road calculations and width interpolation
-  function roadParams() { const topY = H * cfg.road.topY; const bottomY = H; const wTop = cfg.road.widthTop; const wBottom = cfg.road.widthBottom; return { topY, bottomY, wTop, wBottom }; }
+  function roadParams() { const topY = H * cfg.road.topY; const bottomY = H; const wTop = W * cfg.road.widthTopRatio; const wBottom = W * cfg.road.widthBottomRatio; return { topY, bottomY, wTop, wBottom }; }
   function roadWidthAtY(y) { const { topY, bottomY, wTop, wBottom } = roadParams(); const t = clamp((y - topY) / (bottomY - topY), 0, 1); return wTop + (wBottom - wTop) * t; }
   function roadEdgesAtY(y) { const w = roadWidthAtY(y); return { left: W * 0.5 - w * 0.5, right: W * 0.5 + w * 0.5 }; }
 
@@ -469,7 +469,7 @@
     if (y < topY) return;
     if (y > bottomY + 80) { b.dead = true; return; }
 
-    const h=cfg.banners.height;
+    const h = W * cfg.banners.heightRatio;
 
     const roadWnow = roadWidthAtY(y);
     const scale = roadWnow / (b.wL + b.wR || 1);
@@ -741,7 +741,9 @@
   }
   function spawnObstacle(){ 
     const { topY } = roadParams(); 
-    const r = cfg.obstacles.radiusMin + Math.random() * (cfg.obstacles.radiusMax - cfg.obstacles.radiusMin); 
+    const rMin = W * cfg.obstacles.radiusMinRatio;
+    const rMax = W * cfg.obstacles.radiusMaxRatio;
+    const r = rMin + Math.random() * (rMax - rMin); 
     const roadW = roadWidthAtY(topY); 
     const x = W*0.5 + (Math.random()-0.5) * (roadW - r*2); 
     rocks.push({ x, y: topY - r - 10, r, rotation: 0, rotSpeed: (Math.random() - 0.5) * 4 }); 
@@ -804,7 +806,8 @@
     const { topY } = roadParams();
     if (state.time >= state.nextBanner) { 
       const { topY } = roadParams();
-      const newBanner = makeBanner(topY - cfg.banners.height - 12);
+      const bannerHeight = W * cfg.banners.heightRatio;
+      const newBanner = makeBanner(topY - bannerHeight - 12);
       banners.push(newBanner); 
       scheduleNextBanner();
       // Debug: console.log(`Gate spawned at time ${state.time.toFixed(2)}s, next at ${state.nextBanner.toFixed(2)}s, total gates: ${banners.length}`);
