@@ -36,7 +36,156 @@
     /* Hide score during gameplay on mobile for cleaner UI */
     @media (max-width: 768px) {
       #score { display: none; }
-      body.game-over #score { display: block; }
+      body.game-over #score { display: block; position: relative; z-index: 5; }
+      
+      /* Ensure score is visible in game over message on mobile */
+      body.game-over #msg { padding-top: 60px; }
+      body.game-over #score { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); }
+    }
+    
+    /* Settings UI */
+    #settingsBtn { 
+      position: absolute; 
+      top: 10px; 
+      right: 10px; 
+      width: 40px; 
+      height: 40px; 
+      background: rgba(255,255,255,0.1); 
+      border: 2px solid rgba(255,255,255,0.2); 
+      border-radius: 8px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 20px; 
+      color: #ffffff; 
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+    #settingsBtn:hover { 
+      background: rgba(255,255,255,0.2); 
+      border-color: rgba(255,255,255,0.4); 
+    }
+    
+    #settingsDrawer { 
+      position: fixed; 
+      top: 0; 
+      right: -400px; 
+      width: 380px; 
+      height: 100vh; 
+      background: rgba(20, 24, 35, 0.95); 
+      backdrop-filter: blur(10px); 
+      border-left: 2px solid rgba(255,255,255,0.1); 
+      z-index: 20; 
+      transition: right 0.3s ease; 
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #settingsDrawer.open { right: 0; }
+    
+    .settings-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 20px; 
+      padding-bottom: 15px; 
+      border-bottom: 1px solid rgba(255,255,255,0.1); 
+    }
+    .settings-header h2 { 
+      margin: 0; 
+      color: #ffffff; 
+      font-size: 24px; 
+      font-weight: 700; 
+    }
+    
+    #closeSettings { 
+      background: none; 
+      border: none; 
+      color: #ffffff; 
+      font-size: 24px; 
+      cursor: pointer; 
+      padding: 5px; 
+    }
+    
+    .settings-section { 
+      margin-bottom: 25px; 
+    }
+    .settings-section h3 { 
+      color: #00d47e; 
+      font-size: 16px; 
+      font-weight: 600; 
+      margin: 0 0 10px 0; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px; 
+    }
+    
+    .setting-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 12px; 
+      padding: 8px 0; 
+    }
+    .setting-label { 
+      color: #ffffff; 
+      font-size: 14px; 
+      font-weight: 500; 
+      flex: 1; 
+    }
+    .setting-desc { 
+      color: #888; 
+      font-size: 12px; 
+      margin-top: 2px; 
+    }
+    
+    .setting-input { 
+      background: rgba(255,255,255,0.1); 
+      border: 1px solid rgba(255,255,255,0.2); 
+      border-radius: 6px; 
+      color: #ffffff; 
+      padding: 6px 10px; 
+      width: 80px; 
+      text-align: center; 
+      font-size: 14px; 
+    }
+    .setting-input:focus { 
+      outline: none; 
+      border-color: #00d47e; 
+      background: rgba(255,255,255,0.15); 
+    }
+    
+    .settings-actions { 
+      display: flex; 
+      gap: 10px; 
+      margin-top: 30px; 
+      padding-top: 20px; 
+      border-top: 1px solid rgba(255,255,255,0.1); 
+    }
+    .settings-btn { 
+      flex: 1; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 14px; 
+      transition: all 0.2s ease; 
+    }
+    .apply-btn { 
+      background: #00d47e; 
+      color: #ffffff; 
+    }
+    .apply-btn:hover { 
+      background: #00b86b; 
+    }
+    .reset-btn { 
+      background: rgba(255,255,255,0.1); 
+      color: #ffffff; 
+      border: 1px solid rgba(255,255,255,0.2); 
+    }
+    .reset-btn:hover { 
+      background: rgba(255,255,255,0.2); 
     }
     #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: clamp(16px, 4vw, 24px); background: rgba(0,0,0,0.7); padding: 16px 20px; border-radius: 16px; display: none; box-shadow: 0 6px 24px rgba(0,0,0,0.6); z-index: 3; width: 400px; max-width: 90vw; }
     #btn { margin-top: 10px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 16px; }
@@ -49,6 +198,13 @@
       #msgText { font-size: clamp(14px, 3.5vw, 20px); }
       #btn { padding: 12px 24px; font-size: 18px; }
       #nameInput { font-size: 28px; width: 180px; padding: 10px 14px; }
+      
+      /* Settings drawer mobile adjustments */
+      #settingsDrawer { width: 100vw; right: -100vw; }
+      #settingsDrawer.open { right: 0; }
+      .setting-input { width: 70px; font-size: 12px; }
+      .setting-label { font-size: 13px; }
+      .setting-desc { font-size: 11px; }
     }
   </style>
 </head>
@@ -76,6 +232,147 @@
    <div id="wrap" class="with-nav">
     <canvas id="game" aria-label="Runner Math" role="img"></canvas>
     <div id="ui"><div id="score">Score 0</div></div>
+    
+    <!-- Settings Button -->
+    <button id="settingsBtn">⚙️</button>
+    
+    <!-- Settings Drawer -->
+    <div id="settingsDrawer">
+      <div class="settings-header">
+        <h2>Game Settings</h2>
+        <button id="closeSettings">×</button>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Gate Difficulty</h3>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Starting Gate Interval</div>
+            <div class="setting-desc">Time between gates at start (seconds)</div>
+          </div>
+          <input type="number" class="setting-input" id="gateBaseInterval" step="0.1" min="0.5" max="5.0">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Difficulty Ramp Speed</div>
+            <div class="setting-desc">How fast gates get closer together</div>
+          </div>
+          <input type="number" class="setting-input" id="gateRampSpeed" step="0.001" min="0.001" max="0.01">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Minimum Gate Interval</div>
+            <div class="setting-desc">Fastest possible gate spacing (seconds)</div>
+          </div>
+          <input type="number" class="setting-input" id="gateMinInterval" step="0.1" min="0.3" max="2.0">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">First Gate Delay</div>
+            <div class="setting-desc">Delay before first gate appears</div>
+          </div>
+          <input type="number" class="setting-input" id="gateFirstDelay" step="0.1" min="0.5" max="3.0">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Game Speed</h3>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Starting Scroll Speed</div>
+            <div class="setting-desc">Initial game speed</div>
+          </div>
+          <input type="number" class="setting-input" id="baseScroll" step="0.1" min="1.0" max="10.0">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Speed Acceleration</div>
+            <div class="setting-desc">How fast the game speeds up</div>
+          </div>
+          <input type="number" class="setting-input" id="scrollAccel" step="0.0001" min="0.0001" max="0.002">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Obstacles</h3>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Start After Gates</div>
+            <div class="setting-desc">Gates passed before obstacles appear</div>
+          </div>
+          <input type="number" class="setting-input" id="obstacleStartAfter" step="1" min="1" max="10">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Obstacle Interval</div>
+            <div class="setting-desc">Time between obstacles (seconds)</div>
+          </div>
+          <input type="number" class="setting-input" id="obstacleInterval" step="0.1" min="1.0" max="5.0">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Obstacle Size Min</div>
+            <div class="setting-desc">Smallest obstacle size (% of screen)</div>
+          </div>
+          <input type="number" class="setting-input" id="obstacleMinSize" step="0.005" min="0.01" max="0.05">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Obstacle Size Max</div>
+            <div class="setting-desc">Largest obstacle size (% of screen)</div>
+          </div>
+          <input type="number" class="setting-input" id="obstacleMaxSize" step="0.005" min="0.02" max="0.08">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Controls</h3>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Player Speed</div>
+            <div class="setting-desc">How fast the runner moves left/right</div>
+          </div>
+          <input type="number" class="setting-input" id="playerSpeed" step="50" min="200" max="1500">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Touch Sensitivity</div>
+            <div class="setting-desc">Mobile touch responsiveness</div>
+          </div>
+          <input type="number" class="setting-input" id="touchSensitivity" step="0.1" min="0.5" max="3.0">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Visual</h3>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Road Width</div>
+            <div class="setting-desc">Road width at bottom (% of screen)</div>
+          </div>
+          <input type="number" class="setting-input" id="roadWidth" step="0.05" min="0.5" max="0.95">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Gate Height</div>
+            <div class="setting-desc">Gate height (% of screen)</div>
+          </div>
+          <input type="number" class="setting-input" id="gateHeight" step="0.01" min="0.05" max="0.2">
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">Gate Animation Speed</div>
+            <div class="setting-desc">How fast gates disappear (seconds)</div>
+          </div>
+          <input type="number" class="setting-input" id="gateAnimSpeed" step="0.01" min="0.05" max="0.3">
+        </div>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="settings-btn reset-btn" id="resetSettings">Reset to Default</button>
+        <button class="settings-btn apply-btn" id="applySettings">Apply Settings</button>
+      </div>
+    </div>
   </div>
   <div id="msg">
     <div id="msgText">Runner Math</div>
@@ -107,9 +404,9 @@
     banners: {
       heightRatio: 0.1063,      // ~85px at 800px width, scales with screen
       spawnDelayFirstSec: 1.2,
-      baseIntervalSec: 2.2,      // slightly faster for better pacing
-      intervalRampPerSec: 0.002,  // more aggressive ramp for progression
-      minIntervalSec: 0.8,       // minimum for challenging gameplay
+      baseIntervalSec: 2.2,      // starting interval between gates
+      intervalRampPerSec: 0.004,  // faster decrease for progressive difficulty  
+      minIntervalSec: 0.6,       // tighter minimum for intense gameplay
       minFrac: 0.30,
       maxFrac: 0.70,
       animDuration: 0.14,        // faster animation for snappy feel
@@ -124,6 +421,95 @@
       radiusMaxRatio: 0.0475   // ~38px at 800px width
     }
   };
+
+  // ===== SETTINGS MANAGEMENT =====
+  // Settings persistence, UI management, and configuration updates
+  const defaultSettings = {
+    gateBaseInterval: cfg.banners.baseIntervalSec,
+    gateRampSpeed: cfg.banners.intervalRampPerSec,
+    gateMinInterval: cfg.banners.minIntervalSec,
+    gateFirstDelay: cfg.banners.spawnDelayFirstSec,
+    baseScroll: cfg.baseScroll,
+    scrollAccel: cfg.scrollAccel,
+    obstacleStartAfter: cfg.obstacles.startAfterBanners,
+    obstacleInterval: cfg.obstacles.baseIntervalSec,
+    obstacleMinSize: cfg.obstacles.radiusMinRatio,
+    obstacleMaxSize: cfg.obstacles.radiusMaxRatio,
+    playerSpeed: cfg.player.speed,
+    touchSensitivity: cfg.input.touchSensitivity,
+    roadWidth: cfg.road.widthBottomRatio,
+    gateHeight: cfg.banners.heightRatio,
+    gateAnimSpeed: cfg.banners.animDuration
+  };
+
+  function loadSettings() {
+    const saved = localStorage.getItem('runnerMathSettings');
+    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
+  }
+
+  function saveSettings(settings) {
+    localStorage.setItem('runnerMathSettings', JSON.stringify(settings));
+  }
+
+  function applySettings(settings) {
+    cfg.banners.baseIntervalSec = settings.gateBaseInterval;
+    cfg.banners.intervalRampPerSec = settings.gateRampSpeed;
+    cfg.banners.minIntervalSec = settings.gateMinInterval;
+    cfg.banners.spawnDelayFirstSec = settings.gateFirstDelay;
+    cfg.baseScroll = settings.baseScroll;
+    cfg.scrollAccel = settings.scrollAccel;
+    cfg.obstacles.startAfterBanners = settings.obstacleStartAfter;
+    cfg.obstacles.baseIntervalSec = settings.obstacleInterval;
+    cfg.obstacles.radiusMinRatio = settings.obstacleMinSize;
+    cfg.obstacles.radiusMaxRatio = settings.obstacleMaxSize;
+    cfg.player.speed = settings.playerSpeed;
+    cfg.input.touchSensitivity = settings.touchSensitivity;
+    cfg.road.widthBottomRatio = settings.roadWidth;
+    cfg.banners.heightRatio = settings.gateHeight;
+    cfg.banners.animDuration = settings.gateAnimSpeed;
+  }
+
+  function populateSettingsUI(settings) {
+    document.getElementById('gateBaseInterval').value = settings.gateBaseInterval;
+    document.getElementById('gateRampSpeed').value = settings.gateRampSpeed;
+    document.getElementById('gateMinInterval').value = settings.gateMinInterval;
+    document.getElementById('gateFirstDelay').value = settings.gateFirstDelay;
+    document.getElementById('baseScroll').value = settings.baseScroll;
+    document.getElementById('scrollAccel').value = settings.scrollAccel;
+    document.getElementById('obstacleStartAfter').value = settings.obstacleStartAfter;
+    document.getElementById('obstacleInterval').value = settings.obstacleInterval;
+    document.getElementById('obstacleMinSize').value = settings.obstacleMinSize;
+    document.getElementById('obstacleMaxSize').value = settings.obstacleMaxSize;
+    document.getElementById('playerSpeed').value = settings.playerSpeed;
+    document.getElementById('touchSensitivity').value = settings.touchSensitivity;
+    document.getElementById('roadWidth').value = settings.roadWidth;
+    document.getElementById('gateHeight').value = settings.gateHeight;
+    document.getElementById('gateAnimSpeed').value = settings.gateAnimSpeed;
+  }
+
+  function collectSettingsFromUI() {
+    return {
+      gateBaseInterval: parseFloat(document.getElementById('gateBaseInterval').value),
+      gateRampSpeed: parseFloat(document.getElementById('gateRampSpeed').value),
+      gateMinInterval: parseFloat(document.getElementById('gateMinInterval').value),
+      gateFirstDelay: parseFloat(document.getElementById('gateFirstDelay').value),
+      baseScroll: parseFloat(document.getElementById('baseScroll').value),
+      scrollAccel: parseFloat(document.getElementById('scrollAccel').value),
+      obstacleStartAfter: parseInt(document.getElementById('obstacleStartAfter').value),
+      obstacleInterval: parseFloat(document.getElementById('obstacleInterval').value),
+      obstacleMinSize: parseFloat(document.getElementById('obstacleMinSize').value),
+      obstacleMaxSize: parseFloat(document.getElementById('obstacleMaxSize').value),
+      playerSpeed: parseFloat(document.getElementById('playerSpeed').value),
+      touchSensitivity: parseFloat(document.getElementById('touchSensitivity').value),
+      roadWidth: parseFloat(document.getElementById('roadWidth').value),
+      gateHeight: parseFloat(document.getElementById('gateHeight').value),
+      gateAnimSpeed: parseFloat(document.getElementById('gateAnimSpeed').value)
+    };
+  }
+
+  // Load settings on startup
+  const currentSettings = loadSettings();
+  applySettings(currentSettings);
 
   // ===== CANVAS & UI SETUP =====
   // Canvas initialization, resizing, and DOM element references
@@ -182,7 +568,7 @@
 
   // ===== GAME STATE =====
   // Core game state, player position, active objects, and timing
-  const state={started:false,gameOver:false,score:0,time:0,scroll:cfg.baseScroll,lineOffset:0,popup:null,nextBanner:Infinity,nextObstacle:Infinity,bannersPassed:0};
+  const state={started:false,gameOver:false,score:0,time:0,scroll:cfg.baseScroll,lineOffset:0,popup:null,nextBanner:Infinity,nextObstacle:Infinity,bannersPassed:0,difficulty:0};
   
   // Leaderboard system
   function loadLeaderboards() {
@@ -530,7 +916,6 @@
       const displayColor = delta >= 0 ? "#00d47e" : "#ff3b3b";
       state.popup = { text: displayText, t: 0, color: displayColor };
       
-      // Debug: console.log(`Score change: ${before} → ${after} (${displayText})`);
       b.anim = 0.001; // Start animation immediately
       state.bannersPassed++;
       scheduleNextBanner(); scheduleNextObstacleIfNeeded();
@@ -738,12 +1123,15 @@
   }
 
   // ===== SPAWNING & TIMING =====
-  // Gate and obstacle spawning with worldY-based spacing
+  // Gate and obstacle spawning with progressive difficulty
   function scheduleNextBanner(){ 
     const base = cfg.banners.baseIntervalSec; 
     const ramp = cfg.banners.intervalRampPerSec * state.time; 
     const interval = Math.max(cfg.banners.minIntervalSec, base - ramp); 
-    state.nextBanner = state.time + interval; 
+    state.nextBanner = state.time + interval;
+    
+    // Store current difficulty level for potential UI feedback
+    state.difficulty = Math.min(1.0, (base - interval) / (base - cfg.banners.minIntervalSec));
   }
   function scheduleNextObstacleIfNeeded(){ 
     if (state.bannersPassed < cfg.obstacles.startAfterBanners) return; 
@@ -776,6 +1164,7 @@
     state.nextBanner=state.time + cfg.banners.spawnDelayFirstSec; 
     state.nextObstacle=Infinity; 
     state.bannersPassed=0; 
+    state.difficulty=0;
     banners.length=0; 
     rocks.length=0; 
     msgWrap.style.display = "none"; 
@@ -800,6 +1189,51 @@
     }
   }); 
   canvas.addEventListener("click",()=>{ if(!state.started && !nameEntryActive) start(); });
+
+  // Settings UI Event Handlers
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsDrawer = document.getElementById('settingsDrawer');
+  const closeSettingsBtn = document.getElementById('closeSettings');
+  const applySettingsBtn = document.getElementById('applySettings');
+  const resetSettingsBtn = document.getElementById('resetSettings');
+
+  // Initialize settings UI
+  populateSettingsUI(currentSettings);
+
+  settingsBtn.addEventListener('click', () => {
+    // End current game if active
+    if (state.started) {
+      gameOver();
+    }
+    settingsDrawer.classList.add('open');
+  });
+
+  closeSettingsBtn.addEventListener('click', () => {
+    settingsDrawer.classList.remove('open');
+  });
+
+  applySettingsBtn.addEventListener('click', () => {
+    const newSettings = collectSettingsFromUI();
+    applySettings(newSettings);
+    saveSettings(newSettings);
+    settingsDrawer.classList.remove('open');
+    
+    // Update UI to show settings were applied
+    msgText.textContent = "Settings Applied! Press Start to play with new settings.";
+    msgWrap.style.display = "block";
+    restartBtn.textContent = "Start";
+  });
+
+  resetSettingsBtn.addEventListener('click', () => {
+    populateSettingsUI(defaultSettings);
+  });
+
+  // Close settings when clicking outside
+  settingsDrawer.addEventListener('click', (e) => {
+    if (e.target === settingsDrawer) {
+      settingsDrawer.classList.remove('open');
+    }
+  });
   
   // Show best score on initial load
   if (bestScore > 0) {
@@ -826,7 +1260,6 @@
       const newBanner = makeBanner(topY - bannerHeight - 12);
       banners.push(newBanner); 
       scheduleNextBanner();
-      // Debug: console.log(`Gate spawned at time ${state.time.toFixed(2)}s, next at ${state.nextBanner.toFixed(2)}s, total gates: ${banners.length}`);
     }
     if (state.bannersPassed >= cfg.obstacles.startAfterBanners && state.time >= state.nextObstacle) { 
       spawnObstacle(); 
@@ -838,7 +1271,6 @@
     for(const b of banners) drawBanner(b, dt);
     for (let i=banners.length-1;i>=0;i--) {
       if (banners[i].dead) {
-        // Debug: console.log(`Gate removed, ${banners.length - 1} remaining`);
         banners.splice(i,1);
       }
     }
