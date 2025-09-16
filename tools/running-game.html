@@ -139,10 +139,10 @@
     const navHeight = vw <= 768 ? 60 : 80;
     const availableHeight = vh - navHeight;
     
-    const target = { w: cfg.canvasWidth, h: cfg.canvasHeight };
-    const scale = Math.min(vw / target.w, availableHeight / target.h);
-    W = Math.round(target.w * scale);
-    H = Math.round(target.h * scale);
+    // Use full available space instead of fixed dimensions
+    W = vw;
+    H = availableHeight;
+    
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
     canvas.style.width = W + "px";
