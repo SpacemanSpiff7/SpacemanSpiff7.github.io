@@ -121,7 +121,7 @@
       "title": "Running Game",
       "shortDescription": "A simple running game that tests your reflexes and patience",
       "description": "A simple running game that tests your reflexes and patience. Built with JavaScript.",
-      "category": "Public Art",
+      "category": "Games",
       "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
       "tags": ["Running", "Game", "JavaScript"],
       "actions": [
