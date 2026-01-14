@@ -58,12 +58,11 @@
         .submission-header h1 {
             font-size: var(--text-5xl);
             font-weight: 700;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--color-text-primary);
             margin-bottom: var(--space-6);
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
         
         .submission-header p {
@@ -73,13 +72,13 @@
         }
         
         .permission-banner {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            color: white;
+            background: var(--color-accent-rust);
+            color: var(--color-surface);
             padding: var(--space-6);
             border-radius: var(--radius-xl);
             margin-bottom: var(--space-8);
             text-align: center;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-md);
         }
         
         .permission-banner h3 {
@@ -116,7 +115,7 @@
         .section-icon {
             width: 24px;
             height: 24px;
-            color: var(--color-primary);
+            color: var(--color-accent-rust);
         }
         
         .location-info {
@@ -168,12 +167,12 @@
         }
         
         .photo-upload-area:hover {
-            border-color: var(--color-primary);
+            border-color: var(--color-accent-rust);
             background: rgba(0, 212, 255, 0.05);
         }
         
         .photo-upload-area.dragover {
-            border-color: var(--color-primary);
+            border-color: var(--color-accent-rust);
             background: rgba(0, 212, 255, 0.1);
         }
         
@@ -236,7 +235,7 @@
         }
         
         .camera-btn.primary {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            background: var(--color-accent-rust);
             color: white;
             border: none;
             box-shadow: 
@@ -318,8 +317,8 @@
         
         .loading-message {
             background: rgba(0, 212, 255, 0.1);
-            border: 1px solid var(--color-primary);
-            color: var(--color-primary);
+            border: 1px solid var(--color-accent-rust);
+            color: var(--color-accent-rust);
             padding: var(--space-4);
             border-radius: var(--radius-lg);
             margin-top: var(--space-4);
@@ -462,21 +461,17 @@
             overflow: hidden;
             letter-spacing: -0.01em;
             white-space: nowrap;
-            box-shadow: var(--shadow-xl);
             min-width: 200px;
             height: 64px;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            color: white;
-            box-shadow: 
-                0 12px 40px rgba(0, 212, 255, 0.4),
-                0 8px 24px rgba(183, 148, 246, 0.3);
+            background: var(--color-accent-rust);
+            color: var(--color-surface);
+            box-shadow: var(--shadow-md);
         }
         
         .submit-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 
-                0 16px 50px rgba(0, 212, 255, 0.5),
-                0 12px 32px rgba(183, 148, 246, 0.4);
+            background: #704032;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
         
         .submit-btn:disabled {
@@ -530,8 +525,8 @@
         }
         
         .step.current .step-number {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            border-color: var(--color-primary);
+            background: var(--color-accent-rust);
+            border-color: var(--color-accent-rust);
             color: white;
         }
         
@@ -610,7 +605,24 @@
 </head>
 <body>
     <!-- Navigation -->
-    <div id="nav-container"></div>
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
+                <li><a href="../index.html#about" class="nav-link">About</a></li>
+                <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
     
     <!-- Main Content -->
     <main id="public-art-app">
@@ -703,60 +715,40 @@
     
     <!-- Scripts -->
     <script>
-        // Minimal script for public art submission page
-        // Only load essential functionality, not the full site script
+        // Mobile navigation toggle
         document.addEventListener('DOMContentLoaded', function() {
-            // Load navigation
-            loadNavigation();
-            
-            // Only initialize if we're on the public art submission page
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', function() {
+                    const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                    navToggle.setAttribute('aria-expanded', !isExpanded);
+                    navLinks.classList.toggle('active');
+                });
+
+                // Close menu when clicking on a link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        navToggle.setAttribute('aria-expanded', 'false');
+                        navLinks.classList.remove('active');
+                    });
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                        navToggle.setAttribute('aria-expanded', 'false');
+                        navLinks.classList.remove('active');
+                    }
+                });
+            }
+
+            // Initialize Public Art Submission app
             if (document.getElementById('public-art-app')) {
-                // Wait for navigation to load first
-                setTimeout(() => {
-                    new PublicArtSubmission();
-                }, 100);
+                new PublicArtSubmission();
             }
         });
-        
-        // Load navigation component
-        function loadNavigation() {
-            fetch('../components/nav.html')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('nav-container').innerHTML = html;
-                    
-                    // Add navigation functionality
-                    const navToggle = document.querySelector('.nav-toggle');
-                    const navLinks = document.querySelector('.nav-links');
-                    
-                    if (navToggle && navLinks) {
-                        navToggle.addEventListener('click', function() {
-                            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-                            navToggle.setAttribute('aria-expanded', !isExpanded);
-                            navLinks.classList.toggle('nav-links-open');
-                        });
-                        
-                        // Close menu when clicking on a link
-                        document.querySelectorAll('.nav-link').forEach(link => {
-                            link.addEventListener('click', function() {
-                                navToggle.setAttribute('aria-expanded', 'false');
-                                navLinks.classList.remove('nav-links-open');
-                            });
-                        });
-                        
-                        // Close menu when clicking outside
-                        document.addEventListener('click', function(e) {
-                            if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
-                                navToggle.setAttribute('aria-expanded', 'false');
-                                navLinks.classList.remove('nav-links-open');
-                            }
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading navigation:', error);
-                });
-        }
     </script>
     
     <!-- Public Art Submission Script -->

@@ -106,8 +106,13 @@ function setupNavigation() {
     
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
+            // Skip external links (don't prevent default)
+            if (!link.hasAttribute('data-section')) {
+                return;
+            }
+
             e.preventDefault();
-            
+
             const targetSection = link.getAttribute('data-section');
             
             // Remove active class from all nav links and sections

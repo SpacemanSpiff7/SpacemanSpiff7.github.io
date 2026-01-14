@@ -2,6 +2,7 @@
   "featured": [
     "public-art-submission",
     "dodgers-notifications",
+    "ebay-craigslist-chrome-extension",
     "running-game"
   ],
   "featuredConfig": {
@@ -97,6 +98,23 @@
           "text": "Submit Art",
           "url": "tools/public-art-submission.html",
           "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "ebay-craigslist-chrome-extension",
+      "title": "Ebay Lookup Chrome Extension for Craigslist",
+      "shortDescription": "A Chrome extension that allows you to search eBay for items listed on Craigslist",
+      "description": "A Chrome extension that allows you to search eBay for items listed on Craigslist. It's a simple extension that allows you to search eBay for items listed on Craigslist. It's a simple extension that allows you to search eBay for items listed on Craigslist.",
+      "category": "Chrome Extensions",
+      "image": "assets/images/ebay-craigslist-chrome-extension.png",
+      "tags": ["Chrome Extensions", "Ebay", "Craigslist"],
+      "actions": [
+        {
+          "text": "Use Extension",
+          "url": "https://github.com/SpacemanSpiff7/EbayLookupChromePlugin",
+          "type": "primary",
+          "external": true
         }
       ]
     },

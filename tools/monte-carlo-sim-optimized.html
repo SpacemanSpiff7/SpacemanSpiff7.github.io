@@ -55,12 +55,11 @@
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 700;
             line-height: 1.1;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
             margin-bottom: 20px;
-            background: linear-gradient(135deg, #00D4FF, #B794F6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--color-text-primary);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         .header p {
@@ -134,13 +133,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #00D4FF, #B794F6);
-            color: #fff;
+            background: var(--color-accent-rust);
+            color: var(--color-surface);
         }
 
         .btn-primary:hover:not(:disabled) {
+            background: #704032;
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 212, 255, 0.4);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-secondary {
@@ -305,7 +305,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00D4FF, #B794F6);
+            background: var(--color-accent-rust);
             width: 0%;
             transition: width 0.3s ease;
         }
@@ -392,12 +392,11 @@
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #00D4FF, #B794F6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--color-text-primary);
             margin-bottom: 1.5rem;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         .info-intro {
@@ -1982,22 +1981,22 @@
                 navToggle.addEventListener('click', function() {
                     const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
                     navToggle.setAttribute('aria-expanded', !isExpanded);
-                    navLinks.classList.toggle('nav-links-open');
+                    navLinks.classList.toggle('active');
                 });
-                
+
                 // Close menu when clicking on a link
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.addEventListener('click', function() {
                         navToggle.setAttribute('aria-expanded', 'false');
-                        navLinks.classList.remove('nav-links-open');
+                        navLinks.classList.remove('active');
                     });
                 });
-                
+
                 // Close menu when clicking outside
                 document.addEventListener('click', function(e) {
                     if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
                         navToggle.setAttribute('aria-expanded', 'false');
-                        navLinks.classList.remove('nav-links-open');
+                        navLinks.classList.remove('active');
                     }
                 });
             }

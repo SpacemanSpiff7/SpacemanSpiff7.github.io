@@ -1405,22 +1405,22 @@ document.addEventListener('DOMContentLoaded', function() {
     navToggle.addEventListener('click', function() {
       const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
       navToggle.setAttribute('aria-expanded', !isExpanded);
-      navLinks.classList.toggle('nav-links-open');
+      navLinks.classList.toggle('active');
     });
-    
+
     // Close menu when clicking on a link
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', function() {
         navToggle.setAttribute('aria-expanded', 'false');
-        navLinks.classList.remove('nav-links-open');
+        navLinks.classList.remove('active');
       });
     });
-    
+
     // Close menu when clicking outside
     document.addEventListener('click', function(e) {
       if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
         navToggle.setAttribute('aria-expanded', 'false');
-        navLinks.classList.remove('nav-links-open');
+        navLinks.classList.remove('active');
       }
     });
   }

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulting Services - Coming Soon</title>
+    <meta name="description" content="Software development consulting services coming soon.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .coming-soon-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface) 100%);
+        }
+
+        .coming-soon-content {
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--color-accent-rust);
+            color: white;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 600;
+            margin-bottom: var(--space-8);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: var(--text-4xl);
+            font-weight: 700;
+            line-height: var(--leading-tight);
+            margin-bottom: var(--space-6);
+            color: var(--color-text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+            line-height: var(--leading-relaxed);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--color-accent-rust);
+            text-decoration: none;
+            font-size: var(--text-base);
+            font-weight: 500;
+            transition: color var(--transition-normal);
+        }
+
+        .back-link:hover {
+            color: var(--color-accent-olive);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: var(--text-3xl);
+            }
+
+            p {
+                font-size: var(--text-base);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="coming-soon-container">
+        <div class="coming-soon-content">
+            <span class="badge">Coming Soon</span>
+            <h1>Software Consulting Services</h1>
+            <p>I'm launching a consulting service for rapid software prototyping and development. Stay tuned for details on single-session builds, pricing, and availability.</p>
+            <a href="../index.html" class="back-link">← Back to Main Site</a>
+        </div>
+    </div>
+</body>
+</html>

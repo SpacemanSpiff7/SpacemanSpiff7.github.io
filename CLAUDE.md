@@ -70,9 +70,10 @@ loadComponent('home-container', 'components/home.html');
 ## Important Implementation Notes
 
 ### Standalone Tools
-Tools in the `/tools/` directory are **standalone pages** that:
-- Set `window.SKIP_MAIN_SCRIPT = true` to prevent main component loading
-- Reference parent directory for shared CSS (`../style.css`)
+Tools in the `/tools/` directory are **standalone pages** with different navigation patterns:
+- **Some tools** (location-map.html, public-art-submission.html) set `window.SKIP_MAIN_SCRIPT = true` to prevent main component loading
+- **Other tools** (shopping-research.html, monte-carlo-sim-optimized.html, running-game.html) use standalone navigation without the skip flag
+- All reference parent directory for shared CSS (`../style.css`)
 - May have different navigation structures
 
 ### Google API Integration
@@ -89,6 +90,17 @@ Two tools integrate with Google services:
 - Requires API keys and OAuth configuration
 - See `docs/LOCATION_MAP_SETUP.md` for complete setup guide
 
+### Interactive Tools
+
+**Running Game** (`tools/running-game.html`):
+- Fully-featured browser game testing reflexes and patience
+- Complete game mechanics with player movement, obstacles, and scoring system
+- Settings drawer with customizable game options
+- High score tracking with localStorage
+- Mobile-optimized touch controls
+- Featured project in projects.json
+- 1,452 lines of self-contained HTML/CSS/JS
+
 ### Mobile Optimizations
 - Touch-friendly 44px minimum touch targets
 - iOS Safari specific viewport and input handling
@@ -100,31 +112,39 @@ Two tools integrate with Google services:
 ```
 /
 ├── index.html              # Main SPA entry point
-├── style.css              # Global styles and design system
-├── script.js              # Main application logic
+├── style.css              # Global styles and design system (1,401 lines)
+├── script.js              # Main application logic (449 lines)
+├── cursor_site.html        # Alternative/legacy standalone site version
 ├── CNAME                  # GitHub Pages domain configuration
+├── README.md              # Repository readme
 ├── assets/                # Static assets
-│   └── favicon.svg        # Site favicon
+│   ├── favicon.svg        # Site favicon
+│   └── images/            # Project card images
+│       └── dodgers-image.jpg  # Dodgers project image (4.83 MB)
+├── resources/             # Media resources
+│   └── simone_pic.png     # Hero section image (5.77 MB)
 ├── components/            # SPA components
-│   ├── nav.html
-│   ├── home.html
-│   ├── projects.html
-│   ├── about.html
-│   └── contact.html
+│   ├── nav.html           # Navigation with mobile hamburger menu
+│   ├── home.html          # Hero section with featured tools
+│   ├── projects.html      # Project showcase grid
+│   ├── about.html         # About section
+│   └── contact.html       # Contact information
 ├── data/                  # Configuration and data files
 │   ├── projects.json      # Project configuration (main data source)
+│   │                      # Contains 7 projects with 3 featured
+│   ├── projects-commented.json  # Commented reference version
 │   └── README.md         # Project management guide
 ├── tools/                 # Standalone tool pages
-│   ├── shopping-research.html
-│   ├── monte-carlo-sim-optimized.html
-│   ├── location-map.html
-│   ├── location-map.js
-│   ├── public-art-submission.html
-│   └── find-field-ids.html
+│   ├── shopping-research.html        # Product research comparison tool
+│   ├── monte-carlo-sim-optimized.html  # Monte Carlo simulation
+│   ├── running-game.html            # Browser-based running game (1,452 lines)
+│   ├── location-map.html            # Interactive location mapping tool
+│   ├── location-map.js              # Location map logic
+│   └── public-art-submission.html   # Public art submission form
 └── docs/                  # Documentation files
-    ├── PUBLIC_ART_SUBMISSION_README.md
-    ├── LOCATION_MAP_SETUP.md
-    └── location-map-example-data.csv
+    ├── PUBLIC_ART_SUBMISSION_README.md  # Setup guide for art submission
+    ├── LOCATION_MAP_SETUP.md            # Complete location map setup
+    └── location-map-example-data.csv    # Sample data for location map
 ```
 
 ## Code Conventions
@@ -152,11 +172,23 @@ Two tools integrate with Google services:
 - **Google Fonts** - Inter font family
 - **Google Maps API** - For location map feature
 - **Google Sheets/Drive APIs** - For location data storage
-- **Unsplash** - Images for tool cards (consider self-hosting for production)
+- **Unsplash** - Some project card images (mix of Unsplash and self-hosted images)
+- **Self-hosted images** - Hero image (resources/simone_pic.png) and some project images (assets/images/)
+
+## Projects Configuration
+
+The site features are managed through `data/projects.json`:
+- **7 total projects** defined in the projects array
+- **3 featured projects** highlighted on the home page:
+  - public-art-submission
+  - dodgers-notifications
+  - running-game
+- Projects include tools, games, and applications
+- Each project has metadata: title, description, tech stack, links, and images
 
 ## GitHub Pages Configuration
 
-- **Custom domain**: Configured via CNAME file
+- **Custom domain**: Configured via CNAME file (simonelongo.com)
 - **Branch**: Deploys from `master` branch
 - **HTTPS**: Enabled for security (required for geolocation API)
 - **Build process**: None - static files served directly
