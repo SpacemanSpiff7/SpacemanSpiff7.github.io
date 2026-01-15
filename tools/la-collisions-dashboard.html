@@ -232,11 +232,19 @@
         }
 
         /* Charts Section */
+        .charts-wrapper {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-md);
+        }
+
         .charts-section {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-bottom: 3rem;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 1200px) {
@@ -246,11 +254,11 @@
         }
 
         .chart-container {
-            background: var(--color-surface);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-md);
-            height: 280px;
+            background: var(--color-bg);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            height: 260px;
         }
 
         .chart-container h3 {
@@ -260,7 +268,71 @@
         }
 
         .chart-container canvas {
-            max-height: 200px;
+            max-height: 180px;
+        }
+
+        /* Chart Controls */
+        .chart-controls {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            gap: 1rem 2rem;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--color-bg);
+            border-radius: var(--radius-md);
+            border-top: 1px solid #eee;
+        }
+
+        .control-group {
+            display: contents;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            color: var(--color-text);
+            font-weight: 600;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-control {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: #fff;
+            color: var(--color-text);
+            border: 2px solid #ddd;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        .btn-control:hover {
+            background: #f8f9fa;
+            border-color: #bbb;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-control.active {
+            background: var(--color-accent-olive);
+            color: #fff;
+            border-color: var(--color-accent-olive);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-control.active:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
         }
 
         /* Filter Panel */
@@ -355,7 +427,7 @@
             position: fixed;
             right: 0;
             top: 80px;
-            width: 400px;
+            width: 600px;
             height: calc(100vh - 80px);
             background: var(--color-surface);
             box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
@@ -393,7 +465,7 @@
 
         .detail-row {
             display: grid;
-            grid-template-columns: 120px 1fr;
+            grid-template-columns: 150px 1fr;
             gap: 1rem;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
@@ -902,19 +974,51 @@
             </section>
         </div>
 
-        <!-- Charts Section (moved to bottom) -->
-        <section class="charts-grid">
-            <div class="chart-container">
-                <h3>Collisions by Hour</h3>
-                <canvas id="hourChart"></canvas>
+        <!-- Charts Section with Controls -->
+        <section class="charts-wrapper">
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3>Collisions by Hour</h3>
+                    <canvas id="hourChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Collisions by Day of Week</h3>
+                    <canvas id="dowChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Trend Over Time</h3>
+                    <canvas id="yearChart"></canvas>
+                </div>
             </div>
-            <div class="chart-container">
-                <h3>Collisions by Day of Week</h3>
-                <canvas id="dowChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Trend Over Time</h3>
-                <canvas id="yearChart"></canvas>
+
+            <!-- Chart Controls -->
+            <div class="chart-controls">
+                <div class="control-group">
+                    <div class="button-group">
+                        <label>Data Scope:</label>
+                        <button class="btn-control active" data-scope="viewport">
+                            Viewport Only
+                        </button>
+                        <button class="btn-control" data-scope="all">
+                            All Filtered
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="button-group">
+                        <label>Display Mode:</label>
+                        <button class="btn-control active" data-mode="stacked">
+                            Stacked
+                        </button>
+                        <button class="btn-control" data-mode="grouped">
+                            Grouped
+                        </button>
+                        <button class="btn-control" data-mode="total">
+                            Total Only
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1021,6 +1125,8 @@
                 this.map = null;
                 this.selectedCollisionId = null; // Track selected collision for highlighting
                 this.charts = {};
+                this.chartDataScope = 'viewport'; // 'viewport' or 'all'
+                this.chartDisplayMode = 'stacked'; // 'stacked', 'grouped', or 'total'
 
                 // Config
                 this.tileSize = 0.02;
@@ -1035,6 +1141,7 @@
                     await this.loadOverview();
                     this.initMap();
                     this.initCharts();
+                    this.initChartControls();
                     this.updateKPIs(this.overview);
                     this.updateChartsFromOverview();
                     this.attachEventListeners();
@@ -1205,10 +1312,10 @@
                         paint: {
                             'circle-radius': [
                                 'interpolate', ['linear'], ['zoom'],
-                                9, 2,
-                                10, 4,
-                                13, 6,
-                                15, 8
+                                9, 1.5,
+                                10, 3.5,
+                                13, 5,
+                                15, 7
                             ],
                             'circle-color': [
                                 'case',
@@ -1232,31 +1339,31 @@
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
                                     1.0,    // Selected: 100% opaque
-                                    0.4     // Not selected: 40% opaque
+                                    0.3     // Not selected: 30% opaque
                                 ],
                                 14, [
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
                                     1.0,    // Selected: 100% opaque
-                                    0.6     // Not selected: 60% opaque
+                                    0.5     // Not selected: 50% opaque
                                 ],
                                 15, [
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
                                     1.0,    // Selected: 100% opaque
-                                    0.75    // Not selected: 75% opaque
+                                    0.65    // Not selected: 65% opaque
                                 ],
                                 16, [
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
                                     1.0,    // Selected: 100% opaque
-                                    0.9     // Not selected: 90% opaque
+                                    0.8     // Not selected: 80% opaque
                                 ],
                                 17, [
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
                                     1.0,    // Selected: 100% opaque
-                                    0.95    // Not selected: 95% opaque
+                                    0.85    // Not selected: 85% opaque
                                 ]
                             ],
                             'circle-stroke-color': [
@@ -1545,7 +1652,21 @@
                     samplingIndicator.style.display = 'none';
                 }
 
-                this.updateCharts(visibleData);
+                // Determine chart data based on chartDataScope setting
+                let chartData;
+                if (this.chartDataScope === 'all') {
+                    // Get all filtered data without viewport restrictions
+                    const allViewport = {
+                        minX: -180, maxX: 180,
+                        minY: -90, maxY: 90
+                    };
+                    chartData = this.getFilteredData(allViewport);
+                } else {
+                    // Use viewport-filtered data (default)
+                    chartData = visibleData;
+                }
+
+                this.updateCharts(chartData);
                 // Table update moved to separate debounced event (500ms) for better performance
             }
 
@@ -1678,17 +1799,64 @@
                             if (i === 12) return '12pm';
                             return `${i-12}pm`;
                         }),
-                        datasets: [{
-                            label: 'Collisions',
-                            data: new Array(24).fill(0),
-                            backgroundColor: 'rgba(255, 107, 107, 0.6)'
-                        }]
+                        datasets: [
+                            {
+                                label: 'Vehicle-Vehicle',
+                                data: new Array(24).fill(0),
+                                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Pedestrian',
+                                data: new Array(24).fill(0),
+                                backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Motorcycle',
+                                data: new Array(24).fill(0),
+                                backgroundColor: 'rgba(255, 100, 0, 0.7)',
+                                borderColor: 'rgba(255, 100, 0, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Bicycle',
+                                data: new Array(24).fill(0),
+                                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Other',
+                                data: new Array(24).fill(0),
+                                backgroundColor: 'rgba(149, 165, 166, 0.7)',
+                                borderColor: 'rgba(149, 165, 166, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true }
+                            x: { stacked: true },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: { size: 10 },
+                                    padding: 8
+                                }
+                            }
                         }
                     }
                 });
@@ -1697,17 +1865,64 @@
                     type: 'bar',
                     data: {
                         labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                        datasets: [{
-                            label: 'Collisions',
-                            data: new Array(7).fill(0),
-                            backgroundColor: 'rgba(107, 169, 255, 0.6)'
-                        }]
+                        datasets: [
+                            {
+                                label: 'Vehicle-Vehicle',
+                                data: new Array(7).fill(0),
+                                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Pedestrian',
+                                data: new Array(7).fill(0),
+                                backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Motorcycle',
+                                data: new Array(7).fill(0),
+                                backgroundColor: 'rgba(255, 100, 0, 0.7)',
+                                borderColor: 'rgba(255, 100, 0, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Vehicle-Bicycle',
+                                data: new Array(7).fill(0),
+                                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Other',
+                                data: new Array(7).fill(0),
+                                backgroundColor: 'rgba(149, 165, 166, 0.7)',
+                                borderColor: 'rgba(149, 165, 166, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true }
+                            x: { stacked: true },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: { size: 10 },
+                                    padding: 8
+                                }
+                            }
                         }
                     }
                 });
@@ -1716,20 +1931,68 @@
                     type: 'line',
                     data: {
                         labels: [],
-                        datasets: [{
-                            label: 'Collisions',
-                            data: [],
-                            borderColor: 'rgba(107, 255, 169, 0.8)',
-                            backgroundColor: 'rgba(107, 255, 169, 0.2)',
-                            tension: 0.4,
-                            fill: true
-                        }]
+                        datasets: [
+                            {
+                                label: 'Vehicle-Vehicle',
+                                data: [],
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                backgroundColor: 'rgba(52, 152, 219, 0.3)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Vehicle-Pedestrian',
+                                data: [],
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                backgroundColor: 'rgba(231, 76, 60, 0.3)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Vehicle-Motorcycle',
+                                data: [],
+                                borderColor: 'rgba(255, 100, 0, 1)',
+                                backgroundColor: 'rgba(255, 100, 0, 0.3)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Vehicle-Bicycle',
+                                data: [],
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                backgroundColor: 'rgba(46, 204, 113, 0.3)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Other',
+                                data: [],
+                                borderColor: 'rgba(149, 165, 166, 1)',
+                                backgroundColor: 'rgba(149, 165, 166, 0.3)',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true }
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: { size: 10 },
+                                    padding: 8
+                                }
+                            }
                         }
                     }
                 });
@@ -1748,29 +2011,158 @@
             }
 
             updateCharts(filteredData) {
-                const hourlyCounts = new Array(24).fill(0);
-                const dowCounts = new Array(7).fill(0);
-                const yearCounts = {};
+                // Initialize counts by collision type (all 5 types)
+                const collisionTypes = ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'];
 
-                filteredData.forEach(feature => {
-                    const props = feature.properties;
-                    if (props.hour !== null) {
-                        hourlyCounts[props.hour]++;
-                    }
-                    dowCounts[props.dow]++;
-                    yearCounts[props.year] = (yearCounts[props.year] || 0) + 1;
+                // Hourly counts by type: { 'vehicle-to-vehicle': [24 hours], ... }
+                const hourlyCountsByType = {};
+                collisionTypes.forEach(type => {
+                    hourlyCountsByType[type] = new Array(24).fill(0);
                 });
 
-                this.charts.hour.data.datasets[0].data = hourlyCounts;
+                // Day of week counts by type
+                const dowCountsByType = {};
+                collisionTypes.forEach(type => {
+                    dowCountsByType[type] = new Array(7).fill(0);
+                });
+
+                // Year counts by type
+                const yearCountsByType = {};
+                collisionTypes.forEach(type => {
+                    yearCountsByType[type] = {};
+                });
+
+                // Aggregate data by type
+                filteredData.forEach(feature => {
+                    const props = feature.properties;
+                    let collisionType = props.collision_type || 'other';
+
+                    // Include all 5 types
+                    if (!collisionTypes.includes(collisionType)) {
+                        // Shouldn't happen, but fallback to 'other'
+                        collisionType = 'other';
+                    }
+
+                    // Hourly
+                    if (props.hour !== null) {
+                        hourlyCountsByType[collisionType][props.hour]++;
+                    }
+
+                    // Day of week
+                    dowCountsByType[collisionType][props.dow]++;
+
+                    // Year
+                    yearCountsByType[collisionType][props.year] =
+                        (yearCountsByType[collisionType][props.year] || 0) + 1;
+                });
+
+                // Update hourly chart datasets
+                this.charts.hour.data.datasets[0].data = hourlyCountsByType['vehicle-to-vehicle'];
+                this.charts.hour.data.datasets[1].data = hourlyCountsByType['vehicle-pedestrian'];
+                this.charts.hour.data.datasets[2].data = hourlyCountsByType['vehicle-motorcycle'];
+                this.charts.hour.data.datasets[3].data = hourlyCountsByType['vehicle-bicycle'];
+                this.charts.hour.data.datasets[4].data = hourlyCountsByType['other'];
                 this.charts.hour.update();
 
-                this.charts.dow.data.datasets[0].data = dowCounts;
+                // Update day of week chart datasets
+                this.charts.dow.data.datasets[0].data = dowCountsByType['vehicle-to-vehicle'];
+                this.charts.dow.data.datasets[1].data = dowCountsByType['vehicle-pedestrian'];
+                this.charts.dow.data.datasets[2].data = dowCountsByType['vehicle-motorcycle'];
+                this.charts.dow.data.datasets[3].data = dowCountsByType['vehicle-bicycle'];
+                this.charts.dow.data.datasets[4].data = dowCountsByType['other'];
                 this.charts.dow.update();
 
-                const years = Object.keys(yearCounts).sort();
+                // Update year chart datasets
+                // Collect all years across all types
+                const allYears = new Set();
+                collisionTypes.forEach(type => {
+                    Object.keys(yearCountsByType[type]).forEach(year => allYears.add(year));
+                });
+                const years = Array.from(allYears).sort();
+
                 this.charts.year.data.labels = years;
-                this.charts.year.data.datasets[0].data = years.map(y => yearCounts[y]);
+                this.charts.year.data.datasets[0].data = years.map(y => yearCountsByType['vehicle-to-vehicle'][y] || 0);
+                this.charts.year.data.datasets[1].data = years.map(y => yearCountsByType['vehicle-pedestrian'][y] || 0);
+                this.charts.year.data.datasets[2].data = years.map(y => yearCountsByType['vehicle-motorcycle'][y] || 0);
+                this.charts.year.data.datasets[3].data = years.map(y => yearCountsByType['vehicle-bicycle'][y] || 0);
+                this.charts.year.data.datasets[4].data = years.map(y => yearCountsByType['other'][y] || 0);
                 this.charts.year.update();
+            }
+
+            initChartControls() {
+                // Data scope controls
+                document.querySelectorAll('[data-scope]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Toggle active state
+                        document.querySelectorAll('[data-scope]').forEach(b =>
+                            b.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        // Update data scope setting
+                        this.chartDataScope = e.target.dataset.scope;
+
+                        // Refresh charts
+                        this.updateMapData();
+                    });
+                });
+
+                // Display mode controls
+                document.querySelectorAll('[data-mode]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Toggle active state
+                        document.querySelectorAll('[data-mode]').forEach(b =>
+                            b.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        // Update display mode
+                        this.chartDisplayMode = e.target.dataset.mode;
+
+                        // Update chart options
+                        this.updateChartDisplayMode();
+                    });
+                });
+            }
+
+            updateChartDisplayMode() {
+                const mode = this.chartDisplayMode;
+
+                ['hour', 'dow', 'year'].forEach(chartKey => {
+                    const chart = this.charts[chartKey];
+
+                    if (mode === 'stacked') {
+                        // Enable stacking
+                        chart.options.scales.y.stacked = true;
+                        if (chart.options.scales.x) {
+                            chart.options.scales.x.stacked = true;
+                        }
+                        // Show all datasets
+                        chart.data.datasets.forEach(ds => {
+                            ds.hidden = false;
+                        });
+                    } else if (mode === 'grouped') {
+                        // Disable stacking
+                        chart.options.scales.y.stacked = false;
+                        if (chart.options.scales.x) {
+                            chart.options.scales.x.stacked = false;
+                        }
+                        // Show all datasets
+                        chart.data.datasets.forEach(ds => {
+                            ds.hidden = false;
+                        });
+                    } else if (mode === 'total') {
+                        // Show only aggregated data (hide datasets except first)
+                        chart.data.datasets.forEach((ds, i) => {
+                            ds.hidden = i > 0;  // Hide all except first
+                        });
+                        // Re-enable stacking for cleaner look
+                        chart.options.scales.y.stacked = true;
+                        if (chart.options.scales.x) {
+                            chart.options.scales.x.stacked = true;
+                        }
+                    }
+
+                    chart.update();
+                });
             }
 
             updateKPIs(data) {
