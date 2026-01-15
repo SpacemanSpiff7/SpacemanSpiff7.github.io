@@ -1,0 +1,5873 @@
+{
+  "tiles": [
+    {
+      "filename": "lat_34.06_lon_-118.32.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 7435,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.42.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 2281,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.46.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 662,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.32.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 8091,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.32.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 5261,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.22.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 3208,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.24.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 4534,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.32.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 6349,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.28.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 2823,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.34.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 4736,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.20.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 1294,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.22.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 4386,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.72_lon_-118.28.json",
+      "bounds": {
+        "south": 33.72,
+        "north": 33.74,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 179,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.74_lon_-118.30.json",
+      "bounds": {
+        "south": 33.74,
+        "north": 33.760000000000005,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 2434,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.26.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 1669,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.72_lon_-118.32.json",
+      "bounds": {
+        "south": 33.72,
+        "north": 33.74,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 929,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.86_lon_-118.30.json",
+      "bounds": {
+        "south": 33.86,
+        "north": 33.88,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 668,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.30.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 2071,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.72_lon_-118.30.json",
+      "bounds": {
+        "south": 33.72,
+        "north": 33.74,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 3494,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.34.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 5912,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.26.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 12705,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.28.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 1590,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.30.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 529,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.32.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 7405,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.34.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 8200,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.24.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 2464,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.32.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 2627,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.26.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 3563,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.36.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 2241,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.36.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 1282,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.38.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 937,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.36.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 5235,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.28.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 7508,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.26.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 6510,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.34.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 3741,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.36.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 5136,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.38.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 3779,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.36.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 4727,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.38.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 4603,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.38.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 2578,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.30.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 5245,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.38.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 4925,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.40.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 805,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.28.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 6502,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.24.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 3623,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.40.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 2614,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.48.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 1117,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.48.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 2967,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.46.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 1508,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.56.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 303,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.48.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 305,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.46.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 4417,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.40.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 2274,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.42.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1222,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.28.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 9739,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.30.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 9646,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.44.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 3186,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.44.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 1166,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.46.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 3008,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.50.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 168,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.54.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 204,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.30.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 4428,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.30.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 6396,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.54.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 799,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.46.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 265,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.46.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 3684,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.46.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 2466,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.46.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 4529,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.48.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 3435,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.44.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2211,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.44.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 3364,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.54.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 2688,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.48.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 1618,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.52.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 1726,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.44.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 3105,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.48.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 3255,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.52.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 2111,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.34.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 3981,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.58.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 1169,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.52.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 2127,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.52.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 2140,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.22.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 1685,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.50.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 1498,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.54.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 2837,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.50.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 1413,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.56.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 1501,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.56.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 2512,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.54.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 2804,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.56.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 1828,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.56.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 2129,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.58.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 1753,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.20.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 1102,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.28.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 2032,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.22.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 3571,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.28.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 2177,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.22.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 1001,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.84_lon_-118.32.json",
+      "bounds": {
+        "south": 33.84,
+        "north": 33.86000000000001,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 441,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.30.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 2641,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.24.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1751,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.24.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1223,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.32.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 177,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.26.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 1696,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.30.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 7937,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.26.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 2303,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.20.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 829,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.18.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 1097,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.20.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 2408,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.28.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 7312,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.30.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 6875,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.32.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 6111,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.26.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 306,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.84_lon_-118.30.json",
+      "bounds": {
+        "south": 33.84,
+        "north": 33.86000000000001,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 690,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.28.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 5754,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.70_lon_-118.30.json",
+      "bounds": {
+        "south": 33.7,
+        "north": 33.720000000000006,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 568,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.28.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 5868,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.82_lon_-118.32.json",
+      "bounds": {
+        "south": 33.82,
+        "north": 33.84,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 873,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.24.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 851,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.26.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 4667,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.46.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 3081,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.38.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1481,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.44.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 1771,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.42.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1683,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.38.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 964,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.48.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 3851,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.40.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 932,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.44.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2098,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.40.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 3057,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.44.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 330,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.42.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 586,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.46.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 425,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.44.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2612,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.48.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 310,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.48.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 557,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.46.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 2389,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.38.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 3252,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.40.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 2342,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.40.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 3038,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.38.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 4114,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.40.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 2329,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.38.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1866,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.42.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 3236,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.42.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 2653,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.38.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 276,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.40.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 3516,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.42.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1799,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.42.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1115,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.36.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 475,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.42.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 2375,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.44.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2208,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.38.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1908,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.28.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 549,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.40.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 1612,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.38.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1715,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.32.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 819,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.42.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 2237,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.54.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 3176,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.48.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 1541,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.36.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 2499,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.60.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 1919,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.60.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 370,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.52.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 1697,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.48.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 4923,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.52.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 1294,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.56.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 1348,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.56.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 666,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.50.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 954,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.54.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 1121,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.54.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 121,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.60.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 1334,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.28.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 5250,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.28.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 4061,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.44.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 1704,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.46.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 4542,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.42.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1492,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.44.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2138,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.30.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 3245,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.26.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 3023,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.46.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 1302,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.48.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 891,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.46.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 1697,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.50.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 289,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.48.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 1662,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.30.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 9363,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.50.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 10,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.60.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 2866,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.62.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 432,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.64.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 361,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.58.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 2571,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.60.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 1753,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.62.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 2022,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.66.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.66,
+        "east": -118.64
+      },
+      "record_count": 97,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.62.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 2619,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.60.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 2260,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.66.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.66,
+        "east": -118.64
+      },
+      "record_count": 627,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.42.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 303,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.44.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2247,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.48.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 1977,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.62.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 885,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.62.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 2593,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.64.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 1213,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.56.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 178,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.32.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 2068,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.34.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 1646,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.24.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 319,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.58.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 2565,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.34.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 342,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.34.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 3425,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.30.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 2455,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.50.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 197,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.44.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 602,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.52.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 34,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.36.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 580,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.58.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 624,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.26.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 1346,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.54.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 2050,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.46.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 868,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.50.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 932,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.34.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 244,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.42.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 243,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.18.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 1486,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.34.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 3010,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.58.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 1370,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.42.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1882,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.26.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 2977,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.24.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1460,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.24.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 877,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.36.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 4780,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.24.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1171,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.70_lon_-118.32.json",
+      "bounds": {
+        "south": 33.7,
+        "north": 33.720000000000006,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 83,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.28.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 947,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.20.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 455,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.20.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 1203,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.74_lon_-118.26.json",
+      "bounds": {
+        "south": 33.74,
+        "north": 33.760000000000005,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 177,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.30.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 316,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.26.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 2623,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.22.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 1363,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.32.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 407,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.36.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 233,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.30.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 1302,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.40.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 654,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.36.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 187,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.46.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 1303,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.74_lon_-118.28.json",
+      "bounds": {
+        "south": 33.74,
+        "north": 33.760000000000005,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 246,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.32.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 157,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.74_lon_-118.32.json",
+      "bounds": {
+        "south": 33.74,
+        "north": 33.760000000000005,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 822,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.52.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 374,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.48.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 349,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.38.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1013,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.48.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 209,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.22.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 131,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.32.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 6064,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.36.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 574,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.38.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 418,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.42.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1360,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.44.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 1155,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.42.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1165,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.34.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 126,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.40.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 636,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.38.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 148,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.52.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 521,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.20.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 821,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.64.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 738,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.64.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 717,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.28.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 34,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.50.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 1072,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.46.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 293,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.38.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 213,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.82_lon_-118.30.json",
+      "bounds": {
+        "south": 33.82,
+        "north": 33.84,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 292,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.58.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 68,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.32.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 1227,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.32.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 518,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.50.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 481,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.54.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 85,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.50.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 215,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.52.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 51,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.58.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 255,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.62.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 1137,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.44.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 433,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.46.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 176,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.52.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 478,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.30.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 1229,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.66.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.66,
+        "east": -118.64
+      },
+      "record_count": 349,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.04_lon_-118.56.json",
+      "bounds": {
+        "south": 34.04,
+        "north": 34.06,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 347,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.44.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 186,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.44.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 164,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.52.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 201,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.40.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 345,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.40.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 186,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.44.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 493,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.50.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 1707,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.50.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 491,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.88_lon_-118.30.json",
+      "bounds": {
+        "south": 33.88,
+        "north": 33.900000000000006,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 862,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.44.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 2139,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.62.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.62,
+        "east": -118.60000000000001
+      },
+      "record_count": 428,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.22.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 876,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.44.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 195,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.86_lon_-118.32.json",
+      "bounds": {
+        "south": 33.86,
+        "north": 33.88,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 118,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.28.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 147,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.40.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 390,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.40.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 169,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.40.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 93,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.58.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 34,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.52.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 347,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.50.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 320,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.58.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 41,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.46.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 185,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.56.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 125,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.58.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 192,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.28.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 107,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.20.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 141,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.42.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 193,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.70_lon_-118.34.json",
+      "bounds": {
+        "south": 33.7,
+        "north": 33.720000000000006,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 12,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_33.72_lon_-118.34.json",
+      "bounds": {
+        "south": 33.72,
+        "north": 33.74,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 72,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.60.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 162,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.48.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 248,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.64.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 104,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.32.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 111,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.24.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 151,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.42.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 122,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.26_lon_-118.30.json",
+      "bounds": {
+        "south": 34.26,
+        "north": 34.28,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 121,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.34.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 314,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.52.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 115,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.50.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 76,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.18.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 233,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.22.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 4,
+      "year_range": {
+        "min": 2010,
+        "max": 2019
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.46.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.46,
+        "east": -118.44
+      },
+      "record_count": 256,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.30.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 153,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.42.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 250,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.40.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 149,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.24.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 277,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.42.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 67,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.36.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 283,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.36.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 102,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.54.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 139,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.32_lon_-118.48.json",
+      "bounds": {
+        "south": 34.32,
+        "north": 34.34,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 249,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.30.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 166,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.58.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 8,
+      "year_range": {
+        "min": 2011,
+        "max": 2021
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.50.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 102,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.66.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.66,
+        "east": -118.64
+      },
+      "record_count": 215,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.26.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 98,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.54.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.54,
+        "east": -118.52000000000001
+      },
+      "record_count": 33,
+      "year_range": {
+        "min": 2011,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.52.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 11,
+      "year_range": {
+        "min": 2010,
+        "max": 2022
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.16.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 70,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.10_lon_-118.48.json",
+      "bounds": {
+        "south": 34.1,
+        "north": 34.120000000000005,
+        "west": -118.48,
+        "east": -118.46000000000001
+      },
+      "record_count": 108,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.52.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.52,
+        "east": -118.5
+      },
+      "record_count": 19,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.70_lon_-118.26.json",
+      "bounds": {
+        "south": 33.7,
+        "north": 33.720000000000006,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 25,
+      "year_range": {
+        "min": 2011,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.24.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 10,
+      "year_range": {
+        "min": 2010,
+        "max": 2021
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.18.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 75,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.88_lon_-118.42.json",
+      "bounds": {
+        "south": 33.88,
+        "north": 33.900000000000006,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 30,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.26.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.26,
+        "east": -118.24000000000001
+      },
+      "record_count": 13,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.92_lon_-118.32.json",
+      "bounds": {
+        "south": 33.92,
+        "north": 33.940000000000005,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 55,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.34.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 10,
+      "year_range": {
+        "min": 2010,
+        "max": 2019
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.42.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 40,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.56.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 29,
+      "year_range": {
+        "min": 2010,
+        "max": 2022
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.44.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.44,
+        "east": -118.42
+      },
+      "record_count": 46,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.36.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 49,
+      "year_range": {
+        "min": 2010,
+        "max": 2021
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.28.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 86,
+      "year_range": {
+        "min": 2010,
+        "max": 2025
+      }
+    },
+    {
+      "filename": "lat_34.24_lon_-118.64.json",
+      "bounds": {
+        "south": 34.24,
+        "north": 34.260000000000005,
+        "west": -118.64,
+        "east": -118.62
+      },
+      "record_count": 17,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.58.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 56,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.38.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 14,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.60.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 33,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.24.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 4,
+      "year_range": {
+        "min": 2012,
+        "max": 2020
+      }
+    },
+    {
+      "filename": "lat_33.72_lon_-118.24.json",
+      "bounds": {
+        "south": 33.72,
+        "north": 33.74,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 11,
+      "year_range": {
+        "min": 2011,
+        "max": 2021
+      }
+    },
+    {
+      "filename": "lat_33.98_lon_-118.38.json",
+      "bounds": {
+        "south": 33.98,
+        "north": 34,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 37,
+      "year_range": {
+        "min": 2010,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.12_lon_-118.56.json",
+      "bounds": {
+        "south": 34.12,
+        "north": 34.14,
+        "west": -118.56,
+        "east": -118.54
+      },
+      "record_count": 5,
+      "year_range": {
+        "min": 2014,
+        "max": 2022
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.34.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 55,
+      "year_range": {
+        "min": 2010,
+        "max": 2021
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.68.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.68,
+        "east": -118.66000000000001
+      },
+      "record_count": 26,
+      "year_range": {
+        "min": 2010,
+        "max": 2022
+      }
+    },
+    {
+      "filename": "lat_34.20_lon_-118.68.json",
+      "bounds": {
+        "south": 34.2,
+        "north": 34.220000000000006,
+        "west": -118.68,
+        "east": -118.66000000000001
+      },
+      "record_count": 10,
+      "year_range": {
+        "min": 2011,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_34.22_lon_-118.32.json",
+      "bounds": {
+        "south": 34.22,
+        "north": 34.24,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 5,
+      "year_range": {
+        "min": 2011,
+        "max": 2019
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.30.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 26,
+      "year_range": {
+        "min": 2010,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_33.82_lon_-118.24.json",
+      "bounds": {
+        "south": 33.82,
+        "north": 33.84,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 17,
+      "year_range": {
+        "min": 2010,
+        "max": 2022
+      }
+    },
+    {
+      "filename": "lat_34.28_lon_-118.30.json",
+      "bounds": {
+        "south": 34.28,
+        "north": 34.300000000000004,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 8,
+      "year_range": {
+        "min": 2015,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.16.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 5,
+      "year_range": {
+        "min": 2011,
+        "max": 2023
+      }
+    },
+    {
+      "filename": "lat_33.88_lon_-118.16.json",
+      "bounds": {
+        "south": 33.88,
+        "north": 33.900000000000006,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2012,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.36.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.36,
+        "east": -118.34
+      },
+      "record_count": 10,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.20.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 3,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.20.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 11,
+      "year_range": {
+        "min": 2010,
+        "max": 2017
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.16.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 12,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.50.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 28,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.88_lon_-118.18.json",
+      "bounds": {
+        "south": 33.88,
+        "north": 33.900000000000006,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 29,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.50.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.5,
+        "east": -118.48
+      },
+      "record_count": 30,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.84_lon_-118.40.json",
+      "bounds": {
+        "south": 33.84,
+        "north": 33.86000000000001,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 15,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.22.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.22,
+        "east": -118.2
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.20.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.74_lon_-118.12.json",
+      "bounds": {
+        "south": 33.74,
+        "north": 33.760000000000005,
+        "west": -118.12,
+        "east": -118.10000000000001
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.82_lon_-118.20.json",
+      "bounds": {
+        "south": 33.82,
+        "north": 33.84,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.94_lon_-118.14.json",
+      "bounds": {
+        "south": 33.94,
+        "north": 33.96,
+        "west": -118.14,
+        "east": -118.12
+      },
+      "record_count": 25,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.76_lon_-118.12.json",
+      "bounds": {
+        "south": 33.76,
+        "north": 33.78,
+        "west": -118.12,
+        "east": -118.10000000000001
+      },
+      "record_count": 18,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.32.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 4,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.16.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.84_lon_-118.20.json",
+      "bounds": {
+        "south": 33.84,
+        "north": 33.86000000000001,
+        "west": -118.2,
+        "east": -118.18
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.14.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.14,
+        "east": -118.12
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.38.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2010,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.38.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2010,
+        "max": 2010
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.32.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.34.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.34,
+        "east": -118.32000000000001
+      },
+      "record_count": 4,
+      "year_range": {
+        "min": 2010,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.12.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.12,
+        "east": -118.10000000000001
+      },
+      "record_count": 3,
+      "year_range": {
+        "min": 2010,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.40.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2011,
+        "max": 2011
+      }
+    },
+    {
+      "filename": "lat_34.00_lon_-118.18.json",
+      "bounds": {
+        "south": 34,
+        "north": 34.02,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2011,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.28.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2011,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.18.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.18,
+        "east": -118.16000000000001
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2011,
+        "max": 2011
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.32.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.32,
+        "east": -118.3
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2011,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_33.78_lon_-118.16.json",
+      "bounds": {
+        "south": 33.78,
+        "north": 33.800000000000004,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2012,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_33.96_lon_-118.24.json",
+      "bounds": {
+        "south": 33.96,
+        "north": 33.980000000000004,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2012,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.60.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2012,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_34.02_lon_-118.16.json",
+      "bounds": {
+        "south": 34.02,
+        "north": 34.040000000000006,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2012,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_33.80_lon_-118.14.json",
+      "bounds": {
+        "south": 33.8,
+        "north": 33.82,
+        "west": -118.14,
+        "east": -118.12
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2012,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_33.88_lon_-118.38.json",
+      "bounds": {
+        "south": 33.88,
+        "north": 33.900000000000006,
+        "west": -118.38,
+        "east": -118.36
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2012,
+        "max": 2012
+      }
+    },
+    {
+      "filename": "lat_33.86_lon_-118.42.json",
+      "bounds": {
+        "south": 33.86,
+        "north": 33.88,
+        "west": -118.42,
+        "east": -118.4
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2013,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_33.84_lon_-118.28.json",
+      "bounds": {
+        "south": 33.84,
+        "north": 33.86000000000001,
+        "west": -118.28,
+        "east": -118.26
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2013,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.16.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.16,
+        "east": -118.14
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2013,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_33.90_lon_-118.24.json",
+      "bounds": {
+        "south": 33.9,
+        "north": 33.92,
+        "west": -118.24,
+        "east": -118.22
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2013,
+        "max": 2013
+      }
+    },
+    {
+      "filename": "lat_33.86_lon_-118.40.json",
+      "bounds": {
+        "south": 33.86,
+        "north": 33.88,
+        "west": -118.4,
+        "east": -118.38000000000001
+      },
+      "record_count": 2,
+      "year_range": {
+        "min": 2013,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.16_lon_-118.68.json",
+      "bounds": {
+        "south": 34.16,
+        "north": 34.18,
+        "west": -118.68,
+        "east": -118.66000000000001
+      },
+      "record_count": 8,
+      "year_range": {
+        "min": 2013,
+        "max": 2024
+      }
+    },
+    {
+      "filename": "lat_34.18_lon_-118.30.json",
+      "bounds": {
+        "south": 34.18,
+        "north": 34.2,
+        "west": -118.3,
+        "east": -118.28
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2014,
+        "max": 2014
+      }
+    },
+    {
+      "filename": "lat_34.06_lon_-118.60.json",
+      "bounds": {
+        "south": 34.06,
+        "north": 34.080000000000005,
+        "west": -118.6,
+        "east": -118.58
+      },
+      "record_count": 7,
+      "year_range": {
+        "min": 2014,
+        "max": 2018
+      }
+    },
+    {
+      "filename": "lat_34.08_lon_-118.14.json",
+      "bounds": {
+        "south": 34.08,
+        "north": 34.1,
+        "west": -118.14,
+        "east": -118.12
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2015,
+        "max": 2015
+      }
+    },
+    {
+      "filename": "lat_34.14_lon_-118.66.json",
+      "bounds": {
+        "south": 34.14,
+        "north": 34.160000000000004,
+        "west": -118.66,
+        "east": -118.64
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2019,
+        "max": 2019
+      }
+    },
+    {
+      "filename": "lat_34.30_lon_-118.58.json",
+      "bounds": {
+        "south": 34.3,
+        "north": 34.32,
+        "west": -118.58,
+        "east": -118.56
+      },
+      "record_count": 1,
+      "year_range": {
+        "min": 2024,
+        "max": 2024
+      }
+    }
+  ],
+  "generated_at": "2026-01-14T21:53:12.916Z",
+  "total_tiles": 419,
+  "total_records": 620659
+}

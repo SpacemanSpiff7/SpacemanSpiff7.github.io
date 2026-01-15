@@ -1,0 +1,2702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA Traffic Collisions Dashboard | Simone Longo</title>
+    <meta name="description" content="Interactive dashboard analyzing 620K+ LA traffic collision records (2010-2021) with map visualization, temporal analysis, and filtering.">
+
+    <!-- Skip main site script -->
+    <script>window.SKIP_MAIN_SCRIPT = true;</script>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="../style.css" as="style">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/rbush@3.0.1/rbush.min.js"></script>
+
+    <style>
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 80px 2rem 3rem;
+            background: var(--color-background);
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--color-accent-olive);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 1.125rem;
+        }
+
+        /* KPI Cards - Single Horizontal Row */
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent-rust);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Responsive: 2x2 grid on tablets */
+        @media (max-width: 1024px) {
+            .kpi-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Responsive: Stack on mobile */
+        @media (max-width: 768px) {
+            .kpi-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Map Section */
+        .map-section {
+            position: relative;
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            height: 650px;
+            min-height: 650px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--color-accent-olive);
+        }
+
+        /* Override for table section header - white text */
+        .table-section .section-header h2 {
+            color: #ffffff;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--color-accent-rust);
+            background: rgba(211, 84, 0, 0.15);
+            color: #ff9a6c;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary.active {
+            background: var(--color-accent-rust);
+            color: white;
+            text-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(211, 84, 0, 0.25);
+        }
+
+        .collision-map {
+            width: 100%;
+            height: 650px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .map-stats {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            text-align: center;
+        }
+
+        /* Map Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.75rem;
+            z-index: 1;
+            max-width: 200px;
+        }
+
+        .map-legend h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .legend-label {
+            color: var(--color-text);
+            font-size: 0.75rem;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 768px) {
+            .map-legend {
+                bottom: 10px;
+                left: 10px;
+                font-size: 0.65rem;
+                padding: 8px 12px;
+            }
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            height: 280px;
+        }
+
+        .chart-container h3 {
+            font-size: 1.125rem;
+            color: var(--color-accent-olive);
+            margin-bottom: 1rem;
+        }
+
+        .chart-container canvas {
+            max-height: 200px;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 3rem;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-header h3 {
+            font-size: 1.25rem;
+            color: var(--color-accent-olive);
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--color-accent-rust);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+
+        .btn-text:hover {
+            opacity: 0.7;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chip {
+            padding: 0.5rem 1rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            border-color: var(--color-accent-rust);
+            background: var(--color-accent-rust);
+            color: white;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            right: 0;
+            top: 80px;
+            width: 400px;
+            height: calc(100vh - 80px);
+            background: var(--color-surface);
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+        }
+
+        .btn-icon:hover {
+            color: var(--color-accent-rust);
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .detail-value {
+            color: var(--color-text);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 60px 1rem 2rem;
+            }
+
+            .kpi-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .collision-map {
+                height: 400px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .detail-panel {
+                width: 100%;
+                top: 60px;
+                height: calc(100vh - 60px);
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-panel {
+                padding: 1rem;
+            }
+        }
+
+        /* ===== Hover Tooltip Styling ===== */
+
+        /* MapLibre popup container override */
+        .maplibregl-popup.collision-tooltip .maplibregl-popup-content {
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            min-width: 250px;
+            max-width: 300px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .maplibregl-popup.collision-tooltip .maplibregl-popup-tip {
+            border-top-color: #1a1a1a;
+        }
+
+        /* Tooltip header with area name and severity badge */
+        .tooltip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #1a1a1a;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            flex: 1;
+        }
+
+        .tooltip-severity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tooltip body with collision details */
+        .tooltip-body {
+            padding: 10px 12px;
+            background: #2a2a2a;
+        }
+
+        .tooltip-row {
+            display: flex;
+            margin-bottom: 6px;
+        }
+
+        .tooltip-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-label {
+            flex: 0 0 75px;
+            font-weight: 500;
+            color: #999;
+        }
+
+        .tooltip-value {
+            flex: 1;
+            color: #fff;
+            word-break: break-word;
+        }
+
+        /* Special circumstance badges */
+        .tooltip-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin-top: 8px;
+            margin-right: 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tooltip-badge.hit-run {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .tooltip-badge.dui {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .badge-warn {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e74c3c;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tooltip-badge.severity-property_damage { background: #6c757d; color: #fff; }
+        .tooltip-badge.severity-minor_injury { background: #ffc107; color: #000; }
+        .tooltip-badge.severity-severe_injury { background: #fd7e14; color: #fff; }
+        .tooltip-badge.severity-fatal { background: #dc3545; color: #fff; }
+        .tooltip-badge.severity-unknown { background: #6c757d; color: #fff; }
+
+        /* Detail panel sections */
+        .detail-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .detail-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-accent-olive);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .detail-row-full {
+            grid-column: 1 / -1;
+        }
+
+        .text-danger {
+            color: #e74c3c !important;
+            font-weight: 600;
+        }
+
+        /* Footer hint */
+        .tooltip-footer {
+            padding: 8px 12px;
+            background: #222;
+            border-top: 1px solid #333;
+            text-align: center;
+        }
+
+        .tooltip-hint {
+            font-size: 11px;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Debug section (collapsible) */
+        .tooltip-debug {
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .tooltip-debug details {
+            padding: 8px 12px;
+        }
+
+        .tooltip-debug summary {
+            font-size: 11px;
+            color: #888;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tooltip-debug summary:hover {
+            color: #aaa;
+        }
+
+        .debug-content {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #2a2a2a;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            color: #aaa;
+        }
+
+        .debug-content div {
+            margin-bottom: 4px;
+        }
+
+        /* ===== Data Table Styling ===== */
+
+        .table-section {
+            display: flex;
+            flex-direction: column;
+            background: #2a2a2a;
+            border-radius: var(--radius-xl);  /* Match map-section border-radius */
+            padding: 1.5rem;
+            height: 650px;
+            min-height: 650px;
+            overflow: hidden;  /* Ensure table corners are clipped */
+        }
+
+        @media (max-width: 1200px) {
+            .table-section {
+                max-height: 400px;
+            }
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            margin: 0 0 0.25rem 0;
+            color: #ffffff;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-count {
+            font-size: 0.875rem;
+            color: #b3b3b3;
+            font-weight: 400;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .table-container-fixed {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .collisions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .collisions-table thead {
+            background: #1a1a1a;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .collisions-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collisions-table th:hover {
+            background: #252525;
+        }
+
+        .sort-icon {
+            font-size: 0.75rem;
+            color: #666;
+            margin-left: 0.25rem;
+        }
+
+        .collisions-table th.sorted-asc .sort-icon {
+            color: #4CAF50;
+        }
+
+        .collisions-table th.sorted-desc .sort-icon {
+            color: #4CAF50;
+        }
+
+        .collisions-table tbody tr {
+            border-bottom: 1px solid #333;
+            transition: background-color 0.15s;
+            cursor: pointer;
+        }
+
+        .collisions-table tbody tr:hover {
+            background: #333;
+        }
+
+        .collisions-table tbody tr.highlighted {
+            background-color: rgba(255, 154, 108, 0.3) !important;
+            border-left: 3px solid var(--color-accent-rust);
+        }
+
+        .collisions-table td {
+            padding: 0.75rem;
+            color: #ddd;
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .severity-property_damage { background: #6c757d; }
+        .severity-minor_injury { background: #ffc107; }
+        .severity-severe_injury { background: #fd7e14; }
+        .severity-fatal { background: #dc3545; }
+
+        #tableLoadMore {
+            padding: 1rem;
+            text-align: center;
+            color: #999;
+            font-size: 0.875rem;
+            border-top: 1px solid #333;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .collisions-table {
+                font-size: 0.75rem;
+            }
+
+            .collisions-table th,
+            .collisions-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
+                <li><a href="la-collisions-dashboard.html" class="nav-link active" aria-current="page">LA Collisions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <h1>LA Traffic Collisions (2010-2021)</h1>
+            <p class="subtitle">620,659 collision records from LAPD</p>
+        </header>
+
+        <!-- KPI Cards Section -->
+        <section class="kpi-cards">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Collisions</div>
+                <div class="kpi-value" id="totalCollisions">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Avg Per Day</div>
+                <div class="kpi-value" id="avgPerDay">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Peak Hour</div>
+                <div class="kpi-value" id="peakHour">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Most Collisions</div>
+                <div class="kpi-value" id="mostDangerousArea">-</div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left: Map -->
+            <section class="map-section">
+                <div class="section-header">
+                    <h2>Collision Map</h2>
+                    <div class="map-controls">
+                        <button id="colorByType" class="btn-secondary active">By Collision Type</button>
+                        <button id="colorByTime" class="btn-secondary">By Time of Day</button>
+                    </div>
+                </div>
+                <div id="map" class="collision-map"></div>
+                <div class="map-legend" id="mapLegend">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="map-stats">
+                    <span id="visibleCollisions">0</span> collisions in view
+                    <span id="samplingIndicator" style="display:none;"></span>
+                </div>
+            </section>
+
+            <!-- Right: Data Table (40%) - Always Visible -->
+            <section class="table-section">
+                <div class="section-header">
+                    <div>
+                        <h2>Collisions in View</h2>
+                        <span id="tableCount" class="table-count">0 collisions</span>
+                    </div>
+                    <button id="exportCSV" class="btn-secondary">Export CSV</button>
+                </div>
+                <div class="table-container-fixed">
+                    <table id="collisionsTable" class="collisions-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="date_occ">Date <span class="sort-icon">⇅</span></th>
+                                <th data-sort="time_occ_minutes">Time <span class="sort-icon">⇅</span></th>
+                                <th data-sort="severity">Severity <span class="sort-icon">⇅</span></th>
+                                <th data-sort="collision_type">Type <span class="sort-icon">⇅</span></th>
+                                <th data-sort="address">Location <span class="sort-icon">⇅</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="tableLoadMore" style="display: none; padding: 0.5rem; text-align: center; color: #999; font-size: 0.875rem;"></div>
+            </section>
+        </div>
+
+        <!-- Charts Section (moved to bottom) -->
+        <section class="charts-grid">
+            <div class="chart-container">
+                <h3>Collisions by Hour</h3>
+                <canvas id="hourChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Collisions by Day of Week</h3>
+                <canvas id="dowChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Trend Over Time</h3>
+                <canvas id="yearChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Filter Panel -->
+        <aside id="filterPanel" class="filter-panel">
+            <div class="filter-header">
+                <h3>Filters</h3>
+                <button id="resetFilters" class="btn-text">Reset All</button>
+            </div>
+
+            <!-- Time of Day Filter -->
+            <div class="filter-group">
+                <label>Time of Day</label>
+                <div class="chip-group" id="timeFilters">
+                    <button class="chip active" data-bucket="AM_PEAK">AM Peak</button>
+                    <button class="chip active" data-bucket="MIDDAY">Midday</button>
+                    <button class="chip active" data-bucket="PM_PEAK">PM Peak</button>
+                    <button class="chip active" data-bucket="EVENING">Evening</button>
+                    <button class="chip active" data-bucket="LATE_NIGHT">Late Night</button>
+                    <button class="chip active" data-bucket="EARLY_MORNING">Early AM</button>
+                </div>
+            </div>
+
+            <!-- Day of Week Filter -->
+            <div class="filter-group">
+                <label>Days of Week</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="filterWeekday" checked> Weekdays</label>
+                    <label><input type="checkbox" id="filterWeekend" checked> Weekends</label>
+                </div>
+            </div>
+
+            <!-- Collision Type Filter -->
+            <div class="filter-group">
+                <label>Collision Type</label>
+                <div class="chip-group" id="collisionTypeFilters">
+                    <button class="chip active" data-type="vehicle-to-vehicle">Vehicle-Vehicle</button>
+                    <button class="chip active" data-type="vehicle-pedestrian">Pedestrian</button>
+                    <button class="chip active" data-type="vehicle-motorcycle">Motorcycle</button>
+                    <button class="chip active" data-type="vehicle-bicycle">Bicycle</button>
+                </div>
+            </div>
+
+            <!-- Severity Filter -->
+            <div class="filter-group">
+                <label>Severity Level</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="filterPropertyDamage" checked> Property Damage Only</label>
+                    <label><input type="checkbox" id="filterMinorInjury" checked> Minor Injury</label>
+                    <label><input type="checkbox" id="filterSevereInjury" checked> Severe Injury</label>
+                    <label><input type="checkbox" id="filterFatal" checked> Fatalities</label>
+                </div>
+            </div>
+
+            <!-- Special Circumstances -->
+            <div class="filter-group">
+                <label>Special Circumstances</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="filterHitAndRun"> Hit & Run Only</label>
+                    <label><input type="checkbox" id="filterDUI"> DUI-Related Only</label>
+                </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="filter-group">
+                <label>Date Range</label>
+                <input type="date" id="dateStart" class="form-control" min="2010-01-01" max="2021-12-31">
+                <input type="date" id="dateEnd" class="form-control" min="2010-01-01" max="2021-12-31" style="margin-top: 0.5rem;">
+            </div>
+        </aside>
+
+        <!-- Collision Detail Panel -->
+        <aside id="detailPanel" class="detail-panel" style="display:none;">
+            <div class="detail-header">
+                <h3>Collision Details</h3>
+                <button id="closeDetail" class="btn-icon">&times;</button>
+            </div>
+            <div class="detail-content" id="detailContent"></div>
+        </aside>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        class LACollisionDashboard {
+            constructor() {
+                // State
+                this.overview = null;
+                this.manifest = null;
+                this.loadedTiles = new Map();
+                this.spatialIndex = null;
+                this.activeColorScheme = 'collision_type'; // or 'time_bucket'
+                this.activeFilters = {
+                    dateStart: null,
+                    dateEnd: null,
+                    timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
+                    weekday: true,
+                    weekend: true,
+                    collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle'],
+                    severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal'],
+                    showHitAndRun: false,
+                    showDUI: false
+                };
+                this.map = null;
+                this.selectedCollisionId = null; // Track selected collision for highlighting
+                this.charts = {};
+
+                // Config
+                this.tileSize = 0.02;
+                this.maxPointsToRender = 50000;
+                this.debounceDelay = 200;
+
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.loadOverview();
+                    this.initMap();
+                    this.initCharts();
+                    this.updateKPIs(this.overview);
+                    this.updateChartsFromOverview();
+                    this.attachEventListeners();
+                    this.setupMobileNav();
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                }
+            }
+
+            async loadOverview() {
+                const [overview, manifest] = await Promise.all([
+                    fetch('../assets/collisions/overview.json').then(r => r.json()),
+                    fetch('../assets/collisions/manifest.json').then(r => r.json())
+                ]);
+
+                this.overview = overview;
+                this.manifest = manifest;
+
+                // Initialize RBush with tile bounding boxes
+                this.spatialIndex = new RBush();
+                this.spatialIndex.load(manifest.tiles.map(tile => ({
+                    minX: tile.bounds.west,
+                    minY: tile.bounds.south,
+                    maxX: tile.bounds.east,
+                    maxY: tile.bounds.north,
+                    tile: tile.filename
+                })));
+            }
+
+            initMap() {
+                this.map = new maplibregl.Map({
+                    container: 'map',
+                    style: {
+                        version: 8,
+                        sources: {
+                            'osm': {
+                                type: 'raster',
+                                tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                                tileSize: 256,
+                                attribution: '&copy; OpenStreetMap contributors'
+                            }
+                        },
+                        layers: [{
+                            id: 'osm',
+                            type: 'raster',
+                            source: 'osm'
+                        }]
+                    },
+                    center: [-118.4, 34.05],
+                    zoom: 10,
+                    maxZoom: 18  // Prevent zoom beyond OSM tile availability
+                });
+
+                this.map.on('load', () => {
+                    this.map.addSource('collisions', {
+                        type: 'geojson',
+                        data: { type: 'FeatureCollection', features: [] },
+                        generateId: true  // Auto-generate IDs for setFeatureState
+                    });
+
+                    // Helper function to create collision type heatmap with wide color range
+                    const createCollisionHeatmap = (collisionType, colorLight, colorBright, colorIntense) => ({
+                        id: `collisions-heatmap-${collisionType}`,
+                        type: 'heatmap',
+                        source: 'collisions',
+                        filter: ['==', ['get', 'collision_type'], collisionType],
+                        layout: {
+                            visibility: 'visible'
+                        },
+                        paint: {
+                            // Higher intensity for better heat spread
+                            'heatmap-intensity': [
+                                'interpolate', ['linear'], ['zoom'],
+                                9, 2.0,
+                                12, 4.0
+                            ],
+
+                            // Moderate radius for detail
+                            'heatmap-radius': [
+                                'interpolate', ['linear'], ['zoom'],
+                                9, 22,
+                                10, 18,
+                                11, 14,
+                                12, 10
+                            ],
+
+                            // Weight based on density - higher for better visibility
+                            'heatmap-weight': [
+                                'interpolate', ['linear'],
+                                ['coalesce', ['get', '_density'], 1],
+                                1, 0.3,
+                                5, 0.6,
+                                10, 0.85,
+                                20, 1.0
+                            ],
+
+                            // Wide color range: transparent → light → bright → intense
+                            // Only most concentrated areas show intense bright color
+                            'heatmap-color': [
+                                'interpolate', ['linear'], ['heatmap-density'],
+                                0.0, 'rgba(0, 0, 0, 0)',        // Transparent
+                                0.1, colorLight,                 // Very faint (barely visible)
+                                0.3, colorLight,                 // Light (low density)
+                                0.5, colorBright,                // Bright (medium density)
+                                0.75, colorBright,               // Bright (high density)
+                                0.9, colorIntense,               // Very bright (very high)
+                                1.0, colorIntense                // Intense (maximum concentration)
+                            ],
+
+                            // Progressive opacity - only bright areas very visible
+                            'heatmap-opacity': [
+                                'interpolate', ['linear'], ['zoom'],
+                                9, 0.7,   // Lower base opacity for layering
+                                11, 0.55,
+                                12, 0.35,
+                                13, 0
+                            ]
+                        }
+                    });
+
+                    // Add 5 collision-type heatmaps with wide color ranges
+                    // Vehicle-Vehicle: Light blue → Bright blue → Electric blue
+                    this.map.addLayer(createCollisionHeatmap(
+                        'vehicle-to-vehicle',
+                        'rgba(135, 206, 250, 0.15)',  // Light sky blue
+                        'rgba(30, 144, 255, 0.6)',    // Dodger blue
+                        'rgba(0, 191, 255, 1.0)'      // Electric deep sky blue
+                    ));
+
+                    // Vehicle-Pedestrian: Light red → Bright red → Electric red
+                    this.map.addLayer(createCollisionHeatmap(
+                        'vehicle-pedestrian',
+                        'rgba(255, 160, 160, 0.15)',  // Light coral
+                        'rgba(255, 50, 50, 0.6)',     // Bright red
+                        'rgba(255, 0, 0, 1.0)'        // Pure red
+                    ));
+
+                    // Vehicle-Motorcycle: Light orange → Bright orange → Electric orange
+                    this.map.addLayer(createCollisionHeatmap(
+                        'vehicle-motorcycle',
+                        'rgba(255, 200, 120, 0.15)',  // Light peach
+                        'rgba(255, 140, 0, 0.6)',     // Dark orange
+                        'rgba(255, 100, 0, 1.0)'      // Bright orange-red
+                    ));
+
+                    // Vehicle-Bicycle: Light green → Bright green → Electric green
+                    this.map.addLayer(createCollisionHeatmap(
+                        'vehicle-bicycle',
+                        'rgba(144, 238, 144, 0.15)',  // Light green
+                        'rgba(50, 205, 50, 0.6)',     // Lime green
+                        'rgba(0, 255, 0, 1.0)'        // Pure green
+                    ));
+
+                    // Other: Light gray → Medium gray → Bright white
+                    this.map.addLayer(createCollisionHeatmap(
+                        'other',
+                        'rgba(200, 200, 200, 0.15)',  // Light gray
+                        'rgba(169, 169, 169, 0.6)',   // Dark gray
+                        'rgba(255, 255, 255, 1.0)'    // White
+                    ));
+
+                    // Scatter plot with dynamic color coding
+                    this.map.addLayer({
+                        id: 'collisions-scatter',
+                        type: 'circle',
+                        source: 'collisions',
+                        layout: { visibility: 'visible' },
+                        paint: {
+                            'circle-radius': [
+                                'interpolate', ['linear'], ['zoom'],
+                                9, 2,
+                                10, 4,
+                                13, 6,
+                                15, 8
+                            ],
+                            'circle-color': [
+                                'case',
+                                ['==', ['get', 'collision_type'], null], '#bdc3c7',
+                                [
+                                    'match',
+                                    ['get', 'collision_type'],
+                                    'vehicle-to-vehicle', '#3498db',
+                                    'vehicle-pedestrian', '#e74c3c',
+                                    'vehicle-motorcycle', '#f39c12',
+                                    'vehicle-bicycle', '#2ecc71',
+                                    'other', '#95a5a6',
+                                    '#bdc3c7'
+                                ]
+                            ],
+                            'circle-opacity': [
+                                'interpolate', ['linear'], ['zoom'],
+                                11, 0,      // Invisible at low zoom (heatmap visible)
+                                12, 0.1,    // Barely visible
+                                13, [       // At zoom 13+: check if selected
+                                    'case',
+                                    ['boolean', ['feature-state', 'selected'], false],
+                                    1.0,    // Selected: 100% opaque
+                                    0.4     // Not selected: 40% opaque
+                                ],
+                                14, [
+                                    'case',
+                                    ['boolean', ['feature-state', 'selected'], false],
+                                    1.0,    // Selected: 100% opaque
+                                    0.6     // Not selected: 60% opaque
+                                ],
+                                15, [
+                                    'case',
+                                    ['boolean', ['feature-state', 'selected'], false],
+                                    1.0,    // Selected: 100% opaque
+                                    0.75    // Not selected: 75% opaque
+                                ],
+                                16, [
+                                    'case',
+                                    ['boolean', ['feature-state', 'selected'], false],
+                                    1.0,    // Selected: 100% opaque
+                                    0.9     // Not selected: 90% opaque
+                                ],
+                                17, [
+                                    'case',
+                                    ['boolean', ['feature-state', 'selected'], false],
+                                    1.0,    // Selected: 100% opaque
+                                    0.95    // Not selected: 95% opaque
+                                ]
+                            ],
+                            'circle-stroke-color': [
+                                'case',
+                                ['boolean', ['feature-state', 'selected'], false],
+                                // When selected: use neon version of collision type color
+                                [
+                                    'match', ['get', 'collision_type'],
+                                    'vehicle-to-vehicle', '#00BFFF',      // Electric blue
+                                    'vehicle-pedestrian', '#FF0000',      // Electric red
+                                    'vehicle-motorcycle', '#FF6400',      // Electric orange
+                                    'vehicle-bicycle', '#00FF00',         // Electric green
+                                    'other', '#FFFFFF',                   // White
+                                    '#FFFFFF'                             // Default white
+                                ],
+                                // When not selected: white
+                                '#FFFFFF'
+                            ],
+                            'circle-stroke-width': [
+                                'case',
+                                ['boolean', ['feature-state', 'selected'], false],
+                                5,  // 5px thick stroke when selected (was 3px)
+                                [
+                                    'interpolate', ['linear'],
+                                    ['coalesce', ['get', '_density'], 1],
+                                    1, 0.3,      // Thin stroke for single collisions
+                                    5, 0.6,      // Medium stroke for moderate density
+                                    10, 1.0      // Thick stroke for high density
+                                ]
+                            ],
+                            'circle-stroke-opacity': [
+                                'case',
+                                ['boolean', ['feature-state', 'selected'], false],
+                                1.0,  // Full opacity when selected
+                                [
+                                    'interpolate', ['linear'],
+                                    ['coalesce', ['get', '_density'], 1],
+                                    1, 0.2,
+                                    5, 0.5,
+                                    10, 0.7
+                                ]
+                            ]
+                        }
+                    });
+
+                    // Invisible hover detection layer (always visible for mouse events)
+                    this.map.addLayer({
+                        id: 'collisions-hover',
+                        type: 'circle',
+                        source: 'collisions',
+                        layout: { visibility: 'visible' },
+                        paint: {
+                            'circle-radius': [
+                                'interpolate', ['linear'], ['zoom'],
+                                10, 10,
+                                15, 18
+                            ],
+                            'circle-opacity': 0,
+                            'circle-stroke-width': 0
+                        }
+                    });
+
+                    // Create reusable popup for hover tooltips
+                    this.popup = new maplibregl.Popup({
+                        closeButton: false,    // No close button (auto-dismiss on mouseleave)
+                        closeOnClick: false,   // Don't close when map is clicked
+                        offset: 15,            // Offset from cursor (px)
+                        className: 'collision-tooltip'  // Custom CSS class
+                    });
+
+                    this.updateMapData();
+                    this.updateLegend(); // Initialize legend with default color scheme
+                });
+
+                // Map updates quickly (200ms)
+                this.map.on('moveend', this.debounce(() => this.updateMapData(), this.debounceDelay));
+                this.map.on('zoomend', this.debounce(() => this.updateMapData(), this.debounceDelay));
+
+                // Table updates more slowly (500ms) - separate debounce for better performance
+                this.map.on('moveend', this.debounce(() => {
+                    const viewport = this.getViewport();
+                    const filteredData = this.getFilteredData(viewport);
+                    this.updateDataTable(filteredData);
+                }, 500));
+                this.map.on('zoomend', this.debounce(() => {
+                    const viewport = this.getViewport();
+                    const filteredData = this.getFilteredData(viewport);
+                    this.updateDataTable(filteredData);
+                }, 500));
+
+                this.map.on('click', 'collisions-scatter', (e) => {
+                    if (e.features.length > 0) {
+                        const feature = e.features[0];
+                        const drNumber = feature.properties.dr_number;
+
+                        // Remove previous highlight
+                        if (this.selectedCollisionId) {
+                            this.map.setFeatureState(
+                                { source: 'collisions', id: this.selectedCollisionId },
+                                { selected: false }
+                            );
+                        }
+
+                        // Add new highlight
+                        this.selectedCollisionId = feature.id;
+                        this.map.setFeatureState(
+                            { source: 'collisions', id: feature.id },
+                            { selected: true }
+                        );
+
+                        // Highlight corresponding table row
+                        this.highlightTableRow(drNumber);
+
+                        // Show detail panel
+                        this.showCollisionDetail(feature.properties);
+                    }
+                });
+
+                // Track last hover position to avoid redundant updates
+                this.lastHoverCoords = null;
+
+                // Hover tooltip on points layer
+                this.map.on('mousemove', 'collisions-hover', (e) => {
+                    if (e.features.length > 0) {
+                        // Change cursor
+                        this.map.getCanvas().style.cursor = 'pointer';
+
+                        // Check if mouse moved to different point (avoid redundant updates)
+                        const coords = e.lngLat;
+                        const coordsKey = `${coords.lng.toFixed(6)},${coords.lat.toFixed(6)}`;
+
+                        if (this.lastHoverCoords === coordsKey) return;
+                        this.lastHoverCoords = coordsKey;
+
+                        // Get current zoom level
+                        const currentZoom = this.map.getZoom();
+
+                        // Show tooltip when zoomed in enough to see individual dots
+                        if (currentZoom >= 14) {
+                            // Show individual collision tooltip ONLY
+                            const feature = e.features[0];
+                            this.popup
+                                .setLngLat(e.lngLat)
+                                .setHTML(this.formatTooltipHTMLForSingle(feature))
+                                .addTo(this.map);
+                        }
+                        // No tooltip at lower zoom levels
+                    }
+                });
+
+                // Remove tooltip when mouse leaves points
+                this.map.on('mouseleave', 'collisions-hover', () => {
+                    this.map.getCanvas().style.cursor = '';
+                    this.lastHoverCoords = null;
+                    this.popup.remove();
+                });
+            }
+
+            getViewport() {
+                const bounds = this.map.getBounds();
+                return {
+                    minX: bounds.getWest(),
+                    minY: bounds.getSouth(),
+                    maxX: bounds.getEast(),
+                    maxY: bounds.getNorth()
+                };
+            }
+
+            // Generate deterministic pseudo-random offset based on seed
+            generateOffset(seed, maxOffset) {
+                // Simple pseudo-random number generator using seed
+                const x = Math.sin(seed) * 10000;
+                const y = Math.sin(seed * 1.5) * 10000;
+
+                const randomX = (x - Math.floor(x)) * 2 - 1; // Range: -1 to 1
+                const randomY = (y - Math.floor(y)) * 2 - 1; // Range: -1 to 1
+
+                return {
+                    lon: randomX * maxOffset,
+                    lat: randomY * maxOffset
+                };
+            }
+
+            // Calculate jitter radius based on zoom level
+            getJitterRadius(zoom) {
+                // Use constant radius at all zoom levels for consistent geographic accuracy
+                // At zoom 16+: ~11 meters (0.0001 degrees)
+                // At zoom 13-15: ~11 meters (constant for street-level viewing)
+                // At zoom 9-12: ~11-13 meters (very gentle increase)
+                const baseRadius = 0.0001; // ~11 meters in degrees at LA latitude
+
+                // Add very gentle scaling only at extremely low zoom
+                // This keeps points separate visually without moving them far geographically
+                if (zoom < 12) {
+                    // Add only 20% more jitter at zoom 9 vs zoom 16
+                    const gentleFactor = 1 + (0.2 * (12 - zoom) / 12);
+                    return baseRadius * gentleFactor;
+                }
+
+                return baseRadius;
+            }
+
+            async updateMapData() {
+                if (!this.map || !this.map.getSource('collisions')) return;
+
+                const viewport = this.getViewport();
+
+                const intersectingTiles = this.spatialIndex.search(viewport);
+                const tilesToLoad = intersectingTiles
+                    .map(item => item.tile)
+                    .filter(tile => !this.loadedTiles.has(tile));
+
+                if (tilesToLoad.length > 0) {
+                    await this.loadTiles(tilesToLoad);
+                }
+
+                const visibleData = this.getFilteredData(viewport);
+
+                // Get current zoom level for conditional aggregation
+                const currentZoom = this.map.getZoom();
+
+                // Conditional aggregation based on zoom level
+                if (currentZoom < 15) {
+                    // LOW/MEDIUM ZOOM: Aggregate for performance and heatmap
+                    const collisionCounts = new Map();
+                    visibleData.forEach(feature => {
+                        const [lon, lat] = feature.geometry.coordinates;
+                        // Round to 4 decimal places (~10m precision)
+                        const key = `${lon.toFixed(4)},${lat.toFixed(4)}`;
+                        collisionCounts.set(key, (collisionCounts.get(key) || 0) + 1);
+                    });
+
+                    // Add density property to features
+                    visibleData.forEach(feature => {
+                        const [lon, lat] = feature.geometry.coordinates;
+                        const key = `${lon.toFixed(4)},${lat.toFixed(4)}`;
+                        feature.properties._density = collisionCounts.get(key) || 1;
+                    });
+                } else {
+                    // HIGH ZOOM (15+): No aggregation, individual points only
+                    visibleData.forEach(feature => {
+                        feature.properties._density = 1;  // All points are individual
+                    });
+                }
+
+                // Apply spatial jittering for overlapping points
+                const jitterRadius = this.getJitterRadius(currentZoom);
+
+                visibleData.forEach(feature => {
+                    const [lon, lat] = feature.geometry.coordinates;
+                    const density = feature.properties._density;
+
+                    // Only jitter if multiple collisions at same location
+                    if (density > 1) {
+                        // Use DR number as seed for deterministic offset
+                        const drNumber = feature.properties.dr_number;
+                        const seed = parseInt(drNumber.replace(/\D/g, '')) || 0;
+
+                        // Generate offset
+                        const offset = this.generateOffset(seed, jitterRadius);
+
+                        // Apply offset to coordinates
+                        feature.geometry.coordinates = [
+                            lon + offset.lon,
+                            lat + offset.lat
+                        ];
+                    }
+                });
+
+                const sampledData = this.sampleData(visibleData, this.maxPointsToRender);
+
+                this.map.getSource('collisions').setData({
+                    type: 'FeatureCollection',
+                    features: sampledData
+                });
+
+                document.getElementById('visibleCollisions').textContent =
+                    visibleData.length.toLocaleString();
+
+                const samplingIndicator = document.getElementById('samplingIndicator');
+                if (sampledData.length < visibleData.length) {
+                    samplingIndicator.style.display = 'inline';
+                    samplingIndicator.textContent =
+                        ` • Showing ${sampledData.length.toLocaleString()} of ${visibleData.length.toLocaleString()}`;
+                } else {
+                    samplingIndicator.style.display = 'none';
+                }
+
+                this.updateCharts(visibleData);
+                // Table update moved to separate debounced event (500ms) for better performance
+            }
+
+            async loadTiles(tileFilenames) {
+                const tilePromises = tileFilenames.map(async (filename) => {
+                    try {
+                        const response = await fetch(`../assets/collisions/tiles/${filename}`);
+                        const geojson = await response.json();
+                        this.loadedTiles.set(filename, geojson);
+                    } catch (error) {
+                        console.error(`Failed to load tile ${filename}:`, error);
+                    }
+                });
+
+                await Promise.all(tilePromises);
+            }
+
+            getFilteredData(viewport) {
+                // Gather all features from loaded tiles
+                const allFeatures = [];
+                for (const geojson of this.loadedTiles.values()) {
+                    allFeatures.push(...geojson.features);
+                }
+
+                // Deduplicate by DR number FIRST (before any filtering)
+                const uniqueFeaturesMap = new Map();
+                allFeatures.forEach(feature => {
+                    const dr = feature.properties.dr_number;
+                    if (dr && !uniqueFeaturesMap.has(dr)) {
+                        uniqueFeaturesMap.set(dr, feature);
+                    } else if (!dr) {
+                        // If no DR number, include it (shouldn't happen but be safe)
+                        uniqueFeaturesMap.set(JSON.stringify(feature.properties), feature);
+                    }
+                });
+
+                const dedupedFeatures = Array.from(uniqueFeaturesMap.values());
+
+                // Single-pass filtering - combines all filters into one iteration for 10-15x performance improvement
+                const filtered = dedupedFeatures.filter(feature => {
+                    const [lon, lat] = feature.geometry.coordinates;
+                    const props = feature.properties;
+
+                    // Viewport check (most likely to fail, check first for early exit)
+                    if (lon < viewport.minX || lon > viewport.maxX ||
+                        lat < viewport.minY || lat > viewport.maxY) {
+                        return false;
+                    }
+
+                    // Date filters
+                    if (this.activeFilters.dateStart && props.date_occ < this.activeFilters.dateStart) {
+                        return false;
+                    }
+                    if (this.activeFilters.dateEnd && props.date_occ > this.activeFilters.dateEnd) {
+                        return false;
+                    }
+
+                    // Time bucket filter
+                    if (this.activeFilters.timeBuckets &&
+                        this.activeFilters.timeBuckets.length > 0 &&
+                        this.activeFilters.timeBuckets.length < 6 &&
+                        !this.activeFilters.timeBuckets.includes(props.time_bucket)) {
+                        return false;
+                    }
+
+                    // Day of week filter
+                    if (this.activeFilters.weekday !== undefined || this.activeFilters.weekend !== undefined) {
+                        const isWeekend = props.is_weekend;
+                        if (this.activeFilters.weekday && this.activeFilters.weekend) {
+                            // Both enabled, pass
+                        } else if (this.activeFilters.weekday && isWeekend) {
+                            return false;
+                        } else if (this.activeFilters.weekend && !isWeekend) {
+                            return false;
+                        } else if (!this.activeFilters.weekday && !this.activeFilters.weekend) {
+                            return false;
+                        }
+                    }
+
+                    // Collision type filter
+                    if (this.activeFilters.collisionTypes &&
+                        this.activeFilters.collisionTypes.length > 0 &&
+                        (!props.collision_type || !this.activeFilters.collisionTypes.includes(props.collision_type))) {
+                        return false;
+                    }
+
+                    // Severity filter
+                    if (this.activeFilters.severityLevels &&
+                        this.activeFilters.severityLevels.length > 0 &&
+                        (!props.severity || !this.activeFilters.severityLevels.includes(props.severity))) {
+                        return false;
+                    }
+
+                    // Hit & Run filter
+                    if (this.activeFilters.showHitAndRun && !props.is_hit_and_run) {
+                        return false;
+                    }
+
+                    // DUI filter
+                    if (this.activeFilters.showDUI && !props.is_dui) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                return filtered;
+            }
+
+            sampleData(data, maxPoints) {
+                if (data.length <= maxPoints) {
+                    return data;
+                }
+
+                const step = data.length / maxPoints;
+                const sampled = [];
+                for (let i = 0; i < maxPoints; i++) {
+                    sampled.push(data[Math.floor(i * step)]);
+                }
+                return sampled;
+            }
+
+            initCharts() {
+                this.charts.hour = new Chart(document.getElementById('hourChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Array.from({length: 24}, (_, i) => {
+                            if (i === 0) return '12am';
+                            if (i < 12) return `${i}am`;
+                            if (i === 12) return '12pm';
+                            return `${i-12}pm`;
+                        }),
+                        datasets: [{
+                            label: 'Collisions',
+                            data: new Array(24).fill(0),
+                            backgroundColor: 'rgba(255, 107, 107, 0.6)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                this.charts.dow = new Chart(document.getElementById('dowChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        datasets: [{
+                            label: 'Collisions',
+                            data: new Array(7).fill(0),
+                            backgroundColor: 'rgba(107, 169, 255, 0.6)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                this.charts.year = new Chart(document.getElementById('yearChart'), {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Collisions',
+                            data: [],
+                            borderColor: 'rgba(107, 255, 169, 0.8)',
+                            backgroundColor: 'rgba(107, 255, 169, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            updateChartsFromOverview() {
+                this.charts.hour.data.datasets[0].data = this.overview.hourly_counts;
+                this.charts.hour.update();
+
+                this.charts.dow.data.datasets[0].data = this.overview.dow_counts;
+                this.charts.dow.update();
+
+                this.charts.year.data.labels = this.overview.year_counts.map(y => y.year);
+                this.charts.year.data.datasets[0].data = this.overview.year_counts.map(y => y.count);
+                this.charts.year.update();
+            }
+
+            updateCharts(filteredData) {
+                const hourlyCounts = new Array(24).fill(0);
+                const dowCounts = new Array(7).fill(0);
+                const yearCounts = {};
+
+                filteredData.forEach(feature => {
+                    const props = feature.properties;
+                    if (props.hour !== null) {
+                        hourlyCounts[props.hour]++;
+                    }
+                    dowCounts[props.dow]++;
+                    yearCounts[props.year] = (yearCounts[props.year] || 0) + 1;
+                });
+
+                this.charts.hour.data.datasets[0].data = hourlyCounts;
+                this.charts.hour.update();
+
+                this.charts.dow.data.datasets[0].data = dowCounts;
+                this.charts.dow.update();
+
+                const years = Object.keys(yearCounts).sort();
+                this.charts.year.data.labels = years;
+                this.charts.year.data.datasets[0].data = years.map(y => yearCounts[y]);
+                this.charts.year.update();
+            }
+
+            updateKPIs(data) {
+                document.getElementById('totalCollisions').textContent =
+                    data.total_count.toLocaleString();
+
+                const avgPerDay = Math.round(data.total_count / data.days_in_range);
+                document.getElementById('avgPerDay').textContent = avgPerDay.toLocaleString();
+
+                const peakHourData = data.hourly_counts
+                    .map((count, hour) => ({ hour, count }))
+                    .sort((a, b) => b.count - a.count)[0];
+
+                const formatHour = (h) => {
+                    if (h === 0) return '12am';
+                    if (h < 12) return `${h}am`;
+                    if (h === 12) return '12pm';
+                    return `${h-12}pm`;
+                };
+                document.getElementById('peakHour').textContent = formatHour(peakHourData.hour);
+
+                const topArea = data.area_counts[0];
+                document.getElementById('mostDangerousArea').textContent = topArea.area_name;
+            }
+
+            attachEventListeners() {
+                // Color scheme toggle
+                document.getElementById('colorByType').addEventListener('click', () => {
+                    this.activeColorScheme = 'collision_type';
+                    this.updateMapColors();
+                    document.getElementById('colorByType').classList.add('active');
+                    document.getElementById('colorByTime').classList.remove('active');
+                });
+
+                document.getElementById('colorByTime').addEventListener('click', () => {
+                    this.activeColorScheme = 'time_bucket';
+                    this.updateMapColors();
+                    document.getElementById('colorByTime').classList.add('active');
+                    document.getElementById('colorByType').classList.remove('active');
+                });
+
+                document.getElementById('dateStart').addEventListener('change', (e) => {
+                    this.activeFilters.dateStart = e.target.value;
+                    this.updateMapData();
+                });
+
+                document.getElementById('dateEnd').addEventListener('change', (e) => {
+                    this.activeFilters.dateEnd = e.target.value;
+                    this.updateMapData();
+                });
+
+                // Time of Day filter chips
+                document.querySelectorAll('#timeFilters .chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.target.classList.toggle('active');
+                        this.activeFilters.timeBuckets = Array.from(
+                            document.querySelectorAll('#timeFilters .chip.active')
+                        ).map(c => c.dataset.bucket);
+                        this.updateMapData();
+                    });
+                });
+
+                // Collision Type filter chips
+                document.querySelectorAll('#collisionTypeFilters .chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.target.classList.toggle('active');
+                        this.activeFilters.collisionTypes = Array.from(
+                            document.querySelectorAll('#collisionTypeFilters .chip.active')
+                        ).map(c => c.dataset.type);
+                        this.updateMapData();
+                    });
+                });
+
+                document.getElementById('filterWeekday').addEventListener('change', (e) => {
+                    this.activeFilters.weekday = e.target.checked;
+                    this.updateMapData();
+                });
+
+                document.getElementById('filterWeekend').addEventListener('change', (e) => {
+                    this.activeFilters.weekend = e.target.checked;
+                    this.updateMapData();
+                });
+
+                // Severity checkboxes
+                ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal'].forEach(severity => {
+                    const checkbox = document.getElementById(`filter${severity}`);
+                    checkbox.addEventListener('change', () => {
+                        const severityMap = {
+                            'PropertyDamage': 'property_damage',
+                            'MinorInjury': 'minor_injury',
+                            'SevereInjury': 'severe_injury',
+                            'Fatal': 'fatal'
+                        };
+
+                        this.activeFilters.severityLevels = ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal']
+                            .filter(s => document.getElementById(`filter${s}`).checked)
+                            .map(s => severityMap[s]);
+
+                        this.updateMapData();
+                    });
+                });
+
+                // Special circumstances toggles
+                document.getElementById('filterHitAndRun').addEventListener('change', (e) => {
+                    this.activeFilters.showHitAndRun = e.target.checked;
+                    this.updateMapData();
+                });
+
+                document.getElementById('filterDUI').addEventListener('change', (e) => {
+                    this.activeFilters.showDUI = e.target.checked;
+                    this.updateMapData();
+                });
+
+                document.getElementById('resetFilters').addEventListener('click', () => {
+                    this.activeFilters = {
+                        dateStart: null,
+                        dateEnd: null,
+                        timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
+                        weekday: true,
+                        weekend: true,
+                        collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle'],
+                        severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal'],
+                        showHitAndRun: false,
+                        showDUI: false
+                    };
+                    document.getElementById('dateStart').value = '';
+                    document.getElementById('dateEnd').value = '';
+                    document.querySelectorAll('.chip').forEach(c => c.classList.add('active'));
+                    document.getElementById('filterWeekday').checked = true;
+                    document.getElementById('filterWeekend').checked = true;
+                    document.getElementById('filterPropertyDamage').checked = true;
+                    document.getElementById('filterMinorInjury').checked = true;
+                    document.getElementById('filterSevereInjury').checked = true;
+                    document.getElementById('filterFatal').checked = true;
+                    document.getElementById('filterHitAndRun').checked = false;
+                    document.getElementById('filterDUI').checked = false;
+                    this.updateMapData();
+                });
+
+                document.getElementById('closeDetail').addEventListener('click', (e) => {
+                    e.stopPropagation();  // Prevent triggering click-outside listener
+                    this.closeDetailPanel();
+                });
+
+                // CSV export
+                document.getElementById('exportCSV').addEventListener('click', () => {
+                    // Use stored filtered data (includes all, not just 100 visible rows)
+                    this.exportToCSV(this.currentFilteredData || []);
+                });
+
+                // Setup table sorting
+                this.setupTableSorting();
+            }
+
+            highlightTableRow(drNumber) {
+                // Remove previous highlights
+                document.querySelectorAll('.collisions-table tbody tr.highlighted')
+                    .forEach(r => r.classList.remove('highlighted'));
+
+                // Add highlight to matching row
+                const row = document.querySelector(
+                    `.collisions-table tbody tr[data-dr-number="${drNumber}"]`
+                );
+                if (row) {
+                    row.classList.add('highlighted');
+                    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            showCollisionDetail(props) {
+                // Helper function to format boolean values
+                const formatBoolean = (val) => val ? 'Yes' : 'No';
+
+                // Helper function to format collision type
+                const formatCollisionType = (type) => {
+                    if (!type) return 'Unknown';
+                    return type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+                };
+
+                // Helper function to format severity
+                const formatSeverity = (severity) => {
+                    if (!severity) return 'Unknown';
+                    return severity.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                };
+
+                // Helper function to format time bucket
+                const formatTimeBucket = (bucket) => {
+                    if (!bucket) return 'Unknown';
+                    const mapping = {
+                        'EARLY_MORNING': 'Early Morning (12am-6am)',
+                        'AM_PEAK': 'AM Peak (6am-10am)',
+                        'MIDDAY': 'Midday (10am-3pm)',
+                        'PM_PEAK': 'PM Peak (3pm-7pm)',
+                        'EVENING': 'Evening (7pm-10pm)',
+                        'LATE_NIGHT': 'Late Night (10pm-12am)'
+                    };
+                    return mapping[bucket] || bucket;
+                };
+
+                // Helper function to format day of week
+                const formatDayOfWeek = (dow) => {
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    return days[dow] || 'Unknown';
+                };
+
+                document.getElementById('detailContent').innerHTML = `
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">📋 Incident Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">DR Number:</span>
+                                <span class="detail-value">${props.dr_number || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Date:</span>
+                                <span class="detail-value">${props.date_occ ? props.date_occ.split('T')[0] : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Time:</span>
+                                <span class="detail-value">${this.formatTime(props.time_occ_minutes)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Hour of Day:</span>
+                                <span class="detail-value">${props.hour !== null && props.hour !== undefined ? `${props.hour}:00` : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Time Period:</span>
+                                <span class="detail-value">${formatTimeBucket(props.time_bucket)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Day of Week:</span>
+                                <span class="detail-value">${formatDayOfWeek(props.dow)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Weekend:</span>
+                                <span class="detail-value">${formatBoolean(props.is_weekend)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Year:</span>
+                                <span class="detail-value">${props.year || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">📍 Location Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">Address:</span>
+                                <span class="detail-value">${props.address || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Cross Street:</span>
+                                <span class="detail-value">${props.cross_street || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">LAPD Area:</span>
+                                <span class="detail-value">${props.area_name || 'Unknown'} ${props.area_id ? `(#${props.area_id})` : ''}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Premise:</span>
+                                <span class="detail-value">${props.premise_desc || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">🚗 Collision Details</h3>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">Collision Type:</span>
+                                <span class="detail-value">${formatCollisionType(props.collision_type)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Severity:</span>
+                                <span class="detail-value severity-${props.severity || 'unknown'}">${formatSeverity(props.severity)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Pedestrian Involved:</span>
+                                <span class="detail-value">${formatBoolean(props.has_pedestrian)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Motorcycle Involved:</span>
+                                <span class="detail-value">${formatBoolean(props.has_motorcycle)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Bicycle Involved:</span>
+                                <span class="detail-value">${formatBoolean(props.has_bicycle)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">⚠️ Special Circumstances</h3>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">Hit and Run:</span>
+                                <span class="detail-value ${props.is_hit_and_run ? 'text-danger' : ''}">${formatBoolean(props.is_hit_and_run)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">DUI Related:</span>
+                                <span class="detail-value ${props.is_dui ? 'text-danger' : ''}">${formatBoolean(props.is_dui)}</span>
+                            </div>
+                            ${props.mo_codes ? `
+                            <div class="detail-row detail-row-full">
+                                <span class="detail-label">MO Codes:</span>
+                                <span class="detail-value" style="font-family: monospace; font-size: 0.85rem;">${props.mo_codes}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                const detailPanel = document.getElementById('detailPanel');
+                detailPanel.style.display = 'block';
+
+                // Remove previous click-outside listener if it exists
+                if (this.detailPanelClickOutside) {
+                    document.removeEventListener('click', this.detailPanelClickOutside);
+                }
+
+                // Add click-outside-to-close listener
+                // Use setTimeout to prevent immediate closing from the same click that opened it
+                setTimeout(() => {
+                    this.detailPanelClickOutside = (e) => {
+                        // Close if clicking outside the detail panel
+                        if (!detailPanel.contains(e.target) && detailPanel.style.display === 'block') {
+                            this.closeDetailPanel();
+                        }
+                    };
+                    document.addEventListener('click', this.detailPanelClickOutside);
+                }, 100);
+            }
+
+            closeDetailPanel() {
+                const detailPanel = document.getElementById('detailPanel');
+                detailPanel.style.display = 'none';
+
+                // Remove click-outside listener
+                if (this.detailPanelClickOutside) {
+                    document.removeEventListener('click', this.detailPanelClickOutside);
+                    this.detailPanelClickOutside = null;
+                }
+
+                // Remove map point highlight
+                if (this.selectedCollisionId) {
+                    this.map.setFeatureState(
+                        { source: 'collisions', id: this.selectedCollisionId },
+                        { selected: false }
+                    );
+                    this.selectedCollisionId = null;
+                }
+
+                // Remove table row highlight
+                document.querySelectorAll('.collisions-table tbody tr.highlighted')
+                    .forEach(r => r.classList.remove('highlighted'));
+            }
+
+            updateMapColors() {
+                if (!this.map || !this.map.getLayer('collisions-scatter')) return;
+
+                let colorExpression;
+
+                if (this.activeColorScheme === 'collision_type') {
+                    colorExpression = [
+                        'case',
+                        ['==', ['get', 'collision_type'], null], '#bdc3c7',
+                        [
+                            'match',
+                            ['get', 'collision_type'],
+                            'vehicle-to-vehicle', '#3498db',
+                            'vehicle-pedestrian', '#e74c3c',
+                            'vehicle-motorcycle', '#f39c12',
+                            'vehicle-bicycle', '#2ecc71',
+                            'other', '#95a5a6',
+                            '#bdc3c7'
+                        ]
+                    ];
+                } else if (this.activeColorScheme === 'time_bucket') {
+                    colorExpression = [
+                        'case',
+                        ['==', ['get', 'time_bucket'], null], '#95a5a6',
+                        [
+                            'match',
+                            ['get', 'time_bucket'],
+                            'EARLY_MORNING', '#2c3e50',
+                            'AM_PEAK', '#e67e22',
+                            'MIDDAY', '#f1c40f',
+                            'PM_PEAK', '#c0392b',
+                            'EVENING', '#8e44ad',
+                            'LATE_NIGHT', '#34495e',
+                            '#95a5a6'
+                        ]
+                    ];
+                }
+
+                this.map.setPaintProperty('collisions-scatter', 'circle-color', colorExpression);
+                this.updateLegend();
+            }
+
+            updateLegend() {
+                const legendEl = document.getElementById('mapLegend');
+                if (!legendEl) return;
+
+                let legendHTML = '';
+
+                if (this.activeColorScheme === 'collision_type') {
+                    legendHTML = `
+                        <h4>Collision Type</h4>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3498db;"></div>
+                            <div class="legend-label">Vehicle-Vehicle</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e74c3c;"></div>
+                            <div class="legend-label">Vehicle-Pedestrian</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f39c12;"></div>
+                            <div class="legend-label">Vehicle-Motorcycle</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2ecc71;"></div>
+                            <div class="legend-label">Vehicle-Bicycle</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #95a5a6;"></div>
+                            <div class="legend-label">Other</div>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #999;">
+                            Heatmap (zoom out) and points (zoom in) use these colors
+                        </div>
+                    `;
+                } else if (this.activeColorScheme === 'time_bucket') {
+                    legendHTML = `
+                        <h4>Time of Day</h4>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2c3e50;"></div>
+                            <div class="legend-label">Early AM (12-6am)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e67e22;"></div>
+                            <div class="legend-label">AM Peak (6-10am)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f1c40f;"></div>
+                            <div class="legend-label">Midday (10am-3pm)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #c0392b;"></div>
+                            <div class="legend-label">PM Peak (3-7pm)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #8e44ad;"></div>
+                            <div class="legend-label">Evening (7-10pm)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #34495e;"></div>
+                            <div class="legend-label">Late Night (10pm-12am)</div>
+                        </div>
+                    `;
+                }
+
+                legendEl.innerHTML = legendHTML;
+            }
+
+            formatTime(minutes) {
+                if (!minutes && minutes !== 0) return 'Unknown';
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                const ampm = hours >= 12 ? 'pm' : 'am';
+                const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                return `${displayHours}:${mins.toString().padStart(2, '0')}${ampm}`;
+            }
+
+            /**
+             * Format tooltip HTML for a single collision (used at high zoom)
+             * Shows address, severity badge, date, and time
+             */
+            formatTooltipHTMLForSingle(feature) {
+                const props = feature.properties;
+                const timeStr = this.formatTime(props.time_occ_minutes);
+                const dateStr = props.date_occ ? props.date_occ.split('T')[0] : 'Unknown';
+                const severity = props.severity || 'unknown';
+                const severityClass = `severity-${severity}`;
+                const severityLabel = severity.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+                // Format collision type
+                const collisionType = props.collision_type
+                    ? props.collision_type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-')
+                    : 'Unknown';
+
+                // Build special circumstances badges
+                const badges = [];
+                if (props.is_hit_and_run) badges.push('<span class="badge-warn">Hit & Run</span>');
+                if (props.is_dui) badges.push('<span class="badge-warn">DUI</span>');
+                const badgesHTML = badges.length > 0 ? `<div style="margin-top: 0.3rem;">${badges.join(' ')}</div>` : '';
+
+                return `
+                    <div style="padding: 0.6rem; min-width: 250px;">
+                        <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.2rem;">
+                            ${props.area_name || 'Unknown Area'}
+                        </div>
+                        <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">
+                            ${props.address || 'Unknown Location'}
+                        </div>
+                        ${props.cross_street ? `<div style="font-size: 0.8rem; color: #bbb; margin-bottom: 0.5rem;">Near ${props.cross_street}</div>` : ''}
+                        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.3rem;">
+                            <span class="tooltip-badge ${severityClass}">${severityLabel}</span>
+                            <span style="font-size: 0.8rem; color: #aaa;">${collisionType}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #999;">
+                            ${dateStr} at ${timeStr}
+                        </div>
+                        ${badgesHTML}
+                    </div>
+                `;
+            }
+
+            /**
+             * Deduplicate collision features by DR number
+             * Returns array of unique features
+             */
+            deduplicateFeatures(features) {
+                const uniqueMap = new Map();
+                features.forEach(feature => {
+                    const dr = feature.properties.dr_number;
+                    if (dr && !uniqueMap.has(dr)) {
+                        uniqueMap.set(dr, feature);
+                    }
+                });
+                return Array.from(uniqueMap.values());
+            }
+
+            /**
+             * Format tooltip HTML for multiple collisions at same location
+             * Shows inline list of all incidents
+             */
+            formatTooltipHTMLForMultiple(features) {
+                if (features.length === 1) {
+                    // Single collision - use existing formatter
+                    return this.formatTooltipHTML(features[0].properties);
+                }
+
+                // Limit to first 10 for performance
+                const displayFeatures = features.slice(0, 10);
+                const hasMore = features.length > 10;
+
+                // Format each collision as a compact line
+                const incidentLines = displayFeatures.map(feature => {
+                    const props = feature.properties;
+                    const dateStr = props.date_occ ? props.date_occ.split('T')[0] : '?';
+                    const timeStr = this.formatTime(props.time_occ_minutes);
+                    const severity = props.severity || 'unknown';
+
+                    // Severity badge color
+                    const color = {
+                        'property_damage': '#6c757d',
+                        'minor_injury': '#ffc107',
+                        'severe_injury': '#fd7e14',
+                        'fatal': '#dc3545'
+                    }[severity] || '#6c757d';
+
+                    // Severity abbreviation
+                    const sevAbbrev = {
+                        'property_damage': 'PDO',
+                        'minor_injury': 'MIN',
+                        'severe_injury': 'SEV',
+                        'fatal': 'FAT'
+                    }[severity] || '???';
+
+                    return `<div style="display: flex; gap: 6px; align-items: center; padding: 2px 0; font-size: 11px;">
+                        <span style="background: ${color}; color: #fff; padding: 1px 4px; border-radius: 2px; font-weight: 600; min-width: 32px; text-align: center;">${sevAbbrev}</span>
+                        <span style="color: #ddd;">${dateStr}</span>
+                        <span style="color: #bbb;">${timeStr}</span>
+                    </div>`;
+                }).join('');
+
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${features[0].properties.area_name || 'Unknown Area'}</div>
+                        <div class="tooltip-severity" style="background-color: #3498db; font-size: 11px;">
+                            ${features.length} Collisions
+                        </div>
+                    </div>
+                    <div class="tooltip-body" style="padding: 8px; max-height: 300px; overflow-y: auto;">
+                        <div style="margin-bottom: 6px; font-size: 11px; color: #999; font-weight: 600;">
+                            Location: ${features[0].properties.address || 'Unknown'}
+                        </div>
+                        ${incidentLines}
+                        ${hasMore ? `<div style="margin-top: 6px; font-size: 11px; color: #999; font-style: italic;">...and ${features.length - 10} more</div>` : ''}
+                    </div>
+                `;
+            }
+
+            /**
+             * Format collision properties into compact HTML for hover tooltip
+             * Shows key fields for quick preview and debugging
+             */
+            formatTooltipHTML(props) {
+                // Format time
+                const timeStr = this.formatTime(props.time_occ_minutes);
+
+                // Format date (just the date part, no time)
+                const dateStr = props.date_occ ? props.date_occ.split('T')[0] : 'Unknown';
+
+                // Format collision type (capitalize words)
+                const collisionType = props.collision_type
+                    ? props.collision_type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                    : 'Unknown';
+
+                // Format severity (capitalize, replace underscores)
+                const severity = props.severity
+                    ? props.severity.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                    : 'Unknown';
+
+                // Severity badge color
+                const severityColors = {
+                    'property_damage': '#6c757d',  // Gray
+                    'minor_injury': '#ffc107',     // Yellow
+                    'severe_injury': '#fd7e14',    // Orange
+                    'fatal': '#dc3545'             // Red
+                };
+                const severityColor = severityColors[props.severity] || '#6c757d';
+
+                // Build HTML
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${props.area_name || 'Unknown Area'}</div>
+                        <div class="tooltip-severity" style="background-color: ${severityColor}">
+                            ${severity}
+                        </div>
+                    </div>
+                    <div class="tooltip-body">
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Date:</span>
+                            <span class="tooltip-value">${dateStr}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Time:</span>
+                            <span class="tooltip-value">${timeStr}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Type:</span>
+                            <span class="tooltip-value">${collisionType}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Location:</span>
+                            <span class="tooltip-value">${props.address || 'Unknown'}</span>
+                        </div>
+                        ${props.cross_street ? `
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Cross St:</span>
+                            <span class="tooltip-value">${props.cross_street}</span>
+                        </div>
+                        ` : ''}
+                        ${props.is_hit_and_run ? '<div class="tooltip-badge hit-run">Hit & Run</div>' : ''}
+                        ${props.is_dui ? '<div class="tooltip-badge dui">DUI-Related</div>' : ''}
+                    </div>
+                    <div class="tooltip-footer">
+                        <span class="tooltip-hint">Click for full details</span>
+                    </div>
+                    <div class="tooltip-debug">
+                        <details>
+                            <summary>Debug Info</summary>
+                            <div class="debug-content">
+                                <div>DR: ${props.dr_number || 'N/A'}</div>
+                                <div>Bucket: ${props.time_bucket || 'N/A'}</div>
+                                <div>Hour: ${props.hour !== null ? props.hour : 'N/A'}</div>
+                                <div>Weekend: ${props.is_weekend ? 'Yes' : 'No'}</div>
+                                <div>MO Codes: ${props.mo_codes || 'None'}</div>
+                            </div>
+                        </details>
+                    </div>
+                `;
+            }
+
+            /**
+             * Update data table with visible collisions
+             * Called after map updates or filters change
+             */
+            updateDataTable(filteredData) {
+                // Store full dataset for export
+                this.currentFilteredData = filteredData;
+
+                // Update count
+                document.getElementById('tableCount').textContent =
+                    `${filteredData.length.toLocaleString()} collision${filteredData.length === 1 ? '' : 's'}`;
+
+                // LIMIT TO FIRST 100 ROWS for performance
+                const displayLimit = 100;
+                const displayData = filteredData.slice(0, displayLimit);
+                const hasMore = filteredData.length > displayLimit;
+
+                // Populate table body
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = displayData.map(feature => {
+                    const props = feature.properties;
+                    const timeStr = this.formatTime(props.time_occ_minutes);
+                    const dateStr = props.date_occ ? props.date_occ.split('T')[0] : 'Unknown';
+                    const severity = props.severity || 'unknown';
+                    const severityLabel = severity.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+                    // Format collision type
+                    const collisionType = props.collision_type || 'unknown';
+                    const collisionTypeLabel = collisionType.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+
+                    return `
+                        <tr data-dr-number="${props.dr_number}" data-coords="${feature.geometry.coordinates.join(',')}">
+                            <td>${dateStr}</td>
+                            <td>${timeStr}</td>
+                            <td><span class="severity-badge severity-${severity}">${severityLabel}</span></td>
+                            <td style="font-size: 0.8rem;">${collisionTypeLabel}</td>
+                            <td>${props.address || 'Unknown'}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Show/hide "Load More" indicator
+                const loadMoreIndicator = document.getElementById('tableLoadMore');
+                if (loadMoreIndicator) {
+                    if (hasMore) {
+                        loadMoreIndicator.style.display = 'block';
+                        loadMoreIndicator.textContent = `Showing first ${displayLimit} of ${filteredData.length.toLocaleString()} collisions`;
+                    } else {
+                        loadMoreIndicator.style.display = 'none';
+                    }
+                }
+
+                // Add click handlers using EVENT DELEGATION
+                this.attachTableRowHandlers();
+            }
+
+            /**
+             * Attach table row click handlers using event delegation
+             * O(1) instead of O(n) - single listener on tbody
+             */
+            attachTableRowHandlers() {
+                const tbody = document.getElementById('tableBody');
+
+                // Remove old listener if exists
+                if (this.tableClickHandler) {
+                    tbody.removeEventListener('click', this.tableClickHandler);
+                }
+
+                // Create new handler with event delegation
+                this.tableClickHandler = (e) => {
+                    const row = e.target.closest('tr');
+                    if (!row || !row.dataset.coords) return;
+
+                    const coords = row.dataset.coords.split(',').map(Number);
+                    const drNumber = row.dataset.drNumber;
+
+                    // Highlight this row
+                    this.highlightTableRow(drNumber);
+
+                    // Find and highlight corresponding map point
+                    const features = this.map.querySourceFeatures('collisions');
+                    const matchingFeature = features.find(
+                        f => f.properties && f.properties.dr_number === drNumber
+                    );
+
+                    if (matchingFeature) {
+                        // Remove previous highlight
+                        if (this.selectedCollisionId) {
+                            this.map.setFeatureState(
+                                { source: 'collisions', id: this.selectedCollisionId },
+                                { selected: false }
+                            );
+                        }
+
+                        // Add new highlight
+                        this.selectedCollisionId = matchingFeature.id;
+                        this.map.setFeatureState(
+                            { source: 'collisions', id: matchingFeature.id },
+                            { selected: true }
+                        );
+                    }
+
+                    // Fly to location on map
+                    this.map.flyTo({
+                        center: coords,
+                        zoom: Math.max(this.map.getZoom(), 16),
+                        duration: 1000
+                    });
+                };
+
+                tbody.addEventListener('click', this.tableClickHandler);
+            }
+
+            /**
+             * Export visible collision data as CSV
+             */
+            exportToCSV(filteredData) {
+                // CSV headers
+                const headers = [
+                    'DR Number',
+                    'Date',
+                    'Time',
+                    'Area',
+                    'Collision Type',
+                    'Severity',
+                    'Location',
+                    'Cross Street',
+                    'Hit and Run',
+                    'DUI Related',
+                    'Latitude',
+                    'Longitude'
+                ];
+
+                // CSV rows
+                const rows = filteredData.map(feature => {
+                    const props = feature.properties;
+                    const coords = feature.geometry.coordinates;
+                    const timeStr = this.formatTime(props.time_occ_minutes);
+                    const dateStr = props.date_occ ? props.date_occ.split('T')[0] : '';
+
+                    return [
+                        props.dr_number || '',
+                        dateStr,
+                        timeStr,
+                        props.area_name || '',
+                        props.collision_type || '',
+                        props.severity || '',
+                        props.address || '',
+                        props.cross_street || '',
+                        props.is_hit_and_run ? 'Yes' : 'No',
+                        props.is_dui ? 'Yes' : 'No',
+                        coords[1],  // latitude
+                        coords[0]   // longitude
+                    ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+                });
+
+                // Combine
+                const csv = [headers.join(','), ...rows].join('\n');
+
+                // Download
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `la-collisions-${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+
+            /**
+             * Setup table sorting functionality
+             */
+            setupTableSorting() {
+                let currentSort = { column: 'date_occ', direction: 'desc' };
+
+                document.querySelectorAll('.collisions-table th[data-sort]').forEach(th => {
+                    th.addEventListener('click', () => {
+                        const column = th.dataset.sort;
+
+                        // Toggle direction if same column, otherwise default to asc
+                        if (currentSort.column === column) {
+                            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            currentSort = { column, direction: 'asc' };
+                        }
+
+                        // Update UI
+                        document.querySelectorAll('.collisions-table th').forEach(h => {
+                            h.classList.remove('sorted-asc', 'sorted-desc');
+                        });
+                        th.classList.add(`sorted-${currentSort.direction}`);
+
+                        // Sort the table data
+                        this.sortTable(currentSort.column, currentSort.direction);
+                    });
+                });
+            }
+
+            sortTable(column, direction) {
+                const tbody = document.getElementById('tableBody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                rows.sort((a, b) => {
+                    const aVal = a.children[this.getColumnIndex(column)].textContent;
+                    const bVal = b.children[this.getColumnIndex(column)].textContent;
+
+                    const comparison = aVal.localeCompare(bVal, undefined, { numeric: true });
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+
+                tbody.innerHTML = '';
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            getColumnIndex(column) {
+                const columnMap = {
+                    'date_occ': 0,
+                    'time_occ_minutes': 1,
+                    'severity': 2,
+                    'collision_type': 3,
+                    'address': 4
+                };
+                return columnMap[column] || 0;
+            }
+
+            debounce(func, wait) {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
+            setupMobileNav() {
+                const navToggle = document.querySelector('.nav-toggle');
+                const navLinks = document.querySelector('.nav-links');
+
+                if (navToggle && navLinks) {
+                    navToggle.addEventListener('click', () => {
+                        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                        navToggle.setAttribute('aria-expanded', !isExpanded);
+                        navLinks.classList.toggle('active');
+                    });
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            new LACollisionDashboard();
+        });
+    </script>
+</body>
+</html>

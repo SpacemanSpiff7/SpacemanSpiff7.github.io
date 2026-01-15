@@ -69,6 +69,22 @@
       ]
     },
     {
+      "id": "la-collisions-dashboard",
+      "title": "LA Traffic Collisions Dashboard",
+      "shortDescription": "620K collision records proving what every LA driver already knows: traffic here is a nightmare",
+      "description": "An interactive dashboard that turns 12 years of LAPD collision data into beautiful, depressing visualizations. Features a map that progressively loads 620K+ collision records so you can zoom into your neighborhood and realize you should probably take a different route to work. Includes temporal analysis showing that 5pm is indeed the worst time to be on LA roads, as if you needed data to tell you that.",
+      "category": "Data Visualization",
+      "image": "https://images.unsplash.com/photo-1569098644584-210bcd375b59?w=400&h=300&fit=crop",
+      "tags": ["Data Visualization", "MapLibre GL", "Chart.js", "LA Open Data"],
+      "actions": [
+        {
+          "text": "Explore Dashboard",
+          "url": "tools/la-collisions-dashboard.html",
+          "type": "primary"
+        }
+      ]
+    },
+    {
       "id": "dodgers-notifications",
       "title": "Dodgers Win Deal Notifier",
       "shortDescription": "The most important public service I've ever provided",
