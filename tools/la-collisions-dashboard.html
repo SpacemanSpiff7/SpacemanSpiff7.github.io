@@ -848,6 +848,7 @@
         .severity-minor_injury { background: #ffc107; }
         .severity-severe_injury { background: #fd7e14; }
         .severity-fatal { background: #dc3545; }
+        .severity-unknown { background: #6c757d; }
 
         #tableLoadMore {
             padding: 1rem;
@@ -907,20 +908,20 @@
         <!-- KPI Cards Section -->
         <section class="kpi-cards">
             <div class="kpi-card">
-                <div class="kpi-label">Total Collisions</div>
-                <div class="kpi-value" id="totalCollisions">-</div>
+                <div class="kpi-label">Area in View</div>
+                <div class="kpi-value" id="topArea">-</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Avg Per Day</div>
-                <div class="kpi-value" id="avgPerDay">-</div>
+                <div class="kpi-label">Collision Type</div>
+                <div class="kpi-value" id="topCollisionType">-</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Peak Hour</div>
-                <div class="kpi-value" id="peakHour">-</div>
+                <div class="kpi-value" id="viewportPeakHour">-</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Most Collisions</div>
-                <div class="kpi-value" id="mostDangerousArea">-</div>
+                <div class="kpi-label">Severity</div>
+                <div class="kpi-value" id="topSeverity">-</div>
             </div>
         </section>
 
@@ -1059,6 +1060,7 @@
                     <button class="chip active" data-type="vehicle-pedestrian">Pedestrian</button>
                     <button class="chip active" data-type="vehicle-motorcycle">Motorcycle</button>
                     <button class="chip active" data-type="vehicle-bicycle">Bicycle</button>
+                    <button class="chip active" data-type="other">Other</button>
                 </div>
             </div>
 
@@ -1070,6 +1072,7 @@
                     <label><input type="checkbox" id="filterMinorInjury" checked> Minor Injury</label>
                     <label><input type="checkbox" id="filterSevereInjury" checked> Severe Injury</label>
                     <label><input type="checkbox" id="filterFatal" checked> Fatalities</label>
+                    <label><input type="checkbox" id="filterUnknown" checked> Unknown</label>
                 </div>
             </div>
 
@@ -1117,8 +1120,8 @@
                     timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
                     weekday: true,
                     weekend: true,
-                    collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle'],
-                    severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal'],
+                    collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'],
+                    severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal', 'unknown'],
                     showHitAndRun: false,
                     showDUI: false
                 };
@@ -1142,7 +1145,7 @@
                     this.initMap();
                     this.initCharts();
                     this.initChartControls();
-                    this.updateKPIs(this.overview);
+                    // KPIs now viewport-based, will update when map loads
                     this.updateChartsFromOverview();
                     this.attachEventListeners();
                     this.setupMobileNav();
@@ -1667,6 +1670,7 @@
                 }
 
                 this.updateCharts(chartData);
+                this.updateViewportKPIs(visibleData); // Update viewport KPIs
                 // Table update moved to separate debounced event (500ms) for better performance
             }
 
@@ -1748,16 +1752,21 @@
 
                     // Collision type filter
                     if (this.activeFilters.collisionTypes &&
-                        this.activeFilters.collisionTypes.length > 0 &&
-                        (!props.collision_type || !this.activeFilters.collisionTypes.includes(props.collision_type))) {
-                        return false;
+                        this.activeFilters.collisionTypes.length > 0) {
+                        const collisionType = props.collision_type || 'other';
+                        if (!this.activeFilters.collisionTypes.includes(collisionType)) {
+                            return false;
+                        }
                     }
 
                     // Severity filter
                     if (this.activeFilters.severityLevels &&
-                        this.activeFilters.severityLevels.length > 0 &&
-                        (!props.severity || !this.activeFilters.severityLevels.includes(props.severity))) {
-                        return false;
+                        this.activeFilters.severityLevels.length > 0) {
+                        // Treat null/undefined severity as 'unknown'
+                        const severity = props.severity || 'unknown';
+                        if (!this.activeFilters.severityLevels.includes(severity)) {
+                            return false;
+                        }
                     }
 
                     // Hit & Run filter
@@ -2165,27 +2174,122 @@
                 });
             }
 
-            updateKPIs(data) {
-                document.getElementById('totalCollisions').textContent =
-                    data.total_count.toLocaleString();
+            updateViewportKPIs(visibleData) {
+                // Early exit for empty viewport
+                if (!visibleData || visibleData.length === 0) {
+                    document.getElementById('topArea').textContent = 'N/A';
+                    document.getElementById('topCollisionType').textContent = 'N/A';
+                    document.getElementById('viewportPeakHour').textContent = 'N/A';
+                    document.getElementById('topSeverity').textContent = 'N/A';
+                    return;
+                }
 
-                const avgPerDay = Math.round(data.total_count / data.days_in_range);
-                document.getElementById('avgPerDay').textContent = avgPerDay.toLocaleString();
+                // Single-pass aggregation for all 4 KPIs
+                const areaCounts = new Map();
+                const typeCounts = new Map();
+                const hourCounts = new Array(24).fill(0);
+                const severityCounts = new Map();
 
-                const peakHourData = data.hourly_counts
-                    .map((count, hour) => ({ hour, count }))
-                    .sort((a, b) => b.count - a.count)[0];
+                visibleData.forEach(feature => {
+                    const props = feature.properties;
 
-                const formatHour = (h) => {
-                    if (h === 0) return '12am';
-                    if (h < 12) return `${h}am`;
-                    if (h === 12) return '12pm';
-                    return `${h-12}pm`;
+                    // Area aggregation
+                    if (props.area_name) {
+                        areaCounts.set(props.area_name, (areaCounts.get(props.area_name) || 0) + 1);
+                    }
+
+                    // Collision type aggregation
+                    const collisionType = props.collision_type || 'other';
+                    typeCounts.set(collisionType, (typeCounts.get(collisionType) || 0) + 1);
+
+                    // Hour aggregation
+                    if (props.hour !== null && props.hour !== undefined &&
+                        props.hour >= 0 && props.hour <= 23) {
+                        hourCounts[props.hour]++;
+                    }
+
+                    // Severity aggregation
+                    if (props.severity) {
+                        severityCounts.set(props.severity, (severityCounts.get(props.severity) || 0) + 1);
+                    }
+                });
+
+                // KPI 1: Top Area
+                const topArea = this.findTopEntry(areaCounts);
+                document.getElementById('topArea').textContent = topArea || 'N/A';
+
+                // KPI 2: Top Collision Type
+                const topType = this.findTopEntry(typeCounts);
+                document.getElementById('topCollisionType').textContent =
+                    this.formatCollisionType(topType);
+
+                // KPI 3: Peak Hour (handle all-zero case)
+                const maxHourCount = Math.max(...hourCounts);
+                if (maxHourCount === 0) {
+                    document.getElementById('viewportPeakHour').textContent = 'N/A';
+                } else {
+                    const peakHourIndex = hourCounts.indexOf(maxHourCount);
+                    document.getElementById('viewportPeakHour').textContent =
+                        this.formatHour(peakHourIndex);
+                }
+
+                // KPI 4: Dominant Severity with Percentage
+                const topSeverity = this.findTopEntry(severityCounts);
+                if (topSeverity) {
+                    const severityPercentage = (severityCounts.get(topSeverity) / visibleData.length) * 100;
+                    document.getElementById('topSeverity').innerHTML =
+                        `${this.formatSeverity(topSeverity)} <span style="font-size:0.75em;opacity:0.8">(${severityPercentage.toFixed(0)}%)</span>`;
+                } else {
+                    document.getElementById('topSeverity').textContent = 'N/A';
+                }
+            }
+
+            findTopEntry(countsMap) {
+                if (countsMap.size === 0) return null;
+
+                let maxCount = 0;
+                let topEntry = null;
+
+                countsMap.forEach((count, key) => {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        topEntry = key;
+                    }
+                });
+
+                return topEntry;
+            }
+
+            formatCollisionType(type) {
+                if (!type) return 'N/A';
+                const typeMap = {
+                    'vehicle-to-vehicle': 'Vehicle-Vehicle',
+                    'vehicle-pedestrian': 'Vehicle-Pedestrian',
+                    'vehicle-motorcycle': 'Vehicle-Motorcycle',
+                    'vehicle-bicycle': 'Vehicle-Bicycle',
+                    'other': 'Other'
                 };
-                document.getElementById('peakHour').textContent = formatHour(peakHourData.hour);
+                return typeMap[type] || type;
+            }
 
-                const topArea = data.area_counts[0];
-                document.getElementById('mostDangerousArea').textContent = topArea.area_name;
+            formatSeverity(severity) {
+                if (!severity) return 'Unknown';
+                const severityMap = {
+                    'property_damage': 'Property Damage',
+                    'minor_injury': 'Minor Injury',
+                    'severe_injury': 'Severe Injury',
+                    'fatal': 'Fatal',
+                    'unknown': 'Unknown'
+                };
+                return severityMap[severity] || 'Unknown';
+            }
+
+            formatHour(h) {
+                if (h === null || h === undefined || h < 0 || h > 23) return 'N/A';
+                if (h === 0) return '12am';
+                if (h < 12) return `${h}am`;
+                if (h === 12) return '12pm';
+                return `${h-12}pm`;
             }
 
             attachEventListeners() {
@@ -2247,17 +2351,18 @@
                 });
 
                 // Severity checkboxes
-                ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal'].forEach(severity => {
+                ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal', 'Unknown'].forEach(severity => {
                     const checkbox = document.getElementById(`filter${severity}`);
                     checkbox.addEventListener('change', () => {
                         const severityMap = {
                             'PropertyDamage': 'property_damage',
                             'MinorInjury': 'minor_injury',
                             'SevereInjury': 'severe_injury',
-                            'Fatal': 'fatal'
+                            'Fatal': 'fatal',
+                            'Unknown': 'unknown'
                         };
 
-                        this.activeFilters.severityLevels = ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal']
+                        this.activeFilters.severityLevels = ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal', 'Unknown']
                             .filter(s => document.getElementById(`filter${s}`).checked)
                             .map(s => severityMap[s]);
 
@@ -2283,8 +2388,8 @@
                         timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
                         weekday: true,
                         weekend: true,
-                        collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle'],
-                        severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal'],
+                        collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'],
+                        severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal', 'unknown'],
                         showHitAndRun: false,
                         showDUI: false
                     };
@@ -2297,6 +2402,7 @@
                     document.getElementById('filterMinorInjury').checked = true;
                     document.getElementById('filterSevereInjury').checked = true;
                     document.getElementById('filterFatal').checked = true;
+                    document.getElementById('filterUnknown').checked = true;
                     document.getElementById('filterHitAndRun').checked = false;
                     document.getElementById('filterDUI').checked = false;
                     this.updateMapData();
