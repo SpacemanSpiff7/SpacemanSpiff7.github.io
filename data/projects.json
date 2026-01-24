@@ -1,7 +1,7 @@
 {
   "featured": [
     "la-collisions-dashboard",
-    "public-art-submission",
+    "public-art-submission-app",
     "dodgers-notifications",
     "ebay-craigslist-chrome-extension"
   ],
@@ -113,6 +113,22 @@
         {
           "text": "Submit Art",
           "url": "tools/public-art-submission.html",
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "public-art-submission-app",
+      "title": "Public Art Submission App",
+      "shortDescription": "For when you see something cool and want to help me with a personal project.",
+      "description": "A mobile-friendly app that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Also help me collect data for my public art map project.",
+      "category": "Public Art",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Public Art", "Mobile App", "Location Services"],
+      "actions": [
+        {
+          "text": "Go to App",
+          "url": "https://street-art-hunter.vercel.app/",
           "type": "primary"
         }
       ]
