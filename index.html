@@ -79,6 +79,48 @@
         </section>
     </main>
 
+    <!-- Control Panel -->
+    <div id="blob-control-panel" class="blob-controls">
+        <div class="controls-header" id="controls-toggle">
+            <span class="controls-caret">▲</span>
+        </div>
+        <div class="controls-drawer">
+            <div class="controls-grid">
+                <div class="control-item">
+                    <label for="morph-speed">Morph Speed</label>
+                    <input type="range" id="morph-speed" min="0" max="0.02" step="0.001" value="0.005">
+                    <span class="control-value" id="morph-speed-value">0.005</span>
+                </div>
+                <div class="control-item">
+                    <label for="noise-amplitude">Noise Amount</label>
+                    <input type="range" id="noise-amplitude" min="0" max="0.5" step="0.01" value="0.10">
+                    <span class="control-value" id="noise-amplitude-value">0.10</span>
+                </div>
+                <div class="control-item">
+                    <label for="noise-frequency">Noise Detail</label>
+                    <input type="range" id="noise-frequency" min="0.001" max="0.01" step="0.0001" value="0.003">
+                    <span class="control-value" id="noise-frequency-value">0.003</span>
+                </div>
+                <div class="control-item">
+                    <label for="base-radius">Size</label>
+                    <input type="range" id="base-radius" min="100" max="400" step="10" value="200">
+                    <span class="control-value" id="base-radius-value">200px</span>
+                </div>
+                <div class="control-item">
+                    <label for="brightness">Brightness</label>
+                    <input type="range" id="brightness" min="0.3" max="1.5" step="0.05" value="1.0">
+                    <span class="control-value" id="brightness-value">1.00</span>
+                </div>
+                <div class="control-item">
+                    <label for="line-width">Line Width</label>
+                    <input type="range" id="line-width" min="0.1" max="3" step="0.1" value="1.0">
+                    <span class="control-value" id="line-width-value">1.0</span>
+                </div>
+            </div>
+            <button class="controls-reset" id="controls-reset">Reset to Defaults</button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="animations.js"></script>
     <script src="script.js"></script>

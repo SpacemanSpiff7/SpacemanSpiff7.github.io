@@ -16,6 +16,8 @@ const CONFIG = {
     idleMorphSpeed: 0.005, // Faster morph speed when idle
     idleThreshold: 0.001,  // Velocity below this = idle
     baseRadius: 200,
+    brightnessMultiplier: 1.0,
+    lineWidth: 1.0,
 
     // Color themes per section (dark enough to not interfere with text)
     sectionColors: {
@@ -178,6 +180,69 @@ function lerpColor(colorA, colorB, t) {
         a.g + (b.g - a.g) * t,
         a.b + (b.b - a.b) * t
     );
+}
+
+function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+        }
+    }
+
+    return { h, s, l };
+}
+
+function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
+
+function adjustBrightness(hexColor, multiplier) {
+    const rgb = hexToRgb(hexColor);
+    if (!rgb) return hexColor;
+
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    hsl.l = Math.min(1, Math.max(0, hsl.l * multiplier));
+
+    const newRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+    return '#' + [newRgb.r, newRgb.g, newRgb.b].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
 // ==========================================
@@ -419,7 +484,7 @@ function renderBlob(currentTime) {
     if (CONFIG.displayColor !== CONFIG.targetColor) {
         CONFIG.displayColor = lerpColor(CONFIG.displayColor, CONFIG.targetColor, CONFIG.colorTransitionSpeed);
     }
-    const blobColor = CONFIG.displayColor;
+    const blobColor = adjustBrightness(CONFIG.displayColor, CONFIG.brightnessMultiplier);
 
     // Draw 3D shading glow behind wireframe
     const centerX = blobCanvas.width / 2;
@@ -448,7 +513,7 @@ function renderBlob(currentTime) {
     }
 
     // Draw wireframe
-    blobCtx.lineWidth = 1;
+    blobCtx.lineWidth = CONFIG.lineWidth;
 
     // Draw latitude lines
     for (let lat = 0; lat <= gridRes.lat; lat++) {
@@ -538,4 +603,245 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initBlobSystem);
 } else {
     initBlobSystem();
+}
+
+// ==========================================
+// CONTROL PANEL
+// ==========================================
+function initControlPanel() {
+    const controlPanel = document.getElementById('blob-control-panel');
+    const toggleBtn = document.getElementById('controls-toggle');
+    const resetBtn = document.getElementById('controls-reset');
+
+    if (!controlPanel || !toggleBtn || !resetBtn) return;
+
+    // Store defaults
+    const DEFAULT_CONFIG = {
+        noiseAmplitude: 0.10,
+        noiseFrequency: 0.003,
+        idleMorphSpeed: 0.005,
+        baseRadius: 200,
+        brightnessMultiplier: 1.0,
+        lineWidth: 1.0,
+    };
+
+    // Toggle panel open/closed
+    toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        controlPanel.classList.toggle('open');
+    });
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+        if (controlPanel.classList.contains('open') && !controlPanel.contains(e.target)) {
+            controlPanel.classList.remove('open');
+        }
+    });
+
+    // Prevent clicks inside panel from closing it
+    controlPanel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Update display value helper
+    function updateValueDisplay(sliderId, value, suffix = '') {
+        const display = document.getElementById(sliderId + '-value');
+        if (display) {
+            display.textContent = value + suffix;
+        }
+    }
+
+    // Morph Speed slider
+    const morphSlider = document.getElementById('morph-speed');
+    if (morphSlider) {
+        morphSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            CONFIG.idleMorphSpeed = value;
+            CONFIG.morphSpeed = value * 0.6; // Keep proportion
+            updateValueDisplay('morph-speed', value.toFixed(3));
+            saveSettings();
+        });
+    }
+
+    // Noise Amplitude slider
+    const noiseAmpSlider = document.getElementById('noise-amplitude');
+    if (noiseAmpSlider) {
+        noiseAmpSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            CONFIG.noiseAmplitude = value;
+            updateValueDisplay('noise-amplitude', value.toFixed(2));
+            saveSettings();
+        });
+    }
+
+    // Noise Frequency slider
+    const noiseFreqSlider = document.getElementById('noise-frequency');
+    if (noiseFreqSlider) {
+        noiseFreqSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            CONFIG.noiseFrequency = value;
+            updateValueDisplay('noise-frequency', value.toFixed(4));
+            saveSettings();
+        });
+    }
+
+    // Base Radius slider
+    const radiusSlider = document.getElementById('base-radius');
+    if (radiusSlider) {
+        radiusSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            CONFIG.baseRadius = value;
+            updateValueDisplay('base-radius', value, 'px');
+            saveSettings();
+        });
+    }
+
+    // Brightness slider
+    const brightnessSlider = document.getElementById('brightness');
+    if (brightnessSlider) {
+        brightnessSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            CONFIG.brightnessMultiplier = value;
+            updateValueDisplay('brightness', value.toFixed(2));
+            saveSettings();
+        });
+    }
+
+    // Line Width slider
+    const lineWidthSlider = document.getElementById('line-width');
+    if (lineWidthSlider) {
+        lineWidthSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            CONFIG.lineWidth = value;
+            updateValueDisplay('line-width', value.toFixed(1));
+            saveSettings();
+        });
+    }
+
+    // LocalStorage persistence
+    function saveSettings() {
+        const settings = {
+            morphSpeed: CONFIG.idleMorphSpeed,
+            noiseAmplitude: CONFIG.noiseAmplitude,
+            noiseFrequency: CONFIG.noiseFrequency,
+            baseRadius: CONFIG.baseRadius,
+            brightnessMultiplier: CONFIG.brightnessMultiplier,
+            lineWidth: CONFIG.lineWidth
+        };
+        localStorage.setItem('blobSettings', JSON.stringify(settings));
+    }
+
+    function loadSettings() {
+        const saved = localStorage.getItem('blobSettings');
+        if (saved) {
+            try {
+                const settings = JSON.parse(saved);
+
+                if (settings.morphSpeed !== undefined) {
+                    CONFIG.idleMorphSpeed = settings.morphSpeed;
+                    CONFIG.morphSpeed = settings.morphSpeed * 0.6;
+                    if (morphSlider) {
+                        morphSlider.value = settings.morphSpeed;
+                        updateValueDisplay('morph-speed', settings.morphSpeed.toFixed(3));
+                    }
+                }
+
+                if (settings.noiseAmplitude !== undefined) {
+                    CONFIG.noiseAmplitude = settings.noiseAmplitude;
+                    if (noiseAmpSlider) {
+                        noiseAmpSlider.value = settings.noiseAmplitude;
+                        updateValueDisplay('noise-amplitude', settings.noiseAmplitude.toFixed(2));
+                    }
+                }
+
+                if (settings.noiseFrequency !== undefined) {
+                    CONFIG.noiseFrequency = settings.noiseFrequency;
+                    if (noiseFreqSlider) {
+                        noiseFreqSlider.value = settings.noiseFrequency;
+                        updateValueDisplay('noise-frequency', settings.noiseFrequency.toFixed(4));
+                    }
+                }
+
+                if (settings.baseRadius !== undefined) {
+                    CONFIG.baseRadius = settings.baseRadius;
+                    if (radiusSlider) {
+                        radiusSlider.value = settings.baseRadius;
+                        updateValueDisplay('base-radius', settings.baseRadius, 'px');
+                    }
+                }
+
+                if (settings.brightnessMultiplier !== undefined) {
+                    CONFIG.brightnessMultiplier = settings.brightnessMultiplier;
+                    if (brightnessSlider) {
+                        brightnessSlider.value = settings.brightnessMultiplier;
+                        updateValueDisplay('brightness', settings.brightnessMultiplier.toFixed(2));
+                    }
+                }
+
+                if (settings.lineWidth !== undefined) {
+                    CONFIG.lineWidth = settings.lineWidth;
+                    if (lineWidthSlider) {
+                        lineWidthSlider.value = settings.lineWidth;
+                        updateValueDisplay('line-width', settings.lineWidth.toFixed(1));
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load settings:', e);
+            }
+        }
+    }
+
+    // Reset to defaults
+    resetBtn.addEventListener('click', () => {
+        CONFIG.noiseAmplitude = DEFAULT_CONFIG.noiseAmplitude;
+        CONFIG.noiseFrequency = DEFAULT_CONFIG.noiseFrequency;
+        CONFIG.idleMorphSpeed = DEFAULT_CONFIG.idleMorphSpeed;
+        CONFIG.morphSpeed = DEFAULT_CONFIG.idleMorphSpeed * 0.6;
+        CONFIG.baseRadius = DEFAULT_CONFIG.baseRadius;
+        CONFIG.brightnessMultiplier = DEFAULT_CONFIG.brightnessMultiplier;
+        CONFIG.lineWidth = DEFAULT_CONFIG.lineWidth;
+
+        // Update all sliders
+        if (morphSlider) {
+            morphSlider.value = DEFAULT_CONFIG.idleMorphSpeed;
+            updateValueDisplay('morph-speed', DEFAULT_CONFIG.idleMorphSpeed.toFixed(3));
+        }
+
+        if (noiseAmpSlider) {
+            noiseAmpSlider.value = DEFAULT_CONFIG.noiseAmplitude;
+            updateValueDisplay('noise-amplitude', DEFAULT_CONFIG.noiseAmplitude.toFixed(2));
+        }
+
+        if (noiseFreqSlider) {
+            noiseFreqSlider.value = DEFAULT_CONFIG.noiseFrequency;
+            updateValueDisplay('noise-frequency', DEFAULT_CONFIG.noiseFrequency.toFixed(4));
+        }
+
+        if (radiusSlider) {
+            radiusSlider.value = DEFAULT_CONFIG.baseRadius;
+            updateValueDisplay('base-radius', DEFAULT_CONFIG.baseRadius, 'px');
+        }
+
+        if (brightnessSlider) {
+            brightnessSlider.value = DEFAULT_CONFIG.brightnessMultiplier;
+            updateValueDisplay('brightness', DEFAULT_CONFIG.brightnessMultiplier.toFixed(2));
+        }
+
+        if (lineWidthSlider) {
+            lineWidthSlider.value = DEFAULT_CONFIG.lineWidth;
+            updateValueDisplay('line-width', DEFAULT_CONFIG.lineWidth.toFixed(1));
+        }
+
+        saveSettings();
+    });
+
+    // Load saved settings on page load
+    loadSettings();
+}
+
+// Initialize control panel when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initControlPanel);
+} else {
+    initControlPanel();
 }
