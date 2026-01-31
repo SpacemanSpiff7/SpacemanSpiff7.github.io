@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Blob Prototype - Morphing Asteroid</title>
+
+  <!-- Google Fonts: Silkscreen, Audiowide, IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Audiowide&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-space-black: #000000;
+      --color-bright-purple: #DA00FF;
+      --color-neon-cyan: #00FFFF;
+      --color-hot-magenta: #FF00FF;
+      --color-acid-green: #39FF14;
+      --color-electric-blue: #00BFFF;
+      --current-blob-color: #DA00FF;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      background: var(--color-space-black);
+      color: white;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+    /* Fixed starfield background */
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Fixed blob viewport */
+    #blob-viewport {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    #blob-canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    #blob-content-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      pointer-events: all;
+      z-index: 20;
+      will-change: contents;
+      isolation: isolate;
+    }
+
+    .blob-content {
+      opacity: 0;
+      transform: scale(1);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      display: none;
+    }
+
+    .blob-content.active {
+      opacity: 1;
+      display: block;
+    }
+
+    /* Typography */
+    h1, h2 {
+      font-family: 'Silkscreen', 'Courier New', monospace;
+      text-shadow:
+        0 0 10px var(--current-blob-color),
+        0 0 20px var(--current-blob-color),
+        0 0 30px var(--current-blob-color),
+        0 0 40px rgba(255, 255, 255, 0.5);
+      letter-spacing: 1px;
+      color: var(--current-blob-color);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 400;
+    }
+
+    h3 {
+      font-family: 'Audiowide', cursive;
+      text-shadow:
+        0 0 10px var(--current-blob-color),
+        0 0 20px var(--current-blob-color),
+        0 0 30px var(--current-blob-color),
+        0 0 40px rgba(255, 255, 255, 0.5);
+      letter-spacing: 1px;
+      color: var(--current-blob-color);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
+
+    p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+    }
+
+    .blob-subtitle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .blob-description {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+    }
+
+    /* Glass-morphism buttons */
+    .blob-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .blob-btn {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 16px 32px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      will-change: transform, background;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    .blob-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .blob-btn-primary {
+      background: rgba(139, 0, 255, 0.3);
+      border-color: var(--current-blob-color);
+    }
+
+    .blob-btn-primary:hover {
+      background: rgba(139, 0, 255, 0.5);
+    }
+
+    /* Tags */
+    .blob-tags {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Scroll spacer */
+    #scroll-spacer {
+      height: 200vh;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Scroll indicator */
+    #scroll-indicator {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: all;
+    }
+
+    .scroll-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scroll-dot.active {
+      background: var(--current-blob-color);
+      border-color: var(--current-blob-color);
+      box-shadow: 0 0 10px var(--current-blob-color), 0 0 20px var(--current-blob-color);
+      transform: scale(1.3);
+    }
+
+    .scroll-dot:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.2);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .blob-actions {
+        flex-direction: column;
+      }
+
+      .blob-btn {
+        width: 100%;
+      }
+    }
+
+    /* Reduced motion fallback */
+    @media (prefers-reduced-motion: reduce) {
+      #blob-canvas {
+        display: none;
+      }
+
+      #blob-viewport {
+        background: linear-gradient(135deg, #1a0033 0%, #000033 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Starfield canvas (fixed) -->
+  <canvas id="starfield"></canvas>
+
+  <!-- Blob viewport (fixed, centered) -->
+  <div id="blob-viewport">
+    <canvas id="blob-canvas"></canvas>
+    <div id="blob-content-container">
+      <!-- Section 0: Hero -->
+      <div class="blob-content active" data-section="0">
+        <h1 class="blob-title">Simone Longo</h1>
+        <p class="blob-subtitle">Software Engineer</p>
+        <div class="blob-actions">
+          <button class="blob-btn" onclick="scrollToSection(1)">Projects</button>
+          <button class="blob-btn" onclick="scrollToSection(1)">About</button>
+          <button class="blob-btn" onclick="scrollToSection(1)">Contact</button>
+        </div>
+      </div>
+
+      <!-- Section 1: Example Project -->
+      <div class="blob-content" data-section="1">
+        <h2 class="blob-title">LA Traffic Collisions Dashboard</h2>
+        <p class="blob-description">Interactive visualization of 620K+ LAPD collision records with progressive tile-based loading and spatial analysis.</p>
+        <div class="blob-tags">
+          <span class="tag">MapLibre GL</span>
+          <span class="tag">Chart.js</span>
+          <span class="tag">RBush</span>
+          <span class="tag">Spatial Data</span>
+        </div>
+        <a href="#" class="blob-btn blob-btn-primary">View Project</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div id="scroll-indicator">
+    <div class="scroll-dot active" data-section="0" title="Hero"></div>
+    <div class="scroll-dot" data-section="1" title="LA Collisions"></div>
+  </div>
+
+  <!-- Scroll spacer (200vh for 2 sections) -->
+  <div id="scroll-spacer"></div>
+
+  <script>
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
+    const CONFIG = {
+      // Blob parameters
+      gridResolution: { lat: 40, lon: 40 },
+      gridResolutionMobile: { lat: 28, lon: 28 },
+      noiseAmplitude: 0.15,
+      noiseFrequency: 0.003,
+      idleRotationSpeed: { x: 0.0003, y: 0.0005, z: 0.0002 }, // Slower idle rotation
+      scrollRotationSpeed: 0.008, // Rotation speed based on scroll (increased for more dramatic effect)
+      baseRadius: 250,
+      expandedRadius: 250,
+      contractedRadius: 5,
+
+      // Colors
+      colors: [
+        '#DA00FF', // Bright Purple
+        '#00FFFF', // Neon Cyan
+        '#FF00FF', // Hot Magenta
+        '#39FF14', // Acid Green
+        '#00BFFF', // Electric Blue
+      ],
+
+      // Starfield
+      starCount: 250,
+
+      // Performance
+      targetFPS: 60,
+      targetFPSMobile: 30,
+    };
+
+    const isMobile = window.innerWidth < 768;
+    const targetFPS = isMobile ? CONFIG.targetFPSMobile : CONFIG.targetFPS;
+    const frameInterval = 1000 / targetFPS;
+
+    // ==========================================
+    // SIMPLEX NOISE (Inline Implementation)
+    // ==========================================
+    class SimplexNoise {
+      constructor() {
+        this.grad3 = [
+          [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+          [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+          [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+        ];
+        this.p = [];
+        for (let i = 0; i < 256; i++) {
+          this.p[i] = Math.floor(Math.random() * 256);
+        }
+        this.perm = [];
+        for (let i = 0; i < 512; i++) {
+          this.perm[i] = this.p[i & 255];
+        }
+      }
+
+      dot(g, x, y, z) {
+        return g[0] * x + g[1] * y + g[2] * z;
+      }
+
+      noise3D(x, y, z) {
+        const F3 = 1.0 / 3.0;
+        const G3 = 1.0 / 6.0;
+
+        let n0, n1, n2, n3;
+
+        const s = (x + y + z) * F3;
+        const i = Math.floor(x + s);
+        const j = Math.floor(y + s);
+        const k = Math.floor(z + s);
+
+        const t = (i + j + k) * G3;
+        const X0 = i - t;
+        const Y0 = j - t;
+        const Z0 = k - t;
+        const x0 = x - X0;
+        const y0 = y - Y0;
+        const z0 = z - Z0;
+
+        let i1, j1, k1, i2, j2, k2;
+        if (x0 >= y0) {
+          if (y0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; }
+          else if (x0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; }
+          else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; }
+        } else {
+          if (y0 < z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; }
+          else if (x0 < z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; }
+          else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; }
+        }
+
+        const x1 = x0 - i1 + G3;
+        const y1 = y0 - j1 + G3;
+        const z1 = z0 - k1 + G3;
+        const x2 = x0 - i2 + 2.0 * G3;
+        const y2 = y0 - j2 + 2.0 * G3;
+        const z2 = z0 - k2 + 2.0 * G3;
+        const x3 = x0 - 1.0 + 3.0 * G3;
+        const y3 = y0 - 1.0 + 3.0 * G3;
+        const z3 = z0 - 1.0 + 3.0 * G3;
+
+        const ii = i & 255;
+        const jj = j & 255;
+        const kk = k & 255;
+        const gi0 = this.perm[ii + this.perm[jj + this.perm[kk]]] % 12;
+        const gi1 = this.perm[ii + i1 + this.perm[jj + j1 + this.perm[kk + k1]]] % 12;
+        const gi2 = this.perm[ii + i2 + this.perm[jj + j2 + this.perm[kk + k2]]] % 12;
+        const gi3 = this.perm[ii + 1 + this.perm[jj + 1 + this.perm[kk + 1]]] % 12;
+
+        let t0 = 0.6 - x0*x0 - y0*y0 - z0*z0;
+        if (t0 < 0) n0 = 0.0;
+        else {
+          t0 *= t0;
+          n0 = t0 * t0 * this.dot(this.grad3[gi0], x0, y0, z0);
+        }
+
+        let t1 = 0.6 - x1*x1 - y1*y1 - z1*z1;
+        if (t1 < 0) n1 = 0.0;
+        else {
+          t1 *= t1;
+          n1 = t1 * t1 * this.dot(this.grad3[gi1], x1, y1, z1);
+        }
+
+        let t2 = 0.6 - x2*x2 - y2*y2 - z2*z2;
+        if (t2 < 0) n2 = 0.0;
+        else {
+          t2 *= t2;
+          n2 = t2 * t2 * this.dot(this.grad3[gi2], x2, y2, z2);
+        }
+
+        let t3 = 0.6 - x3*x3 - y3*y3 - z3*z3;
+        if (t3 < 0) n3 = 0.0;
+        else {
+          t3 *= t3;
+          n3 = t3 * t3 * this.dot(this.grad3[gi3], x3, y3, z3);
+        }
+
+        return 32.0 * (n0 + n1 + n2 + n3);
+      }
+    }
+
+    const simplex = new SimplexNoise();
+
+    // ==========================================
+    // STARFIELD
+    // ==========================================
+    const starfieldCanvas = document.getElementById('starfield');
+    const starfieldCtx = starfieldCanvas.getContext('2d');
+
+    function resizeStarfield() {
+      starfieldCanvas.width = window.innerWidth;
+      starfieldCanvas.height = window.innerHeight;
+    }
+    resizeStarfield();
+    window.addEventListener('resize', resizeStarfield);
+
+    // Generate stars
+    const stars = [];
+    for (let i = 0; i < CONFIG.starCount; i++) {
+      stars.push({
+        x: Math.random() * starfieldCanvas.width,
+        y: Math.random() * starfieldCanvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.5,
+        twinkleSpeed: Math.random() * 0.02 + 0.01,
+        twinklePhase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    function renderStarfield(time) {
+      starfieldCtx.fillStyle = '#000000';
+      starfieldCtx.fillRect(0, 0, starfieldCanvas.width, starfieldCanvas.height);
+
+      stars.forEach(star => {
+        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+        const opacity = star.opacity + twinkle * 0.3;
+
+        starfieldCtx.beginPath();
+        starfieldCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        starfieldCtx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        starfieldCtx.fill();
+      });
+    }
+
+    // ==========================================
+    // 3D BLOB MESH
+    // ==========================================
+    const blobCanvas = document.getElementById('blob-canvas');
+    const blobCtx = blobCanvas.getContext('2d');
+
+    function resizeBlob() {
+      // Make canvas full viewport size for better coverage
+      blobCanvas.width = window.innerWidth;
+      blobCanvas.height = window.innerHeight;
+    }
+    resizeBlob();
+    window.addEventListener('resize', resizeBlob);
+
+    // Generate 3D sphere mesh
+    const gridRes = CONFIG.gridResolution;
+    const vertices = [];
+
+    for (let lat = 0; lat <= gridRes.lat; lat++) {
+      for (let lon = 0; lon <= gridRes.lon; lon++) {
+        const theta = (lat / gridRes.lat) * Math.PI;
+        const phi = (lon / gridRes.lon) * Math.PI * 2;
+
+        vertices.push({
+          lat,
+          lon,
+          theta,
+          phi,
+          x: 0,
+          y: 0,
+          z: 0,
+          projected: { x: 0, y: 0 },
+        });
+      }
+    }
+
+    // Rotation state
+    let rotation = { x: 0, y: 0, z: 0 };
+
+    // ==========================================
+    // 3D TRANSFORMATIONS
+    // ==========================================
+    function rotateX(x, y, z, angle) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return {
+        x,
+        y: y * cos - z * sin,
+        z: y * sin + z * cos,
+      };
+    }
+
+    function rotateY(x, y, z, angle) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return {
+        x: x * cos + z * sin,
+        y,
+        z: -x * sin + z * cos,
+      };
+    }
+
+    function rotateZ(x, y, z, angle) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return {
+        x: x * cos - y * sin,
+        y: x * sin + y * cos,
+        z,
+      };
+    }
+
+    function project3D(x, y, z, radius) {
+      const perspective = 600;
+      const scale = perspective / (perspective + z);
+      return {
+        x: blobCanvas.width / 2 + x * scale,
+        y: blobCanvas.height / 2 + y * scale,
+        scale,
+      };
+    }
+
+    // ==========================================
+    // SCROLL HANDLING
+    // ==========================================
+    let currentSection = 0;
+    let currentRadius = CONFIG.expandedRadius;
+    let currentColor = CONFIG.colors[0];
+    let isScrolling = false;
+    let scrollTimeout;
+    let lastScrollY = 0;
+    let scrollRotation = 0;
+
+    function updateScroll() {
+      const scrollY = window.scrollY;
+      const sectionHeight = window.innerHeight;
+      const maxScroll = sectionHeight;
+
+      // Detect scrolling
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 150);
+
+      // Track scroll-based rotation
+      const scrollDelta = scrollY - lastScrollY;
+      scrollRotation += scrollDelta * CONFIG.scrollRotationSpeed;
+      lastScrollY = scrollY;
+
+      const section = Math.floor(scrollY / sectionHeight);
+      const progress = (scrollY % sectionHeight) / sectionHeight;
+
+      currentSection = Math.min(section, 1);
+
+      // Update radius (expand/contract)
+      if (progress < 0.5) {
+        currentRadius = CONFIG.expandedRadius * (1 - progress * 2) + CONFIG.contractedRadius * (progress * 2);
+      } else {
+        currentRadius = CONFIG.contractedRadius * (1 - (progress - 0.5) * 2) + CONFIG.expandedRadius * ((progress - 0.5) * 2);
+      }
+
+      // Update content visibility with slower fade/scale
+      // Text transitions at 0.35x speed compared to asteroid for more reading time
+      const textSpeed = 0.35;
+
+      document.querySelectorAll('.blob-content').forEach((content, index) => {
+        if (progress < 0.5 && index === section) {
+          content.classList.add('active');
+          // Fade out and shrink more slowly
+          const textProgress = Math.min(progress * 2 * textSpeed, 1);
+          content.style.opacity = 1 - textProgress;
+          content.style.transform = `scale(${1 - textProgress * 0.3})`; // Shrink to 70% at minimum
+        } else if (progress >= 0.5 && index === section + 1) {
+          content.classList.add('active');
+          // Fade in and grow more slowly
+          const textProgress = Math.min((progress - 0.5) * 2 * textSpeed, 1);
+          content.style.opacity = textProgress;
+          content.style.transform = `scale(${0.7 + textProgress * 0.3})`; // Grow from 70% to 100%
+        } else {
+          content.classList.remove('active');
+        }
+      });
+
+      // Update scroll indicator dots based on which section's content is more visible
+      const activeSection = progress < 0.5 ? section : Math.min(section + 1, 1);
+      document.querySelectorAll('.scroll-dot').forEach((dot, index) => {
+        if (index === activeSection) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      // Update color only at midpoint (when asteroid is fully collapsed)
+      // This keeps each section's color consistent until the transition midpoint
+      const colorSection = progress < 0.5 ? section : Math.min(section + 1, 1);
+      const colorIndex = colorSection % CONFIG.colors.length;
+      currentColor = CONFIG.colors[colorIndex];
+      document.documentElement.style.setProperty('--current-blob-color', currentColor);
+    }
+
+    window.addEventListener('scroll', updateScroll);
+    updateScroll();
+
+    // Scroll indicator click handlers
+    document.querySelectorAll('.scroll-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const section = parseInt(dot.dataset.section);
+        window.scrollTo({
+          top: section * window.innerHeight,
+          behavior: 'smooth',
+        });
+      });
+    });
+
+    function scrollToSection(index) {
+      window.scrollTo({
+        top: index * window.innerHeight,
+        behavior: 'smooth',
+      });
+    }
+
+    // ==========================================
+    // BLOB RENDERING
+    // ==========================================
+    let time = 0;
+    let lastFrameTime = 0;
+
+    function renderBlob(currentTime) {
+      if (currentTime - lastFrameTime < frameInterval) {
+        requestAnimationFrame(renderBlob);
+        return;
+      }
+      lastFrameTime = currentTime;
+
+      // Only morph when not scrolling
+      if (!isScrolling) {
+        time += 0.005; // Slower morphing
+      }
+
+      // Clear canvas
+      blobCtx.clearRect(0, 0, blobCanvas.width, blobCanvas.height);
+
+      // Update rotation - combine idle rotation with scroll-based rotation
+      if (isScrolling) {
+        // During scroll, use scroll-based rotation
+        rotation.y = scrollRotation;
+        rotation.x += CONFIG.idleRotationSpeed.x * 0.5; // Minimal idle rotation
+        rotation.z += CONFIG.idleRotationSpeed.z * 0.5;
+      } else {
+        // When idle, use slow automatic rotation
+        rotation.x += CONFIG.idleRotationSpeed.x;
+        rotation.y += CONFIG.idleRotationSpeed.y;
+        rotation.z += CONFIG.idleRotationSpeed.z;
+      }
+
+      // Update vertices
+      vertices.forEach(vertex => {
+        // Apply noise to radius
+        const noiseValue = simplex.noise3D(
+          Math.cos(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
+          Math.sin(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
+          Math.cos(vertex.theta) + time * CONFIG.noiseFrequency * 100
+        );
+
+        const radius = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+
+        // Spherical to Cartesian
+        let x = radius * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+        let y = radius * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+        let z = radius * Math.cos(vertex.theta);
+
+        // Apply rotations
+        let rotated = rotateX(x, y, z, rotation.x);
+        rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
+        rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
+
+        vertex.x = rotated.x;
+        vertex.y = rotated.y;
+        vertex.z = rotated.z;
+
+        // Project to 2D
+        vertex.projected = project3D(rotated.x, rotated.y, rotated.z, currentRadius);
+      });
+
+      // Sort vertices by Z (back to front)
+      const sortedVertices = [...vertices].sort((a, b) => a.z - b.z);
+
+      // Light direction (from top-right-front)
+      const lightDir = { x: 0.5, y: -0.5, z: 1 };
+      const lightMag = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
+      const lightNorm = { x: lightDir.x / lightMag, y: lightDir.y / lightMag, z: lightDir.z / lightMag };
+
+      // Calculate normals for each vertex
+      vertices.forEach(vertex => {
+        // Normal is just the normalized position vector for a sphere
+        const mag = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
+        vertex.normal = {
+          x: vertex.x / mag,
+          y: vertex.y / mag,
+          z: vertex.z / mag,
+        };
+        // Calculate lighting (dot product with light direction)
+        vertex.lighting = Math.max(0, vertex.normal.x * lightNorm.x + vertex.normal.y * lightNorm.y + vertex.normal.z * lightNorm.z);
+      });
+
+      // Draw wireframe with thinner, more subtle lines
+      blobCtx.lineWidth = 0.5;
+
+      // Draw latitude lines
+      for (let lat = 0; lat <= gridRes.lat; lat++) {
+        blobCtx.beginPath();
+        for (let lon = 0; lon <= gridRes.lon; lon++) {
+          const index = lat * (gridRes.lon + 1) + lon;
+          const vertex = vertices[index];
+
+          // Improved shading: combine Z-depth and normal-based lighting
+          const depthFade = (vertex.z / currentRadius + 1) / 2; // 0 (back) to 1 (front)
+          const lighting = vertex.lighting; // 0 (dark) to 1 (bright)
+
+          // Base opacity is low, increases with lighting and depth
+          const baseOpacity = 0.15;
+          const lightBoost = lighting * 0.4;
+          const depthBoost = depthFade * 0.25;
+          const opacity = baseOpacity + lightBoost + depthBoost;
+
+          blobCtx.strokeStyle = currentColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+
+          if (lon === 0) {
+            blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+          } else {
+            blobCtx.lineTo(vertex.projected.x, vertex.projected.y);
+          }
+        }
+        blobCtx.stroke();
+      }
+
+      // Draw longitude lines
+      for (let lon = 0; lon <= gridRes.lon; lon++) {
+        blobCtx.beginPath();
+        for (let lat = 0; lat <= gridRes.lat; lat++) {
+          const index = lat * (gridRes.lon + 1) + lon;
+          const vertex = vertices[index];
+
+          const depthFade = (vertex.z / currentRadius + 1) / 2;
+          const lighting = vertex.lighting;
+
+          const baseOpacity = 0.15;
+          const lightBoost = lighting * 0.4;
+          const depthBoost = depthFade * 0.25;
+          const opacity = baseOpacity + lightBoost + depthBoost;
+
+          blobCtx.strokeStyle = currentColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+
+          if (lat === 0) {
+            blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+          } else {
+            blobCtx.lineTo(vertex.projected.x, vertex.projected.y);
+          }
+        }
+        blobCtx.stroke();
+      }
+
+      requestAnimationFrame(renderBlob);
+    }
+
+    // ==========================================
+    // ANIMATION LOOP
+    // ==========================================
+    function animate(currentTime) {
+      renderStarfield(currentTime * 0.001);
+      requestAnimationFrame(animate);
+    }
+
+    // Start animations
+    requestAnimationFrame(animate);
+    requestAnimationFrame(renderBlob);
+  </script>
+</body>
+</html>

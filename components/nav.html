@@ -1,7 +1,9 @@
 <!-- Navigation -->
 <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav-container">
-        <a href="#" class="nav-logo" aria-label="Home">Simone Longo</a>
+        <a href="#" class="nav-logo" data-section="hero" aria-label="Home">
+            <img src="resources/simone_logo.png" alt="SL" class="nav-logo-img">
+        </a>
         <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -10,11 +12,10 @@
             </svg>
         </button>
         <ul class="nav-links">
-            <li><a href="#" data-section="home" class="nav-link active" aria-current="page">Home</a></li>
-            <li><a href="#" data-section="projects" class="nav-link">Tools</a></li>
+            <li><a href="#" data-section="hero" class="nav-link active" aria-current="page">Home</a></li>
             <li><a href="#" data-section="about" class="nav-link">About</a></li>
             <li><a href="#" data-section="contact" class="nav-link">Contact</a></li>
-            <li><a href="tools/consulting-coming-soon.html" target="_blank" rel="noopener noreferrer" class="nav-link external-link">Consulting</a></li>
+            <li><a href="#" data-section="projects-grid" class="nav-link">Projects</a></li>
         </ul>
     </div>
-</nav> 
+</nav>

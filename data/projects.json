@@ -36,7 +36,7 @@
       "description": "A stock analysis tool with more buttons and charts than I know what to do with. Features Monte Carlo simulations because apparently regular mistakes weren't random enough. Helps you lose money with confidence and statistical backing.",
       "category": "Financial",
       "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Financial Analytics", "Monte Carlo", "React"],
+      "tags": ["Financial Analysis"],
       "actions": [
         {
           "text": "Use Tool",
@@ -45,7 +45,7 @@
           "external": true
         },
         {
-          "text": "View Code", 
+          "text": "Github",
           "url": "https://github.com/SpacemanSpiff7/lil-stock-widget",
           "type": "secondary",
           "external": true
@@ -143,7 +143,7 @@
       "tags": ["Chrome Extensions", "Ebay", "Craigslist"],
       "actions": [
         {
-          "text": "Use Extension",
+          "text": "Github",
           "url": "https://github.com/SpacemanSpiff7/EbayLookupChromePlugin",
           "type": "primary",
           "external": true
@@ -173,7 +173,7 @@
       "description": "A simple running game that tests your reflexes and patience. Built with JavaScript.",
       "category": "Games",
       "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Running", "Game", "JavaScript"],
+      "tags": ["Game"],
       "actions": [
         {
           "text": "Play Game",

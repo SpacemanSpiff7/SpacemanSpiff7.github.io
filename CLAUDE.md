@@ -33,9 +33,18 @@ This is a **single-page application (SPA)** with a component-based architecture:
 
 - **Main page**: `index.html` - Loads all components dynamically via JavaScript
 - **Components**: HTML files in `/components/` directory loaded via `loadComponent()` function
-- **Standalone pages**: Separate HTML files for specific tools (shopping-research.html, location-map.html, etc.)
+- **Standalone pages**: 9 HTML tools in `/tools/` directory with varying navigation patterns
 - **Global styles**: `style.css` with CSS custom properties and mobile-first responsive design
 - **Global scripts**: `script.js` handles component loading, navigation, and interactive features
+
+### Data-Driven Configuration
+
+**Single Source of Truth**: `data/projects.json`
+- Controls featured tools on home page
+- Powers projects grid with metadata
+- **When adding projects**: Update projects.json, not CLAUDE.md (see `data/README.md`)
+
+**Current featured** (4 projects): la-collisions-dashboard, public-art-submission, dodgers-notifications, ebay-craigslist-chrome-extension
 
 ### Component System
 The site uses a custom component loading system in `script.js`:
@@ -46,13 +55,6 @@ loadComponent('nav-container', 'components/nav.html');
 loadComponent('home-container', 'components/home.html');
 // etc.
 ```
-
-**Key components:**
-- `nav.html` - Navigation with mobile hamburger menu
-- `home.html` - Hero section with featured tools
-- `projects.html` - Project showcase
-- `about.html` - About section
-- `contact.html` - Contact information
 
 ### Navigation System
 - Single-page navigation using `data-section` attributes
@@ -69,12 +71,36 @@ loadComponent('home-container', 'components/home.html');
 
 ## Important Implementation Notes
 
-### Standalone Tools
-Tools in the `/tools/` directory are **standalone pages** with different navigation patterns:
-- **Some tools** (location-map.html, public-art-submission.html) set `window.SKIP_MAIN_SCRIPT = true` to prevent main component loading
-- **Other tools** (shopping-research.html, monte-carlo-sim-optimized.html, running-game.html) use standalone navigation without the skip flag
-- All reference parent directory for shared CSS (`../style.css`)
-- May have different navigation structures
+### Standalone Tool Patterns
+
+Tools in `/tools/` use three distinct navigation approaches:
+
+**Pattern 1: SKIP_MAIN_SCRIPT + Standalone Nav** (3 tools)
+- `la-collisions-dashboard.html`, `location-map.html`, `public-art-submission.html`
+- Sets `window.SKIP_MAIN_SCRIPT = true` to prevent SPA component loading
+- Fully standalone with own navigation structure
+
+**Pattern 2: Inline Nav, No SKIP** (5 tools)
+- `shopping-research.html`, `monte-carlo-sim-optimized.html`, `running-game.html`, `claude-consulting-draft.html`, `consulting-coming-soon.html`
+- Creates navigation inline, references `../style.css`
+
+**Pattern 3: External Module** (1 file)
+- `location-map.js` (supporting JavaScript for location-map.html)
+
+**Why different patterns?**: Performance optimization (avoid loading unused SPA components) and standalone functionality requirements.
+
+### LA Collisions Dashboard
+
+**Purpose**: Interactive visualization of 620K+ LAPD collision records (2010-2021) with progressive loading and no backend.
+
+**Architecture** (`tools/la-collisions-dashboard.html`, ~3,200 lines):
+- **Map rendering**: MapLibre GL 3.6.2
+- **Temporal analysis**: Chart.js 4.4.0
+- **Spatial indexing**: RBush 3.0.1 (fast collision detection)
+- **Data**: 303MB `data/la_traffic_collisions.json` → 421 spatial tiles in `assets/collisions/tiles/*.json`
+- **Pattern**: Uses `window.SKIP_MAIN_SCRIPT = true`, tile-based progressive loading
+
+**When modifying**: Tiles are git-tracked. Regenerate with `scripts/preprocess-collisions.js` if source data changes.
 
 ### Google API Integration
 Two tools integrate with Google services:
@@ -92,14 +118,7 @@ Two tools integrate with Google services:
 
 ### Interactive Tools
 
-**Running Game** (`tools/running-game.html`):
-- Fully-featured browser game testing reflexes and patience
-- Complete game mechanics with player movement, obstacles, and scoring system
-- Settings drawer with customizable game options
-- High score tracking with localStorage
-- Mobile-optimized touch controls
-- Featured project in projects.json
-- 1,452 lines of self-contained HTML/CSS/JS
+**Running Game** (`tools/running-game.html`): Browser-based game with localStorage high scores. See projects.json for details.
 
 ### Mobile Optimizations
 - Touch-friendly 44px minimum touch targets
@@ -111,80 +130,46 @@ Two tools integrate with Google services:
 
 ```
 /
-├── index.html              # Main SPA entry point
-├── style.css              # Global styles and design system (1,401 lines)
-├── script.js              # Main application logic (449 lines)
+├── index.html, style.css (~1,266 lines), script.js (~453 lines)
 ├── cursor_site.html        # Alternative/legacy standalone site version
-├── CNAME                  # GitHub Pages domain configuration
+├── CNAME                   # GitHub Pages domain configuration
 ├── README.md              # Repository readme
-├── assets/                # Static assets
-│   ├── favicon.svg        # Site favicon
-│   └── images/            # Project card images
-│       └── dodgers-image.jpg  # Dodgers project image (4.83 MB)
-├── resources/             # Media resources
-│   └── simone_pic.png     # Hero section image (5.77 MB)
-├── components/            # SPA components
-│   ├── nav.html           # Navigation with mobile hamburger menu
-│   ├── home.html          # Hero section with featured tools
-│   ├── projects.html      # Project showcase grid
-│   ├── about.html         # About section
-│   └── contact.html       # Contact information
-├── data/                  # Configuration and data files
-│   ├── projects.json      # Project configuration (main data source)
-│   │                      # Contains 7 projects with 3 featured
-│   ├── projects-commented.json  # Commented reference version
-│   └── README.md         # Project management guide
-├── tools/                 # Standalone tool pages
-│   ├── shopping-research.html        # Product research comparison tool
-│   ├── monte-carlo-sim-optimized.html  # Monte Carlo simulation
-│   ├── running-game.html            # Browser-based running game (1,452 lines)
-│   ├── location-map.html            # Interactive location mapping tool
-│   ├── location-map.js              # Location map logic
-│   └── public-art-submission.html   # Public art submission form
-└── docs/                  # Documentation files
-    ├── PUBLIC_ART_SUBMISSION_README.md  # Setup guide for art submission
-    ├── LOCATION_MAP_SETUP.md            # Complete location map setup
-    └── location-map-example-data.csv    # Sample data for location map
+├── components/            # 5 SPA components (nav, home, projects, about, contact)
+├── tools/                 # 9 standalone HTML tools (see Tool Patterns above)
+├── data/                  # projects.json (source of truth), la_traffic_collisions.json (303MB)
+├── assets/                # favicon.svg, images/, collisions/tiles/ (421 JSON files)
+├── scripts/               # preprocess-collisions.js (data preprocessing)
+├── resources/             # simone_pic.png, og-image.png
+└── docs/                  # Setup guides for Google API tools
 ```
-
-## Code Conventions
-
-### CSS
-- Use CSS custom properties from `:root` for consistent theming
-- Follow BEM-like naming for components
-- Mobile-first responsive design with min-width media queries
-- Prefer CSS Grid and Flexbox for layouts
-
-### JavaScript
-- ES6+ features are used throughout
-- Event delegation for dynamic content
-- Component lifecycle managed through custom events
-- Async/await for API calls in Google integrations
-
-### HTML
-- Semantic HTML5 elements
-- ARIA attributes for accessibility
-- Mobile-optimized viewport settings
-- Preload critical resources
 
 ## External Dependencies
 
-- **Google Fonts** - Inter font family
-- **Google Maps API** - For location map feature
-- **Google Sheets/Drive APIs** - For location data storage
-- **Unsplash** - Some project card images (mix of Unsplash and self-hosted images)
-- **Self-hosted images** - Hero image (resources/simone_pic.png) and some project images (assets/images/)
+**Map/Visualization Libraries**:
+- MapLibre GL 3.6.2 - Collision dashboard map rendering
+- Chart.js 4.4.0 - Temporal analysis charts
+- RBush 3.0.1 - Spatial indexing for collision tiles
+
+**Google APIs**:
+- Maps (location-map.html)
+- Sheets/Drive (location-map.html data storage)
+- Forms (public-art-submission.html)
+
+**Assets**:
+- Google Fonts (Inter)
+- Unsplash + self-hosted images (mix)
 
 ## Projects Configuration
 
 The site features are managed through `data/projects.json`:
-- **7 total projects** defined in the projects array
-- **3 featured projects** highlighted on the home page:
+- **10 total projects** (mix of tools, games, and applications)
+- **4 featured projects** highlighted on home page:
+  - la-collisions-dashboard
   - public-art-submission
   - dodgers-notifications
-  - running-game
-- Projects include tools, games, and applications
+  - ebay-craigslist-chrome-extension
 - Each project has metadata: title, description, tech stack, links, and images
+- **Source of truth**: projects.json (not CLAUDE.md - see `data/README.md`)
 
 ## GitHub Pages Configuration
 

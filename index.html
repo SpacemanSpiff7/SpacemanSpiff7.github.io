@@ -6,49 +6,81 @@
     <meta name="description" content="Simone Longo - Software Engineer">
     <meta name="keywords" content="software engineer, tools, shopping research, AI prompts, public service">
     <meta name="author" content="Simone Longo">
-    
+
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://simonelongo.com/">
     <meta property="og:title" content="Simone Longo - Software Engineer">
     <meta property="og:description" content="Simone Longo - Software Engineer">
-    
+
     <!-- Instagram -->
     <meta property="og:site_name" content="Simone Longo">
-    
+
     <title>Simone Longo - Software Engineer</title>
-    
+
     <!-- Preload critical resources -->
     <link rel="preload" href="style.css" as="style">
     <link rel="preload" href="script.js" as="script">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
+    <!-- Blob System Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Audiowide&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-    
+
 </head>
 <body>
     <!-- Navigation -->
     <div id="nav-container"></div>
-    
-    <!-- Main Content -->
-    <main>
-        <div id="home-container"></div>
-        <div id="projects-container"></div>
-        <div id="about-container"></div>
-        <div id="contact-container"></div>
+
+    <!-- Fixed backgrounds -->
+    <canvas id="starfield"></canvas>
+    <canvas id="blob-canvas"></canvas>
+
+    <!-- Scrollable content -->
+    <main class="scroll-container">
+        <section id="hero" class="snap-section">
+            <h1 class="hero-title"><span class="letter" data-letter="0">S</span><span class="letter" data-letter="1">i</span><span class="letter" data-letter="2">m</span><span class="letter" data-letter="3">o</span><span class="letter" data-letter="4">n</span><span class="letter" data-letter="5">e</span> <span class="letter" data-letter="6">L</span><span class="letter" data-letter="7">o</span><span class="letter" data-letter="8">n</span><span class="letter" data-letter="9">g</span><span class="letter" data-letter="10">o</span></h1>
+            <p class="hero-subtitle">Software Engineer</p>
+        </section>
+        <!-- Featured projects - one per screen -->
+        <section id="featured-1" class="snap-section featured-project"></section>
+        <section id="featured-2" class="snap-section featured-project"></section>
+        <section id="featured-3" class="snap-section featured-project"></section>
+        <section id="featured-4" class="snap-section featured-project"></section>
+
+        <section id="about" class="snap-section">
+            <h2 class="section-title">About</h2>
+            <p class="section-text">Software engineer in Los Angeles working in ad tech. Academic background in computational chemistry and data science. Outside of work, I organize ultramarathon relays and spend time running trails, skiing, and listening to techno.</p>
+        </section>
+
+        <section id="contact" class="snap-section">
+            <h2 class="section-title">Let's Connect</h2>
+            <p class="section-text">Want to collaborate or just chat? Find me here:</p>
+            <div class="contact-links">
+                <a href="https://github.com/SpacemanSpiff7" class="link-btn" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://www.linkedin.com/in/simone-longo-a9849892/" class="link-btn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://www.instagram.com/smoneylongo/" class="link-btn" target="_blank" rel="noopener noreferrer">Instagram</a>
+            </div>
+        </section>
+
+        <section id="projects-grid">
+            <h2 class="section-title">All Projects</h2>
+            <div class="projects-grid"></div>
+        </section>
     </main>
-    
+
     <!-- Scripts -->
+    <script src="animations.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-

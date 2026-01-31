@@ -3,15 +3,24 @@
 
 /* CSS Custom Properties - Editorial Design Tokens */
 :root {
-    /* Foundation - Warm Paper */
-    --color-background: #F6F4EF;           /* Primary surface */
-    --color-surface: #FFFFFF;              /* Elevated cards */
-    --color-surface-secondary: #FAFAF8;    /* Secondary surfaces */
+    /* Dark theme overrides for blob system */
+    --color-space-black: #000000;
+    --color-bright-purple: #DA00FF;
+    --color-neon-cyan: #00FFFF;
+    --color-hot-magenta: #FF00FF;
+    --color-acid-green: #39FF14;
+    --color-electric-blue: #00BFFF;
+    --current-blob-color: #DA00FF; /* Dynamic via JS */
 
-    /* Text Hierarchy */
-    --color-text-primary: #1F2328;         /* Charcoal Ink */
-    --color-text-secondary: #5B6166;       /* Graphite */
-    --color-text-tertiary: #8B8F94;        /* Metadata */
+    /* Foundation - Dark theme replaces warm paper */
+    --color-background: #000000;           /* Dark space black */
+    --color-surface: rgba(0, 0, 0, 0.8);   /* Dark surface */
+    --color-surface-secondary: rgba(0, 0, 0, 0.6);    /* Dark secondary surfaces */
+
+    /* Text Hierarchy - Dark theme overrides */
+    --color-text-primary: #FFFFFF;         /* White for dark theme */
+    --color-text-secondary: rgba(255, 255, 255, 0.7);       /* Translucent white */
+    --color-text-tertiary: rgba(255, 255, 255, 0.5);        /* More translucent */
 
     /* Chromatic Restraint */
     --color-accent-olive: #5A6B3C;         /* Deep Olive - section headers ONLY */
@@ -102,13 +111,13 @@ html {
     scroll-behavior: smooth;
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
-    background: var(--color-background);
+    background: #000000;
     height: 100%;
 }
 
 body {
     font-family: var(--font-family);
-    background: var(--color-background);
+    background: transparent;
     color: var(--color-text-primary);
     line-height: var(--leading-normal);
     font-weight: 400;
@@ -131,15 +140,15 @@ h1, h2, h3 {
 }
 
 main {
-    background: var(--color-background);
+    background: transparent;
 }
 
 section {
-    background: var(--color-background);
+    background: transparent;
 }
 
 .section {
-    background: var(--color-background);
+    background: transparent;
 }
 
 /* Container - Perfect Center Alignment */
@@ -164,6 +173,15 @@ section {
     transition: all var(--transition-normal);
 }
 
+/* Remove all outlines and borders from nav elements */
+.nav *:focus,
+.nav *:active,
+.nav *:focus-visible {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .nav-container {
     display: flex;
     align-items: center;
@@ -174,11 +192,33 @@ section {
 }
 
 .nav-logo {
+    font-family: 'Silkscreen', 'Courier New', monospace;
     font-size: var(--text-lg);
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: #FFFFFF;
     text-decoration: none;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo-img {
+    height: 40px;
+    width: auto;
+    display: block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-logo:hover .nav-logo-img {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.nav-logo:focus,
+.nav-logo:focus-visible,
+.nav-logo:active {
+    outline: none;
+    border: none;
 }
 
 .nav-links {
@@ -196,21 +236,29 @@ section {
 }
 
 .nav-link {
-    color: var(--color-text-secondary);
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    color: rgba(255, 255, 255, 0.5);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 400;
     font-size: var(--text-sm);
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-md);
     transition: all var(--transition-normal);
     position: relative;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.5px;
     display: block;
 }
 
 .nav-link:hover,
 .nav-link.active {
-    color: var(--color-accent-rust);
+    color: #FFFFFF;
+}
+
+.nav-link:focus,
+.nav-link:focus-visible,
+.nav-link:active {
+    outline: none;
+    border: none;
 }
 
 /* Mobile Navigation */
@@ -230,9 +278,12 @@ section {
     background: var(--color-surface-secondary);
 }
 
-.nav-toggle:focus {
+.nav-toggle:focus,
+.nav-toggle:focus-visible,
+.nav-toggle:active {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-accent-rust);
+    border: none;
+    box-shadow: none;
 }
 
 /* Hero Section - Modernist Editorial */
@@ -1054,6 +1105,13 @@ section {
     /* Mobile Navigation */
     .nav-toggle {
         display: block;
+        min-width: 44px;
+        min-height: 44px;
+        padding: var(--space-3);
+    }
+
+    .nav-toggle svg {
+        pointer-events: none;
     }
     
     .nav-links {
@@ -1104,8 +1162,8 @@ section {
     }
 
     .nav-link.active {
-        background: rgba(139, 74, 50, 0.08);
-        color: var(--color-accent-rust);
+        background: transparent;
+        color: #FFFFFF;
     }
     
     .hero {
@@ -1262,5 +1320,303 @@ section {
     .about-content h2 {
         color: var(--color-text-primary);
         letter-spacing: -0.03em;
+    }
+}
+
+/* ==========================================
+   SCROLL-SNAP VERTICAL SCROLL SYSTEM
+   ========================================== */
+
+/* Fixed background canvases */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+}
+
+#blob-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Main scroll container with snap */
+.scroll-container {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    background: transparent;
+}
+
+/* Hide scrollbar but keep functionality */
+.scroll-container::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.scroll-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Snap sections - full viewport height, centered content */
+.snap-section {
+    min-height: 100vh;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+    background: transparent;
+}
+
+/* Hero section */
+.hero-title {
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 20px rgba(218, 0, 255, 0.5);
+}
+
+.hero-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+}
+
+/* Rainbow glow per letter */
+.hero-title .letter {
+    display: inline-block;
+    color: white;
+}
+
+.hero-title .letter[data-letter="0"]  { text-shadow: 0 0 20px hsl(0, 100%, 50%); }    /* Red */
+.hero-title .letter[data-letter="1"]  { text-shadow: 0 0 20px hsl(30, 100%, 50%); }   /* Orange */
+.hero-title .letter[data-letter="2"]  { text-shadow: 0 0 20px hsl(60, 100%, 50%); }   /* Yellow */
+.hero-title .letter[data-letter="3"]  { text-shadow: 0 0 20px hsl(120, 100%, 50%); }  /* Green */
+.hero-title .letter[data-letter="4"]  { text-shadow: 0 0 20px hsl(180, 100%, 50%); }  /* Cyan */
+.hero-title .letter[data-letter="5"]  { text-shadow: 0 0 20px hsl(240, 100%, 50%); }  /* Blue */
+.hero-title .letter[data-letter="6"]  { text-shadow: 0 0 20px hsl(270, 100%, 50%); }  /* Purple */
+.hero-title .letter[data-letter="7"]  { text-shadow: 0 0 20px hsl(300, 100%, 50%); }  /* Magenta */
+.hero-title .letter[data-letter="8"]  { text-shadow: 0 0 20px hsl(330, 100%, 50%); }  /* Pink */
+.hero-title .letter[data-letter="9"]  { text-shadow: 0 0 20px hsl(15, 100%, 50%); }   /* Red-Orange */
+.hero-title .letter[data-letter="10"] { text-shadow: 0 0 20px hsl(45, 100%, 50%); }   /* Gold */
+
+/* Section titles */
+.section-title {
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    font-size: 2rem;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 15px rgba(218, 0, 255, 0.4);
+}
+
+/* Section text */
+.section-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 600px;
+    margin-bottom: 1.5rem;
+}
+
+/* Featured project sections */
+.featured-project h2 {
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.featured-project p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 500px;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.featured-project .tags {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.tag {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Silkscreen link buttons - minimal style */
+.link-btn {
+    font-family: 'Silkscreen', cursive;
+    font-size: 0.9rem;
+    color: white;
+    text-decoration: underline;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    display: inline-block;
+}
+
+.link-btn:hover {
+    opacity: 0.7;
+}
+
+/* Contact links */
+.contact-links {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+/* Projects grid section - NO snap, free scroll */
+#projects-grid {
+    min-height: auto;
+    padding: 4rem 2rem 6rem;
+    scroll-snap-align: start;
+    display: block;
+    text-align: center;
+    background: transparent;
+}
+
+#projects-grid .section-title {
+    margin-bottom: 2rem;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.project-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: background 0.2s ease;
+}
+
+.project-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.project-card h3 {
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.project-card p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.project-card .link-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0;
+}
+
+/* Navigation adjustments for dark theme */
+.nav {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .section-text {
+        font-size: 0.95rem;
+        padding: 0 1rem;
+    }
+
+    .featured-project h2 {
+        font-size: 1.4rem;
+    }
+
+    .featured-project p {
+        font-size: 0.95rem;
+        padding: 0 1rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    .contact-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .snap-section {
+        padding: 1.5rem;
+    }
+}
+
+/* Reduced motion fallback */
+@media (prefers-reduced-motion: reduce) {
+    .scroll-container {
+        scroll-behavior: auto;
+    }
+
+    #blob-canvas {
+        display: none;
     }
 }

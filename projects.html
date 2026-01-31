@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simone Longo - All Projects">
+    <title>Projects - Simone Longo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Simone Longo</a>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="projects.html" class="nav-link active">Projects</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="section" style="padding-top: 100px; min-height: 100vh;">
+        <div class="container">
+            <div class="about-content">
+                <h1>All Projects</h1>
+                <p>A collection of things I built when I should have been doing more important stuff.</p>
+            </div>
+            <div id="all-projects-grid" class="grid grid-3"></div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinksContainer = document.querySelector('.nav-links');
+
+            if (navToggle && navLinksContainer) {
+                const toggleMenu = (e) => {
+                    e.preventDefault();
+                    const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                    navToggle.setAttribute('aria-expanded', !isExpanded);
+                    navLinksContainer.classList.toggle('active');
+                };
+
+                navToggle.addEventListener('click', toggleMenu);
+                navToggle.addEventListener('touchstart', toggleMenu, { passive: false });
+            }
+
+            loadAllProjects();
+        });
+
+        async function loadAllProjects() {
+            try {
+                const response = await fetch('data/projects.json');
+                const projectData = await response.json();
+                const container = document.getElementById('all-projects-grid');
+
+                container.innerHTML = projectData.projects.map(project => `
+                    <article class="card">
+                        <div class="card-image">
+                            <img src="${project.image}" alt="${project.title}" loading="lazy">
+                        </div>
+                        <div class="card-content">
+                            <h3>${project.title}</h3>
+                            <p>${project.description}</p>
+                            <div class="card-footer">
+                                ${project.tags.slice(0, 3).map(tag => `<span class="tech-tag">${tag}</span>`).join('')}
+                            </div>
+                            <div class="card-actions">
+                                ${project.actions.map(action => `
+                                    <a href="${action.url}"
+                                       class="btn btn-${action.type}"
+                                       ${action.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                                        ${action.text}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </article>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+    </script>
+</body>
+</html>
