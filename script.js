@@ -1,3 +1,13 @@
+// Fix for mobile viewport height (handles dynamic address bar)
+function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Set on load and resize
+setViewportHeight();
+window.addEventListener('resize', setViewportHeight);
+
 // Component loading system
 let loadedComponents = new Set();
 const requiredComponents = ['nav-container'];
@@ -251,9 +261,61 @@ async function loadProjects() {
             `).join('');
         }
 
+        // Initialize progress indicator with dynamic featured count
+        initProgressIndicator(featuredProjects.length);
+
     } catch (error) {
         console.error('Error loading projects:', error);
     }
+}
+
+// Progress indicator - dynamically generated based on projects.json
+function initProgressIndicator(featuredCount) {
+    const container = document.querySelector('.progress-indicator');
+    if (!container) return;
+
+    // Build sections array dynamically
+    const sections = [
+        { id: 'hero', label: 'Home' }
+    ];
+
+    // Add featured sections based on projects.json count
+    for (let i = 1; i <= featuredCount; i++) {
+        sections.push({ id: `featured-${i}`, label: `Featured ${i}` });
+    }
+
+    sections.push(
+        { id: 'about', label: 'About' },
+        { id: 'contact', label: 'Contact' },
+        { id: 'projects-grid', label: 'Projects' }
+    );
+
+    // Create line
+    const line = document.createElement('div');
+    line.className = 'progress-line';
+    container.appendChild(line);
+
+    // Create dots
+    sections.forEach((section, index) => {
+        const dot = document.createElement('button');
+        dot.className = 'progress-dot' + (index === 0 ? ' active' : '');
+        dot.dataset.section = section.id;
+        dot.setAttribute('aria-label', section.label);
+        dot.addEventListener('click', () => {
+            const el = document.getElementById(section.id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+        container.appendChild(dot);
+    });
+
+    // Listen to section changes (dispatched by setupScrollHighlighting)
+    window.addEventListener('sectionChanged', (e) => {
+        const sectionId = e.detail.section;
+        const dots = container.querySelectorAll('.progress-dot');
+        dots.forEach(dot => {
+            dot.classList.toggle('active', dot.dataset.section === sectionId);
+        });
+    });
 }
 
 // Performance optimization: Lazy load images

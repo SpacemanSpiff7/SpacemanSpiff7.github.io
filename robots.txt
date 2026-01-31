@@ -1,0 +1,29 @@
+# robots.txt for simonelongo.com
+# Portfolio site - allow crawling of main content, block large data files
+
+User-agent: *
+
+# Allow main portfolio content
+Allow: /
+Allow: /index.html
+Allow: /components/
+Allow: /tools/
+
+# Disallow large data files and internal docs
+Disallow: /data/la_traffic_collisions.json
+Disallow: /assets/collisions/tiles/
+Disallow: /docs/
+Disallow: /scripts/
+
+# Legacy/alternative versions
+Disallow: /cursor_site.html
+
+# Allow common resources
+Allow: /style.css
+Allow: /script.js
+Allow: /resources/
+Allow: /assets/favicon.svg
+Allow: /assets/images/
+
+# Sitemap
+Sitemap: https://simonelongo.com/sitemap.xml

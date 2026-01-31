@@ -257,8 +257,16 @@ function initStarfield() {
     starfieldCtx = starfieldCanvas.getContext('2d');
 
     function resizeStarfield() {
-        starfieldCanvas.width = window.innerWidth;
-        starfieldCanvas.height = window.innerHeight;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Set internal canvas resolution
+        starfieldCanvas.width = w;
+        starfieldCanvas.height = h;
+
+        // Set CSS dimensions to match exactly (eliminates gaps)
+        starfieldCanvas.style.width = w + 'px';
+        starfieldCanvas.style.height = h + 'px';
     }
     resizeStarfield();
     window.addEventListener('resize', resizeStarfield);
@@ -306,8 +314,16 @@ function initBlobMesh() {
     blobCtx = blobCanvas.getContext('2d');
 
     function resizeBlob() {
-        blobCanvas.width = window.innerWidth;
-        blobCanvas.height = window.innerHeight;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Set internal canvas resolution
+        blobCanvas.width = w;
+        blobCanvas.height = h;
+
+        // Set CSS dimensions to match exactly (eliminates gaps)
+        blobCanvas.style.width = w + 'px';
+        blobCanvas.style.height = h + 'px';
     }
     resizeBlob();
     window.addEventListener('resize', resizeBlob);
