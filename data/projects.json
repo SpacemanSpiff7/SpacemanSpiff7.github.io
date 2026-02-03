@@ -14,22 +14,6 @@
   },
   "projects": [
     {
-      "id": "shopping-research",
-      "title": "Shopping Research Generator",
-      "shortDescription": "Because googling 'best [thing] 2024' apparently isn't good enough anymore",
-      "description": "A glorified form that generates overly detailed shopping research prompts. Perfect for when you want to spend 3 hours researching a $20 purchase like the responsible adult you pretend to be.",
-      "category": "AI Prompts",
-      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
-      "tags": ["JavaScript", "AI Prompts", "Web App"],
-      "actions": [
-        {
-          "text": "Use Tool",
-          "url": "tools/shopping-research.html",
-          "type": "primary"
-        }
-      ]
-    },
-    {
       "id": "stock-analytics",
       "title": "Stock Analytics Widget", 
       "shortDescription": "Fancy graphs that make losing money look scientific",
