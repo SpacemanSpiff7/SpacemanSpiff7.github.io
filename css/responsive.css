@@ -1,0 +1,314 @@
+/* ==========================================
+   RESPONSIVE DESIGN - Mobile-First Excellence
+   ========================================== */
+
+@media (max-width: 1200px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --container-padding: var(--space-4);
+        --space-32: var(--space-24);
+        --space-20: var(--space-16);
+    }
+
+    /* Mobile Navigation */
+    .nav-toggle {
+        display: block;
+        min-width: 44px;
+        min-height: 44px;
+        padding: var(--space-3);
+    }
+
+    .nav-toggle svg {
+        pointer-events: none;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-divider);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        flex-direction: column;
+        gap: 0;
+        padding: var(--space-4) 0;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+        z-index: 999;
+    }
+
+    .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-link {
+        display: block;
+        min-height: 48px;
+        padding: var(--space-5) var(--space-6);
+        text-align: center;
+        font-size: var(--text-base);
+        border-radius: 0;
+        border-bottom: 1px solid var(--color-divider);
+    }
+
+    .nav-link:last-child {
+        border-bottom: none;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+
+    .nav-link.active {
+        background: transparent;
+        color: #FFFFFF;
+    }
+
+    .hero {
+        min-height: 70vh;
+        padding: var(--space-16) 0;
+    }
+
+    .hero-content {
+        padding: var(--space-16) var(--space-6);
+        margin: 0 var(--space-4);
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        margin-bottom: var(--space-4);
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: var(--space-8);
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        gap: var(--space-3);
+        align-items: stretch;
+    }
+
+    /* Touch-optimized buttons */
+    .btn {
+        width: 100%;
+        min-width: auto;
+        min-height: 48px;
+        padding: var(--space-4) var(--space-6);
+    }
+
+    .hero-actions .btn {
+        min-height: 52px;
+        font-size: var(--text-lg);
+    }
+
+    /* Card spacing for thumb reach */
+    .tools-grid,
+    .grid,
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+
+    /* Reduce hover lift on touch devices */
+    @media (hover: none) {
+        .tool-card:hover,
+        .card:hover,
+        .contact-item:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+    }
+
+    /* Tap feedback with scale */
+    .tool-card:active,
+    .card:active,
+    .contact-item:active {
+        transform: scale(0.98);
+        transition: transform 0.1s;
+    }
+
+    .tool-card,
+    .card,
+    .contact-item {
+        border-radius: var(--radius-lg);
+    }
+
+    .tool-card {
+        margin: 0;
+    }
+
+    .tool-content {
+        padding: var(--space-6);
+    }
+
+    .section {
+        padding: var(--space-16) 0;
+    }
+
+    /* Section titles */
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .section-text {
+        font-size: 0.95rem;
+        padding: 0 1rem;
+    }
+
+    .featured-project h2 {
+        font-size: 1.4rem;
+    }
+
+    .featured-project p {
+        font-size: 0.95rem;
+        padding: 0 1rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    .contact-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .snap-section {
+        padding: 1.5rem;
+    }
+
+    /* Progress indicator mobile */
+    .progress-indicator {
+        right: var(--space-3);
+        gap: var(--space-12);
+    }
+
+    .progress-dot {
+        width: 8px;
+        height: 8px;
+        box-shadow: 0 0 0 6px #000000;
+    }
+
+    .progress-dot.active {
+        box-shadow: 0 0 0 6px #000000, 0 0 8px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Blob controls mobile */
+    .blob-controls {
+        width: 100%;
+        max-width: none;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+    }
+
+    .blob-controls.open .controls-drawer {
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    .control-item {
+        grid-template-columns: 120px 1fr 50px;
+        gap: 8px;
+    }
+
+    .control-item label {
+        font-size: 0.8rem;
+    }
+
+    .control-value {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content {
+        padding: var(--space-12) var(--space-4);
+        border-radius: var(--radius-lg);
+    }
+
+    .nav-container {
+        padding: 0 var(--space-4);
+    }
+
+    .nav-menu {
+        gap: var(--space-2);
+    }
+
+    .nav-link {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+    }
+}
+
+/* ==========================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .scroll-container {
+        scroll-behavior: auto;
+    }
+
+    #blob-canvas {
+        display: none;
+    }
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+    .nav,
+    .hero-actions,
+    .btn {
+        display: none;
+    }
+
+    .hero-content {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .hero-title,
+    .tools-header h2,
+    .about-content h2 {
+        color: var(--color-text-primary);
+        letter-spacing: -0.03em;
+    }
+}

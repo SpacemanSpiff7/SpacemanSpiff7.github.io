@@ -17,7 +17,7 @@
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/style.css">
     
     <style>
         * {
@@ -37,6 +37,9 @@
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             overflow-x: hidden;
+            overflow-y: auto !important;
+            height: auto !important;
+            min-height: 100vh;
         }
 
         .container {
@@ -557,27 +560,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav" role="navigation" aria-label="Main navigation">
-        <div class="nav-container">
-            <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
-            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-            <ul class="nav-links">
-                <li><a href="../index.html" class="nav-link">Home</a></li>
-                <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
-                <li><a href="../index.html#about" class="nav-link">About</a></li>
-                <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <div class="container" style="padding-top: 80px;">
+    <div class="container" style="padding-top: 2rem;">
         <div class="header">
             <h1>3D Monte Carlo Metropolis Simulation</h1>
             <p>Advanced particle physics simulation with realistic 3D dynamics, proper energy minimization, and comprehensive real-time analysis</p>
@@ -597,12 +580,16 @@
                 <input type="number" id="numModulators" value="25" min="5" max="200">
             </div>
             <div class="control-group">
-                <label for="covalentEnergy">Covalent Bond Energy (kJ/mol)</label>
-                <input type="number" id="covalentEnergy" value="-20.0" step="0.5">
+                <label for="epsilon">LJ Well Depth ε (kJ/mol)</label>
+                <input type="number" id="epsilon" value="1.0" step="0.1" min="0.1" max="10">
             </div>
             <div class="control-group">
-                <label for="vdwEnergy">Van der Waals Energy (kJ/mol)</label>
-                <input type="number" id="vdwEnergy" value="-3.0" step="0.1">
+                <label for="sigma">LJ Diameter σ (lattice units)</label>
+                <input type="number" id="sigma" value="1.0" step="0.1" min="0.5" max="3.0">
+            </div>
+            <div class="control-group">
+                <label for="cutoffRadius">Cutoff Radius (σ multiples)</label>
+                <input type="number" id="cutoffRadius" value="2.5" step="0.1" min="1.5" max="5.0">
             </div>
             <div class="control-group">
                 <label for="numSweeps">Monte Carlo Steps</label>
@@ -616,6 +603,18 @@
                 <label for="updateInterval">Update Interval (ms)</label>
                 <input type="number" id="updateInterval" value="50" step="10" min="10" max="500">
             </div>
+            <div class="control-group">
+                <label for="annealingMode">Simulated Annealing</label>
+                <select id="annealingMode">
+                    <option value="none">Off - Fixed Temperature</option>
+                    <option value="linear">Linear Cooling</option>
+                    <option value="exponential">Exponential Cooling</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="finalTemp">Final Temperature (K)</label>
+                <input type="number" id="finalTemp" value="50" step="10" min="1" max="500">
+            </div>
         </div>
 
         <div class="button-group">
@@ -623,6 +622,14 @@
             <button class="btn btn-secondary" id="pauseBtn" disabled>Pause</button>
             <button class="btn btn-secondary" id="resetBtn">Reset</button>
             <button class="btn btn-secondary" id="exportBtn" disabled>Export Data</button>
+            <select id="presetSelect" class="btn btn-secondary" style="background: #2D2D30; color: #fff; min-width: 180px;">
+                <option value="">Load Preset...</option>
+                <option value="lj-fluid">LJ Fluid (Standard)</option>
+                <option value="crystal-growth">Crystal Growth</option>
+                <option value="phase-transition">Phase Transition</option>
+                <option value="gas-phase">Gas Phase</option>
+                <option value="dense-liquid">Dense Liquid</option>
+            </select>
         </div>
 
         <div class="loading" id="loading">
@@ -680,6 +687,22 @@
                 <div class="stat-item">
                     <span class="stat-label">Temperature:</span>
                     <span class="stat-value" id="displayTemp">300 K</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pressure (reduced):</span>
+                    <span class="stat-value" id="pressure">0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Heat Capacity Cv:</span>
+                    <span class="stat-value" id="heatCapacity">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Reduced Density ρ*:</span>
+                    <span class="stat-value" id="reducedDensity">0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value" id="equilibrationStatus" style="color: #F6E05E;">Ready</span>
                 </div>
                 <div class="progress-container">
                     <div class="stat-item">
@@ -765,6 +788,24 @@
                     </div>
                 </div>
             </div>
+
+            <div class="chart-panel">
+                <h3>Radial Distribution Function g(r)</h3>
+                <p class="chart-description">The probability of finding a particle at distance r. Peaks reveal preferred neighbor distances: sharp peaks indicate ordered structure, broad peaks indicate liquid, flat line indicates gas.</p>
+                <div class="chart-wrapper">
+                    <canvas id="rdfChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E53E3E;"></div>
+                        <span class="legend-label">g(r) Current</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(229, 62, 62, 0.3);"></div>
+                        <span class="legend-label">Ideal Gas (g=1)</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="info-section">
@@ -778,13 +819,13 @@
                 </div>
                 
                 <div class="info-card">
-                    <h3>Realistic Energy Model</h3>
-                    <p><strong>Interactions:</strong> Implements proper pair-wise interactions with distance-dependent energies. Covalent bonds form between different particle types at short range (~1.5Å), while van der Waals forces provide weak long-range attraction (~2.5Å).</p>
+                    <h3>Lennard-Jones 12-6 Potential</h3>
+                    <p><strong>Interactions:</strong> Uses the industry-standard Lennard-Jones potential V(r) = 4ε[(σ/r)¹² - (σ/r)⁶]. The r⁻¹² term provides strong repulsion at short distances (hard core), while the r⁻⁶ term models van der Waals attraction. Equilibrium distance is at r = 2^(1/6)σ ≈ 1.12σ.</p>
                 </div>
                 
                 <div class="info-card">
-                    <h3>True 3D Dynamics</h3>
-                    <p><strong>Movement:</strong> Particles can move in all three spatial dimensions with proper 3D neighbor detection. The simulation uses periodic boundary conditions and realistic diffusion patterns to explore the full configurational space.</p>
+                    <h3>Continuous 3D Dynamics</h3>
+                    <p><strong>Movement:</strong> Particles move continuously in 3D space with small displacements (~0.3σ per step) for optimal acceptance rates. Cell-list spatial partitioning enables O(n) performance for large systems. Periodic boundary conditions simulate an infinite system.</p>
                 </div>
                 
                 <div class="info-card">
@@ -829,6 +870,21 @@
                     <div class="term-item">
                         <div class="term-name">Van der Waals Forces</div>
                         <div class="term-definition">Weak intermolecular forces that arise from temporary fluctuations in electron density. They provide long-range attraction between particles.</div>
+                    </div>
+
+                    <div class="term-item">
+                        <div class="term-name">Lennard-Jones Potential</div>
+                        <div class="term-definition">V(r) = 4ε[(σ/r)¹² - (σ/r)⁶]. The most widely used potential for noble gases and simple liquids. ε controls the well depth (attraction strength), σ is the particle diameter. The minimum energy occurs at r = 2^(1/6)σ ≈ 1.12σ.</div>
+                    </div>
+
+                    <div class="term-item">
+                        <div class="term-name">Radial Distribution Function g(r)</div>
+                        <div class="term-definition">The probability of finding a particle at distance r relative to an ideal gas. Sharp peaks indicate crystalline order, broad peaks indicate liquid structure, and g(r) = 1 everywhere indicates an ideal gas.</div>
+                    </div>
+
+                    <div class="term-item">
+                        <div class="term-name">Simulated Annealing</div>
+                        <div class="term-definition">A temperature-scheduling technique that slowly cools the system from high temperature. This allows the system to escape local minima and find lower-energy (more ordered) configurations.</div>
                     </div>
                     
                     <div class="term-item">
@@ -881,11 +937,13 @@
                 this.clusterChart = document.getElementById('clusterChart');
                 this.acceptanceChart = document.getElementById('acceptanceChart');
                 this.bondChart = document.getElementById('bondChart');
-                
+                this.rdfChart = document.getElementById('rdfChart');
+
                 this.energyCtx = this.energyChart.getContext('2d');
                 this.clusterCtx = this.clusterChart.getContext('2d');
                 this.acceptanceCtx = this.acceptanceChart.getContext('2d');
                 this.bondCtx = this.bondChart.getContext('2d');
+                this.rdfCtx = this.rdfChart.getContext('2d');
                 
                 this.particles = [];
                 this.currentStep = 0;
@@ -907,6 +965,7 @@
                 // Performance tracking
                 this.lastUpdateTime = 0;
                 this.lastStepTime = 0;
+                this.lastStepCount = 0;
                 this.stepsPerSecond = 0;
                 this.frameCount = 0;
                 this.lastFrameTime = 0;
@@ -916,6 +975,12 @@
                 this.clusterHistory = [];
                 this.acceptanceHistory = [];
                 this.bondHistory = [];
+                this.rdfHistory = [];
+
+                // Cell list for O(n) neighbor finding
+                this.cells = null;
+                this.cellSize = 0;
+                this.numCells = 0;
                 
                 // Mouse interaction
                 this.isMouseDown = false;
@@ -949,11 +1014,13 @@
                     this.ctx.scale(dpr, dpr);
                     
                     // Also resize chart canvases
-                    [this.energyChart, this.clusterChart, this.acceptanceChart, this.bondChart].forEach(canvas => {
-                        const chartWrapper = canvas.parentElement;
-                        const chartRect = chartWrapper.getBoundingClientRect();
-                        canvas.width = chartRect.width;
-                        canvas.height = chartRect.height;
+                    [this.energyChart, this.clusterChart, this.acceptanceChart, this.bondChart, this.rdfChart].forEach(canvas => {
+                        if (canvas) {
+                            const chartWrapper = canvas.parentElement;
+                            const chartRect = chartWrapper.getBoundingClientRect();
+                            canvas.width = chartRect.width;
+                            canvas.height = chartRect.height;
+                        }
                     });
                     
                     // Redraw if simulation is running
@@ -981,6 +1048,9 @@
                 document.getElementById('resetViewBtn').addEventListener('click', () => this.resetView());
                 document.getElementById('topViewBtn').addEventListener('click', () => this.setTopView());
                 document.getElementById('sideViewBtn').addEventListener('click', () => this.setSideView());
+
+                // Preset selector
+                document.getElementById('presetSelect').addEventListener('change', (e) => this.loadPreset(e.target.value));
                 
                 // Mouse controls for 3D view
                 this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
@@ -995,7 +1065,7 @@
                 this.canvas.addEventListener('touchend', () => this.handleTouchEnd());
                 
                 // Parameter change listeners
-                const inputs = ['latticeSize', 'numLinkers', 'numModulators', 'covalentEnergy', 'vdwEnergy', 'numSweeps', 'temperature'];
+                const inputs = ['latticeSize', 'numLinkers', 'numModulators', 'epsilon', 'sigma', 'cutoffRadius', 'numSweeps', 'temperature'];
                 inputs.forEach(id => {
                     document.getElementById(id).addEventListener('change', () => {
                         if (!this.isRunning) {
@@ -1098,51 +1168,194 @@
                 this.camera.rotationY = 0;
                 this.render();
             }
+
+            /**
+             * Load simulation presets
+             */
+            loadPreset(presetName) {
+                if (!presetName) return;
+
+                const presets = {
+                    'lj-fluid': {
+                        latticeSize: 10,
+                        numLinkers: 50,
+                        numModulators: 50,
+                        epsilon: 1.0,
+                        sigma: 1.0,
+                        cutoffRadius: 2.5,
+                        temperature: 300,
+                        finalTemp: 300,
+                        numSweeps: 5000,
+                        annealingMode: 'none',
+                        description: 'Standard Lennard-Jones fluid at moderate temperature'
+                    },
+                    'crystal-growth': {
+                        latticeSize: 12,
+                        numLinkers: 60,
+                        numModulators: 60,
+                        epsilon: 1.5,
+                        sigma: 1.0,
+                        cutoffRadius: 2.5,
+                        temperature: 100,
+                        finalTemp: 100,
+                        numSweeps: 10000,
+                        annealingMode: 'none',
+                        description: 'Low temperature for crystalline structure formation'
+                    },
+                    'phase-transition': {
+                        latticeSize: 10,
+                        numLinkers: 40,
+                        numModulators: 40,
+                        epsilon: 1.0,
+                        sigma: 1.0,
+                        cutoffRadius: 2.5,
+                        temperature: 500,
+                        finalTemp: 50,
+                        numSweeps: 8000,
+                        annealingMode: 'exponential',
+                        description: 'Watch crystallization as system cools from gas to solid'
+                    },
+                    'gas-phase': {
+                        latticeSize: 15,
+                        numLinkers: 30,
+                        numModulators: 30,
+                        epsilon: 0.5,
+                        sigma: 1.0,
+                        cutoffRadius: 2.5,
+                        temperature: 600,
+                        finalTemp: 600,
+                        numSweeps: 3000,
+                        annealingMode: 'none',
+                        description: 'High temperature dilute gas with fast dynamics'
+                    },
+                    'dense-liquid': {
+                        latticeSize: 8,
+                        numLinkers: 80,
+                        numModulators: 80,
+                        epsilon: 1.2,
+                        sigma: 1.0,
+                        cutoffRadius: 2.5,
+                        temperature: 250,
+                        finalTemp: 250,
+                        numSweeps: 6000,
+                        annealingMode: 'none',
+                        description: 'Dense liquid phase with strong local ordering'
+                    }
+                };
+
+                const preset = presets[presetName];
+                if (!preset) return;
+
+                // Apply preset values
+                document.getElementById('latticeSize').value = preset.latticeSize;
+                document.getElementById('numLinkers').value = preset.numLinkers;
+                document.getElementById('numModulators').value = preset.numModulators;
+                document.getElementById('epsilon').value = preset.epsilon;
+                document.getElementById('sigma').value = preset.sigma;
+                document.getElementById('cutoffRadius').value = preset.cutoffRadius;
+                document.getElementById('temperature').value = preset.temperature;
+                document.getElementById('finalTemp').value = preset.finalTemp;
+                document.getElementById('numSweeps').value = preset.numSweeps;
+                document.getElementById('annealingMode').value = preset.annealingMode;
+
+                // Reset selector
+                document.getElementById('presetSelect').value = '';
+
+                // Reinitialize particles
+                this.initializeParticles();
+            }
             
             getParameters() {
                 return {
                     latticeSize: parseInt(document.getElementById('latticeSize').value),
                     numLinkers: parseInt(document.getElementById('numLinkers').value),
                     numModulators: parseInt(document.getElementById('numModulators').value),
-                    covalentEnergy: parseFloat(document.getElementById('covalentEnergy').value),
-                    vdwEnergy: parseFloat(document.getElementById('vdwEnergy').value),
+                    epsilon: parseFloat(document.getElementById('epsilon').value),
+                    sigma: parseFloat(document.getElementById('sigma').value),
+                    cutoffRadius: parseFloat(document.getElementById('cutoffRadius').value),
                     numSweeps: parseInt(document.getElementById('numSweeps').value),
                     temperature: parseFloat(document.getElementById('temperature').value),
-                    updateInterval: parseInt(document.getElementById('updateInterval').value)
+                    updateInterval: parseInt(document.getElementById('updateInterval').value),
+                    annealingMode: document.getElementById('annealingMode').value,
+                    finalTemp: parseFloat(document.getElementById('finalTemp').value)
                 };
+            }
+
+            /**
+             * Get current temperature based on annealing schedule
+             */
+            getCurrentTemperature() {
+                const params = this.getParameters();
+                const progress = this.currentStep / params.numSweeps;
+
+                switch (params.annealingMode) {
+                    case 'linear':
+                        // Linear interpolation from initial to final temp
+                        return params.temperature - progress * (params.temperature - params.finalTemp);
+
+                    case 'exponential':
+                        // Exponential decay: T(t) = T0 * (Tf/T0)^(t/tmax)
+                        const ratio = params.finalTemp / params.temperature;
+                        return params.temperature * Math.pow(ratio, progress);
+
+                    default:
+                        // No annealing - fixed temperature
+                        return params.temperature;
+                }
             }
             
             initializeParticles() {
                 this.particles = [];
                 const params = this.getParameters();
-                
-                // Initialize linker particles (type 0)
-                for (let i = 0; i < params.numLinkers; i++) {
-                    let x, y, z, overlap;
-                    do {
-                        x = Math.floor(Math.random() * params.latticeSize);
-                        y = Math.floor(Math.random() * params.latticeSize);
-                        z = Math.floor(Math.random() * params.latticeSize);
-                        
-                        overlap = this.particles.some(p => p.x === x && p.y === y && p.z === z);
-                    } while (overlap);
-                    
-                    this.particles.push({ x, y, z, type: 0 });
+
+                // Validate particle density (for LJ, avoid too high density)
+                const boxVolume = params.latticeSize ** 3;
+                const totalParticles = params.numLinkers + params.numModulators;
+                const reducedDensity = totalParticles * Math.pow(params.sigma, 3) / boxVolume;
+
+                if (reducedDensity > 0.9) {
+                    alert(`Particle density too high (ρ* = ${reducedDensity.toFixed(2)}). Reduce particles or increase box size. Maximum recommended ρ* is 0.9.`);
+                    return;
                 }
-                
-                // Initialize modulator particles (type 1)
-                for (let i = 0; i < params.numModulators; i++) {
-                    let x, y, z, overlap;
-                    do {
-                        x = Math.floor(Math.random() * params.latticeSize);
-                        y = Math.floor(Math.random() * params.latticeSize);
-                        z = Math.floor(Math.random() * params.latticeSize);
-                        
-                        overlap = this.particles.some(p => p.x === x && p.y === y && p.z === z);
-                    } while (overlap);
-                    
-                    this.particles.push({ x, y, z, type: 1 });
+
+                // Initialize particles on a simple cubic lattice with continuous positions
+                // This avoids overlaps and provides a good starting configuration
+                const spacing = params.latticeSize / Math.cbrt(totalParticles) * 0.9;
+                let particleIndex = 0;
+
+                outer:
+                for (let ix = 0; ix < params.latticeSize && particleIndex < totalParticles; ix += spacing) {
+                    for (let iy = 0; iy < params.latticeSize && particleIndex < totalParticles; iy += spacing) {
+                        for (let iz = 0; iz < params.latticeSize && particleIndex < totalParticles; iz += spacing) {
+                            // Add small random displacement to break symmetry
+                            const x = ix + (Math.random() - 0.5) * 0.1 * params.sigma;
+                            const y = iy + (Math.random() - 0.5) * 0.1 * params.sigma;
+                            const z = iz + (Math.random() - 0.5) * 0.1 * params.sigma;
+
+                            // Wrap to periodic box
+                            const type = particleIndex < params.numLinkers ? 0 : 1;
+                            this.particles.push({
+                                x: ((x % params.latticeSize) + params.latticeSize) % params.latticeSize,
+                                y: ((y % params.latticeSize) + params.latticeSize) % params.latticeSize,
+                                z: ((z % params.latticeSize) + params.latticeSize) % params.latticeSize,
+                                type: type,
+                                lastDisplacement: 0 // Track for velocity coloring
+                            });
+                            particleIndex++;
+                        }
+                    }
                 }
+
+                // Shuffle particle types randomly
+                for (let i = this.particles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const tempType = this.particles[i].type;
+                    this.particles[i].type = this.particles[j].type;
+                    this.particles[j].type = tempType;
+                }
+
+                // Initialize cell list for O(n) neighbor finding
+                this.initializeCellList(params);
                 
                 // Reset simulation state
                 this.currentStep = 0;
@@ -1164,21 +1377,123 @@
                 const dz = Math.min(Math.abs(p1.z - p2.z), latticeSize - Math.abs(p1.z - p2.z));
                 return Math.sqrt(dx*dx + dy*dy + dz*dz);
             }
+
+            /**
+             * Initialize cell list for O(n) neighbor finding
+             * Cell size should be >= cutoff radius to ensure all neighbors are in adjacent cells
+             */
+            initializeCellList(params) {
+                const cutoff = params.cutoffRadius * params.sigma;
+                // Cell size should be at least the cutoff radius
+                this.cellSize = Math.max(cutoff, params.latticeSize / 10);
+                this.numCells = Math.floor(params.latticeSize / this.cellSize);
+                if (this.numCells < 3) this.numCells = 3;
+                this.cellSize = params.latticeSize / this.numCells;
+
+                // Create 3D cell array
+                this.cells = new Array(this.numCells);
+                for (let i = 0; i < this.numCells; i++) {
+                    this.cells[i] = new Array(this.numCells);
+                    for (let j = 0; j < this.numCells; j++) {
+                        this.cells[i][j] = new Array(this.numCells);
+                        for (let k = 0; k < this.numCells; k++) {
+                            this.cells[i][j][k] = [];
+                        }
+                    }
+                }
+
+                // Assign particles to cells
+                for (let i = 0; i < this.particles.length; i++) {
+                    this.addParticleToCell(i);
+                }
+            }
+
+            getCellIndices(particle) {
+                const params = this.getParameters();
+                const cx = Math.floor(particle.x / this.cellSize) % this.numCells;
+                const cy = Math.floor(particle.y / this.cellSize) % this.numCells;
+                const cz = Math.floor(particle.z / this.cellSize) % this.numCells;
+                return [
+                    (cx + this.numCells) % this.numCells,
+                    (cy + this.numCells) % this.numCells,
+                    (cz + this.numCells) % this.numCells
+                ];
+            }
+
+            addParticleToCell(particleIndex) {
+                const particle = this.particles[particleIndex];
+                const [cx, cy, cz] = this.getCellIndices(particle);
+                this.cells[cx][cy][cz].push(particleIndex);
+            }
+
+            removeParticleFromCell(particleIndex, oldX, oldY, oldZ) {
+                const tempParticle = { x: oldX, y: oldY, z: oldZ };
+                const [cx, cy, cz] = this.getCellIndices(tempParticle);
+                const cell = this.cells[cx][cy][cz];
+                const idx = cell.indexOf(particleIndex);
+                if (idx !== -1) {
+                    cell.splice(idx, 1);
+                }
+            }
+
+            /**
+             * Get all neighbor particle indices within interaction range
+             * Checks current cell and all 26 neighboring cells
+             */
+            getNeighborIndices(particleIndex) {
+                const particle = this.particles[particleIndex];
+                const [cx, cy, cz] = this.getCellIndices(particle);
+                const neighbors = [];
+
+                // Check all 27 cells (current + 26 neighbors)
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dz = -1; dz <= 1; dz++) {
+                            const nx = (cx + dx + this.numCells) % this.numCells;
+                            const ny = (cy + dy + this.numCells) % this.numCells;
+                            const nz = (cz + dz + this.numCells) % this.numCells;
+
+                            for (const idx of this.cells[nx][ny][nz]) {
+                                if (idx !== particleIndex) {
+                                    neighbors.push(idx);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return neighbors;
+            }
             
+            /**
+             * Calculate Lennard-Jones 12-6 pair potential
+             * V(r) = 4ε[(σ/r)¹² - (σ/r)⁶]
+             * Shifted so V(r_cutoff) = 0 to avoid discontinuities
+             */
             calculatePairEnergy(p1, p2, latticeSize, params) {
                 const distance = this.calculateDistance(p1, p2, latticeSize);
-                
-                if (distance > 2.0) return 0;
-                
-                if (p1.type !== p2.type && distance <= 1.0) {
-                    // Only adjacent particles can form covalent bonds
-                    return params.covalentEnergy;
-                } else if (distance <= 2.0) {
-                    // Weak van der Waals interaction for nearby but not adjacent particles
-                    return params.vdwEnergy * Math.exp(-distance);
-                }
-                
-                return 0;
+                const cutoff = params.cutoffRadius * params.sigma;
+
+                // Beyond cutoff, no interaction
+                if (distance >= cutoff) return 0;
+
+                // Prevent division by zero for overlapping particles
+                if (distance < 0.1 * params.sigma) return Infinity;
+
+                const sigma_over_r = params.sigma / distance;
+                const sigma_over_r_6 = Math.pow(sigma_over_r, 6);
+                const sigma_over_r_12 = sigma_over_r_6 * sigma_over_r_6;
+
+                // Lennard-Jones potential
+                const lj = 4.0 * params.epsilon * (sigma_over_r_12 - sigma_over_r_6);
+
+                // Shift potential so it goes to zero at cutoff
+                const sigma_over_rc = params.sigma / cutoff;
+                const sigma_over_rc_6 = Math.pow(sigma_over_rc, 6);
+                const sigma_over_rc_12 = sigma_over_rc_6 * sigma_over_rc_6;
+                const lj_cutoff = 4.0 * params.epsilon * (sigma_over_rc_12 - sigma_over_rc_6);
+
+                return lj - lj_cutoff;
             }
             
             calculateTotalEnergy() {
@@ -1203,56 +1518,83 @@
                 const params = this.getParameters();
                 let energy = 0;
                 const particle = this.particles[particleIndex];
-                
-                for (let i = 0; i < this.particles.length; i++) {
-                    if (i !== particleIndex) {
+
+                // Use cell list for O(n) neighbor finding if available
+                if (this.cells) {
+                    const neighbors = this.getNeighborIndices(particleIndex);
+                    for (const i of neighbors) {
                         energy += this.calculatePairEnergy(
-                            particle, 
-                            this.particles[i], 
-                            params.latticeSize, 
+                            particle,
+                            this.particles[i],
+                            params.latticeSize,
                             params
                         );
                     }
+                } else {
+                    // Fallback to O(n²) if cell list not initialized
+                    for (let i = 0; i < this.particles.length; i++) {
+                        if (i !== particleIndex) {
+                            energy += this.calculatePairEnergy(
+                                particle,
+                                this.particles[i],
+                                params.latticeSize,
+                                params
+                            );
+                        }
+                    }
                 }
-                
+
                 return energy;
             }
             
             proposeMove(particleIndex) {
                 const params = this.getParameters();
                 const particle = this.particles[particleIndex];
-                
+
                 const oldX = particle.x;
                 const oldY = particle.y;
                 const oldZ = particle.z;
-                
+
                 const oldEnergy = this.calculateParticleEnergy(particleIndex);
-                
-                const maxStep = Math.max(1, Math.floor(params.latticeSize / 10));
-                particle.x = (particle.x + Math.floor((Math.random() - 0.5) * 2 * maxStep) + params.latticeSize) % params.latticeSize;
-                particle.y = (particle.y + Math.floor((Math.random() - 0.5) * 2 * maxStep) + params.latticeSize) % params.latticeSize;
-                particle.z = (particle.z + Math.floor((Math.random() - 0.5) * 2 * maxStep) + params.latticeSize) % params.latticeSize;
-                
-                for (let i = 0; i < this.particles.length; i++) {
-                    if (i !== particleIndex) {
-                        const other = this.particles[i];
-                        if (particle.x === other.x && particle.y === other.y && particle.z === other.z) {
-                            particle.x = oldX;
-                            particle.y = oldY;
-                            particle.z = oldZ;
-                            return false;
-                        }
-                    }
-                }
-                
+
+                // Use adaptive step size based on sigma for optimal acceptance rate (25-45%)
+                // Step size of ~0.3σ typically gives good acceptance rates for LJ fluids
+                const maxStep = 0.3 * params.sigma;
+
+                // Continuous displacement with periodic boundaries
+                const dx = (Math.random() - 0.5) * 2 * maxStep;
+                const dy = (Math.random() - 0.5) * 2 * maxStep;
+                const dz = (Math.random() - 0.5) * 2 * maxStep;
+
+                particle.x = ((particle.x + dx) % params.latticeSize + params.latticeSize) % params.latticeSize;
+                particle.y = ((particle.y + dy) % params.latticeSize + params.latticeSize) % params.latticeSize;
+                particle.z = ((particle.z + dz) % params.latticeSize + params.latticeSize) % params.latticeSize;
+
                 const newEnergy = this.calculateParticleEnergy(particleIndex);
                 const deltaE = newEnergy - oldEnergy;
-                
-                const beta = 1.0 / (this.kB * params.temperature);
+
+                // Reject if energy is infinite (hard core overlap)
+                if (!isFinite(deltaE)) {
+                    particle.x = oldX;
+                    particle.y = oldY;
+                    particle.z = oldZ;
+                    return false;
+                }
+
+                // Use current temperature (may be annealing)
+                const currentTemp = this.getCurrentTemperature();
+                const beta = 1.0 / (this.kB * currentTemp);
                 const acceptanceProbability = deltaE <= 0 ? 1.0 : Math.exp(-beta * deltaE);
-                
+
                 if (Math.random() < acceptanceProbability) {
                     this.acceptedMoves++;
+                    // Track displacement for velocity coloring
+                    particle.lastDisplacement = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                    // Update cell list if move accepted
+                    if (this.cells) {
+                        this.removeParticleFromCell(particleIndex, oldX, oldY, oldZ);
+                        this.addParticleToCell(particleIndex);
+                    }
                     return true;
                 } else {
                     particle.x = oldX;
@@ -1282,28 +1624,32 @@
             dfsCluster(startIndex, visited, params) {
                 const cluster = [];
                 const stack = [startIndex];
-                
+                // Bond threshold: particles within 1.3σ are considered bonded (LJ minimum is at ~1.12σ)
+                const bondThreshold = 1.3 * params.sigma;
+
                 while (stack.length > 0) {
                     const currentIndex = stack.pop();
                     if (visited[currentIndex]) continue;
-                    
+
                     visited[currentIndex] = true;
                     cluster.push(currentIndex);
-                    
+
                     const currentParticle = this.particles[currentIndex];
-                    
+
                     for (let i = 0; i < this.particles.length; i++) {
                         if (!visited[i]) {
                             const otherParticle = this.particles[i];
                             const distance = this.calculateDistance(currentParticle, otherParticle, params.latticeSize);
-                            
-                            if (distance <= 1.0 && currentParticle.type !== otherParticle.type) {
+
+                            // Consider bonded if within threshold (unlike types have stronger attraction)
+                            const threshold = currentParticle.type !== otherParticle.type ? bondThreshold * 1.2 : bondThreshold;
+                            if (distance <= threshold) {
                                 stack.push(i);
                             }
                         }
                     }
                 }
-                
+
                 return cluster;
             }
             
@@ -1424,7 +1770,8 @@
                 
                 // Calculate performance metrics
                 if (currentTime - this.lastUpdateTime >= 1000) {
-                    this.stepsPerSecond = Math.round((this.currentStep * 1000) / (currentTime - this.lastUpdateTime));
+                    this.stepsPerSecond = Math.round((this.currentStep - this.lastStepCount) * 1000 / (currentTime - this.lastUpdateTime));
+                    this.lastStepCount = this.currentStep;
                     this.lastUpdateTime = currentTime;
                 }
                 
@@ -1466,35 +1813,61 @@
                 document.getElementById('largestCluster').textContent = largestCluster;
                 document.getElementById('acceptanceRate').textContent = acceptanceRate + '%';
                 document.getElementById('stepsPerSecond').textContent = this.stepsPerSecond;
-                document.getElementById('displayTemp').textContent = params.temperature + ' K';
+                const currentTemp = this.getCurrentTemperature();
+                document.getElementById('displayTemp').textContent = currentTemp.toFixed(1) + ' K';
                 document.getElementById('progressPercent').textContent = progress + '%';
                 document.getElementById('progressFill').style.width = progress + '%';
+
+                // Thermodynamic properties
+                const pressure = this.calculatePressure();
+                const reducedDensity = this.calculateReducedDensity();
+                const heatCapacity = this.calculateHeatCapacity();
+
+                document.getElementById('pressure').textContent = pressure.toFixed(3);
+                document.getElementById('reducedDensity').textContent = reducedDensity.toFixed(3);
+                document.getElementById('heatCapacity').textContent = heatCapacity !== null ? heatCapacity.toFixed(2) + ' kB' : '--';
+
+                // Equilibration status
+                const equilibrationStatus = this.detectEquilibration();
+                const statusEl = document.getElementById('equilibrationStatus');
+                const statusConfig = {
+                    'equilibrating': { text: 'Equilibrating...', color: '#F6E05E' },
+                    'equilibrated': { text: 'Equilibrated', color: '#68D391' },
+                    'production': { text: 'Production Run', color: '#68D391' },
+                    'annealing': { text: 'Annealing...', color: '#B794F6' },
+                    'cooling-complete': { text: 'Cooling Complete', color: '#68D391' }
+                };
+                const config = statusConfig[equilibrationStatus] || statusConfig['equilibrating'];
+                statusEl.textContent = config.text;
+                statusEl.style.color = config.color;
             }
             
             countBonds() {
                 const params = this.getParameters();
                 let bonds = 0;
-                
+                // Bond threshold: near LJ minimum (~1.12σ), use 1.3σ for "bonded" pairs
+                const bondThreshold = 1.3 * params.sigma;
+
                 for (let i = 0; i < this.particles.length; i++) {
                     for (let j = i + 1; j < this.particles.length; j++) {
                         const distance = this.calculateDistance(this.particles[i], this.particles[j], params.latticeSize);
-                        if (distance <= 1.0 && this.particles[i].type !== this.particles[j].type) {
+                        if (distance <= bondThreshold && this.particles[i].type !== this.particles[j].type) {
                             bonds++;
                         }
                     }
                 }
-                
+
                 return bonds;
             }
             
             render() {
                 const params = this.getParameters();
-                
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Use style dimensions for proper centering (not scaled canvas dimensions)
-                const displayWidth = parseInt(this.canvas.style.width) || this.canvas.width;
-                const displayHeight = parseInt(this.canvas.style.height) || this.canvas.height;
+
+                // Use display dimensions for clearRect (context is already scaled)
+                const dpr = window.devicePixelRatio || 1;
+                const displayWidth = this.canvas.width / dpr;
+                const displayHeight = this.canvas.height / dpr;
+                this.ctx.clearRect(0, 0, displayWidth, displayHeight);
                 
                 const centerX = displayWidth / 2 + this.camera.panX;
                 const centerY = displayHeight / 2 + this.camera.panY;
@@ -1538,20 +1911,50 @@
                 const pos = this.project3D(particle, latticeSize);
                 const screenX = centerX + pos.x * scale;
                 const screenY = centerY + pos.y * scale;
-                
+                const params = this.getParameters();
+
                 const depthFactor = Math.max(0.3, 1 - pos.z / (latticeSize * 2));
                 const radius = 8 * depthFactor;
-                
+
+                // Velocity coloring: blend base color with "hot" color based on displacement
+                const maxDisplacement = 0.5 * params.sigma;
+                const velocityFactor = Math.min(1, (particle.lastDisplacement || 0) / maxDisplacement);
+
+                let r, g, b;
                 if (particle.type === 0) {
-                    this.ctx.fillStyle = `rgba(255, 59, 48, ${0.9 * depthFactor})`;
+                    // Linker: Red -> Yellow/White when fast
+                    r = 255;
+                    g = Math.round(59 + velocityFactor * 196); // 59 -> 255
+                    b = Math.round(48 + velocityFactor * 207); // 48 -> 255
                 } else {
-                    this.ctx.fillStyle = `rgba(0, 212, 255, ${0.9 * depthFactor})`;
+                    // Modulator: Cyan -> White/Yellow when fast
+                    r = Math.round(0 + velocityFactor * 255);
+                    g = Math.round(212 + velocityFactor * 43);
+                    b = Math.round(255 - velocityFactor * 55);
                 }
-                
+
+                this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.9 * depthFactor})`;
+
                 this.ctx.beginPath();
                 this.ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
                 this.ctx.fill();
-                
+
+                // Add glow effect for fast-moving particles
+                if (velocityFactor > 0.5) {
+                    const glowRadius = radius * (1 + velocityFactor * 0.5);
+                    const gradient = this.ctx.createRadialGradient(
+                        screenX, screenY, radius * 0.5,
+                        screenX, screenY, glowRadius
+                    );
+                    gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.3 * depthFactor})`);
+                    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(screenX, screenY, glowRadius, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                // Highlight
                 this.ctx.beginPath();
                 this.ctx.arc(screenX - radius * 0.3, screenY - radius * 0.3, radius * 0.4, 0, 2 * Math.PI);
                 this.ctx.fillStyle = `rgba(255, 255, 255, ${0.4 * depthFactor})`;
@@ -1561,22 +1964,36 @@
             drawBonds(centerX, centerY, scale, params) {
                 this.ctx.strokeStyle = 'rgba(104, 211, 145, 0.8)';
                 this.ctx.lineWidth = 2;
-                
+                const bondThreshold = 1.3 * params.sigma;
+
                 for (let i = 0; i < this.particles.length; i++) {
                     for (let j = i + 1; j < this.particles.length; j++) {
                         const p1 = this.particles[i];
                         const p2 = this.particles[j];
                         const distance = this.calculateDistance(p1, p2, params.latticeSize);
-                        
-                        if (distance <= 1.0 && p1.type !== p2.type) {
+
+                        if (distance <= bondThreshold && p1.type !== p2.type) {
+                            // Handle periodic boundary correctly
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const dz = p2.z - p1.z;
+                            const halfBox = params.latticeSize / 2;
+
+                            // Create adjusted position for p2 that represents shortest path
+                            const p2Adj = {
+                                x: p1.x + (Math.abs(dx) > halfBox ? dx - Math.sign(dx) * params.latticeSize : dx),
+                                y: p1.y + (Math.abs(dy) > halfBox ? dy - Math.sign(dy) * params.latticeSize : dy),
+                                z: p1.z + (Math.abs(dz) > halfBox ? dz - Math.sign(dz) * params.latticeSize : dz)
+                            };
+
                             const pos1 = this.project3D(p1, params.latticeSize);
-                            const pos2 = this.project3D(p2, params.latticeSize);
-                            
+                            const pos2 = this.project3D(p2Adj, params.latticeSize);
+
                             const x1 = centerX + pos1.x * scale;
                             const y1 = centerY + pos1.y * scale;
                             const x2 = centerX + pos2.x * scale;
                             const y2 = centerY + pos2.y * scale;
-                            
+
                             this.ctx.beginPath();
                             this.ctx.moveTo(x1, y1);
                             this.ctx.lineTo(x2, y2);
@@ -1614,9 +2031,171 @@
             }
             
             setupCharts() {
-                [this.energyCtx, this.clusterCtx, this.acceptanceCtx, this.bondCtx].forEach(ctx => {
-                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                [this.energyCtx, this.clusterCtx, this.acceptanceCtx, this.bondCtx, this.rdfCtx].forEach(ctx => {
+                    if (ctx) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 });
+            }
+
+            /**
+             * Calculate pressure using the virial equation
+             * P = ρkT + (1/3V) Σ r_ij · f_ij
+             * where f_ij is the force between particles i and j
+             */
+            calculatePressure() {
+                const params = this.getParameters();
+                const volume = Math.pow(params.latticeSize, 3);
+                const N = this.particles.length;
+                const currentTemp = this.getCurrentTemperature();
+                const density = N / volume;
+
+                // Ideal gas contribution
+                let pressure = density * this.kB * currentTemp;
+
+                // Virial contribution from pair interactions
+                let virial = 0;
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const p1 = this.particles[i];
+                        const p2 = this.particles[j];
+                        const distance = this.calculateDistance(p1, p2, params.latticeSize);
+                        const cutoff = params.cutoffRadius * params.sigma;
+
+                        if (distance < cutoff && distance > 0.1 * params.sigma) {
+                            // LJ force magnitude: f = 24ε/r * [2(σ/r)^12 - (σ/r)^6]
+                            const sigma_over_r = params.sigma / distance;
+                            const sigma_over_r_6 = Math.pow(sigma_over_r, 6);
+                            const sigma_over_r_12 = sigma_over_r_6 * sigma_over_r_6;
+
+                            // r · f = -r · dV/dr = 24ε * [2(σ/r)^12 - (σ/r)^6]
+                            const rDotF = 24 * params.epsilon * (2 * sigma_over_r_12 - sigma_over_r_6);
+                            virial += rDotF;
+                        }
+                    }
+                }
+
+                pressure += virial / (3 * volume);
+                return pressure;
+            }
+
+            /**
+             * Calculate heat capacity from energy fluctuations
+             * Cv = (<E²> - <E>²) / (kT²)
+             */
+            calculateHeatCapacity() {
+                if (this.energyHistory.length < 20) return null;
+
+                // Use last 50 points for rolling average
+                const recentEnergies = this.energyHistory.slice(-50).map(e => e.energy);
+                const N = recentEnergies.length;
+
+                const meanE = recentEnergies.reduce((a, b) => a + b, 0) / N;
+                const meanE2 = recentEnergies.reduce((a, b) => a + b * b, 0) / N;
+                const variance = meanE2 - meanE * meanE;
+
+                const currentTemp = this.getCurrentTemperature();
+                const kT2 = Math.pow(this.kB * currentTemp, 2);
+
+                // Cv in units of kB per particle
+                const Cv = variance / kT2 / this.particles.length;
+                return Cv;
+            }
+
+            /**
+             * Calculate reduced density ρ* = ρσ³
+             */
+            calculateReducedDensity() {
+                const params = this.getParameters();
+                const volume = Math.pow(params.latticeSize, 3);
+                const N = this.particles.length;
+                return N * Math.pow(params.sigma, 3) / volume;
+            }
+
+            /**
+             * Detect equilibration by checking if energy variance has stabilized
+             * Returns: 'equilibrating', 'equilibrated', or 'production'
+             */
+            detectEquilibration() {
+                if (this.energyHistory.length < 20) return 'equilibrating';
+
+                const params = this.getParameters();
+                const progress = this.currentStep / params.numSweeps;
+
+                // If annealing, always show as annealing
+                if (params.annealingMode !== 'none') {
+                    return progress < 0.9 ? 'annealing' : 'cooling-complete';
+                }
+
+                // Calculate rolling variance over different windows
+                const recentEnergies = this.energyHistory.slice(-50).map(e => e.energy);
+                const oldEnergies = this.energyHistory.slice(-100, -50).map(e => e.energy);
+
+                if (oldEnergies.length < 20) return 'equilibrating';
+
+                const calcVariance = (arr) => {
+                    const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                    return arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / arr.length;
+                };
+
+                const recentVariance = calcVariance(recentEnergies);
+                const oldVariance = calcVariance(oldEnergies);
+
+                // Calculate mean drift
+                const recentMean = recentEnergies.reduce((a, b) => a + b, 0) / recentEnergies.length;
+                const oldMean = oldEnergies.reduce((a, b) => a + b, 0) / oldEnergies.length;
+                const drift = Math.abs(recentMean - oldMean) / Math.abs(oldMean || 1);
+
+                // Equilibrated if variance is stable and mean isn't drifting significantly
+                if (drift < 0.05 && Math.abs(recentVariance - oldVariance) / (oldVariance || 1) < 0.3) {
+                    return progress > 0.2 ? 'production' : 'equilibrated';
+                }
+
+                return 'equilibrating';
+            }
+
+            /**
+             * Calculate radial distribution function g(r)
+             * g(r) = (V / N²) * (n(r) / (4πr²Δr))
+             * where n(r) is the number of pairs at distance r
+             */
+            calculateRDF() {
+                const params = this.getParameters();
+                const numBins = 50;
+                const maxR = params.latticeSize / 2; // Half box due to periodic boundaries
+                const dr = maxR / numBins;
+                const histogram = new Array(numBins).fill(0);
+
+                // Count pairs at each distance
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const distance = this.calculateDistance(
+                            this.particles[i],
+                            this.particles[j],
+                            params.latticeSize
+                        );
+                        if (distance < maxR) {
+                            const bin = Math.floor(distance / dr);
+                            if (bin < numBins) {
+                                histogram[bin] += 2; // Count both i-j and j-i
+                            }
+                        }
+                    }
+                }
+
+                // Normalize to get g(r)
+                const volume = Math.pow(params.latticeSize, 3);
+                const N = this.particles.length;
+                const density = N / volume;
+                const rdf = [];
+
+                for (let bin = 0; bin < numBins; bin++) {
+                    const r = (bin + 0.5) * dr;
+                    const shellVolume = (4/3) * Math.PI * (Math.pow((bin+1)*dr, 3) - Math.pow(bin*dr, 3));
+                    const idealCount = density * shellVolume * N;
+                    const gr = idealCount > 0 ? histogram[bin] / idealCount : 0;
+                    rdf.push({ r: r / params.sigma, g: gr }); // Normalize r by sigma
+                }
+
+                return rdf;
             }
             
             updateAllCharts() {
@@ -1624,6 +2203,7 @@
                 this.updateClusterChart();
                 this.updateAcceptanceChart();
                 this.updateBondChart();
+                this.updateRDFChart();
             }
             
             updateEnergyChart() {
@@ -1933,14 +2513,117 @@
                 ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('Monte Carlo Steps', canvas.width / 2, canvas.height - 10);
-                
+
                 ctx.save();
                 ctx.translate(15, canvas.height / 2);
                 ctx.rotate(-Math.PI / 2);
                 ctx.fillText('Bond Count', 0, 0);
                 ctx.restore();
             }
-            
+
+            updateRDFChart() {
+                if (!this.rdfCtx) return;
+                const ctx = this.rdfCtx;
+                const canvas = ctx.canvas;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (this.particles.length < 2) return;
+
+                const rdf = this.calculateRDF();
+                if (rdf.length < 2) return;
+
+                const padding = 40;
+                const chartWidth = canvas.width - 2 * padding;
+                const chartHeight = canvas.height - 2 * padding;
+
+                const maxR = Math.max(...rdf.map(d => d.r));
+                const maxG = Math.max(...rdf.map(d => d.g), 2); // At least show up to 2
+
+                // Draw grid
+                ctx.strokeStyle = '#2A2A2D';
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= 5; i++) {
+                    const y = padding + (i / 5) * chartHeight;
+                    ctx.beginPath();
+                    ctx.moveTo(padding, y);
+                    ctx.lineTo(canvas.width - padding, y);
+                    ctx.stroke();
+                }
+
+                // Draw ideal gas line (g=1)
+                ctx.strokeStyle = 'rgba(229, 62, 62, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                const idealY = padding + (1 - 1 / maxG) * chartHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding, idealY);
+                ctx.lineTo(canvas.width - padding, idealY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw g(r) curve
+                ctx.strokeStyle = '#E53E3E';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                rdf.forEach((point, i) => {
+                    const x = padding + (point.r / maxR) * chartWidth;
+                    const y = padding + (1 - point.g / maxG) * chartHeight;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+
+                ctx.stroke();
+
+                // Fill under curve for visual effect
+                ctx.fillStyle = 'rgba(229, 62, 62, 0.1)';
+                ctx.beginPath();
+                ctx.moveTo(padding, padding + chartHeight);
+
+                rdf.forEach((point) => {
+                    const x = padding + (point.r / maxR) * chartWidth;
+                    const y = padding + (1 - point.g / maxG) * chartHeight;
+                    ctx.lineTo(x, y);
+                });
+
+                ctx.lineTo(canvas.width - padding, padding + chartHeight);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw labels
+                ctx.fillStyle = '#A0A0A3';
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Distance r/σ', canvas.width / 2, canvas.height - 10);
+
+                ctx.save();
+                ctx.translate(15, canvas.height / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('g(r)', 0, 0);
+                ctx.restore();
+
+                // Mark key positions (1σ and 2^(1/6)σ ≈ 1.12σ which is LJ minimum)
+                ctx.fillStyle = '#A0A0A3';
+                ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+                const ljMinPos = 1.12;
+                if (ljMinPos <= maxR) {
+                    const x = padding + (ljMinPos / maxR) * chartWidth;
+                    ctx.fillText('1.12σ', x, canvas.height - 25);
+                    ctx.strokeStyle = 'rgba(160, 160, 163, 0.5)';
+                    ctx.setLineDash([2, 2]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding);
+                    ctx.lineTo(x, padding + chartHeight);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+
             exportData() {
                 const data = {
                     simulation: {

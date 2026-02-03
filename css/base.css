@@ -1,0 +1,203 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    background: #000000;
+    height: 100%;
+}
+
+body {
+    font-family: var(--font-family);
+    background: transparent;
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+    font-weight: 400;
+    font-size: var(--text-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    min-height: calc(var(--vh, 1vh) * 100);
+    height: 100%;
+}
+
+/* Modern 4K Typography - Crisp & High-Contrast */
+h1, h2, h3 {
+    color: var(--color-text-primary);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+main {
+    background: transparent;
+}
+
+section {
+    background: transparent;
+}
+
+.section {
+    background: transparent;
+}
+
+/* Container - Perfect Center Alignment */
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+    width: 100%;
+    position: relative;
+}
+
+/* Buttons - Modernist Restraint */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    min-width: 140px;
+    height: 48px;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--color-accent-rust);
+    color: var(--color-surface);
+    border-color: var(--color-accent-rust);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: #704032;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-divider);
+}
+
+.btn-secondary:hover {
+    background: var(--color-surface-secondary);
+    border-color: var(--color-accent-rust);
+    transform: translateY(-2px);
+}
+
+.btn svg {
+    transition: transform var(--transition-fast);
+}
+
+.btn:hover svg {
+    transform: translateX(2px);
+}
+
+/* Grid System */
+.grid {
+    display: grid;
+    gap: var(--space-8);
+}
+
+.grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+}
+
+/* Cards - Modernist Restraint */
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-10);
+    border: 1.5px solid var(--color-divider);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent-olive);
+    box-shadow: var(--shadow-lg);
+}
+
+.card h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-4);
+    letter-spacing: -0.01em;
+}
+
+.card p {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-6);
+}
+
+.card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+}
+
+.tech-tag {
+    background: var(--color-surface-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-divider);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.card-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-0 { margin-top: 0; }
+.mt-4 { margin-top: var(--space-4); }
+.mt-8 { margin-top: var(--space-8); }
+.mt-16 { margin-top: var(--space-16); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-8 { margin-bottom: var(--space-8); }
+.mb-16 { margin-bottom: var(--space-16); }
+
+.hidden { display: none; }
+.visible { display: block; }

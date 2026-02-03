@@ -1,0 +1,104 @@
+/* Modernist Editorial Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Custom Properties - Editorial Design Tokens */
+:root {
+    /* Dynamic viewport height (set via JS to handle mobile address bars) */
+    --vh: 1vh;
+
+    /* Dark theme overrides for blob system */
+    --color-space-black: #000000;
+    --color-bright-purple: #DA00FF;
+    --color-neon-cyan: #00FFFF;
+    --color-hot-magenta: #FF00FF;
+    --color-acid-green: #39FF14;
+    --color-electric-blue: #00BFFF;
+    --current-blob-color: #DA00FF; /* Dynamic via JS */
+
+    /* Foundation - Dark theme replaces warm paper */
+    --color-background: #000000;           /* Dark space black */
+    --color-surface: rgba(0, 0, 0, 0.8);   /* Dark surface */
+    --color-surface-secondary: rgba(0, 0, 0, 0.6);    /* Dark secondary surfaces */
+
+    /* Text Hierarchy - Dark theme overrides */
+    --color-text-primary: #FFFFFF;         /* White for dark theme */
+    --color-text-secondary: rgba(255, 255, 255, 0.7);       /* Translucent white */
+    --color-text-tertiary: rgba(255, 255, 255, 0.5);        /* More translucent */
+
+    /* Chromatic Restraint */
+    --color-accent-olive: #5A6B3C;         /* Deep Olive - section headers ONLY */
+    --color-accent-rust: #8B4A32;          /* Oxide Rust - links/interactions ONLY */
+
+    /* UI Chrome */
+    --color-divider: #D8D5CF;              /* Soft Ash - borders */
+    --color-divider-light: #E8E6E1;        /* Subtle separation */
+
+    /* Semantic (minimal usage) */
+    --color-success: #4A6B3C;              /* Muted green */
+    --color-warning: #9B7B3C;              /* Muted amber */
+    --color-error: #8B4A3C;                /* Muted red */
+
+    /* Typography - Humanist Sans */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+
+    /* Type Scale - Refined for Readability */
+    --text-xs: 0.75rem;      /* 12px - metadata */
+    --text-sm: 0.875rem;     /* 14px - supporting text */
+    --text-base: 1rem;       /* 16px - body */
+    --text-lg: 1.125rem;     /* 18px - large body */
+    --text-xl: 1.375rem;     /* 22px - subheadings */
+    --text-2xl: 1.75rem;     /* 28px - section titles */
+    --text-3xl: 2.25rem;     /* 36px - page titles */
+    --text-4xl: 3rem;        /* 48px - hero */
+
+    /* Line Heights - Generous Leading */
+    --leading-tight: 1.2;
+    --leading-snug: 1.4;
+    --leading-normal: 1.6;
+    --leading-relaxed: 1.8;
+
+    /* Measure - Comfortable Reading */
+    --measure-narrow: 45ch;
+    --measure-base: 65ch;
+    --measure-wide: 75ch;
+
+    /* Spacing - Apple's 8pt Grid */
+    --space-1: 0.25rem;    /* 4px */
+    --space-2: 0.5rem;     /* 8px */
+    --space-3: 0.75rem;    /* 12px */
+    --space-4: 1rem;       /* 16px */
+    --space-5: 1.25rem;    /* 20px */
+    --space-6: 1.5rem;     /* 24px */
+    --space-8: 2rem;       /* 32px */
+    --space-10: 2.5rem;    /* 40px */
+    --space-12: 3rem;      /* 48px */
+    --space-16: 4rem;      /* 64px */
+    --space-20: 5rem;      /* 80px */
+    --space-24: 6rem;      /* 96px */
+    --space-32: 8rem;      /* 128px */
+
+    /* Border Radius - Gentle Curves */
+    --radius-sm: 0.375rem;   /* 6px - small elements */
+    --radius-md: 0.75rem;    /* 12px - buttons, inputs, cards */
+    --radius-lg: 1rem;       /* 16px - large cards, modals */
+    --radius-xl: 1.5rem;     /* 24px - hero elements, special containers */
+    --radius-full: 9999px;
+
+    /* Shadows - Natural Light, Progressive Depth */
+    --shadow-subtle: 0 1px 3px rgba(31, 35, 40, 0.05);
+    --shadow-sm: 0 2px 6px rgba(31, 35, 40, 0.07);
+    --shadow-md: 0 4px 12px rgba(31, 35, 40, 0.09);
+    --shadow-lg: 0 8px 20px rgba(31, 35, 40, 0.11);
+
+    /* Transitions - Reduced Duration */
+    --transition-fast: 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Layout - Restrained Width */
+    --container-max-width: 1200px;        /* Narrower than 1400px */
+    --container-narrow: 800px;            /* For long-form content */
+    --container-wide: 1400px;             /* For grids */
+    --container-padding: var(--space-6);
+}

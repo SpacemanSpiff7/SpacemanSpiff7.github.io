@@ -19,9 +19,8 @@ Disallow: /scripts/
 Disallow: /cursor_site.html
 
 # Allow common resources
-Allow: /style.css
-Allow: /script.js
-Allow: /resources/
+Allow: /css/
+Allow: /js/
 Allow: /assets/favicon.svg
 Allow: /assets/images/
 

@@ -28,14 +28,33 @@ git push origin master
 
 ## Architecture Overview
 
-### Site Structure
-This is a **single-page application (SPA)** with a component-based architecture:
+### Current Design
+- **Scroll-snap single page** with animated backgrounds
+- **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js)
+- **Dynamic content**: Projects loaded from data/projects.json
+- **Control panel**: Blob parameter tweaking (collapsible UI)
+- **Modular CSS**: Split into tokens, base, components, and responsive files
 
-- **Main page**: `index.html` - Loads all components dynamically via JavaScript
-- **Components**: HTML files in `/components/` directory loaded via `loadComponent()` function
-- **Standalone pages**: 9 HTML tools in `/tools/` directory with varying navigation patterns
-- **Global styles**: `style.css` with CSS custom properties and mobile-first responsive design
-- **Global scripts**: `script.js` handles component loading, navigation, and interactive features
+### Key Files
+| File | Purpose |
+|------|---------|
+| `index.html` | Main page with all sections inline |
+| `css/tokens.css` | CSS custom properties (design system tokens) |
+| `css/base.css` | Reset, typography, containers, buttons, cards |
+| `css/components.css` | Nav, hero, sections, scroll-snap, control panel |
+| `css/responsive.css` | Media queries, reduced motion, print styles |
+| `css/style.css` | Import wrapper for all CSS (used by tools) |
+| `js/main.js` | Navigation, project loading, progress indicator |
+| `js/animations.js` | Starfield and 3D blob rendering |
+| `components/nav.html` | Navigation bar (only component loaded dynamically) |
+| `data/projects.json` | Single source of truth for projects |
+
+### Section Structure
+1. **Hero** - Name + title
+2. **Featured 1-4** - Featured projects (populated from JSON)
+3. **About** - Bio section
+4. **Contact** - Contact information
+5. **Projects Grid** - All projects displayed in grid
 
 ### Data-Driven Configuration
 
@@ -44,32 +63,20 @@ This is a **single-page application (SPA)** with a component-based architecture:
 - Powers projects grid with metadata
 - **When adding projects**: Update projects.json, not CLAUDE.md (see `data/README.md`)
 
-**Current featured** (4 projects): la-collisions-dashboard, public-art-submission, dodgers-notifications, ebay-craigslist-chrome-extension
-
-### Component System
-The site uses a custom component loading system in `script.js`:
-
-```javascript
-// Components are loaded dynamically
-loadComponent('nav-container', 'components/nav.html');
-loadComponent('home-container', 'components/home.html');
-// etc.
-```
-
-### Navigation System
-- Single-page navigation using `data-section` attributes
-- Mobile-responsive hamburger menu
-- Section visibility controlled by `.active` class
-- Smooth scrolling between sections
-
-### Styling Architecture
-- **CSS Custom Properties** for consistent theming
-- **Apple-inspired design system** with refined spacing and typography
-- **Dark theme** with forced dark mode styling
-- **Mobile-first responsive design** with specific iOS Safari optimizations
-- **Modular CSS** organized by components and utilities
-
 ## Important Implementation Notes
+
+### CSS Architecture
+
+The CSS is split into modular files for easier maintenance:
+
+- **tokens.css**: Design tokens (colors, typography, spacing, shadows, transitions)
+- **base.css**: Reset, typography, containers, buttons, cards, utility classes
+- **components.css**: Navigation, hero, sections, animations, scroll-snap, control panel
+- **responsive.css**: Media queries, reduced motion, print styles
+
+**For index.html**: Links all four CSS files directly for optimal loading.
+
+**For tools**: Use `../css/style.css` which imports all modular files via `@import`.
 
 ### Standalone Tool Patterns
 
@@ -82,7 +89,7 @@ Tools in `/tools/` use three distinct navigation approaches:
 
 **Pattern 2: Inline Nav, No SKIP** (5 tools)
 - `shopping-research.html`, `monte-carlo-sim-optimized.html`, `running-game.html`, `claude-consulting-draft.html`, `consulting-coming-soon.html`
-- Creates navigation inline, references `../style.css`
+- Creates navigation inline, references `../css/style.css`
 
 **Pattern 3: External Module** (1 file)
 - `location-map.js` (supporting JavaScript for location-map.html)
@@ -97,7 +104,7 @@ Tools in `/tools/` use three distinct navigation approaches:
 - **Map rendering**: MapLibre GL 3.6.2
 - **Temporal analysis**: Chart.js 4.4.0
 - **Spatial indexing**: RBush 3.0.1 (fast collision detection)
-- **Data**: 303MB `data/la_traffic_collisions.json` → 421 spatial tiles in `assets/collisions/tiles/*.json`
+- **Data**: 303MB `data/la_traffic_collisions.json` -> 421 spatial tiles in `assets/collisions/tiles/*.json`
 - **Pattern**: Uses `window.SKIP_MAIN_SCRIPT = true`, tile-based progressive loading
 
 **When modifying**: Tiles are git-tracked. Regenerate with `scripts/preprocess-collisions.js` if source data changes.
@@ -130,17 +137,31 @@ Two tools integrate with Google services:
 
 ```
 /
-├── index.html, style.css (~1,266 lines), script.js (~453 lines)
-├── cursor_site.html        # Alternative/legacy standalone site version
+├── index.html              # Main page with all sections
+├── css/
+│   ├── tokens.css          # CSS custom properties (design tokens)
+│   ├── base.css            # Reset, typography, containers, buttons, cards
+│   ├── components.css      # Nav, hero, sections, scroll-snap, control panel
+│   ├── responsive.css      # Media queries, reduced motion, print styles
+│   └── style.css           # Import wrapper (for tools compatibility)
+├── js/
+│   ├── main.js             # Navigation, project loading, progress indicator
+│   └── animations.js       # Starfield and 3D blob rendering
+├── components/
+│   └── nav.html            # Navigation bar (only component)
+├── tools/                  # 8 standalone HTML tools (see Tool Patterns above)
+├── data/
+│   ├── projects.json       # Source of truth for projects
+│   └── la_traffic_collisions.json  # 303MB collision data
+├── assets/
+│   ├── favicon.svg
+│   ├── images/             # All images (simone_pic.png, og-image.png, etc.)
+│   └── collisions/tiles/   # 421 JSON tile files
+├── scripts/
+│   └── preprocess-collisions.js    # Data preprocessing
+├── docs/                   # Setup guides for Google API tools
 ├── CNAME                   # GitHub Pages domain configuration
-├── README.md              # Repository readme
-├── components/            # 5 SPA components (nav, home, projects, about, contact)
-├── tools/                 # 9 standalone HTML tools (see Tool Patterns above)
-├── data/                  # projects.json (source of truth), la_traffic_collisions.json (303MB)
-├── assets/                # favicon.svg, images/, collisions/tiles/ (421 JSON files)
-├── scripts/               # preprocess-collisions.js (data preprocessing)
-├── resources/             # simone_pic.png, og-image.png
-└── docs/                  # Setup guides for Google API tools
+└── README.md               # Repository readme
 ```
 
 ## External Dependencies
@@ -156,18 +177,14 @@ Two tools integrate with Google services:
 - Forms (public-art-submission.html)
 
 **Assets**:
-- Google Fonts (Inter)
+- Google Fonts (Inter, Silkscreen, IBM Plex Mono)
 - Unsplash + self-hosted images (mix)
 
 ## Projects Configuration
 
 The site features are managed through `data/projects.json`:
 - **10 total projects** (mix of tools, games, and applications)
-- **4 featured projects** highlighted on home page:
-  - la-collisions-dashboard
-  - public-art-submission
-  - dodgers-notifications
-  - ebay-craigslist-chrome-extension
+- **4 featured projects** highlighted on home page
 - Each project has metadata: title, description, tech stack, links, and images
 - **Source of truth**: projects.json (not CLAUDE.md - see `data/README.md`)
 

@@ -8,10 +8,6 @@ function setViewportHeight() {
 setViewportHeight();
 window.addEventListener('resize', setViewportHeight);
 
-// Component loading system
-let loadedComponents = new Set();
-const requiredComponents = ['nav-container'];
-
 document.addEventListener('DOMContentLoaded', function() {
     // Skip if this is a standalone page
     if (window.SKIP_MAIN_SCRIPT) {
@@ -28,9 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('componentLoaded', function(e) {
-    loadedComponents.add(e.detail.containerId);
-
-    // Re-initialize navigation if nav component is loaded
+    // Initialize navigation when nav component loads
     if (e.detail.containerId === 'nav-container') {
         setTimeout(setupNavigation, 50);
     }
@@ -238,7 +232,7 @@ async function loadProjects() {
                     </div>
                     <a href="${project.actions[0].url}"
                        class="link-btn"
-                       ${project.actions[0].external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                       target="_blank" rel="noopener noreferrer">
                         ${project.actions[0].text}
                     </a>
                 `;
@@ -254,7 +248,7 @@ async function loadProjects() {
                     <p>${project.shortDescription}</p>
                     <a href="${project.actions[0].url}"
                        class="link-btn"
-                       ${project.actions[0].external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                       target="_blank" rel="noopener noreferrer">
                         ${project.actions[0].text}
                     </a>
                 </div>
@@ -317,36 +311,3 @@ function initProgressIndicator(featuredCount) {
         });
     });
 }
-
-// Performance optimization: Lazy load images
-document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img[loading="lazy"]');
-
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src || img.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        images.forEach(img => imageObserver.observe(img));
-    }
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    clearTimeout(window.resizeTimeout);
-    window.resizeTimeout = setTimeout(() => {
-        // Any resize-dependent logic here
-    }, 250);
-});
-
-// Error handling
-window.addEventListener('error', function(e) {
-    console.error('Application error:', e.error);
-});

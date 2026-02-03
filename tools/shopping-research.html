@@ -21,33 +21,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/style.css">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav" role="navigation" aria-label="Main navigation">
-        <div class="nav-container">
-            <a href="../index.html" class="nav-logo" aria-label="Home">Simone Longo</a>
-            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-            <ul class="nav-links">
-                <li><a href="../index.html" class="nav-link">Home</a></li>
-                <li><a href="../index.html#projects" class="nav-link">Tools</a></li>
-                <li><a href="../index.html#about" class="nav-link">About</a></li>
-                <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <div class="shopping-container" style="padding-top: 80px;">
+    <div class="shopping-container" style="padding-top: 2rem;">
         <div class="shopping-header">
             <h1>Shopping Research Generator</h1>
             <p>Generate intelligent prompts for comprehensive product research and informed decision making</p>
@@ -367,33 +347,6 @@ Begin your research systematically: identify sources → analyze location factor
             });
         }
 
-        // Navigation functionality
-        const navToggle = document.querySelector('.nav-toggle');
-        const navLinks = document.querySelector('.nav-links');
-        
-        if (navToggle && navLinks) {
-            navToggle.addEventListener('click', function() {
-                const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-                navToggle.setAttribute('aria-expanded', !isExpanded);
-                navLinks.classList.toggle('active');
-            });
-
-            // Close menu when clicking on a link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function() {
-                    navToggle.setAttribute('aria-expanded', 'false');
-                    navLinks.classList.remove('active');
-                });
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
-                    navToggle.setAttribute('aria-expanded', 'false');
-                    navLinks.classList.remove('active');
-                }
-            });
-        }
     </script>
 </body>
 </html> 

@@ -123,7 +123,7 @@
       "shortDescription": "For when you see something cool and want to help me with a personal project.",
       "description": "A mobile-friendly app that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Also help me collect data for my public art map project.",
       "category": "Cool Stuff",
-      "image": "resources/og-image.png",
+      "image": "assets/images/og-image.png",
       "tags": ["Public Art", "Mobile App", "Location Services"],
       "actions": [
         {
@@ -147,38 +147,6 @@
           "url": "https://github.com/SpacemanSpiff7/EbayLookupChromePlugin",
           "type": "primary",
           "external": true
-        }
-      ]
-    },
-    {
-      "id": "public-art-map",
-      "title": "Public Art Interactive Map (WIP)",
-      "shortDescription": "All the cool art stuff people found, on a map that might actually work",
-      "description": "An interactive map that shows all the street art and murals people have submitted. Built with Google Maps.",
-      "category": "Public Art",
-      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Public Art", "Google Maps", "Interactive Map"],
-      "actions": [
-        {
-          "text": "View Map",
-          "url": "tools/location-map.html", 
-          "type": "primary"
-        }
-      ]
-    },
-    {
-      "id": "running-game",
-      "title": "Running Game",
-      "shortDescription": "A simple running game that tests your reflexes and patience",
-      "description": "A simple running game that tests your reflexes and patience. Built with JavaScript.",
-      "category": "Games",
-      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Game"],
-      "actions": [
-        {
-          "text": "Play Game",
-          "url": "tools/running-game.html", 
-          "type": "primary"
         }
       ]
     }
