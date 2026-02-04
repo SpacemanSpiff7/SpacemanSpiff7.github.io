@@ -15,6 +15,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- External Libraries -->
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
@@ -22,6 +23,44 @@
     <script src="https://unpkg.com/rbush@3.0.1/rbush.min.js"></script>
 
     <style>
+        /* Override main site's scroll-snap and overflow:hidden for dashboard */
+        html, body {
+            overflow: visible !important;
+            overflow-y: auto !important;
+            height: auto !important;
+            scroll-snap-type: none !important;
+        }
+
+        /* Unified Color Palette */
+        :root {
+            /* Collision Type Colors - muted for dark theme */
+            --color-vehicle: #4a90d9;
+            --color-pedestrian: #e05d5d;
+            --color-motorcycle: #f0a040;
+            --color-bicycle: #50b080;
+            --color-other: #8090a0;
+
+            /* Severity Colors */
+            --color-severity-property: #6b7c8d;
+            --color-severity-minor: #f4a940;
+            --color-severity-severe: #e05d5d;
+            --color-severity-fatal: #dc3545;
+            --color-severity-unknown: #8090a0;
+
+            /* Trend Colors */
+            --color-trend-up: #e05d5d;
+            --color-trend-down: #50b080;
+            --color-trend-neutral: #8090a0;
+
+            /* Time of Day Colors */
+            --color-time-early-am: #2c3e50;
+            --color-time-am-peak: #e67e22;
+            --color-time-midday: #f1c40f;
+            --color-time-pm-peak: #c0392b;
+            --color-time-evening: #8e44ad;
+            --color-time-late-night: #34495e;
+        }
+
         /* Dashboard Container */
         .dashboard-container {
             max-width: 1920px;
@@ -36,44 +75,204 @@
         }
 
         .dashboard-header h1 {
+            font-family: 'Silkscreen', 'Courier New', monospace;
             font-size: clamp(2rem, 5vw, 3.5rem);
-            color: var(--color-accent-olive);
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
             margin-bottom: 0.5rem;
         }
 
         .subtitle {
+            font-family: 'Silkscreen', 'Courier New', monospace;
             color: var(--color-text-secondary);
-            font-size: 1.125rem;
+            font-size: 0.875rem;
         }
 
-        /* KPI Cards - Single Horizontal Row */
+        .subtitle a {
+            color: #00bfff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .subtitle a:hover {
+            opacity: 0.8;
+        }
+
+        /* Data Quality Banner - Muted rust tones for dark theme */
+        .data-quality-banner {
+            background: linear-gradient(135deg, rgba(139, 74, 50, 0.15), rgba(139, 74, 50, 0.08));
+            border: 1px solid rgba(139, 74, 50, 0.35);
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .data-quality-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(139, 74, 50, 0.1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-quality-header:hover {
+            background: rgba(139, 74, 50, 0.18);
+        }
+
+        .data-quality-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: #d4836b;
+        }
+
+        .data-quality-icon {
+            font-size: 1.25rem;
+        }
+
+        .data-quality-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #d4836b;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 0.25rem;
+        }
+
+        .data-quality-banner.expanded .data-quality-toggle {
+            transform: rotate(180deg);
+        }
+
+        .data-quality-content {
+            display: none;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(139, 74, 50, 0.25);
+        }
+
+        .data-quality-banner.expanded .data-quality-content {
+            display: block;
+        }
+
+        .data-quality-content h4 {
+            color: var(--color-text);
+            font-size: 1rem;
+            margin: 0 0 0.75rem 0;
+        }
+
+        .data-quality-content ul {
+            margin: 0 0 1.25rem 0;
+            padding-left: 1.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        .data-quality-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .data-quality-content p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .data-quality-content strong {
+            color: var(--color-text);
+        }
+
+
+        /* KPI Cards - Styled to match insight-panel aesthetic */
         .kpi-cards {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1rem;
         }
 
         .kpi-card {
-            background: var(--color-surface);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-md);
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: left;
         }
 
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--color-accent-rust);
-            margin-bottom: 0.5rem;
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .kpi-icon-map {
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        .kpi-icon-map svg {
+            color: #a855f7;
+        }
+
+        .kpi-icon-type {
+            background: rgba(0, 191, 255, 0.2);
+        }
+
+        .kpi-icon-type svg {
+            color: #00bfff;
+        }
+
+        .kpi-icon-time {
+            background: rgba(240, 160, 64, 0.2);
+        }
+
+        .kpi-icon-time svg {
+            color: #f0a040;
+        }
+
+        .kpi-icon-severity {
+            background: rgba(224, 93, 93, 0.2);
+        }
+
+        .kpi-icon-severity svg {
+            color: #e05d5d;
+        }
+
+        .kpi-content {
+            flex: 1;
         }
 
         .kpi-label {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: var(--color-text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            line-height: 1.3;
         }
 
         /* Responsive: 2x2 grid on tablets */
@@ -87,7 +286,12 @@
         @media (max-width: 768px) {
             .kpi-cards {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 0.75rem;
+                padding: 1rem;
+            }
+
+            .kpi-card {
+                padding: 0.625rem;
             }
         }
 
@@ -114,8 +318,7 @@
             box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
-            height: 650px;
-            min-height: 650px;
+            height: 600px;
         }
 
         .section-header {
@@ -126,13 +329,10 @@
         }
 
         .section-header h2 {
-            font-size: 1.5rem;
-            color: var(--color-accent-olive);
-        }
-
-        /* Override for table section header - white text */
-        .table-section .section-header h2 {
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 1.25rem;
             color: #ffffff;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
         }
 
         .map-controls {
@@ -142,51 +342,67 @@
 
         .btn-secondary {
             padding: 0.5rem 1rem;
-            border: 2px solid var(--color-accent-rust);
-            background: rgba(211, 84, 0, 0.15);
-            color: #ff9a6c;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            background: rgba(138, 43, 226, 0.15);
+            color: #e0e0ff;
             border-radius: var(--radius-md);
-            font-weight: 600;
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: 400;
             cursor: pointer;
             transition: all 0.2s;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary.active {
-            background: var(--color-accent-rust);
+            background: rgba(138, 43, 226, 0.4);
+            border-color: rgba(138, 43, 226, 0.8);
             color: white;
-            text-shadow: none;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
         }
 
         .btn-secondary:hover {
-            background: rgba(211, 84, 0, 0.25);
+            background: rgba(138, 43, 226, 0.25);
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+
+        .map-wrapper {
+            position: relative;
+            flex: 1;
+            min-height: 0;
         }
 
         .collision-map {
             width: 100%;
-            height: 650px;
+            height: 100%;
             border-radius: var(--radius-md);
             overflow: hidden;
         }
 
-        .map-stats {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            color: var(--color-text-secondary);
-            text-align: center;
+        .map-stats-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 10;
         }
 
-        /* Map Legend */
+        /* Map Legend - Dark Theme */
         .map-legend {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
+            bottom: 16px;
+            left: 16px;
+            background: rgba(26, 26, 26, 0.95);
             padding: 12px 16px;
             border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.75rem;
-            z-index: 1;
+            z-index: 10;
             max-width: 200px;
         }
 
@@ -194,7 +410,7 @@
             margin: 0 0 8px 0;
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--color-text);
+            color: #ffffff;
         }
 
         .legend-item {
@@ -212,13 +428,20 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             flex-shrink: 0;
         }
 
         .legend-label {
-            color: var(--color-text);
+            color: #e0e0e0;
             font-size: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .legend-help {
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            color: #888;
             line-height: 1.3;
         }
 
@@ -229,6 +452,13 @@
                 font-size: 0.65rem;
                 padding: 8px 12px;
             }
+
+            .map-stats-overlay {
+                top: 8px;
+                left: 8px;
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
         }
 
         /* Charts Section */
@@ -238,6 +468,7 @@
             padding: 1.5rem;
             margin-bottom: 3rem;
             box-shadow: var(--shadow-md);
+            overflow: hidden;
         }
 
         .charts-section {
@@ -259,19 +490,25 @@
             padding: 1rem;
             box-shadow: var(--shadow-sm);
             height: 260px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .chart-container h3 {
-            font-size: 1.125rem;
-            color: var(--color-accent-olive);
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 1rem;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(138, 43, 226, 0.3);
             margin-bottom: 1rem;
         }
 
         .chart-container canvas {
             max-height: 180px;
+            width: 100% !important;
+            max-width: 100%;
         }
 
-        /* Chart Controls */
+        /* Chart Controls - Dark Theme */
         .chart-controls {
             display: grid;
             grid-template-columns: auto auto auto auto;
@@ -279,9 +516,9 @@
             justify-content: center;
             align-items: center;
             padding: 1rem 1.5rem;
-            background: var(--color-bg);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: var(--radius-md);
-            border-top: 1px solid #eee;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .control-group {
@@ -289,9 +526,10 @@
         }
 
         .control-group label {
-            font-size: 0.9rem;
-            color: var(--color-text);
-            font-weight: 600;
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
             text-align: right;
             white-space: nowrap;
         }
@@ -303,36 +541,32 @@
         }
 
         .btn-control {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            background: #fff;
-            color: var(--color-text);
-            border: 2px solid #ddd;
-            border-radius: var(--radius-md);
+            padding: 0.5rem 1rem;
+            font-size: 0.7rem;
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            background: rgba(0, 191, 255, 0.1);
+            color: #e0f0ff;
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            border-radius: 2rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             white-space: nowrap;
         }
 
         .btn-control:hover {
-            background: #f8f9fa;
-            border-color: #bbb;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            background: rgba(0, 191, 255, 0.15);
+            border-color: rgba(0, 191, 255, 0.5);
         }
 
         .btn-control.active {
-            background: var(--color-accent-olive);
+            background: rgba(0, 191, 255, 0.25);
             color: #fff;
-            border-color: var(--color-accent-olive);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-color: rgba(0, 191, 255, 0.7);
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
         }
 
         .btn-control.active:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+            background: rgba(0, 191, 255, 0.3);
         }
 
         /* Filter Panel */
@@ -352,8 +586,10 @@
         }
 
         .filter-header h3 {
-            font-size: 1.25rem;
-            color: var(--color-accent-olive);
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 1rem;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(138, 43, 226, 0.3);
         }
 
         .btn-text {
@@ -373,6 +609,49 @@
             margin-bottom: 1.5rem;
         }
 
+        /* Collapsible filter groups using <details> */
+        .filter-collapsible {
+            border: none;
+        }
+
+        .filter-collapsible summary {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+        }
+
+        .filter-collapsible summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .filter-collapsible summary::after {
+            content: '▼';
+            float: right;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .filter-collapsible[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        /* On mobile, collapse filters by default */
+        @media (max-width: 768px) {
+            .filter-collapsible:not([open]) > :not(summary) {
+                display: none;
+            }
+
+            .filter-collapsible summary {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
         .filter-group label {
             display: block;
             font-weight: 500;
@@ -383,9 +662,107 @@
         .form-control {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius-md);
             font-size: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-text);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-accent-rust);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Date Range Slider */
+        .date-range-slider {
+            padding: 1rem;
+            margin: 0 -0.5rem;
+            background: rgba(0, 191, 255, 0.05);
+            border-radius: var(--radius-md);
+            box-shadow:
+                0 0 15px rgba(0, 191, 255, 0.1),
+                inset 0 0 20px rgba(0, 191, 255, 0.03);
+            border: 1px solid rgba(0, 191, 255, 0.15);
+        }
+
+        .date-range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #e0f0ff;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 20px;
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .slider-range {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+            background: rgba(0, 191, 255, 0.5);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
+        }
+
+        .slider-container input[type="range"] {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            pointer-events: none;
+            margin: 0;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00bfff;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+            border: 2px solid #fff;
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #00bfff;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+            border: 2px solid #fff;
+        }
+
+        .slider-container input[type="range"]:focus {
+            outline: none;
+        }
+
+        .slider-container input[type="range"]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
         }
 
         .chip-group {
@@ -396,18 +773,26 @@
 
         .chip {
             padding: 0.5rem 1rem;
-            border: 2px solid #ddd;
-            background: white;
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            background: rgba(0, 191, 255, 0.1);
+            color: #e0f0ff;
             border-radius: 2rem;
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.7rem;
             cursor: pointer;
-            font-size: 0.875rem;
             transition: all 0.2s;
         }
 
+        .chip:hover {
+            border-color: rgba(0, 191, 255, 0.5);
+            background: rgba(0, 191, 255, 0.15);
+        }
+
         .chip.active {
-            border-color: var(--color-accent-rust);
-            background: var(--color-accent-rust);
+            border-color: rgba(0, 191, 255, 0.7);
+            background: rgba(0, 191, 255, 0.25);
             color: white;
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
         }
 
         .checkbox-group {
@@ -420,21 +805,63 @@
             align-items: center;
             gap: 0.5rem;
             font-weight: normal;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid rgba(0, 191, 255, 0.4);
+            border-radius: 3px;
+            background: rgba(0, 191, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked {
+            background: rgba(0, 191, 255, 0.3);
+            border-color: rgba(0, 191, 255, 0.7);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #00ffff;
+            border-radius: 2px;
+        }
+
+        .checkbox-group input[type="checkbox"]:hover {
+            border-color: rgba(0, 191, 255, 0.6);
         }
 
         /* Detail Panel */
         .detail-panel {
             position: fixed;
             right: 0;
-            top: 80px;
+            top: 0;
             width: 600px;
-            height: calc(100vh - 80px);
-            background: var(--color-surface);
-            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            background: rgba(15, 18, 25, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow:
+                -4px 0 20px rgba(0, 0, 0, 0.4),
+                -1px 0 0 rgba(0, 191, 255, 0.15);
             padding: 2rem;
             overflow-y: auto;
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
+        }
+
+        .detail-panel .drag-handle {
+            display: none;
         }
 
         @keyframes slideIn {
@@ -447,38 +874,51 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            border-bottom: 2px solid #eee;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.2);
             padding-bottom: 1rem;
+        }
+
+        .detail-header h3 {
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 1rem;
+            color: #e0f0ff;
+            font-weight: 400;
+            letter-spacing: 0.5px;
         }
 
         .btn-icon {
             background: none;
             border: none;
-            font-size: 2rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--color-text-secondary);
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.2s ease;
         }
 
         .btn-icon:hover {
-            color: var(--color-accent-rust);
+            color: rgba(0, 191, 255, 0.9);
         }
 
         .detail-row {
             display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #f0f0f0;
+            grid-template-columns: 140px 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.1);
         }
 
         .detail-label {
-            font-weight: 600;
-            color: var(--color-text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .detail-value {
-            color: var(--color-text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            color: #e0f0ff;
         }
 
         /* Mobile Responsive */
@@ -491,18 +931,45 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .collision-map {
-                height: 400px;
+            .map-wrapper {
+                min-height: 400px;
             }
 
             .chart-container {
                 height: 250px;
             }
 
+            /* Mobile bottom sheet for detail panel */
             .detail-panel {
                 width: 100%;
-                top: 60px;
-                height: calc(100vh - 60px);
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: auto;
+                max-height: 70vh;
+                border-radius: 1rem 1rem 0 0;
+                animation: slideUp 0.3s ease-out;
+                padding: 1rem 1.5rem 2rem;
+            }
+
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+
+            .detail-panel .detail-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .detail-panel .drag-handle {
+                display: block;
+                width: 40px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 2px;
+                margin: 0 auto 1rem;
             }
 
             .detail-grid {
@@ -600,19 +1067,19 @@
         }
 
         .tooltip-badge.hit-run {
-            background: #e74c3c;
+            background: var(--color-pedestrian);
             color: #fff;
         }
 
         .tooltip-badge.dui {
-            background: #f39c12;
-            color: #fff;
+            background: var(--color-motorcycle);
+            color: #1a1a1a;
         }
 
         .badge-warn {
             display: inline-block;
             padding: 2px 6px;
-            background: #e74c3c;
+            background: var(--color-pedestrian);
             color: #fff;
             border-radius: 3px;
             font-size: 10px;
@@ -620,17 +1087,17 @@
             text-transform: uppercase;
         }
 
-        .tooltip-badge.severity-property_damage { background: #6c757d; color: #fff; }
-        .tooltip-badge.severity-minor_injury { background: #ffc107; color: #000; }
-        .tooltip-badge.severity-severe_injury { background: #fd7e14; color: #fff; }
-        .tooltip-badge.severity-fatal { background: #dc3545; color: #fff; }
-        .tooltip-badge.severity-unknown { background: #6c757d; color: #fff; }
+        .tooltip-badge.severity-property_damage { background: var(--color-severity-property); color: #fff; }
+        .tooltip-badge.severity-minor_injury { background: var(--color-severity-minor); color: #1a1a1a; }
+        .tooltip-badge.severity-severe_injury { background: var(--color-severity-severe); color: #fff; }
+        .tooltip-badge.severity-fatal { background: var(--color-severity-fatal); color: #fff; }
+        .tooltip-badge.severity-unknown { background: var(--color-severity-unknown); color: #fff; }
 
         /* Detail panel sections */
         .detail-section {
             margin-bottom: 1.5rem;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.15);
         }
 
         .detail-section:last-child {
@@ -640,13 +1107,15 @@
         }
 
         .detail-section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--color-accent-olive);
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: rgba(0, 191, 255, 0.8);
             margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            letter-spacing: 0.5px;
         }
 
         .detail-grid {
@@ -660,7 +1129,7 @@
         }
 
         .text-danger {
-            color: #e74c3c !important;
+            color: var(--color-pedestrian) !important;
             font-weight: 600;
         }
 
@@ -724,8 +1193,7 @@
             background: #2a2a2a;
             border-radius: var(--radius-xl);  /* Match map-section border-radius */
             padding: 1.5rem;
-            height: 650px;
-            min-height: 650px;
+            height: 600px;
             overflow: hidden;  /* Ensure table corners are clipped */
         }
 
@@ -844,11 +1312,11 @@
             text-transform: uppercase;
         }
 
-        .severity-property_damage { background: #6c757d; }
-        .severity-minor_injury { background: #ffc107; }
-        .severity-severe_injury { background: #fd7e14; }
-        .severity-fatal { background: #dc3545; }
-        .severity-unknown { background: #6c757d; }
+        .severity-property_damage { background: var(--color-severity-property); }
+        .severity-minor_injury { background: var(--color-severity-minor); color: #1a1a1a; }
+        .severity-severe_injury { background: var(--color-severity-severe); }
+        .severity-fatal { background: var(--color-severity-fatal); }
+        .severity-unknown { background: var(--color-severity-unknown); }
 
         #tableLoadMore {
             padding: 1rem;
@@ -882,29 +1350,65 @@
     <div class="dashboard-container">
         <!-- Dashboard Header -->
         <header class="dashboard-header">
-            <h1>LA Traffic Collisions (2010-2021)</h1>
-            <p class="subtitle">620,659 collision records from LAPD</p>
+            <h1>LA Traffic Collisions (2010-2025)</h1>
+            <p class="subtitle">620,659 collision records from LAPD &bull; <a id="showDataNotes">See data notes</a></p>
         </header>
 
         <!-- KPI Cards Section -->
         <section class="kpi-cards">
             <div class="kpi-card">
-                <div class="kpi-label">Area in View</div>
-                <div class="kpi-value" id="topArea">-</div>
+                <span class="kpi-icon kpi-icon-map" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </span>
+                <div class="kpi-content">
+                    <div class="kpi-label">Area in View</div>
+                    <div class="kpi-value" id="topArea">-</div>
+                </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Collision Type</div>
-                <div class="kpi-value" id="topCollisionType">-</div>
+                <span class="kpi-icon kpi-icon-type" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                </span>
+                <div class="kpi-content">
+                    <div class="kpi-label">Collision Type</div>
+                    <div class="kpi-value" id="topCollisionType">-</div>
+                </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Peak Hour</div>
-                <div class="kpi-value" id="viewportPeakHour">-</div>
+                <span class="kpi-icon kpi-icon-time" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </span>
+                <div class="kpi-content">
+                    <div class="kpi-label">Peak Hour</div>
+                    <div class="kpi-value" id="viewportPeakHour">-</div>
+                </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Severity</div>
-                <div class="kpi-value" id="topSeverity">-</div>
+                <span class="kpi-icon kpi-icon-severity" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </span>
+                <div class="kpi-content">
+                    <div class="kpi-label">Severity</div>
+                    <div class="kpi-value" id="topSeverity">-</div>
+                </div>
             </div>
         </section>
+
 
         <!-- Main Dashboard Grid -->
         <div class="dashboard-grid">
@@ -912,18 +1416,20 @@
             <section class="map-section">
                 <div class="section-header">
                     <h2>Collision Map</h2>
-                    <div class="map-controls">
-                        <button id="colorByType" class="btn-secondary active">By Collision Type</button>
-                        <button id="colorByTime" class="btn-secondary">By Time of Day</button>
+                    <div class="map-controls" role="group" aria-label="Map color scheme">
+                        <button id="colorByType" class="btn-secondary active" aria-pressed="true">By Collision Type</button>
+                        <button id="colorByTime" class="btn-secondary" aria-pressed="false">By Time of Day</button>
                     </div>
                 </div>
-                <div id="map" class="collision-map"></div>
-                <div class="map-legend" id="mapLegend">
-                    <!-- Populated by JavaScript -->
-                </div>
-                <div class="map-stats">
-                    <span id="visibleCollisions">0</span> collisions in view
-                    <span id="samplingIndicator" style="display:none;"></span>
+                <div class="map-wrapper">
+                    <div id="map" class="collision-map" role="application" aria-label="Interactive collision map"></div>
+                    <div class="map-stats-overlay">
+                        <span id="visibleCollisions" aria-live="polite" aria-atomic="true">0</span> collisions in view
+                        <span id="samplingIndicator" style="display:none;"></span>
+                    </div>
+                    <div class="map-legend" id="mapLegend">
+                        <!-- Populated by JavaScript -->
+                    </div>
                 </div>
             </section>
 
@@ -934,7 +1440,6 @@
                         <h2>Collisions in View</h2>
                         <span id="tableCount" class="table-count">0 collisions</span>
                     </div>
-                    <button id="exportCSV" class="btn-secondary">Export CSV</button>
                 </div>
                 <div class="table-container-fixed">
                     <table id="collisionsTable" class="collisions-table">
@@ -1005,117 +1510,264 @@
         </section>
 
         <!-- Filter Panel -->
-        <aside id="filterPanel" class="filter-panel">
+        <aside id="filterPanel" class="filter-panel" role="region" aria-label="Filter controls">
             <div class="filter-header">
                 <h3>Filters</h3>
-                <button id="resetFilters" class="btn-text">Reset All</button>
+                <button id="resetFilters" class="btn-control">Reset All</button>
             </div>
 
             <!-- Time of Day Filter -->
-            <div class="filter-group">
-                <label>Time of Day</label>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Time of Day</summary>
                 <div class="chip-group" id="timeFilters">
-                    <button class="chip active" data-bucket="AM_PEAK">AM Peak</button>
-                    <button class="chip active" data-bucket="MIDDAY">Midday</button>
-                    <button class="chip active" data-bucket="PM_PEAK">PM Peak</button>
-                    <button class="chip active" data-bucket="EVENING">Evening</button>
-                    <button class="chip active" data-bucket="LATE_NIGHT">Late Night</button>
-                    <button class="chip active" data-bucket="EARLY_MORNING">Early AM</button>
+                    <button class="chip active" data-bucket="AM_PEAK" role="checkbox" aria-checked="true">AM Peak</button>
+                    <button class="chip active" data-bucket="MIDDAY" role="checkbox" aria-checked="true">Midday</button>
+                    <button class="chip active" data-bucket="PM_PEAK" role="checkbox" aria-checked="true">PM Peak</button>
+                    <button class="chip active" data-bucket="EVENING" role="checkbox" aria-checked="true">Evening</button>
+                    <button class="chip active" data-bucket="LATE_NIGHT" role="checkbox" aria-checked="true">Late Night</button>
+                    <button class="chip active" data-bucket="EARLY_MORNING" role="checkbox" aria-checked="true">Early AM</button>
                 </div>
-            </div>
+            </details>
 
             <!-- Day of Week Filter -->
-            <div class="filter-group">
-                <label>Days of Week</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="filterWeekday" checked> Weekdays</label>
-                    <label><input type="checkbox" id="filterWeekend" checked> Weekends</label>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Days of Week</summary>
+                <div class="chip-group" id="dayFilters">
+                    <button class="chip active" data-day="weekday" role="checkbox" aria-checked="true">Weekdays</button>
+                    <button class="chip active" data-day="weekend" role="checkbox" aria-checked="true">Weekends</button>
                 </div>
-            </div>
+            </details>
 
             <!-- Collision Type Filter -->
-            <div class="filter-group">
-                <label>Collision Type</label>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Collision Type</summary>
                 <div class="chip-group" id="collisionTypeFilters">
-                    <button class="chip active" data-type="vehicle-to-vehicle">Vehicle-Vehicle</button>
-                    <button class="chip active" data-type="vehicle-pedestrian">Pedestrian</button>
-                    <button class="chip active" data-type="vehicle-motorcycle">Motorcycle</button>
-                    <button class="chip active" data-type="vehicle-bicycle">Bicycle</button>
-                    <button class="chip active" data-type="other">Other</button>
+                    <button class="chip active" data-type="vehicle-to-vehicle" role="checkbox" aria-checked="true">Vehicle-Vehicle</button>
+                    <button class="chip active" data-type="vehicle-pedestrian" role="checkbox" aria-checked="true">Pedestrian</button>
+                    <button class="chip active" data-type="vehicle-motorcycle" role="checkbox" aria-checked="true">Motorcycle</button>
+                    <button class="chip active" data-type="vehicle-bicycle" role="checkbox" aria-checked="true">Bicycle</button>
+                    <button class="chip active" data-type="other" role="checkbox" aria-checked="true">Other</button>
                 </div>
-            </div>
+            </details>
 
             <!-- Severity Filter -->
-            <div class="filter-group">
-                <label>Severity Level</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="filterPropertyDamage" checked> Property Damage Only</label>
-                    <label><input type="checkbox" id="filterMinorInjury" checked> Minor Injury</label>
-                    <label><input type="checkbox" id="filterSevereInjury" checked> Severe Injury</label>
-                    <label><input type="checkbox" id="filterFatal" checked> Fatalities</label>
-                    <label><input type="checkbox" id="filterUnknown" checked> Unknown</label>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Severity Level</summary>
+                <div class="chip-group" id="severityFilters">
+                    <button class="chip active" data-severity="property_damage" role="checkbox" aria-checked="true">Property Damage</button>
+                    <button class="chip active" data-severity="minor_injury" role="checkbox" aria-checked="true">Minor Injury</button>
+                    <button class="chip active" data-severity="severe_injury" role="checkbox" aria-checked="true">Severe Injury</button>
+                    <button class="chip active" data-severity="unknown" role="checkbox" aria-checked="true">Unknown</button>
                 </div>
-            </div>
+            </details>
 
             <!-- Special Circumstances -->
-            <div class="filter-group">
-                <label>Special Circumstances</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="filterHitAndRun"> Hit & Run Only</label>
-                    <label><input type="checkbox" id="filterDUI"> DUI-Related Only</label>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Special Circumstances</summary>
+                <div class="chip-group" id="specialFilters">
+                    <button class="chip" data-special="hit_and_run" role="checkbox" aria-checked="false">Hit & Run</button>
+                    <button class="chip" data-special="dui" role="checkbox" aria-checked="false">DUI-Related</button>
                 </div>
-            </div>
+            </details>
 
             <!-- Date Range Filter -->
-            <div class="filter-group">
-                <label>Date Range</label>
-                <input type="date" id="dateStart" class="form-control" min="2010-01-01" max="2021-12-31">
-                <input type="date" id="dateEnd" class="form-control" min="2010-01-01" max="2021-12-31" style="margin-top: 0.5rem;">
-            </div>
+            <details class="filter-group filter-collapsible" open>
+                <summary>Date Range</summary>
+                <div class="date-range-slider">
+                    <div class="date-range-labels">
+                        <span id="dateStartLabel">Jan 2010</span>
+                        <span id="dateEndLabel">Mar 2025</span>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-track"></div>
+                        <div class="slider-range" id="sliderRange"></div>
+                        <input type="range" id="dateStartSlider" min="0" max="182" value="0" aria-label="Start date">
+                        <input type="range" id="dateEndSlider" min="0" max="182" value="182" aria-label="End date">
+                    </div>
+                </div>
+            </details>
         </aside>
 
-        <!-- Collision Detail Panel -->
-        <aside id="detailPanel" class="detail-panel" style="display:none;">
-            <div class="detail-header">
-                <h3>Collision Details</h3>
-                <button id="closeDetail" class="btn-icon">&times;</button>
+        <!-- Data Quality Banner -->
+        <aside class="data-quality-banner" id="dataQualityBanner">
+            <div class="data-quality-header" id="dataQualityHeader">
+                <span class="data-quality-title">
+                    <span class="data-quality-icon">&#9888;</span>
+                    Data Quality &amp; Methodology Notes
+                </span>
+                <button class="data-quality-toggle" aria-label="Toggle data notes">&#9660;</button>
             </div>
-            <div class="detail-content" id="detailContent"></div>
+            <div class="data-quality-content">
+                <h4>Severity Classification</h4>
+                <ul>
+                    <li><strong>No fatality data available:</strong> LAPD MO codes do not reliably indicate fatal collisions. Records are classified as severe injury, minor injury, property damage, or unknown.</li>
+                    <li><strong>Severity categories:</strong> Based on injury codes (40xx series) - "Severe" includes incapacitating/visible injuries; "Minor" includes complaint of pain.</li>
+                    <li><strong>~37% marked "Unknown":</strong> Records without clear injury indicator codes in their MO data.</li>
+                </ul>
+
+                <h4>Data Coverage</h4>
+                <ul>
+                    <li><strong>Date range:</strong> January 2010 - March 2025 (latest available)</li>
+                    <li><strong>2020-2021 drop:</strong> Sharp decline in reported collisions coincides with COVID-19 pandemic reduced traffic.</li>
+                    <li><strong>2021+ partial data:</strong> Years 2022-2025 show reduced record counts; may reflect ongoing data collection delays.</li>
+                </ul>
+
+                <h4>Collision Types</h4>
+                <ul>
+                    <li><strong>Bicycle collisions (43%):</strong> Higher than national average (~2%) - this reflects LAPD's classification methodology, not actual collision distribution.</li>
+                    <li><strong>Classification method:</strong> Based on MO codes indicating vehicle/pedestrian/bicycle/motorcycle involvement.</li>
+                </ul>
+
+                <p><strong>Source:</strong> LAPD Traffic Collision Data via LA Open Data Portal. Last updated March 2025.</p>
+            </div>
         </aside>
 
     </div>
 
+    <!-- Collision Detail Panel (outside dashboard-container for proper fixed positioning) -->
+    <aside id="detailPanel" class="detail-panel" style="display:none;" role="dialog" aria-label="Collision Details">
+        <div class="drag-handle" aria-hidden="true"></div>
+        <div class="detail-header">
+            <h3>Collision Details</h3>
+            <button id="closeDetail" class="btn-icon" aria-label="Close details">&times;</button>
+        </div>
+        <div class="detail-content" id="detailContent"></div>
+    </aside>
+
     <!-- JavaScript -->
     <script>
+        /**
+         * LRU (Least Recently Used) Cache for tile management
+         * Prevents unbounded memory growth during extended panning
+         */
+        class LRUCache {
+            constructor(maxSize = 100) {
+                this.maxSize = maxSize;
+                this.cache = new Map();
+            }
+
+            has(key) {
+                return this.cache.has(key);
+            }
+
+            get(key) {
+                if (!this.cache.has(key)) return undefined;
+
+                // Move to end (most recently used)
+                const value = this.cache.get(key);
+                this.cache.delete(key);
+                this.cache.set(key, value);
+                return value;
+            }
+
+            set(key, value) {
+                // If key exists, delete it first to update position
+                if (this.cache.has(key)) {
+                    this.cache.delete(key);
+                }
+
+                // Evict oldest entries if at capacity
+                while (this.cache.size >= this.maxSize) {
+                    const oldestKey = this.cache.keys().next().value;
+                    this.cache.delete(oldestKey);
+                }
+
+                this.cache.set(key, value);
+            }
+
+            values() {
+                return this.cache.values();
+            }
+
+            size() {
+                return this.cache.size;
+            }
+
+            clear() {
+                this.cache.clear();
+            }
+        }
+
+        /**
+         * Dashboard configuration constants
+         * Centralized to avoid magic numbers throughout the codebase
+         */
+        const CONFIG = {
+            // Tile system
+            TILE_SIZE: 0.02,                    // Degrees (~2km x 2km tiles)
+            MAX_TILE_CACHE: 100,                // Max tiles in LRU cache (~200MB)
+
+            // Rendering
+            MAX_POINTS_TO_RENDER: 50000,        // Sample limit for performance
+            DEBOUNCE_DELAY: 200,                // ms for map updates
+            TABLE_DEBOUNCE_DELAY: 500,          // ms for table updates
+
+            // Network
+            MAX_RETRIES: 3,                     // Tile fetch retry attempts
+            RETRY_BASE_DELAY: 500,              // ms base for exponential backoff
+
+            // Map settings
+            DEFAULT_CENTER: [-118.4, 34.05],    // Downtown LA
+            DEFAULT_ZOOM: 10,
+            MAX_ZOOM: 18,
+
+            // Jitter (for overlapping points)
+            JITTER_RADIUS: 0.0001,              // ~11 meters in degrees at LA latitude
+
+            // Colors - unified muted palette for dark theme
+            COLORS: {
+                collisionType: {
+                    'vehicle-to-vehicle': '#4a90d9',
+                    'vehicle-pedestrian': '#e05d5d',
+                    'vehicle-motorcycle': '#f0a040',
+                    'vehicle-bicycle': '#50b080',
+                    'other': '#8090a0'
+                },
+                severity: {
+                    'property_damage': '#6b7c8d',
+                    'minor_injury': '#f4a940',
+                    'severe_injury': '#e05d5d',
+                    'unknown': '#8090a0'
+                }
+            },
+
+            // Default filter state
+            DEFAULT_FILTERS: {
+                dateStart: null,
+                dateEnd: null,
+                timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
+                weekday: true,
+                weekend: true,
+                collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'],
+                severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'unknown'],
+                showHitAndRun: false,
+                showDUI: false
+            },
+
+            // Date slider configuration
+            DATE_SLIDER: {
+                startYear: 2010,
+                startMonth: 1,   // January
+                endYear: 2025,
+                endMonth: 3,     // March
+                totalMonths: 183 // (2025-2010)*12 + 3 = 183 months, index 0-182
+            }
+        };
+
         class LACollisionDashboard {
             constructor() {
                 // State
                 this.overview = null;
                 this.manifest = null;
-                this.loadedTiles = new Map();
+                this.loadedTiles = new LRUCache(CONFIG.MAX_TILE_CACHE);
                 this.spatialIndex = null;
-                this.activeColorScheme = 'collision_type'; // or 'time_bucket'
-                this.activeFilters = {
-                    dateStart: null,
-                    dateEnd: null,
-                    timeBuckets: ['AM_PEAK', 'MIDDAY', 'PM_PEAK', 'EVENING', 'LATE_NIGHT', 'EARLY_MORNING'],
-                    weekday: true,
-                    weekend: true,
-                    collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'],
-                    severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal', 'unknown'],
-                    showHitAndRun: false,
-                    showDUI: false
-                };
+                this.activeColorScheme = 'collision_type';
+                this.activeFilters = { ...CONFIG.DEFAULT_FILTERS };
                 this.map = null;
-                this.selectedCollisionId = null; // Track selected collision for highlighting
+                this.selectedCollisionId = null;
                 this.charts = {};
-                this.chartDataScope = 'viewport'; // 'viewport' or 'all'
-                this.chartDisplayMode = 'stacked'; // 'stacked', 'grouped', or 'total'
-
-                // Config
-                this.tileSize = 0.02;
-                this.maxPointsToRender = 50000;
-                this.debounceDelay = 200;
+                this.chartDataScope = 'viewport';
+                this.chartDisplayMode = 'stacked';
 
                 this.init();
             }
@@ -1155,6 +1807,34 @@
                 })));
             }
 
+            // Convert month index (0-182) to date string "YYYY-MM-01"
+            monthIndexToDate(index) {
+                const year = CONFIG.DATE_SLIDER.startYear + Math.floor(index / 12);
+                const month = (index % 12) + 1;
+                return `${year}-${String(month).padStart(2, '0')}-01`;
+            }
+
+            // Convert month index to display label "Mon YYYY"
+            monthIndexToLabel(index) {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const year = CONFIG.DATE_SLIDER.startYear + Math.floor(index / 12);
+                const month = index % 12;
+                return `${months[month]} ${year}`;
+            }
+
+            // Update slider range highlight bar position
+            updateSliderRange() {
+                const startSlider = document.getElementById('dateStartSlider');
+                const endSlider = document.getElementById('dateEndSlider');
+                const range = document.getElementById('sliderRange');
+                const max = parseInt(startSlider.max);
+                const startPercent = (parseInt(startSlider.value) / max) * 100;
+                const endPercent = (parseInt(endSlider.value) / max) * 100;
+                range.style.left = startPercent + '%';
+                range.style.width = (endPercent - startPercent) + '%';
+            }
+
             initMap() {
                 this.map = new maplibregl.Map({
                     container: 'map',
@@ -1174,9 +1854,9 @@
                             source: 'osm'
                         }]
                     },
-                    center: [-118.4, 34.05],
-                    zoom: 10,
-                    maxZoom: 18  // Prevent zoom beyond OSM tile availability
+                    center: CONFIG.DEFAULT_CENTER,
+                    zoom: CONFIG.DEFAULT_ZOOM,
+                    maxZoom: CONFIG.MAX_ZOOM
                 });
 
                 this.map.on('load', () => {
@@ -1236,12 +1916,15 @@
                             ],
 
                             // Progressive opacity - only bright areas very visible
+                            // Gradual opacity fade (smooth transition instead of abrupt at zoom 13)
                             'heatmap-opacity': [
                                 'interpolate', ['linear'], ['zoom'],
-                                9, 0.7,   // Lower base opacity for layering
-                                11, 0.55,
-                                12, 0.35,
-                                13, 0
+                                9, 0.75,   // Full visibility at low zoom
+                                11, 0.6,
+                                12, 0.45,
+                                13, 0.25,  // Still visible, fading
+                                14, 0.1,   // Nearly transparent
+                                15, 0      // Fully transparent, scatter plot takes over
                             ]
                         }
                     });
@@ -1296,29 +1979,36 @@
                         paint: {
                             'circle-radius': [
                                 'interpolate', ['linear'], ['zoom'],
-                                9, 1.5,
-                                10, 3.5,
-                                13, 5,
+                                9, 3,
+                                10, 5,
+                                13, 6,
                                 15, 7
+                            ],
+                            'circle-blur': [
+                                'interpolate', ['linear'], ['zoom'],
+                                10, 0.8,    // High blur at low zoom (cloud effect)
+                                13, 0.4,    // Medium blur
+                                15, 0.1     // Low blur at high zoom (individual points visible)
                             ],
                             'circle-color': [
                                 'case',
-                                ['==', ['get', 'collision_type'], null], '#bdc3c7',
+                                ['==', ['get', 'collision_type'], null], '#8090a0',
                                 [
                                     'match',
                                     ['get', 'collision_type'],
-                                    'vehicle-to-vehicle', '#3498db',
-                                    'vehicle-pedestrian', '#e74c3c',
-                                    'vehicle-motorcycle', '#f39c12',
-                                    'vehicle-bicycle', '#2ecc71',
-                                    'other', '#95a5a6',
-                                    '#bdc3c7'
+                                    'vehicle-to-vehicle', '#4a90d9',
+                                    'vehicle-pedestrian', '#e05d5d',
+                                    'vehicle-motorcycle', '#f0a040',
+                                    'vehicle-bicycle', '#50b080',
+                                    'other', '#8090a0',
+                                    '#8090a0'
                                 ]
                             ],
                             'circle-opacity': [
                                 'interpolate', ['linear'], ['zoom'],
-                                11, 0,      // Invisible at low zoom (heatmap visible)
-                                12, 0.1,    // Barely visible
+                                10, 0.4,    // Start visible with cloud effect
+                                11, 0.5,    // Slightly more visible
+                                12, 0.55,   // Transition zone
                                 13, [       // At zoom 13+: check if selected
                                     'case',
                                     ['boolean', ['feature-state', 'selected'], false],
@@ -1369,26 +2059,14 @@
                             'circle-stroke-width': [
                                 'case',
                                 ['boolean', ['feature-state', 'selected'], false],
-                                5,  // 5px thick stroke when selected (was 3px)
-                                [
-                                    'interpolate', ['linear'],
-                                    ['coalesce', ['get', '_density'], 1],
-                                    1, 0.3,      // Thin stroke for single collisions
-                                    5, 0.6,      // Medium stroke for moderate density
-                                    10, 1.0      // Thick stroke for high density
-                                ]
+                                3,  // Keep stroke only for selected points
+                                0   // No stroke for unselected points
                             ],
                             'circle-stroke-opacity': [
                                 'case',
                                 ['boolean', ['feature-state', 'selected'], false],
                                 1.0,  // Full opacity when selected
-                                [
-                                    'interpolate', ['linear'],
-                                    ['coalesce', ['get', '_density'], 1],
-                                    1, 0.2,
-                                    5, 0.5,
-                                    10, 0.7
-                                ]
+                                0     // No stroke opacity for unselected
                             ]
                         }
                     });
@@ -1423,8 +2101,8 @@
                 });
 
                 // Map updates quickly (200ms)
-                this.map.on('moveend', this.debounce(() => this.updateMapData(), this.debounceDelay));
-                this.map.on('zoomend', this.debounce(() => this.updateMapData(), this.debounceDelay));
+                this.map.on('moveend', this.debounce(() => this.updateMapData(), CONFIG.DEBOUNCE_DELAY));
+                this.map.on('zoomend', this.debounce(() => this.updateMapData(), CONFIG.DEBOUNCE_DELAY));
 
                 // Table updates more slowly (500ms) - separate debounce for better performance
                 this.map.on('moveend', this.debounce(() => {
@@ -1550,6 +2228,132 @@
                 return baseRadius;
             }
 
+            /**
+             * Filter by hour - called when clicking on hour chart bar
+             */
+            filterByHour(hour) {
+                // Map hour to time bucket
+                const timeBucketMap = {
+                    0: 'EARLY_MORNING', 1: 'EARLY_MORNING', 2: 'EARLY_MORNING',
+                    3: 'EARLY_MORNING', 4: 'EARLY_MORNING', 5: 'EARLY_MORNING',
+                    6: 'AM_PEAK', 7: 'AM_PEAK', 8: 'AM_PEAK', 9: 'AM_PEAK',
+                    10: 'MIDDAY', 11: 'MIDDAY', 12: 'MIDDAY', 13: 'MIDDAY', 14: 'MIDDAY',
+                    15: 'PM_PEAK', 16: 'PM_PEAK', 17: 'PM_PEAK', 18: 'PM_PEAK',
+                    19: 'EVENING', 20: 'EVENING', 21: 'EVENING',
+                    22: 'LATE_NIGHT', 23: 'LATE_NIGHT'
+                };
+
+                const bucket = timeBucketMap[hour];
+
+                // Update UI chips
+                document.querySelectorAll('#timeFilters .chip').forEach(chip => {
+                    const isMatch = chip.dataset.bucket === bucket;
+                    chip.classList.toggle('active', isMatch);
+                    chip.setAttribute('aria-checked', isMatch);
+                });
+
+                // Update filter state
+                this.activeFilters.timeBuckets = [bucket];
+                this.updateMapData();
+
+                // Show toast notification
+                this.showFilterToast(`Filtered to ${this.formatTimeBucketLabel(bucket)}`);
+            }
+
+            /**
+             * Filter by day of week - called when clicking on dow chart bar
+             */
+            filterByDayOfWeek(dayIndex) {
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const isWeekend = dayIndex === 0 || dayIndex === 6;
+
+                // Update chip UI
+                const weekdayChip = document.querySelector('#dayFilters .chip[data-day="weekday"]');
+                const weekendChip = document.querySelector('#dayFilters .chip[data-day="weekend"]');
+
+                if (isWeekend) {
+                    weekdayChip.classList.remove('active');
+                    weekdayChip.setAttribute('aria-checked', 'false');
+                    weekendChip.classList.add('active');
+                    weekendChip.setAttribute('aria-checked', 'true');
+                } else {
+                    weekdayChip.classList.add('active');
+                    weekdayChip.setAttribute('aria-checked', 'true');
+                    weekendChip.classList.remove('active');
+                    weekendChip.setAttribute('aria-checked', 'false');
+                }
+
+                // Update filter state
+                this.activeFilters.weekday = !isWeekend;
+                this.activeFilters.weekend = isWeekend;
+                this.updateMapData();
+
+                // Show toast notification
+                this.showFilterToast(`Filtered to ${dayNames[dayIndex]}s (${isWeekend ? 'weekends' : 'weekdays'})`);
+            }
+
+            /**
+             * Format time bucket for display
+             */
+            formatTimeBucketLabel(bucket) {
+                const labels = {
+                    'EARLY_MORNING': 'Early Morning (12am-6am)',
+                    'AM_PEAK': 'AM Peak (6am-10am)',
+                    'MIDDAY': 'Midday (10am-3pm)',
+                    'PM_PEAK': 'PM Peak (3pm-7pm)',
+                    'EVENING': 'Evening (7pm-10pm)',
+                    'LATE_NIGHT': 'Late Night (10pm-12am)'
+                };
+                return labels[bucket] || bucket;
+            }
+
+            /**
+             * Show toast notification for filter changes
+             */
+            showFilterToast(message) {
+                const existing = document.getElementById('filterToast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.id = 'filterToast';
+                toast.setAttribute('role', 'status');
+                toast.setAttribute('aria-live', 'polite');
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(var(--color-accent-olive-rgb, 85, 107, 47), 0.95);
+                    background: #556b2f;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    animation: slideUpToast 0.3s ease-out;
+                `;
+                toast.textContent = message;
+
+                // Add animation keyframes if not present
+                if (!document.getElementById('toastStyles')) {
+                    const style = document.createElement('style');
+                    style.id = 'toastStyles';
+                    style.textContent = `
+                        @keyframes slideUpToast {
+                            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+                            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                document.body.appendChild(toast);
+
+                // Auto-dismiss after 3 seconds
+                setTimeout(() => toast.remove(), 3000);
+            }
+
             async updateMapData() {
                 if (!this.map || !this.map.getSource('collisions')) return;
 
@@ -1617,7 +2421,7 @@
                     }
                 });
 
-                const sampledData = this.sampleData(visibleData, this.maxPointsToRender);
+                const sampledData = this.sampleData(visibleData, CONFIG.MAX_POINTS_TO_RENDER);
 
                 this.map.getSource('collisions').setData({
                     type: 'FeatureCollection',
@@ -1655,18 +2459,72 @@
                 // Table update moved to separate debounced event (500ms) for better performance
             }
 
+            /**
+             * Load tiles with retry logic and exponential backoff
+             */
             async loadTiles(tileFilenames) {
-                const tilePromises = tileFilenames.map(async (filename) => {
+                const MAX_RETRIES = 3;
+                const BASE_DELAY = 500; // ms
+                let failedTiles = [];
+
+                const loadTileWithRetry = async (filename, attempt = 1) => {
                     try {
                         const response = await fetch(`../assets/collisions/tiles/${filename}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
                         const geojson = await response.json();
                         this.loadedTiles.set(filename, geojson);
+                        return true;
                     } catch (error) {
-                        console.error(`Failed to load tile ${filename}:`, error);
+                        if (attempt < MAX_RETRIES) {
+                            // Exponential backoff: 500ms, 1000ms, 2000ms
+                            const delay = BASE_DELAY * Math.pow(2, attempt - 1);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return loadTileWithRetry(filename, attempt + 1);
+                        }
+                        console.error(`Failed to load tile ${filename} after ${MAX_RETRIES} attempts:`, error);
+                        failedTiles.push(filename);
+                        return false;
                     }
-                });
+                };
 
+                const tilePromises = tileFilenames.map(filename => loadTileWithRetry(filename));
                 await Promise.all(tilePromises);
+
+                // Show user feedback if tiles failed to load
+                if (failedTiles.length > 0) {
+                    this.showTileLoadError(failedTiles.length);
+                }
+            }
+
+            /**
+             * Display temporary error message for failed tile loads
+             */
+            showTileLoadError(count) {
+                const existing = document.getElementById('tileLoadError');
+                if (existing) existing.remove();
+
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'tileLoadError';
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(220, 53, 69, 0.95);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                `;
+                errorDiv.textContent = `${count} tile${count > 1 ? 's' : ''} failed to load. Some collision data may be missing.`;
+                document.body.appendChild(errorDiv);
+
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => errorDiv.remove(), 5000);
             }
 
             getFilteredData(viewport) {
@@ -1847,6 +2705,12 @@
                                     padding: 8
                                 }
                             }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                this.filterByHour(index);
+                            }
                         }
                     }
                 });
@@ -1912,6 +2776,12 @@
                                     font: { size: 10 },
                                     padding: 8
                                 }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                this.filterByDayOfWeek(index);
                             }
                         }
                     }
@@ -2256,10 +3126,9 @@
             formatSeverity(severity) {
                 if (!severity) return 'Unknown';
                 const severityMap = {
-                    'property_damage': 'Property Damage',
+                    'property_damage': 'Property Dmg',
                     'minor_injury': 'Minor Injury',
                     'severe_injury': 'Severe Injury',
-                    'fatal': 'Fatal',
                     'unknown': 'Unknown'
                 };
                 return severityMap[severity] || 'Unknown';
@@ -2274,30 +3143,75 @@
             }
 
             attachEventListeners() {
+                // Data quality banner toggle
+                const banner = document.getElementById('dataQualityBanner');
+                const bannerHeader = document.getElementById('dataQualityHeader');
+                const showDataNotes = document.getElementById('showDataNotes');
+
+                bannerHeader.addEventListener('click', () => {
+                    banner.classList.toggle('expanded');
+                });
+
+                showDataNotes.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    banner.classList.add('expanded');
+                    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+
                 // Color scheme toggle
                 document.getElementById('colorByType').addEventListener('click', () => {
                     this.activeColorScheme = 'collision_type';
                     this.updateMapColors();
                     document.getElementById('colorByType').classList.add('active');
+                    document.getElementById('colorByType').setAttribute('aria-pressed', 'true');
                     document.getElementById('colorByTime').classList.remove('active');
+                    document.getElementById('colorByTime').setAttribute('aria-pressed', 'false');
                 });
 
                 document.getElementById('colorByTime').addEventListener('click', () => {
                     this.activeColorScheme = 'time_bucket';
                     this.updateMapColors();
                     document.getElementById('colorByTime').classList.add('active');
+                    document.getElementById('colorByTime').setAttribute('aria-pressed', 'true');
                     document.getElementById('colorByType').classList.remove('active');
+                    document.getElementById('colorByType').setAttribute('aria-pressed', 'false');
                 });
 
-                document.getElementById('dateStart').addEventListener('change', (e) => {
-                    this.activeFilters.dateStart = e.target.value;
+                // Date range slider
+                const startSlider = document.getElementById('dateStartSlider');
+                const endSlider = document.getElementById('dateEndSlider');
+
+                startSlider.addEventListener('input', (e) => {
+                    const startVal = parseInt(e.target.value);
+                    const endVal = parseInt(endSlider.value);
+                    // Prevent crossing
+                    if (startVal > endVal) {
+                        e.target.value = endVal;
+                        return;
+                    }
+                    document.getElementById('dateStartLabel').textContent = this.monthIndexToLabel(startVal);
+                    this.activeFilters.dateStart = startVal === 0 ? null : this.monthIndexToDate(startVal);
+                    this.updateSliderRange();
                     this.updateMapData();
                 });
 
-                document.getElementById('dateEnd').addEventListener('change', (e) => {
-                    this.activeFilters.dateEnd = e.target.value;
+                endSlider.addEventListener('input', (e) => {
+                    const endVal = parseInt(e.target.value);
+                    const startVal = parseInt(startSlider.value);
+                    // Prevent crossing
+                    if (endVal < startVal) {
+                        e.target.value = startVal;
+                        return;
+                    }
+                    document.getElementById('dateEndLabel').textContent = this.monthIndexToLabel(endVal);
+                    const maxIndex = CONFIG.DATE_SLIDER.totalMonths - 1;
+                    this.activeFilters.dateEnd = endVal === maxIndex ? null : this.monthIndexToDate(endVal + 1);
+                    this.updateSliderRange();
                     this.updateMapData();
                 });
+
+                // Initialize slider range highlight
+                this.updateSliderRange();
 
                 // Time of Day filter chips
                 document.querySelectorAll('#timeFilters .chip').forEach(chip => {
@@ -2321,45 +3235,41 @@
                     });
                 });
 
-                document.getElementById('filterWeekday').addEventListener('change', (e) => {
-                    this.activeFilters.weekday = e.target.checked;
-                    this.updateMapData();
-                });
-
-                document.getElementById('filterWeekend').addEventListener('change', (e) => {
-                    this.activeFilters.weekend = e.target.checked;
-                    this.updateMapData();
-                });
-
-                // Severity checkboxes
-                ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal', 'Unknown'].forEach(severity => {
-                    const checkbox = document.getElementById(`filter${severity}`);
-                    checkbox.addEventListener('change', () => {
-                        const severityMap = {
-                            'PropertyDamage': 'property_damage',
-                            'MinorInjury': 'minor_injury',
-                            'SevereInjury': 'severe_injury',
-                            'Fatal': 'fatal',
-                            'Unknown': 'unknown'
-                        };
-
-                        this.activeFilters.severityLevels = ['PropertyDamage', 'MinorInjury', 'SevereInjury', 'Fatal', 'Unknown']
-                            .filter(s => document.getElementById(`filter${s}`).checked)
-                            .map(s => severityMap[s]);
-
+                // Days of Week filter chips
+                document.querySelectorAll('#dayFilters .chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.target.classList.toggle('active');
+                        const isActive = e.target.classList.contains('active');
+                        e.target.setAttribute('aria-checked', isActive);
+                        this.activeFilters.weekday = document.querySelector('#dayFilters .chip[data-day="weekday"]').classList.contains('active');
+                        this.activeFilters.weekend = document.querySelector('#dayFilters .chip[data-day="weekend"]').classList.contains('active');
                         this.updateMapData();
                     });
                 });
 
-                // Special circumstances toggles
-                document.getElementById('filterHitAndRun').addEventListener('change', (e) => {
-                    this.activeFilters.showHitAndRun = e.target.checked;
-                    this.updateMapData();
+                // Severity filter chips
+                document.querySelectorAll('#severityFilters .chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.target.classList.toggle('active');
+                        const isActive = e.target.classList.contains('active');
+                        e.target.setAttribute('aria-checked', isActive);
+                        this.activeFilters.severityLevels = Array.from(
+                            document.querySelectorAll('#severityFilters .chip.active')
+                        ).map(c => c.dataset.severity);
+                        this.updateMapData();
+                    });
                 });
 
-                document.getElementById('filterDUI').addEventListener('change', (e) => {
-                    this.activeFilters.showDUI = e.target.checked;
-                    this.updateMapData();
+                // Special circumstances filter chips
+                document.querySelectorAll('#specialFilters .chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.target.classList.toggle('active');
+                        const isActive = e.target.classList.contains('active');
+                        e.target.setAttribute('aria-checked', isActive);
+                        this.activeFilters.showHitAndRun = document.querySelector('#specialFilters .chip[data-special="hit_and_run"]').classList.contains('active');
+                        this.activeFilters.showDUI = document.querySelector('#specialFilters .chip[data-special="dui"]').classList.contains('active');
+                        this.updateMapData();
+                    });
                 });
 
                 document.getElementById('resetFilters').addEventListener('click', () => {
@@ -2370,22 +3280,26 @@
                         weekday: true,
                         weekend: true,
                         collisionTypes: ['vehicle-to-vehicle', 'vehicle-pedestrian', 'vehicle-motorcycle', 'vehicle-bicycle', 'other'],
-                        severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'fatal', 'unknown'],
+                        severityLevels: ['property_damage', 'minor_injury', 'severe_injury', 'unknown'],
                         showHitAndRun: false,
                         showDUI: false
                     };
-                    document.getElementById('dateStart').value = '';
-                    document.getElementById('dateEnd').value = '';
-                    document.querySelectorAll('.chip').forEach(c => c.classList.add('active'));
-                    document.getElementById('filterWeekday').checked = true;
-                    document.getElementById('filterWeekend').checked = true;
-                    document.getElementById('filterPropertyDamage').checked = true;
-                    document.getElementById('filterMinorInjury').checked = true;
-                    document.getElementById('filterSevereInjury').checked = true;
-                    document.getElementById('filterFatal').checked = true;
-                    document.getElementById('filterUnknown').checked = true;
-                    document.getElementById('filterHitAndRun').checked = false;
-                    document.getElementById('filterDUI').checked = false;
+                    // Reset date slider
+                    document.getElementById('dateStartSlider').value = 0;
+                    document.getElementById('dateEndSlider').value = 182;
+                    document.getElementById('dateStartLabel').textContent = 'Jan 2010';
+                    document.getElementById('dateEndLabel').textContent = 'Mar 2025';
+                    this.updateSliderRange();
+                    // Reset all filter chips to active (except special circumstances which start inactive)
+                    document.querySelectorAll('#timeFilters .chip, #dayFilters .chip, #collisionTypeFilters .chip, #severityFilters .chip').forEach(c => {
+                        c.classList.add('active');
+                        c.setAttribute('aria-checked', 'true');
+                    });
+                    // Special circumstances start inactive
+                    document.querySelectorAll('#specialFilters .chip').forEach(c => {
+                        c.classList.remove('active');
+                        c.setAttribute('aria-checked', 'false');
+                    });
                     this.updateMapData();
                 });
 
@@ -2394,10 +3308,25 @@
                     this.closeDetailPanel();
                 });
 
-                // CSV export
-                document.getElementById('exportCSV').addEventListener('click', () => {
-                    // Use stored filtered data (includes all, not just 100 visible rows)
-                    this.exportToCSV(this.currentFilteredData || []);
+                // Keyboard navigation: Escape to close detail panel
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        const detailPanel = document.getElementById('detailPanel');
+                        if (detailPanel.style.display !== 'none') {
+                            this.closeDetailPanel();
+                        }
+                    }
+                });
+
+                // Mobile swipe-to-dismiss for bottom sheet
+                this.setupSwipeToDismiss();
+
+                // Update aria-checked on chip toggles
+                document.querySelectorAll('.chip[role="checkbox"]').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const isChecked = chip.classList.contains('active');
+                        chip.setAttribute('aria-checked', isChecked);
+                    });
                 });
 
                 // Setup table sorting
@@ -2457,7 +3386,7 @@
 
                 document.getElementById('detailContent').innerHTML = `
                     <div class="detail-section">
-                        <h3 class="detail-section-title">📋 Incident Information</h3>
+                        <h3 class="detail-section-title">Incident Information</h3>
                         <div class="detail-grid">
                             <div class="detail-row">
                                 <span class="detail-label">DR Number:</span>
@@ -2495,7 +3424,7 @@
                     </div>
 
                     <div class="detail-section">
-                        <h3 class="detail-section-title">📍 Location Information</h3>
+                        <h3 class="detail-section-title">Location Information</h3>
                         <div class="detail-grid">
                             <div class="detail-row">
                                 <span class="detail-label">Address:</span>
@@ -2517,7 +3446,7 @@
                     </div>
 
                     <div class="detail-section">
-                        <h3 class="detail-section-title">🚗 Collision Details</h3>
+                        <h3 class="detail-section-title">Collision Details</h3>
                         <div class="detail-grid">
                             <div class="detail-row">
                                 <span class="detail-label">Collision Type:</span>
@@ -2543,7 +3472,7 @@
                     </div>
 
                     <div class="detail-section">
-                        <h3 class="detail-section-title">⚠️ Special Circumstances</h3>
+                        <h3 class="detail-section-title">Special Circumstances</h3>
                         <div class="detail-grid">
                             <div class="detail-row">
                                 <span class="detail-label">Hit and Run:</span>
@@ -2587,6 +3516,7 @@
             closeDetailPanel() {
                 const detailPanel = document.getElementById('detailPanel');
                 detailPanel.style.display = 'none';
+                detailPanel.style.transform = '';  // Reset any swipe transform
 
                 // Remove click-outside listener
                 if (this.detailPanelClickOutside) {
@@ -2608,6 +3538,57 @@
                     .forEach(r => r.classList.remove('highlighted'));
             }
 
+            /**
+             * Setup swipe-to-dismiss for mobile bottom sheet
+             */
+            setupSwipeToDismiss() {
+                const panel = document.getElementById('detailPanel');
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+
+                const handleTouchStart = (e) => {
+                    // Only enable swipe on mobile (when bottom sheet is active)
+                    if (window.innerWidth > 768) return;
+
+                    startY = e.touches[0].clientY;
+                    isDragging = true;
+                    panel.style.transition = 'none';
+                };
+
+                const handleTouchMove = (e) => {
+                    if (!isDragging) return;
+
+                    currentY = e.touches[0].clientY;
+                    const deltaY = currentY - startY;
+
+                    // Only allow dragging downward
+                    if (deltaY > 0) {
+                        panel.style.transform = `translateY(${deltaY}px)`;
+                    }
+                };
+
+                const handleTouchEnd = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    const deltaY = currentY - startY;
+                    panel.style.transition = 'transform 0.2s ease-out';
+
+                    // If dragged more than 100px down, dismiss
+                    if (deltaY > 100) {
+                        this.closeDetailPanel();
+                    } else {
+                        // Snap back
+                        panel.style.transform = 'translateY(0)';
+                    }
+                };
+
+                panel.addEventListener('touchstart', handleTouchStart, { passive: true });
+                panel.addEventListener('touchmove', handleTouchMove, { passive: true });
+                panel.addEventListener('touchend', handleTouchEnd);
+            }
+
             updateMapColors() {
                 if (!this.map || !this.map.getLayer('collisions-scatter')) return;
 
@@ -2616,22 +3597,22 @@
                 if (this.activeColorScheme === 'collision_type') {
                     colorExpression = [
                         'case',
-                        ['==', ['get', 'collision_type'], null], '#bdc3c7',
+                        ['==', ['get', 'collision_type'], null], '#8090a0',
                         [
                             'match',
                             ['get', 'collision_type'],
-                            'vehicle-to-vehicle', '#3498db',
-                            'vehicle-pedestrian', '#e74c3c',
-                            'vehicle-motorcycle', '#f39c12',
-                            'vehicle-bicycle', '#2ecc71',
-                            'other', '#95a5a6',
-                            '#bdc3c7'
+                            'vehicle-to-vehicle', '#4a90d9',
+                            'vehicle-pedestrian', '#e05d5d',
+                            'vehicle-motorcycle', '#f0a040',
+                            'vehicle-bicycle', '#50b080',
+                            'other', '#8090a0',
+                            '#8090a0'
                         ]
                     ];
                 } else if (this.activeColorScheme === 'time_bucket') {
                     colorExpression = [
                         'case',
-                        ['==', ['get', 'time_bucket'], null], '#95a5a6',
+                        ['==', ['get', 'time_bucket'], null], '#8090a0',
                         [
                             'match',
                             ['get', 'time_bucket'],
@@ -2641,7 +3622,7 @@
                             'PM_PEAK', '#c0392b',
                             'EVENING', '#8e44ad',
                             'LATE_NIGHT', '#34495e',
-                            '#95a5a6'
+                            '#8090a0'
                         ]
                     ];
                 }
@@ -2660,26 +3641,26 @@
                     legendHTML = `
                         <h4>Collision Type</h4>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #3498db;"></div>
+                            <div class="legend-color" style="background: #4a90d9;"></div>
                             <div class="legend-label">Vehicle-Vehicle</div>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #e74c3c;"></div>
+                            <div class="legend-color" style="background: #e05d5d;"></div>
                             <div class="legend-label">Vehicle-Pedestrian</div>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #f39c12;"></div>
+                            <div class="legend-color" style="background: #f0a040;"></div>
                             <div class="legend-label">Vehicle-Motorcycle</div>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #2ecc71;"></div>
+                            <div class="legend-color" style="background: #50b080;"></div>
                             <div class="legend-label">Vehicle-Bicycle</div>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #95a5a6;"></div>
+                            <div class="legend-color" style="background: #8090a0;"></div>
                             <div class="legend-label">Other</div>
                         </div>
-                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #999;">
+                        <div class="legend-help">
                             Heatmap (zoom out) and points (zoom in) use these colors
                         </div>
                     `;
@@ -2831,7 +3812,7 @@
                 return `
                     <div class="tooltip-header">
                         <div class="tooltip-title">${features[0].properties.area_name || 'Unknown Area'}</div>
-                        <div class="tooltip-severity" style="background-color: #3498db; font-size: 11px;">
+                        <div class="tooltip-severity" style="background-color: #4a90d9; font-size: 11px;">
                             ${features.length} Collisions
                         </div>
                     </div>

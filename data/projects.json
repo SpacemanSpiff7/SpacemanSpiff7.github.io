@@ -1,9 +1,9 @@
 {
   "featured": [
     "la-collisions-dashboard",
+    "ebay-craigslist-chrome-extension",
     "public-art-submission",
-    "dodgers-notifications",
-    "ebay-craigslist-chrome-extension"
+    "dodgers-notifications"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",

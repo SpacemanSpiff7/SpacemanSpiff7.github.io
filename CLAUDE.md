@@ -65,6 +65,12 @@ git push origin master
 
 ## Important Implementation Notes
 
+### No Emojis Policy
+
+- Do not use emojis anywhere on this website
+- This includes code comments, UI elements, and generated content
+- Use text or icons instead for visual indicators
+
 ### CSS Architecture
 
 The CSS is split into modular files for easier maintenance:

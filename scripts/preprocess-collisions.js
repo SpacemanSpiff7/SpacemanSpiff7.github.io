@@ -96,23 +96,41 @@ function extractCollisionType(moCodesStr) {
 
 /**
  * Extract severity level from MO codes
- * Returns: 'property_damage', 'minor_injury', 'severe_injury', 'fatal', or null
+ * Returns: 'property_damage', 'minor_injury', 'severe_injury', or 'unknown'
+ *
+ * IMPORTANT: Previous mapping incorrectly used codes 3030, 4020, 4021 as "fatal"
+ * indicators, resulting in 214K (34.5%) records marked fatal - impossible given
+ * LA has ~1,200 fatalities/year.
+ *
+ * Analysis revealed:
+ * - 3030 = Traffic violation cited (NOT fatal!) - 204K records
+ * - 4020 = Complaint of pain (minor injury) - 11K records
+ * - 4021 = Minor/moderate injury - 8K records
+ *
+ * The dataset lacks a reliable fatal indicator in MO codes.
+ * True fatality data would need to come from a separate source.
+ *
+ * Current verified mapping based on LAPD MO code documentation:
+ * - 4025: Severe/incapacitating injury
+ * - 4024, 4027: Visible injury
+ * - 4020, 4021, 4026: Minor injury / complaint of pain
+ * - 4003, 3025: Property damage only
  */
 function extractSeverity(moCodesStr) {
-  if (!moCodesStr) return null;
+  if (!moCodesStr) return 'unknown';
 
-  // Fatal indicators (highest priority)
-  if (hasCode(moCodesStr, ['3030', '4020', '4021'])) {
-    return 'fatal';
-  }
-
-  // Severe injury
-  if (hasCode(moCodesStr, ['4024', '4025', '4027'])) {
+  // Severe/incapacitating injury (highest severity we can reliably identify)
+  if (hasCode(moCodesStr, ['4025'])) {
     return 'severe_injury';
   }
 
-  // Minor injury
-  if (hasCode(moCodesStr, ['4026'])) {
+  // Visible injury (moderate severity)
+  if (hasCode(moCodesStr, ['4024', '4027'])) {
+    return 'severe_injury';
+  }
+
+  // Minor injury / complaint of pain
+  if (hasCode(moCodesStr, ['4020', '4021', '4026'])) {
     return 'minor_injury';
   }
 
@@ -121,12 +139,13 @@ function extractSeverity(moCodesStr) {
     return 'property_damage';
   }
 
-  // Default to minor if any 40xx code present (injury type specified)
+  // Check for any other 40xx injury code (treat as minor)
   const moCodeArray = moCodesStr.trim().split(/\s+/);
   const hasInjuryCode = moCodeArray.some(code => code.startsWith('40'));
   if (hasInjuryCode) return 'minor_injury';
 
-  return null;
+  // Unknown severity - no injury codes present
+  return 'unknown';
 }
 
 function processRecord(record, columnNames) {

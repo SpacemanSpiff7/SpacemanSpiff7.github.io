@@ -717,10 +717,10 @@
     "vehicle-motorcycle": 21060
   },
   "severity_counts": {
-    "severe_injury": 83463,
-    "fatal": 214080,
-    "property_damage": 35687,
-    "minor_injury": 112718
+    "severe_injury": 129503,
+    "minor_injury": 218731,
+    "property_damage": 39943,
+    "unknown": 232482
   },
   "special_circumstances": {
     "hit_and_run": 77306,
