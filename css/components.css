@@ -234,7 +234,7 @@
 .hero-title .letter {
     display: inline-block;
     color: white;
-    animation: christmasLights 4.5s ease-in-out infinite;
+    animation: christmasLights 3.5s ease-in-out infinite;
 }
 
 /* Stagger each letter's animation */
