@@ -1147,15 +1147,39 @@
     border-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Rainbow glow animation for caret */
+@keyframes rainbow-glow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
 .controls-caret {
-    font-size: 1rem;
-    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease;
     color: white;
-    text-shadow: none;
+    text-shadow: 0 0 10px rgba(100, 200, 255, 0.9),
+                 0 0 20px rgba(100, 200, 255, 0.7),
+                 0 0 30px rgba(100, 200, 255, 0.5);
+}
+
+.controls-header:hover .controls-caret {
+    transform: scale(1.3);
+    text-shadow:
+        0 0 15px rgba(255, 100, 100, 1),
+        0 0 30px rgba(255, 165, 0, 1),
+        0 0 50px rgba(255, 255, 0, 0.9),
+        0 0 70px rgba(0, 255, 100, 0.8),
+        0 0 90px rgba(100, 200, 255, 0.7),
+        0 0 120px rgba(180, 100, 255, 0.6);
+    animation: rainbow-glow 2s linear infinite;
 }
 
 .blob-controls.open .controls-caret {
     transform: rotate(180deg);
+}
+
+.blob-controls.open .controls-header:hover .controls-caret {
+    transform: rotate(180deg) scale(1.3);
 }
 
 .controls-drawer {

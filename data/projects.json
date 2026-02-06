@@ -75,7 +75,7 @@
       "description": "Dodgers win at home? $6 meal deal at Panda Express. Dodgers throw 7 or more strikeouts? FREE Jumbo Jack at Jack in the Box (with purchase of a large drink). This is literally the only sports betting tip that actually matters. Sign up to get notified when your local fast food joints turn on the free food faucet.",
       "category": "Public Service",
       "image": "assets/images/dodgers-image.jpg",
-      "tags": ["Baseball", "Food Deals", "Public Service"],
+      "tags": ["Food Deals", "Public Service"],
       "actions": [
         {
           "text": "Sign Up",
