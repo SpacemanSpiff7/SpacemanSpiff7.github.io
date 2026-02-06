@@ -59,7 +59,7 @@
       "description": "An interactive dashboard that turns 12 years of LAPD collision data into beautiful, depressing visualizations. Features a map that progressively loads 620K+ collision records so you can zoom into your neighborhood and realize you should probably take a different route to work. Includes temporal analysis showing that 5pm is indeed the worst time to be on LA roads, as if you needed data to tell you that.",
       "category": "Data Visualization",
       "image": "https://images.unsplash.com/photo-1569098644584-210bcd375b59?w=400&h=300&fit=crop",
-      "tags": ["Data Visualization", "MapLibre GL", "Chart.js", "LA Open Data"],
+      "tags": ["LA Open Data"],
       "actions": [
         {
           "text": "Explore Dashboard",
@@ -92,7 +92,7 @@
       "description": "A mobile-friendly form that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Also help me collect data for my public art map project.",
       "category": "Public Art",
       "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Public Art", "Mobile App", "Location Services"],
+      "tags": ["Public Art"],
       "actions": [
         {
           "text": "Submit Art",
@@ -108,7 +108,7 @@
       "description": "A mobile-friendly app that lets you document street art, murals, and other cool stuff you find while wandering around. Takes your photo, grabs your location, and hopefully doesn't crash your phone. Also help me collect data for my public art map project.",
       "category": "Cool Stuff",
       "image": "assets/images/og-image.png",
-      "tags": ["Public Art", "Mobile App", "Location Services"],
+      "tags": ["Public Art", "Progressive Web App"],
       "actions": [
         {
           "text": "Go to App",
@@ -124,7 +124,7 @@
       "description": "A Chrome extension that allows you to search eBay for items listed on Craigslist. It's a simple extension that allows you to search eBay for items listed on Craigslist. It's a simple extension that allows you to search eBay for items listed on Craigslist.",
       "category": "Chrome Extensions",
       "image": "assets/images/ebay-craigslist-chrome-extension.png",
-      "tags": ["Chrome Extensions", "Ebay", "Craigslist"],
+      "tags": ["Chrome Extension"],
       "actions": [
         {
           "text": "Github",
