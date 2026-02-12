@@ -132,28 +132,29 @@ function setupNavigation() {
         });
     }
 
-    // Set up scroll-based nav highlighting
-    setupScrollHighlighting(navLinks);
+    // Note: setupScrollHighlighting is now called from loadProjects()
+    // after featured sections are dynamically created
 }
 
-function setupScrollHighlighting(navLinks) {
-    const scrollContainer = document.querySelector('.scroll-container');
-
-    // Map sections to nav items
-    // Hero + featured-1,2,3,4 → 'hero' (Home)
-    // about → 'about'
-    // contact → 'contact'
-    // projects-grid → 'projects-grid'
-    const sectionToNav = {
+// Build sectionToNav mapping dynamically based on actual featured projects count
+function buildSectionMapping(featuredCount) {
+    const mapping = {
         'hero': 'hero',
-        'featured-1': 'hero',
-        'featured-2': 'hero',
-        'featured-3': 'hero',
-        'featured-4': 'hero',
         'about': 'about',
         'contact': 'contact',
         'projects-grid': 'projects-grid'
     };
+
+    // Add featured sections dynamically
+    for (let i = 1; i <= featuredCount; i++) {
+        mapping[`featured-${i}`] = 'hero';
+    }
+
+    return mapping;
+}
+
+function setupScrollHighlighting(navLinks, sectionToNav) {
+    const scrollContainer = document.querySelector('.scroll-container');
 
     // Create Intersection Observer
     // Use scrollContainer if it exists, otherwise use viewport (null = viewport)
@@ -216,30 +217,43 @@ async function loadProjects() {
         }
         const projectData = await response.json();
 
-        // Populate featured projects (one per section)
+        // Get featured projects
         const featuredProjects = projectData.projects.filter(project =>
             projectData.featured.includes(project.id)
         );
 
+        // Get insertion point (after hero section, before about section)
+        const heroSection = document.getElementById('hero');
+        const aboutSection = document.getElementById('about');
+
+        // Dynamically create and populate featured sections
         featuredProjects.forEach((project, index) => {
-            const section = document.getElementById(`featured-${index + 1}`);
-            if (section) {
-                section.innerHTML = `
-                    <h2>${project.title}</h2>
-                    <p>${project.shortDescription}</p>
-                    <div class="tags">
-                        ${project.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                    <a href="${project.actions[0].url}"
-                       class="link-btn"
-                       target="_blank" rel="noopener noreferrer">
-                        ${project.actions[0].text}
-                    </a>
-                `;
+            // Create new section element
+            const section = document.createElement('section');
+            section.id = `featured-${index + 1}`;
+            section.className = 'snap-section featured-project';
+
+            // Populate with project content
+            section.innerHTML = `
+                <h2>${project.title}</h2>
+                <p>${project.shortDescription}</p>
+                <div class="tags">
+                    ${project.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                <a href="${project.actions[0].url}"
+                   class="link-btn"
+                   target="_blank" rel="noopener noreferrer">
+                    ${project.actions[0].text}
+                </a>
+            `;
+
+            // Insert before about section
+            if (heroSection && aboutSection) {
+                heroSection.parentNode.insertBefore(section, aboutSection);
             }
         });
 
-        // Populate projects grid (all projects, 2 columns)
+        // Populate projects grid (workbench - works in progress, 2 columns)
         const grid = document.querySelector('.projects-grid');
         if (grid) {
             grid.innerHTML = projectData.projects.map(project => `
@@ -257,6 +271,12 @@ async function loadProjects() {
 
         // Initialize progress indicator with dynamic featured count
         initProgressIndicator(featuredProjects.length);
+
+        // Set up scroll-based nav highlighting with dynamic section mapping
+        // This must run after featured sections are created
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sectionToNav = buildSectionMapping(featuredProjects.length);
+        setupScrollHighlighting(navLinks, sectionToNav);
 
     } catch (error) {
         console.error('Error loading projects:', error);

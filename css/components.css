@@ -1008,7 +1008,7 @@
     opacity: 0.7;
 }
 
-/* Projects grid section - NO snap, free scroll */
+/* Workbench section - NO snap, free scroll */
 #projects-grid {
     min-height: auto;
     padding: 4rem 2rem 6rem;
