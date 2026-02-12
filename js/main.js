@@ -219,9 +219,9 @@ async function loadProjects() {
         const projectData = await response.json();
 
         // Get featured projects
-        const featuredProjects = projectData.projects.filter(project =>
-            projectData.featured.includes(project.id)
-        );
+        const featuredProjects = projectData.featured
+            .map(id => projectData.projects.find(p => p.id === id))
+            .filter(Boolean);
 
         // Get insertion point (after hero section, before about section)
         const heroSection = document.getElementById('hero');

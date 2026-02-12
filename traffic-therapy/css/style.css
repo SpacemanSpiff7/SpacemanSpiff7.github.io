@@ -1,0 +1,946 @@
+/* ============================================================
+   Traffic Therapy — Complete CSS Theme
+   Spacey dark aesthetic, mobile-first, CSS custom properties
+   ============================================================ */
+
+/* --- 1. CSS Custom Properties (Design Tokens) --- */
+
+:root {
+  /* Core palette */
+  --color-bg: #0a0a1a;
+  --color-board: #12122a;
+  --color-grid-line: rgba(255, 255, 255, 0.06);
+  --color-wall: #2a2a4a;
+  --color-target: #E07B4F;
+  --color-text: #e0e0e0;
+  --color-text-dim: #8888aa;
+
+  /* Stars */
+  --color-star: #FFD700;
+  --color-star-empty: #2a2a4a;
+
+  /* Buttons */
+  --color-btn-bg: #1a1a3a;
+  --color-btn-hover: #2a2a5a;
+  --color-btn-text: #e0e0e0;
+
+  /* Block palette (obstacle colors) */
+  --color-block-1: #5B7B9F; /* slate blue */
+  --color-block-2: #7B6B8F; /* muted purple */
+  --color-block-3: #4F7B7B; /* dark teal */
+  --color-block-4: #8F6B7B; /* dusty rose */
+  --color-block-5: #5B6B8F; /* muted navy */
+  --color-block-6: #6B8F7B; /* sage */
+  --color-block-7: #7B7B6B; /* warm gray */
+  --color-block-8: #6B6B9F; /* soft indigo */
+
+  /* Exit indicator */
+  --color-exit: #E07B4F;
+
+  /* Board sizing — mobile-first default (5x5) */
+  --grid-cols: 5;
+  --grid-rows: 5;
+  --cell-size: min(14vw, 12vh);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease-out;
+  --transition-medium: 0.25s ease-out;
+}
+
+
+/* --- 2. Reset & Base --- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: 'Silkscreen', cursive;
+  font-weight: 400;
+  margin: 0;
+}
+
+
+/* --- 3. Game Root --- */
+
+#game-root {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+
+/* --- 4. Screen Container (shared) --- */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  touch-action: manipulation;
+}
+
+
+/* --- 5. Title Screen --- */
+
+.screen--title {
+  gap: 32px;
+  padding: 24px;
+}
+
+.title {
+  font-family: 'Silkscreen', cursive;
+  font-size: clamp(2rem, 8vw, 4rem);
+  color: var(--color-text);
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 1.2;
+  position: relative;
+}
+
+/* Subtle easter egg element on title screen */
+.title-easter-egg {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-wall);
+  cursor: default;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.4;
+  transition: opacity var(--transition-fast);
+}
+
+.title-easter-egg:hover {
+  opacity: 0.7;
+}
+
+.title-subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  text-align: center;
+  margin: 0;
+}
+
+
+/* --- 6. Level Select Screen --- */
+
+.screen--levels {
+  gap: 24px;
+  padding: 24px;
+  justify-content: flex-start;
+  padding-top: 10vh;
+}
+
+.screen--levels .screen-heading {
+  font-family: 'Silkscreen', cursive;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  margin-bottom: 8px;
+}
+
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 0 12px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.level-card {
+  background: var(--color-board);
+  border: 1px solid var(--color-wall);
+  border-radius: 8px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  user-select: none;
+  min-height: 80px;
+}
+
+.level-card:hover {
+  background: var(--color-btn-hover);
+  border-color: #3a3a6a;
+}
+
+.level-card:active {
+  transform: scale(0.97);
+}
+
+.level-card__number {
+  font-family: 'Silkscreen', cursive;
+  font-size: 1.2rem;
+}
+
+.level-card__stars {
+  display: flex;
+  gap: 2px;
+}
+
+
+/* --- 7. Gameplay Screen --- */
+
+.screen--game {
+  gap: 16px;
+  padding: 12px;
+}
+
+.hud {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: calc(var(--grid-cols) * var(--cell-size) + 6px);
+  padding: 0 4px;
+  font-family: 'Space Mono', monospace;
+}
+
+.hud__level {
+  font-family: 'Silkscreen', cursive;
+  font-size: 1rem;
+}
+
+.move-counter {
+  font-size: 1rem;
+  color: var(--color-text-dim);
+}
+
+.hud-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+
+/* --- 8. Board --- */
+
+.board {
+  position: relative;
+  width: calc(var(--grid-cols) * var(--cell-size));
+  height: calc(var(--grid-rows) * var(--cell-size));
+  background: var(--color-board);
+  border: 3px solid var(--color-wall);
+  border-radius: 8px;
+  overflow: visible;
+  touch-action: none;
+}
+
+/* Grid lines via repeating gradient */
+.board::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--color-grid-line) 0px,
+      var(--color-grid-line) 1px,
+      transparent 1px,
+      transparent var(--cell-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--color-grid-line) 0px,
+      var(--color-grid-line) 1px,
+      transparent 1px,
+      transparent var(--cell-size)
+    );
+  border-radius: 5px;
+  z-index: 0;
+}
+
+
+/* --- 9. Blocks --- */
+
+.block {
+  position: absolute;
+  border-radius: 2px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: transform var(--transition-fast);
+  z-index: 1;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle texture: faint noise-like gradient overlay */
+.block::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  pointer-events: none;
+}
+
+.block--target {
+  background: var(--color-target);
+  z-index: 2;
+}
+
+.block--dragging {
+  cursor: grabbing;
+  z-index: 10;
+  transition: none;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Block color classes (assigned by engine via inline style or class) */
+.block--color-1 { background: var(--color-block-1); }
+.block--color-2 { background: var(--color-block-2); }
+.block--color-3 { background: var(--color-block-3); }
+.block--color-4 { background: var(--color-block-4); }
+.block--color-5 { background: var(--color-block-5); }
+.block--color-6 { background: var(--color-block-6); }
+.block--color-7 { background: var(--color-block-7); }
+.block--color-8 { background: var(--color-block-8); }
+
+
+/* --- 10. Exit Indicator --- */
+
+.exit-indicator {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Exit on right side */
+.exit-indicator--right {
+  right: -16px;
+  width: 16px;
+  height: var(--cell-size);
+}
+
+.exit-indicator--right::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 10px solid var(--color-exit);
+  opacity: 0.8;
+}
+
+/* Exit on left side */
+.exit-indicator--left {
+  left: -16px;
+  width: 16px;
+  height: var(--cell-size);
+}
+
+.exit-indicator--left::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid var(--color-exit);
+  opacity: 0.8;
+}
+
+/* Exit on top side */
+.exit-indicator--top {
+  top: -16px;
+  width: var(--cell-size);
+  height: 16px;
+}
+
+.exit-indicator--top::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid var(--color-exit);
+  opacity: 0.8;
+}
+
+/* Exit on bottom side */
+.exit-indicator--bottom {
+  bottom: -16px;
+  width: var(--cell-size);
+  height: 16px;
+}
+
+.exit-indicator--bottom::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid var(--color-exit);
+  opacity: 0.8;
+}
+
+/* Break the board border at the exit gap */
+.exit-gap--right {
+  border-right-color: transparent;
+}
+
+.exit-gap--left {
+  border-left-color: transparent;
+}
+
+.exit-gap--top {
+  border-top-color: transparent;
+}
+
+.exit-gap--bottom {
+  border-bottom-color: transparent;
+}
+
+/* Localized border gap overlay (engine places a div here to punch the wall) */
+.exit-gap-mask {
+  position: absolute;
+  background: var(--color-board);
+  z-index: 0;
+}
+
+/* Right edge mask */
+.exit-gap-mask--right {
+  right: -3px;
+  width: 4px;
+  height: var(--cell-size);
+}
+
+/* Left edge mask */
+.exit-gap-mask--left {
+  left: -3px;
+  width: 4px;
+  height: var(--cell-size);
+}
+
+/* Top edge mask */
+.exit-gap-mask--top {
+  top: -3px;
+  height: 4px;
+  width: var(--cell-size);
+}
+
+/* Bottom edge mask */
+.exit-gap-mask--bottom {
+  bottom: -3px;
+  height: 4px;
+  width: var(--cell-size);
+}
+
+
+/* --- 11. Win Screen Overlay --- */
+
+.screen--win {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px;
+}
+
+.win-banner {
+  font-family: 'Silkscreen', cursive;
+  font-size: clamp(1.6rem, 6vw, 3rem);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.win-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.1rem;
+}
+
+.win-stars {
+  display: flex;
+  gap: 6px;
+  font-size: 2rem;
+}
+
+.win-moves {
+  color: var(--color-text-dim);
+}
+
+.win-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+
+/* --- 12. Buttons --- */
+
+.btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  padding: 12px 24px;
+  border-radius: 4px;
+  background: var(--color-btn-bg);
+  color: var(--color-btn-text);
+  border: 1px solid var(--color-wall);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), transform 0.1s ease;
+  user-select: none;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn:hover {
+  background: var(--color-btn-hover);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  background: #2a2a5a;
+  border-color: #3a3a7a;
+}
+
+.btn--primary:hover {
+  background: #3a3a7a;
+}
+
+.btn--small {
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  min-height: 44px;
+}
+
+
+/* --- 13. Stars --- */
+
+.star {
+  color: var(--color-star-empty);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.star--earned {
+  color: var(--color-star);
+}
+
+
+/* --- 14. Confetti Canvas --- */
+
+.confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 200;
+}
+
+
+/* --- 15. Admin Badge --- */
+
+.admin-badge {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--color-text-dim);
+  background: rgba(42, 42, 74, 0.7);
+  padding: 2px 8px;
+  border-radius: 3px;
+  z-index: 300;
+  pointer-events: none;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+
+/* --- 16. Editor Styles --- */
+
+.screen--editor {
+  padding: 12px;
+  gap: 12px;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.editor-header {
+  font-family: 'Silkscreen', cursive;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+  align-items: center;
+}
+
+.editor-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.editor-controls label {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-controls input[type="number"] {
+  width: 48px;
+  padding: 4px 6px;
+  background: var(--color-board);
+  color: var(--color-text);
+  border: 1px solid var(--color-wall);
+  border-radius: 3px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.editor-toolbar__item {
+  background: var(--color-board);
+  border: 1px solid var(--color-wall);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-family: 'Space Mono', monospace;
+  color: var(--color-text);
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--transition-fast);
+}
+
+.editor-toolbar__item:hover {
+  background: var(--color-btn-hover);
+}
+
+.editor-toolbar__item--active {
+  border-color: var(--color-target);
+  background: rgba(224, 123, 79, 0.15);
+}
+
+.editor-board-wrapper {
+  position: relative;
+}
+
+.editor-status {
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.editor-status--solvable {
+  color: #6B8F7B;
+}
+
+.editor-status--unsolvable {
+  color: #8F6B7B;
+}
+
+.editor-level-list {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editor-level-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--color-board);
+  border: 1px solid var(--color-wall);
+  border-radius: 4px;
+  cursor: grab;
+  font-size: 0.8rem;
+}
+
+.editor-level-item:active {
+  cursor: grabbing;
+}
+
+.editor-level-item--dragging {
+  opacity: 0.5;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.editor-json-output {
+  width: 100%;
+  max-width: 600px;
+  min-height: 120px;
+  padding: 12px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-wall);
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  resize: vertical;
+}
+
+.editor-warning {
+  color: var(--color-target);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+
+/* --- 17. Screen Transitions --- */
+
+.screen-enter {
+  animation: screenFadeIn var(--transition-medium) ease-out forwards;
+}
+
+.screen-exit {
+  animation: screenFadeOut var(--transition-medium) ease-out forwards;
+}
+
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screenFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Target block exit animation */
+@keyframes blockExit {
+  to {
+    opacity: 0;
+  }
+}
+
+.block--exiting {
+  transition: transform 0.4s ease-in;
+  z-index: 5;
+}
+
+/* Intro highlight pulse on target block and exit indicator */
+@keyframes highlightPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 123, 79, 0); }
+  50% { box-shadow: 0 0 12px 4px rgba(224, 123, 79, 0.6); }
+}
+
+.highlight-intro {
+  animation: highlightPulse 0.5s ease-in-out 3;
+}
+
+
+/* --- 18. Utility Classes --- */
+
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+
+/* --- 19. Responsive — Tablet (768px+) --- */
+
+@media (min-width: 768px) {
+  :root {
+    --cell-size: min(10vw, 10vh, 72px);
+  }
+
+  body {
+    font-size: 15px;
+  }
+
+  .levels-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 480px;
+  }
+
+  .hud {
+    font-size: 1rem;
+  }
+
+  .editor-layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn--small {
+    min-height: 36px;
+  }
+
+  .editor-toolbar__item {
+    min-height: auto;
+  }
+}
+
+
+/* --- 20. Responsive — Desktop (1024px+) --- */
+
+@media (min-width: 1024px) {
+  :root {
+    --cell-size: min(8vw, 9vh, 80px);
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  .levels-grid {
+    grid-template-columns: repeat(3, 140px);
+  }
+
+  .level-card {
+    padding: 20px 16px;
+  }
+
+  .screen--game {
+    gap: 20px;
+  }
+}
+
+
+/* --- 21. Reduced Motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .block {
+    transition: none;
+  }
+
+  .screen-enter,
+  .screen-exit {
+    animation: none;
+  }
+}
