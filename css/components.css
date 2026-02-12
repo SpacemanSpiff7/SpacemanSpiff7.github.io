@@ -1065,6 +1065,18 @@
 }
 
 /* ==========================================
+   BLOB SHOWCASE - Hidden section at end
+   ========================================== */
+
+#blob-showcase {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: transparent;
+}
+
+/* ==========================================
    PROGRESS INDICATOR - Right Side
    ========================================== */
 

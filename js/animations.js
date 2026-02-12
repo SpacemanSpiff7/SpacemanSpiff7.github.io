@@ -28,7 +28,8 @@ const CONFIG = {
         'featured-4': '#3E2C5A',     // Dark purple
         'about': '#006640',          // Dark green
         'contact': '#6B5A00',        // Dark gold
-        'projects-grid': '#6B1F00'   // Dark orange
+        'projects-grid': '#6B1F00',  // Dark orange
+        'blob-showcase': '#FFFF33'   // Highlighter yellow
     },
     currentSection: 'hero',  // Track current section
 

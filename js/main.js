@@ -142,7 +142,8 @@ function buildSectionMapping(featuredCount) {
         'hero': 'hero',
         'about': 'about',
         'contact': 'contact',
-        'projects-grid': 'projects-grid'
+        'projects-grid': 'projects-grid',
+        'blob-showcase': 'projects-grid'  // Observe for blob color, but keep nav on projects-grid
     };
 
     // Add featured sections dynamically
