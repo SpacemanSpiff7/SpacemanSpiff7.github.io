@@ -26,6 +26,16 @@ git commit -m "Your commit message"
 git push origin master
 ```
 
+### Cache Busting
+JavaScript files use version query strings for cache busting.
+When modifying `js/animations.js` or `js/main.js`:
+1. Make your code changes
+2. Increment the version number in index.html (e.g., `?v=2` → `?v=3`)
+3. Update all three references: preload hint + 2 script tags
+4. Commit and push together
+
+This ensures users get fresh JavaScript immediately after deployment.
+
 ## Architecture Overview
 
 ### Current Design
