@@ -353,7 +353,7 @@
         .btn-secondary {
             padding: 0.5rem 1rem;
             border: 1px solid rgba(138, 43, 226, 0.5);
-            background: rgba(138, 43, 226, 0.15);
+            background: rgba(138, 43, 226, 0.08);
             color: #e0e0ff;
             border-radius: var(--radius-md);
             font-family: 'Silkscreen', 'Courier New', monospace;
@@ -364,14 +364,14 @@
         }
 
         .btn-secondary.active {
-            background: rgba(138, 43, 226, 0.4);
+            background: rgba(138, 43, 226, 0.45);
             border-color: rgba(138, 43, 226, 0.8);
             color: white;
             box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
         }
 
         .btn-secondary:hover {
-            background: rgba(138, 43, 226, 0.25);
+            background: rgba(138, 43, 226, 0.15);
             border-color: rgba(138, 43, 226, 0.6);
         }
 
@@ -453,6 +453,61 @@
             font-size: 0.7rem;
             color: #888;
             line-height: 1.3;
+        }
+
+        .legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .legend-header h4 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .legend-toggle {
+            background: rgba(0, 191, 255, 0.15);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: #00bfff;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .legend-toggle:hover {
+            background: rgba(0, 191, 255, 0.25);
+            border-color: rgba(0, 191, 255, 0.5);
+        }
+
+        .legend-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .map-legend.collapsed .legend-content {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .toggle-icon::before {
+            content: '−';
+        }
+
+        .map-legend.collapsed .toggle-icon::before {
+            content: '+';
         }
 
         @media (max-width: 768px) {
@@ -554,7 +609,7 @@
             padding: 0.5rem 1rem;
             font-size: 0.7rem;
             font-family: 'Silkscreen', 'Courier New', monospace;
-            background: rgba(0, 191, 255, 0.1);
+            background: rgba(0, 191, 255, 0.05);
             color: #e0f0ff;
             border: 1px solid rgba(0, 191, 255, 0.3);
             border-radius: 2rem;
@@ -564,19 +619,19 @@
         }
 
         .btn-control:hover {
-            background: rgba(0, 191, 255, 0.15);
+            background: rgba(0, 191, 255, 0.12);
             border-color: rgba(0, 191, 255, 0.5);
         }
 
         .btn-control.active {
-            background: rgba(0, 191, 255, 0.25);
+            background: rgba(0, 191, 255, 0.35);
             color: #fff;
             border-color: rgba(0, 191, 255, 0.7);
             box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
         }
 
         .btn-control.active:hover {
-            background: rgba(0, 191, 255, 0.3);
+            background: rgba(0, 191, 255, 0.4);
         }
 
         /* Filter Panel */
@@ -784,7 +839,7 @@
         .chip {
             padding: 0.5rem 1rem;
             border: 1px solid rgba(0, 191, 255, 0.3);
-            background: rgba(0, 191, 255, 0.1);
+            background: rgba(0, 191, 255, 0.05);
             color: #e0f0ff;
             border-radius: 2rem;
             font-family: 'Silkscreen', 'Courier New', monospace;
@@ -795,12 +850,12 @@
 
         .chip:hover {
             border-color: rgba(0, 191, 255, 0.5);
-            background: rgba(0, 191, 255, 0.15);
+            background: rgba(0, 191, 255, 0.12);
         }
 
         .chip.active {
             border-color: rgba(0, 191, 255, 0.7);
-            background: rgba(0, 191, 255, 0.25);
+            background: rgba(0, 191, 255, 0.35);
             color: white;
             box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
         }
@@ -1484,7 +1539,15 @@
                         <span id="samplingIndicator" style="display:none;"></span>
                     </div>
                     <div class="map-legend" id="mapLegend">
-                        <!-- Populated by JavaScript -->
+                        <div class="legend-header">
+                            <h4>Legend</h4>
+                            <button class="legend-toggle" id="legendToggle" aria-label="Toggle legend" aria-expanded="true">
+                                <span class="toggle-icon"></span>
+                            </button>
+                        </div>
+                        <div class="legend-content" id="legendContent">
+                            <!-- Populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
             </section>
@@ -3233,8 +3296,47 @@
                     this.updateMapData();
                 });
 
+                // Mobile fallback: change events for browsers that don't fire input during drag
+                startSlider.addEventListener('change', (e) => {
+                    const startVal = parseInt(e.target.value);
+                    const endVal = parseInt(endSlider.value);
+                    if (startVal > endVal) {
+                        e.target.value = endVal;
+                        return;
+                    }
+                    document.getElementById('dateStartLabel').textContent = this.monthIndexToLabel(startVal);
+                    this.activeFilters.dateStart = startVal === 0 ? null : this.monthIndexToDate(startVal);
+                    this.updateSliderRange();
+                    this.updateMapData();
+                });
+
+                endSlider.addEventListener('change', (e) => {
+                    const endVal = parseInt(e.target.value);
+                    const startVal = parseInt(startSlider.value);
+                    if (endVal < startVal) {
+                        e.target.value = startVal;
+                        return;
+                    }
+                    document.getElementById('dateEndLabel').textContent = this.monthIndexToLabel(endVal);
+                    const maxIndex = CONFIG.DATE_SLIDER.totalMonths - 1;
+                    this.activeFilters.dateEnd = endVal === maxIndex ? null : this.monthIndexToDate(endVal + 1);
+                    this.updateSliderRange();
+                    this.updateMapData();
+                });
+
                 // Initialize slider range highlight
                 this.updateSliderRange();
+
+                // Legend collapse/expand functionality
+                const legendToggle = document.getElementById('legendToggle');
+                const mapLegend = document.getElementById('mapLegend');
+
+                if (legendToggle && mapLegend) {
+                    legendToggle.addEventListener('click', () => {
+                        const isCollapsed = mapLegend.classList.toggle('collapsed');
+                        legendToggle.setAttribute('aria-expanded', !isCollapsed);
+                    });
+                }
 
                 // Time of Day filter chips
                 document.querySelectorAll('#timeFilters .chip').forEach(chip => {
@@ -3655,14 +3757,16 @@
             }
 
             updateLegend() {
-                const legendEl = document.getElementById('mapLegend');
+                const legendEl = document.getElementById('legendContent');
                 if (!legendEl) return;
+
+                const legendHeader = document.querySelector('.legend-header h4');
 
                 let legendHTML = '';
 
                 if (this.activeColorScheme === 'collision_type') {
+                    if (legendHeader) legendHeader.textContent = 'Collision Type';
                     legendHTML = `
-                        <h4>Collision Type</h4>
                         <div class="legend-item">
                             <div class="legend-color" style="background: #4a90d9;"></div>
                             <div class="legend-label">Vehicle-Vehicle</div>
@@ -3688,8 +3792,8 @@
                         </div>
                     `;
                 } else if (this.activeColorScheme === 'time_bucket') {
+                    if (legendHeader) legendHeader.textContent = 'Time of Day';
                     legendHTML = `
-                        <h4>Time of Day</h4>
                         <div class="legend-item">
                             <div class="legend-color" style="background: #2c3e50;"></div>
                             <div class="legend-label">Early AM (12-6am)</div>
