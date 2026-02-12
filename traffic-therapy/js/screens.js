@@ -82,7 +82,7 @@ window.TT = window.TT || {};
     // Subtitle / instructions
     const subtitle = document.createElement('p');
     subtitle.className = 'title-subtitle';
-    subtitle.textContent = 'Slide the block to the exit';
+    subtitle.textContent = 'Slide the orange block to the exit';
     screen.appendChild(subtitle);
 
     // Start button
