@@ -124,7 +124,7 @@
       "description": "A Rush Hour-style sliding block puzzle game with 5 hand-crafted levels, a BFS solver that verifies every puzzle is solvable, and a hidden level editor for when you want to make your friends suffer. Pure vanilla JS, no frameworks, no build tools, just vibes and pointer events.",
       "category": "Game",
       "image": "https://images.unsplash.com/photo-1544256718-3bcf237f3974?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Puzzle Game", "Vanilla JS"],
+      "tags": ["Puzzle Game"],
       "actions": [
         {
           "text": "Play",

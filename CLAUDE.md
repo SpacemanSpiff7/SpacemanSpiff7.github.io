@@ -6,6 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a static GitHub Pages site with no build process. Simply push to the `master` branch to deploy.
 
+### Python Usage
+- Always use `python` (not `python3`) and run through a virtual environment (venv).
+
 ### Local Development
 ```bash
 # Serve locally using Python (Python 3)
