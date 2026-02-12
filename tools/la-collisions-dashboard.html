@@ -96,6 +96,8 @@
             font-family: 'Silkscreen', 'Courier New', monospace;
             color: var(--color-text-secondary);
             font-size: 0.875rem;
+            position: relative;
+            display: inline-block;
         }
 
         .subtitle a {
@@ -108,91 +110,59 @@
             opacity: 0.8;
         }
 
-        /* Data Quality Banner - Muted rust tones for dark theme */
-        .data-quality-banner {
-            background: linear-gradient(135deg, rgba(139, 74, 50, 0.15), rgba(139, 74, 50, 0.08));
-            border: 1px solid rgba(139, 74, 50, 0.35);
-            border-radius: var(--radius-lg);
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-
-        .data-quality-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: rgba(139, 74, 50, 0.1);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .data-quality-header:hover {
-            background: rgba(139, 74, 50, 0.18);
-        }
-
-        .data-quality-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 600;
-            color: #d4836b;
-        }
-
-        .data-quality-icon {
-            font-size: 1.25rem;
-        }
-
-        .data-quality-toggle {
-            background: none;
-            border: none;
-            font-size: 1.25rem;
-            color: #d4836b;
-            cursor: pointer;
-            transition: transform 0.2s;
-            padding: 0.25rem;
-        }
-
-        .data-quality-banner.expanded .data-quality-toggle {
-            transform: rotate(180deg);
-        }
-
-        .data-quality-content {
+        .data-notes-popover {
             display: none;
-            padding: 1.5rem;
-            border-top: 1px solid rgba(139, 74, 50, 0.25);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.75rem;
+            width: 420px;
+            max-width: 90vw;
+            background: rgba(15, 18, 25, 0.97);
+            border: 1px solid rgba(0, 191, 255, 0.25);
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 100;
         }
 
-        .data-quality-banner.expanded .data-quality-content {
+        .data-notes-popover.visible {
             display: block;
         }
 
-        .data-quality-content h4 {
-            color: var(--color-text);
-            font-size: 1rem;
+        .data-notes-popover h4 {
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #fff;
             margin: 0 0 0.75rem 0;
         }
 
-        .data-quality-content ul {
-            margin: 0 0 1.25rem 0;
-            padding-left: 1.5rem;
-            color: var(--color-text-secondary);
+        .data-notes-popover p {
+            margin: 0 0 0.75rem 0;
         }
 
-        .data-quality-content li {
-            margin-bottom: 0.5rem;
-            line-height: 1.5;
+        .data-notes-popover p:last-child {
+            margin-bottom: 0;
         }
 
-        .data-quality-content p {
-            margin: 0;
-            color: var(--color-text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.6;
+        .data-notes-popover a {
+            color: #00bfff;
+            text-decoration: underline;
         }
 
-        .data-quality-content strong {
-            color: var(--color-text);
+        .data-notes-popover a:hover {
+            opacity: 0.8;
+        }
+
+        .data-notes-popover .note-meta {
+            font-size: 0.7rem;
+            color: rgba(224, 240, 255, 0.45);
         }
 
 
@@ -350,29 +320,34 @@
             gap: 0.5rem;
         }
 
-        .btn-secondary {
+        .dash-btn {
             padding: 0.5rem 1rem;
-            border: 1px solid rgba(138, 43, 226, 0.5);
-            background: rgba(138, 43, 226, 0.08);
-            color: #e0e0ff;
-            border-radius: var(--radius-md);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            background: rgba(0, 191, 255, 0.05);
+            color: #e0f0ff;
+            border-radius: 2rem;
             font-family: 'Silkscreen', 'Courier New', monospace;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 400;
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        .btn-secondary.active {
-            background: rgba(138, 43, 226, 0.45);
-            border-color: rgba(138, 43, 226, 0.8);
-            color: white;
-            box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        .dash-btn:hover {
+            background: rgba(0, 191, 255, 0.12);
+            border-color: rgba(0, 191, 255, 0.5);
         }
 
-        .btn-secondary:hover {
-            background: rgba(138, 43, 226, 0.15);
-            border-color: rgba(138, 43, 226, 0.6);
+        .dash-btn.active {
+            background: rgba(0, 191, 255, 0.35);
+            color: #fff;
+            border-color: rgba(0, 191, 255, 0.7);
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
+        }
+
+        .dash-btn.active:hover {
+            background: rgba(0, 191, 255, 0.4);
         }
 
         .map-wrapper {
@@ -605,34 +580,6 @@
             align-items: center;
         }
 
-        .btn-control {
-            padding: 0.5rem 1rem;
-            font-size: 0.7rem;
-            font-family: 'Silkscreen', 'Courier New', monospace;
-            background: rgba(0, 191, 255, 0.05);
-            color: #e0f0ff;
-            border: 1px solid rgba(0, 191, 255, 0.3);
-            border-radius: 2rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .btn-control:hover {
-            background: rgba(0, 191, 255, 0.12);
-            border-color: rgba(0, 191, 255, 0.5);
-        }
-
-        .btn-control.active {
-            background: rgba(0, 191, 255, 0.35);
-            color: #fff;
-            border-color: rgba(0, 191, 255, 0.7);
-            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
-        }
-
-        .btn-control.active:hover {
-            background: rgba(0, 191, 255, 0.4);
-        }
 
         /* Filter Panel */
         .filter-panel {
@@ -836,29 +783,6 @@
             gap: 0.5rem;
         }
 
-        .chip {
-            padding: 0.5rem 1rem;
-            border: 1px solid rgba(0, 191, 255, 0.3);
-            background: rgba(0, 191, 255, 0.05);
-            color: #e0f0ff;
-            border-radius: 2rem;
-            font-family: 'Silkscreen', 'Courier New', monospace;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .chip:hover {
-            border-color: rgba(0, 191, 255, 0.5);
-            background: rgba(0, 191, 255, 0.12);
-        }
-
-        .chip.active {
-            border-color: rgba(0, 191, 255, 0.7);
-            background: rgba(0, 191, 255, 0.35);
-            color: white;
-            box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
-        }
 
         .checkbox-group {
             display: flex;
@@ -1052,7 +976,7 @@
                 gap: 0.5rem;
             }
 
-            .map-controls .btn-secondary {
+            .map-controls .dash-btn {
                 width: auto;
                 min-width: 150px;
             }
@@ -1074,7 +998,7 @@
                 margin-bottom: 0.5rem;
             }
 
-            .button-group .btn-control {
+            .button-group .dash-btn {
                 width: auto;
                 min-width: 140px;
             }
@@ -1462,7 +1386,15 @@
         <!-- Dashboard Header -->
         <header class="dashboard-header">
             <h1>LA Traffic Collisions (2010-2025)</h1>
-            <p class="subtitle">620,659 collision records from LAPD &bull; <a id="showDataNotes">See data notes</a></p>
+            <div class="subtitle">620,659 collision records from LAPD &bull; <a id="showDataNotes">See data notes</a>
+                <div class="data-notes-popover" id="dataNotesPopover">
+                    <h4>About This Data</h4>
+                    <p>Traffic collision incidents in the City of Los Angeles from 2010 to present, provided by the LAPD. Transcribed from original paper traffic reports -- some inaccuracies may exist. Addresses are rounded to the nearest hundred block for privacy. Locations with missing data are recorded as (0, 0).</p>
+                    <p>622K records across 21 LAPD Geographic Areas. This dataset is no longer updated as LAPD transitions to a new Records Management System.</p>
+                    <p class="note-meta">Data last updated: March 11, 2025 &bull; License: CC0 1.0 (Public Domain)<br>
+                    <a href="https://data.lacity.org/Public-Safety/Traffic-Collision-Data-from-2010-to-Present/d5tf-ez2w/about_data" target="_blank" rel="noopener">View source dataset on LA Open Data</a></p>
+                </div>
+            </div>
         </header>
 
         <!-- KPI Cards Section -->
@@ -1528,8 +1460,8 @@
                 <div class="section-header">
                     <h2>Collision Map</h2>
                     <div class="map-controls" role="group" aria-label="Map color scheme">
-                        <button id="colorByType" class="btn-secondary active" aria-pressed="true">By Collision Type</button>
-                        <button id="colorByTime" class="btn-secondary" aria-pressed="false">By Time of Day</button>
+                        <button id="colorByType" class="dash-btn active" aria-pressed="true">By Collision Type</button>
+                        <button id="colorByTime" class="dash-btn" aria-pressed="false">By Time of Day</button>
                     </div>
                 </div>
                 <div class="map-wrapper">
@@ -1602,10 +1534,10 @@
                 <div class="control-group">
                     <div class="button-group">
                         <label>Data Scope:</label>
-                        <button class="btn-control active" data-scope="viewport">
+                        <button class="dash-btn active" data-scope="viewport">
                             Viewport Only
                         </button>
-                        <button class="btn-control" data-scope="all">
+                        <button class="dash-btn" data-scope="all">
                             All Filtered
                         </button>
                     </div>
@@ -1614,13 +1546,13 @@
                 <div class="control-group">
                     <div class="button-group">
                         <label>Display Mode:</label>
-                        <button class="btn-control active" data-mode="stacked">
+                        <button class="dash-btn active" data-mode="stacked">
                             Stacked
                         </button>
-                        <button class="btn-control" data-mode="grouped">
+                        <button class="dash-btn" data-mode="grouped">
                             Grouped
                         </button>
-                        <button class="btn-control" data-mode="total">
+                        <button class="dash-btn" data-mode="total">
                             Total Only
                         </button>
                     </div>
@@ -1632,19 +1564,19 @@
         <aside id="filterPanel" class="filter-panel" role="region" aria-label="Filter controls">
             <div class="filter-header">
                 <h3>Filters</h3>
-                <button id="resetFilters" class="btn-control">Reset All</button>
+                <button id="resetFilters" class="dash-btn">Reset All</button>
             </div>
 
             <!-- Time of Day Filter -->
             <details class="filter-group filter-collapsible" open>
                 <summary>Time of Day</summary>
                 <div class="chip-group" id="timeFilters">
-                    <button class="chip active" data-bucket="AM_PEAK" role="checkbox" aria-checked="true">AM Peak</button>
-                    <button class="chip active" data-bucket="MIDDAY" role="checkbox" aria-checked="true">Midday</button>
-                    <button class="chip active" data-bucket="PM_PEAK" role="checkbox" aria-checked="true">PM Peak</button>
-                    <button class="chip active" data-bucket="EVENING" role="checkbox" aria-checked="true">Evening</button>
-                    <button class="chip active" data-bucket="LATE_NIGHT" role="checkbox" aria-checked="true">Late Night</button>
-                    <button class="chip active" data-bucket="EARLY_MORNING" role="checkbox" aria-checked="true">Early AM</button>
+                    <button class="dash-btn active" data-bucket="AM_PEAK" role="checkbox" aria-checked="true">AM Peak</button>
+                    <button class="dash-btn active" data-bucket="MIDDAY" role="checkbox" aria-checked="true">Midday</button>
+                    <button class="dash-btn active" data-bucket="PM_PEAK" role="checkbox" aria-checked="true">PM Peak</button>
+                    <button class="dash-btn active" data-bucket="EVENING" role="checkbox" aria-checked="true">Evening</button>
+                    <button class="dash-btn active" data-bucket="LATE_NIGHT" role="checkbox" aria-checked="true">Late Night</button>
+                    <button class="dash-btn active" data-bucket="EARLY_MORNING" role="checkbox" aria-checked="true">Early AM</button>
                 </div>
             </details>
 
@@ -1652,8 +1584,8 @@
             <details class="filter-group filter-collapsible" open>
                 <summary>Days of Week</summary>
                 <div class="chip-group" id="dayFilters">
-                    <button class="chip active" data-day="weekday" role="checkbox" aria-checked="true">Weekdays</button>
-                    <button class="chip active" data-day="weekend" role="checkbox" aria-checked="true">Weekends</button>
+                    <button class="dash-btn active" data-day="weekday" role="checkbox" aria-checked="true">Weekdays</button>
+                    <button class="dash-btn active" data-day="weekend" role="checkbox" aria-checked="true">Weekends</button>
                 </div>
             </details>
 
@@ -1661,11 +1593,11 @@
             <details class="filter-group filter-collapsible" open>
                 <summary>Collision Type</summary>
                 <div class="chip-group" id="collisionTypeFilters">
-                    <button class="chip active" data-type="vehicle-to-vehicle" role="checkbox" aria-checked="true">Vehicle-Vehicle</button>
-                    <button class="chip active" data-type="vehicle-pedestrian" role="checkbox" aria-checked="true">Pedestrian</button>
-                    <button class="chip active" data-type="vehicle-motorcycle" role="checkbox" aria-checked="true">Motorcycle</button>
-                    <button class="chip active" data-type="vehicle-bicycle" role="checkbox" aria-checked="true">Bicycle</button>
-                    <button class="chip active" data-type="other" role="checkbox" aria-checked="true">Other</button>
+                    <button class="dash-btn active" data-type="vehicle-to-vehicle" role="checkbox" aria-checked="true">Vehicle-Vehicle</button>
+                    <button class="dash-btn active" data-type="vehicle-pedestrian" role="checkbox" aria-checked="true">Pedestrian</button>
+                    <button class="dash-btn active" data-type="vehicle-motorcycle" role="checkbox" aria-checked="true">Motorcycle</button>
+                    <button class="dash-btn active" data-type="vehicle-bicycle" role="checkbox" aria-checked="true">Bicycle</button>
+                    <button class="dash-btn active" data-type="other" role="checkbox" aria-checked="true">Other</button>
                 </div>
             </details>
 
@@ -1673,10 +1605,10 @@
             <details class="filter-group filter-collapsible" open>
                 <summary>Severity Level</summary>
                 <div class="chip-group" id="severityFilters">
-                    <button class="chip active" data-severity="property_damage" role="checkbox" aria-checked="true">Property Damage</button>
-                    <button class="chip active" data-severity="minor_injury" role="checkbox" aria-checked="true">Minor Injury</button>
-                    <button class="chip active" data-severity="severe_injury" role="checkbox" aria-checked="true">Severe Injury</button>
-                    <button class="chip active" data-severity="unknown" role="checkbox" aria-checked="true">Unknown</button>
+                    <button class="dash-btn active" data-severity="property_damage" role="checkbox" aria-checked="true">Property Damage</button>
+                    <button class="dash-btn active" data-severity="minor_injury" role="checkbox" aria-checked="true">Minor Injury</button>
+                    <button class="dash-btn active" data-severity="severe_injury" role="checkbox" aria-checked="true">Severe Injury</button>
+                    <button class="dash-btn active" data-severity="unknown" role="checkbox" aria-checked="true">Unknown</button>
                 </div>
             </details>
 
@@ -1684,8 +1616,8 @@
             <details class="filter-group filter-collapsible" open>
                 <summary>Special Circumstances</summary>
                 <div class="chip-group" id="specialFilters">
-                    <button class="chip" data-special="hit_and_run" role="checkbox" aria-checked="false">Hit & Run</button>
-                    <button class="chip" data-special="dui" role="checkbox" aria-checked="false">DUI-Related</button>
+                    <button class="dash-btn" data-special="hit_and_run" role="checkbox" aria-checked="false">Hit & Run</button>
+                    <button class="dash-btn" data-special="dui" role="checkbox" aria-checked="false">DUI-Related</button>
                 </div>
             </details>
 
@@ -2332,7 +2264,7 @@
                 const bucket = timeBucketMap[hour];
 
                 // Update UI chips
-                document.querySelectorAll('#timeFilters .chip').forEach(chip => {
+                document.querySelectorAll('#timeFilters .dash-btn').forEach(chip => {
                     const isMatch = chip.dataset.bucket === bucket;
                     chip.classList.toggle('active', isMatch);
                     chip.setAttribute('aria-checked', isMatch);
@@ -2354,8 +2286,8 @@
                 const isWeekend = dayIndex === 0 || dayIndex === 6;
 
                 // Update chip UI
-                const weekdayChip = document.querySelector('#dayFilters .chip[data-day="weekday"]');
-                const weekendChip = document.querySelector('#dayFilters .chip[data-day="weekend"]');
+                const weekdayChip = document.querySelector('#dayFilters .dash-btn[data-day="weekday"]');
+                const weekendChip = document.querySelector('#dayFilters .dash-btn[data-day="weekend"]');
 
                 if (isWeekend) {
                     weekdayChip.classList.remove('active');
@@ -3229,20 +3161,24 @@
             }
 
             attachEventListeners() {
-                // Data quality banner toggle
-                const banner = document.getElementById('dataQualityBanner');
-                const bannerHeader = document.getElementById('dataQualityHeader');
+                // Data notes popover toggle
                 const showDataNotes = document.getElementById('showDataNotes');
+                const dataNotesPopover = document.getElementById('dataNotesPopover');
 
-                bannerHeader.addEventListener('click', () => {
-                    banner.classList.toggle('expanded');
-                });
+                if (showDataNotes && dataNotesPopover) {
+                    showDataNotes.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dataNotesPopover.classList.toggle('visible');
+                    });
 
-                showDataNotes.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    banner.classList.add('expanded');
-                    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                });
+                    // Close on click outside
+                    document.addEventListener('click', (e) => {
+                        if (!dataNotesPopover.contains(e.target) && e.target !== showDataNotes) {
+                            dataNotesPopover.classList.remove('visible');
+                        }
+                    });
+                }
 
                 // Color scheme toggle
                 document.getElementById('colorByType').addEventListener('click', () => {
@@ -3339,60 +3275,60 @@
                 }
 
                 // Time of Day filter chips
-                document.querySelectorAll('#timeFilters .chip').forEach(chip => {
+                document.querySelectorAll('#timeFilters .dash-btn').forEach(chip => {
                     chip.addEventListener('click', (e) => {
                         e.target.classList.toggle('active');
                         this.activeFilters.timeBuckets = Array.from(
-                            document.querySelectorAll('#timeFilters .chip.active')
+                            document.querySelectorAll('#timeFilters .dash-btn.active')
                         ).map(c => c.dataset.bucket);
                         this.updateMapData();
                     });
                 });
 
                 // Collision Type filter chips
-                document.querySelectorAll('#collisionTypeFilters .chip').forEach(chip => {
+                document.querySelectorAll('#collisionTypeFilters .dash-btn').forEach(chip => {
                     chip.addEventListener('click', (e) => {
                         e.target.classList.toggle('active');
                         this.activeFilters.collisionTypes = Array.from(
-                            document.querySelectorAll('#collisionTypeFilters .chip.active')
+                            document.querySelectorAll('#collisionTypeFilters .dash-btn.active')
                         ).map(c => c.dataset.type);
                         this.updateMapData();
                     });
                 });
 
                 // Days of Week filter chips
-                document.querySelectorAll('#dayFilters .chip').forEach(chip => {
+                document.querySelectorAll('#dayFilters .dash-btn').forEach(chip => {
                     chip.addEventListener('click', (e) => {
                         e.target.classList.toggle('active');
                         const isActive = e.target.classList.contains('active');
                         e.target.setAttribute('aria-checked', isActive);
-                        this.activeFilters.weekday = document.querySelector('#dayFilters .chip[data-day="weekday"]').classList.contains('active');
-                        this.activeFilters.weekend = document.querySelector('#dayFilters .chip[data-day="weekend"]').classList.contains('active');
+                        this.activeFilters.weekday = document.querySelector('#dayFilters .dash-btn[data-day="weekday"]').classList.contains('active');
+                        this.activeFilters.weekend = document.querySelector('#dayFilters .dash-btn[data-day="weekend"]').classList.contains('active');
                         this.updateMapData();
                     });
                 });
 
                 // Severity filter chips
-                document.querySelectorAll('#severityFilters .chip').forEach(chip => {
+                document.querySelectorAll('#severityFilters .dash-btn').forEach(chip => {
                     chip.addEventListener('click', (e) => {
                         e.target.classList.toggle('active');
                         const isActive = e.target.classList.contains('active');
                         e.target.setAttribute('aria-checked', isActive);
                         this.activeFilters.severityLevels = Array.from(
-                            document.querySelectorAll('#severityFilters .chip.active')
+                            document.querySelectorAll('#severityFilters .dash-btn.active')
                         ).map(c => c.dataset.severity);
                         this.updateMapData();
                     });
                 });
 
                 // Special circumstances filter chips
-                document.querySelectorAll('#specialFilters .chip').forEach(chip => {
+                document.querySelectorAll('#specialFilters .dash-btn').forEach(chip => {
                     chip.addEventListener('click', (e) => {
                         e.target.classList.toggle('active');
                         const isActive = e.target.classList.contains('active');
                         e.target.setAttribute('aria-checked', isActive);
-                        this.activeFilters.showHitAndRun = document.querySelector('#specialFilters .chip[data-special="hit_and_run"]').classList.contains('active');
-                        this.activeFilters.showDUI = document.querySelector('#specialFilters .chip[data-special="dui"]').classList.contains('active');
+                        this.activeFilters.showHitAndRun = document.querySelector('#specialFilters .dash-btn[data-special="hit_and_run"]').classList.contains('active');
+                        this.activeFilters.showDUI = document.querySelector('#specialFilters .dash-btn[data-special="dui"]').classList.contains('active');
                         this.updateMapData();
                     });
                 });
@@ -3416,12 +3352,12 @@
                     document.getElementById('dateEndLabel').textContent = 'Mar 2025';
                     this.updateSliderRange();
                     // Reset all filter chips to active (except special circumstances which start inactive)
-                    document.querySelectorAll('#timeFilters .chip, #dayFilters .chip, #collisionTypeFilters .chip, #severityFilters .chip').forEach(c => {
+                    document.querySelectorAll('#timeFilters .dash-btn, #dayFilters .dash-btn, #collisionTypeFilters .dash-btn, #severityFilters .dash-btn').forEach(c => {
                         c.classList.add('active');
                         c.setAttribute('aria-checked', 'true');
                     });
                     // Special circumstances start inactive
-                    document.querySelectorAll('#specialFilters .chip').forEach(c => {
+                    document.querySelectorAll('#specialFilters .dash-btn').forEach(c => {
                         c.classList.remove('active');
                         c.setAttribute('aria-checked', 'false');
                     });
@@ -3447,7 +3383,7 @@
                 this.setupSwipeToDismiss();
 
                 // Update aria-checked on chip toggles
-                document.querySelectorAll('.chip[role="checkbox"]').forEach(chip => {
+                document.querySelectorAll('.dash-btn[role="checkbox"]').forEach(chip => {
                     chip.addEventListener('click', () => {
                         const isChecked = chip.classList.contains('active');
                         chip.setAttribute('aria-checked', isChecked);
