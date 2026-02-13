@@ -3,7 +3,7 @@
     "la-collisions-dashboard",
     "traffic-therapy",
     "dodgers-notifications",
-    "ebay-craigslist-chrome-extension"
+    "glowy-blob-ball"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",
@@ -147,6 +147,21 @@
           "url": "https://github.com/SpacemanSpiff7/EbayLookupChromePlugin",
           "type": "primary",
           "external": true
+        }
+      ]
+    },
+    {
+      "id": "glowy-blob-ball",
+      "title": "Glowy Blob Ball",
+      "shortDescription": "Glowy. Blob. Ball.",
+      "description": "Glowy. Blob. Ball.",
+      "category": "Background",
+      "tags": ["Background"],
+      "actions": [
+        {
+          "text": "See It",
+          "url": "#blob-showcase",
+          "type": "primary"
         }
       ]
     }

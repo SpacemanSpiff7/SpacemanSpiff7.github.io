@@ -239,7 +239,7 @@ async function loadProjects() {
                 <h2>${project.title}</h2>
                 <p>${project.shortDescription}</p>
                 <div class="project-actions">
-                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
                 </div>
             `;
 
@@ -257,11 +257,21 @@ async function loadProjects() {
                     <h3>${project.title}</h3>
                     <p>${project.shortDescription}</p>
                     <div class="project-actions">
-                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
                     </div>
                 </div>
             `).join('');
         }
+
+        // Handle scroll-to links (e.g. #blob-showcase)
+        document.addEventListener('click', (e) => {
+            const scrollLink = e.target.closest('[data-scroll-to]');
+            if (scrollLink) {
+                e.preventDefault();
+                const el = document.getElementById(scrollLink.dataset.scrollTo);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
 
         // Initialize progress indicator with dynamic featured count
         initProgressIndicator(featuredProjects.length);
