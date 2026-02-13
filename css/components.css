@@ -1095,7 +1095,7 @@
 }
 
 .project-card .project-actions {
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .project-card .project-btn {
