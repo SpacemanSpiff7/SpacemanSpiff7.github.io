@@ -238,14 +238,9 @@ async function loadProjects() {
             section.innerHTML = `
                 <h2>${project.title}</h2>
                 <p>${project.shortDescription}</p>
-                <div class="tags">
-                    ${project.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                <div class="project-actions">
+                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
                 </div>
-                <a href="${project.actions[0].url}"
-                   class="link-btn"
-                   target="_blank" rel="noopener noreferrer">
-                    ${project.actions[0].text}
-                </a>
             `;
 
             // Insert before about section
@@ -261,11 +256,9 @@ async function loadProjects() {
                 <div class="project-card">
                     <h3>${project.title}</h3>
                     <p>${project.shortDescription}</p>
-                    <a href="${project.actions[0].url}"
-                       class="link-btn"
-                       target="_blank" rel="noopener noreferrer">
-                        ${project.actions[0].text}
-                    </a>
+                    <div class="project-actions">
+                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                    </div>
                 </div>
             `).join('');
         }

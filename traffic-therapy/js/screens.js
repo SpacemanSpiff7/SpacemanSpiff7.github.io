@@ -92,6 +92,12 @@ window.TT = window.TT || {};
     startBtn.addEventListener('click', () => showLevelSelect());
     screen.appendChild(startBtn);
 
+    const contact = document.createElement('a');
+    contact.className = 'title-contact';
+    contact.href = 'mailto:contact@simonelongo.com';
+    contact.textContent = 'contact@simonelongo.com';
+    screen.appendChild(contact);
+
     transitionTo(screen);
 
     // Show admin badge if already activated (e.g. navigating back to title)
@@ -124,6 +130,12 @@ window.TT = window.TT || {};
     heading.className = 'screen-heading';
     heading.textContent = 'Select Level';
     screen.appendChild(heading);
+
+    // Hint text
+    const hint = document.createElement('p');
+    hint.className = 'levels-hint';
+    hint.textContent = 'Tap a level to play';
+    screen.appendChild(hint);
 
     // Levels grid
     const grid = document.createElement('div');

@@ -193,8 +193,25 @@
     }
 
     .contact-links {
-        flex-direction: column;
-        gap: 1rem;
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    .contact-links .link-btn-label {
+        display: none;
+    }
+
+    .contact-links .link-btn {
+        text-decoration: none;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .contact-links .contact-icon {
+        width: 32px;
+        height: 32px;
     }
 
     .snap-section {

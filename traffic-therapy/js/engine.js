@@ -92,6 +92,24 @@ window.TT = window.TT || {};
     positionExitElement(exitIndicator, levelData.exit);
     boardEl.appendChild(exitIndicator);
 
+    // Exit zone — checkered line at the border gap
+    const exitZone = document.createElement('div');
+    exitZone.className = 'exit-zone exit-zone--' + levelData.exit.side;
+    if (levelData.exit.side === 'right') {
+      exitZone.style.top = `calc(var(--cell-size) * ${levelData.exit.position})`;
+      exitZone.style.right = '-3px';
+    } else if (levelData.exit.side === 'left') {
+      exitZone.style.top = `calc(var(--cell-size) * ${levelData.exit.position})`;
+      exitZone.style.left = '-3px';
+    } else if (levelData.exit.side === 'bottom') {
+      exitZone.style.left = `calc(var(--cell-size) * ${levelData.exit.position})`;
+      exitZone.style.bottom = '-3px';
+    } else if (levelData.exit.side === 'top') {
+      exitZone.style.left = `calc(var(--cell-size) * ${levelData.exit.position})`;
+      exitZone.style.top = '-3px';
+    }
+    boardEl.appendChild(exitZone);
+
     // Create target block
     const targetBlock = makeBlockState({
       id: 'target',
@@ -151,15 +169,21 @@ window.TT = window.TT || {};
       }
     });
 
+    const hintBtn = document.createElement('button');
+    hintBtn.className = 'btn btn-hint';
+    hintBtn.textContent = '?';
+    hintBtn.addEventListener('click', showHintArrows);
+
     btnRow.appendChild(resetBtn);
     btnRow.appendChild(menuBtn);
+    btnRow.appendChild(hintBtn);
     screen.appendChild(btnRow);
 
     root.appendChild(screen);
 
     // Compute cellSize after DOM is rendered
     requestAnimationFrame(() => {
-      cellSize = boardEl.offsetWidth / levelData.gridWidth;
+      cellSize = boardEl.clientWidth / levelData.gridWidth;
     });
 
     // Brief highlight animation on target block and exit indicator
@@ -360,7 +384,7 @@ window.TT = window.TT || {};
     if (!block) return;
 
     // Recompute cellSize in case of resize
-    cellSize = boardEl.offsetWidth / currentLevel.gridWidth;
+    cellSize = boardEl.clientWidth / currentLevel.gridWidth;
 
     // Determine allowed axes based on block dimensions
     const canHorizontal = block.width >= block.height; // horizontal or square
@@ -535,6 +559,43 @@ window.TT = window.TT || {};
         });
       }
     }, 400);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Hint arrows — briefly shows directional arrows on all blocks
+  // ---------------------------------------------------------------------------
+  function showHintArrows() {
+    if (boardEl.querySelector('.block-hint-arrow')) return;
+
+    blocks.forEach(block => {
+      if (!block.el) return;
+
+      const dirs = [];
+      if (block.width === block.height) {
+        dirs.push('left', 'right', 'top', 'bottom');
+      } else if (block.width > block.height) {
+        dirs.push('left', 'right');
+      } else {
+        dirs.push('top', 'bottom');
+      }
+
+      const arrows = { left: '\u2190', right: '\u2192', top: '\u2191', bottom: '\u2193' };
+      dirs.forEach(dir => {
+        const el = document.createElement('div');
+        el.className = `block-hint-arrow block-hint-arrow--${dir}`;
+        el.textContent = arrows[dir];
+        block.el.appendChild(el);
+      });
+    });
+
+    setTimeout(() => {
+      boardEl.querySelectorAll('.block-hint-arrow').forEach(el => {
+        el.classList.add('block-hint-arrow--fade');
+      });
+      setTimeout(() => {
+        boardEl.querySelectorAll('.block-hint-arrow').forEach(el => el.remove());
+      }, 300);
+    }, 1500);
   }
 
   // ---------------------------------------------------------------------------

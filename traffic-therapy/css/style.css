@@ -145,7 +145,9 @@ h1, h2, h3 {
 }
 
 .title-easter-egg:hover {
-  opacity: 0.7;
+  opacity: 1;
+  box-shadow: 0 0 6px 2px rgba(224, 123, 79, 0.6);
+  background: var(--color-exit);
 }
 
 .title-subtitle {
@@ -154,6 +156,19 @@ h1, h2, h3 {
   color: var(--color-text-dim);
   text-align: center;
   margin: 0;
+}
+
+.title-contact {
+  font-family: 'Silkscreen', cursive;
+  font-size: 0.55rem;
+  color: #1e1e3a;
+  text-decoration: none;
+  letter-spacing: 1px;
+  margin-top: -16px;
+}
+
+.title-contact:hover {
+  color: var(--color-text-dim);
 }
 
 
@@ -172,6 +187,12 @@ h1, h2, h3 {
   margin-bottom: 8px;
 }
 
+.levels-hint {
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 .levels-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -184,27 +205,31 @@ h1, h2, h3 {
 }
 
 .level-card {
-  background: var(--color-board);
-  border: 1px solid var(--color-wall);
-  border-radius: 8px;
+  background: var(--color-btn-bg);
+  border: 2px solid var(--color-wall);
+  border-radius: 6px;
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
   user-select: none;
   min-height: 80px;
+  box-shadow: 0 3px 0 #1a1a4a;
 }
 
 .level-card:hover {
   background: var(--color-btn-hover);
-  border-color: #3a3a6a;
+  border-color: #4a4a8a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #1a1a4a;
 }
 
 .level-card:active {
-  transform: scale(0.97);
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #1a1a4a;
 }
 
 .level-card__number {
@@ -262,6 +287,7 @@ h1, h2, h3 {
 /* --- 8. Board --- */
 
 .board {
+  box-sizing: content-box;
   position: relative;
   width: calc(var(--grid-cols) * var(--cell-size));
   height: calc(var(--grid-rows) * var(--cell-size));
@@ -358,6 +384,50 @@ h1, h2, h3 {
 .block--color-6 { background: var(--color-block-6); }
 .block--color-7 { background: var(--color-block-7); }
 .block--color-8 { background: var(--color-block-8); }
+
+/* Direction hint arrows (shown on ? button press) */
+.block-hint-arrow {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-family: 'Space Mono', monospace;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.block-hint-arrow--left {
+  left: 4px;
+  top: 0;
+  bottom: 0;
+}
+
+.block-hint-arrow--right {
+  right: 4px;
+  top: 0;
+  bottom: 0;
+}
+
+.block-hint-arrow--top {
+  top: 2px;
+  left: 0;
+  right: 0;
+}
+
+.block-hint-arrow--bottom {
+  bottom: 2px;
+  left: 0;
+  right: 0;
+}
+
+.block-hint-arrow--fade {
+  opacity: 0;
+}
 
 
 /* --- 10. Exit Indicator --- */
@@ -491,6 +561,40 @@ h1, h2, h3 {
 }
 
 
+/* Exit zone — checkered finish-line strip at the border gap */
+.exit-zone {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.55;
+}
+
+.exit-zone--right,
+.exit-zone--left {
+  width: 3px;
+  height: var(--cell-size);
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-exit) 0px,
+    var(--color-exit) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.exit-zone--top,
+.exit-zone--bottom {
+  height: 3px;
+  width: var(--cell-size);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-exit) 0px,
+    var(--color-exit) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+
 /* --- 11. Win Screen Overlay --- */
 
 .screen--win {
@@ -584,6 +688,21 @@ h1, h2, h3 {
   padding: 8px 16px;
   font-size: 0.8rem;
   min-height: 44px;
+}
+
+.btn-hint {
+  width: 36px;
+  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
