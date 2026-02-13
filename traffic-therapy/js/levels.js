@@ -159,5 +159,58 @@ TT.LEVELS = [
       // Horizontal 2x1 in row 4
       { x: 3, y: 4, width: 2, height: 1, color: "#6B7B5B" }
     ]
+  },
+  {
+    id: 6,
+    name: "Rachel's Level",
+    gridWidth: 5,
+    gridHeight: 5,
+    par: 10,
+    exit: { side: "right", position: 0 },
+    target: { x: 0, y: 3 },
+    blocks: [
+      {
+        "x": 0,
+        "y": 1,
+        "width": 2,
+        "height": 2,
+        "color": "#5B7B9F"
+      },
+      {
+        "x": 3,
+        "y": 1,
+        "width": 1,
+        "height": 2,
+        "color": "#8F6B7B"
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "width": 1,
+        "height": 2,
+        "color": "#5B6B8F"
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "width": 3,
+        "height": 1,
+        "color": "#6B8F7B"
+      },
+      {
+        "x": 4,
+        "y": 0,
+        "width": 1,
+        "height": 2,
+        "color": "#7B7B6B"
+      },
+      {
+        "x": 2,
+        "y": 1,
+        "width": 1,
+        "height": 2,
+        "color": "#6B6B9F"
+      }
+    ]
   }
 ];
