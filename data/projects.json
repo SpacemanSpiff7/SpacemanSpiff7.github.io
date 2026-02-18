@@ -109,6 +109,7 @@
       "category": "Cool Stuff",
       "image": "assets/images/og-image.png",
       "tags": ["Public Art", "Progressive Web App"],
+      "hidden": true,
       "actions": [
         {
           "text": "Go to App",

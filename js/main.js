@@ -239,7 +239,7 @@ async function loadProjects() {
                 <h2>${project.title}</h2>
                 <p>${project.shortDescription}</p>
                 <div class="project-actions">
-                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
                 </div>
             `;
 
@@ -252,12 +252,13 @@ async function loadProjects() {
         // Populate projects grid (workbench - works in progress, 2 columns)
         const grid = document.querySelector('.projects-grid');
         if (grid) {
-            grid.innerHTML = projectData.projects.map(project => `
+            const visibleProjects = projectData.projects.filter(p => !p.hidden);
+            grid.innerHTML = visibleProjects.map(project => `
                 <div class="project-card">
                     <h3>${project.title}</h3>
                     <p>${project.shortDescription}</p>
                     <div class="project-actions">
-                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
                     </div>
                 </div>
             `).join('');
