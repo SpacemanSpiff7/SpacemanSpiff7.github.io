@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-P9G5CS83DZ');
+  </script>
+  <title>Agile This</title>
+  <meta name="description" content="Lightweight kanban board for getting things done, or at least looking like it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header__brand">
+      <h1 class="header__title">Agile This</h1>
+      <span class="header__badge">Certified Scrum</span>
+    </div>
+    <div class="header__actions">
+      <button id="btn-new-ticket" class="btn btn--primary">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+        New Ticket
+        <kbd class="btn__kbd">N</kbd>
+      </button>
+      <button id="btn-export" class="btn btn--ghost">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 3v7"/><path d="M5 7l3 3 3-3"/></svg>
+        Export
+      </button>
+      <button id="btn-import" class="btn btn--ghost">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/></svg>
+        Import
+      </button>
+      <input type="file" id="file-import" accept=".json" hidden>
+    </div>
+  </header>
+
+  <main class="board" id="board">
+    <div class="column" data-status="todo">
+      <div class="column__header">
+        <div class="column__header-left">
+          <span class="status-dot" style="--dot-color: var(--col-todo)"></span>
+          <h2>Todo</h2>
+        </div>
+        <span class="column__count" data-count="todo">0</span>
+      </div>
+      <div class="column__cards" id="col-todo"></div>
+      <div class="column__quickadd">
+        <input type="text" class="quickadd-input" data-status="todo" placeholder="+ Add to Todo...">
+      </div>
+    </div>
+
+    <div class="column" data-status="in-progress">
+      <div class="column__header">
+        <div class="column__header-left">
+          <span class="status-dot" style="--dot-color: var(--col-progress)"></span>
+          <h2>In Progress</h2>
+        </div>
+        <span class="column__count" data-count="in-progress">0</span>
+      </div>
+      <div class="column__cards" id="col-in-progress"></div>
+      <div class="column__quickadd">
+        <input type="text" class="quickadd-input" data-status="in-progress" placeholder="+ Add to In Progress...">
+      </div>
+    </div>
+
+    <div class="column" data-status="testing">
+      <div class="column__header">
+        <div class="column__header-left">
+          <span class="status-dot" style="--dot-color: var(--col-testing)"></span>
+          <h2>Testing</h2>
+        </div>
+        <span class="column__count" data-count="testing">0</span>
+      </div>
+      <div class="column__cards" id="col-testing"></div>
+      <div class="column__quickadd">
+        <input type="text" class="quickadd-input" data-status="testing" placeholder="+ Add to Testing...">
+      </div>
+    </div>
+
+    <div class="column" data-status="done">
+      <div class="column__header">
+        <div class="column__header-left">
+          <span class="status-dot" style="--dot-color: var(--col-done)"></span>
+          <h2>Done</h2>
+        </div>
+        <span class="column__count" data-count="done">0</span>
+      </div>
+      <div class="column__cards" id="col-done"></div>
+      <div class="column__quickadd">
+        <input type="text" class="quickadd-input" data-status="done" placeholder="+ Add to Done...">
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit/Create Modal -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal__header">
+        <h2 id="modal-title">New Ticket</h2>
+        <button class="modal__close" id="modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="ticket-form" class="modal__body">
+        <input type="hidden" id="ticket-id">
+
+        <div class="form-group">
+          <label for="ticket-title">Title</label>
+          <input type="text" id="ticket-title" required placeholder="Ticket title...">
+        </div>
+
+        <div class="form-group">
+          <label for="ticket-desc">Description</label>
+          <textarea id="ticket-desc" rows="3" placeholder="Describe the ticket..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="form-group__header">
+            <label for="ticket-prompt">AI Prompt</label>
+            <button type="button" class="btn--copy" id="btn-copy-prompt" aria-label="Copy prompt to clipboard">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/></svg>
+              <span id="copy-prompt-text">Copy</span>
+            </button>
+          </div>
+          <textarea id="ticket-prompt" class="prompt-textarea" rows="3" placeholder="Paste or write an AI prompt for this ticket..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Priority</label>
+          <div class="priority-pills" id="priority-pills">
+            <label class="priority-pill">
+              <input type="radio" name="priority" value="low">
+              <span class="priority-pill__inner"><span class="priority-dot priority-dot--low"></span> Low</span>
+            </label>
+            <label class="priority-pill">
+              <input type="radio" name="priority" value="medium" checked>
+              <span class="priority-pill__inner"><span class="priority-dot priority-dot--medium"></span> Medium</span>
+            </label>
+            <label class="priority-pill">
+              <input type="radio" name="priority" value="high">
+              <span class="priority-pill__inner"><span class="priority-dot priority-dot--high"></span> High</span>
+            </label>
+            <label class="priority-pill">
+              <input type="radio" name="priority" value="critical">
+              <span class="priority-pill__inner"><span class="priority-dot priority-dot--critical"></span> Critical</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Labels</label>
+          <div class="label-chips" id="label-chips"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="ticket-status">Status</label>
+          <select id="ticket-status">
+            <option value="todo">Todo</option>
+            <option value="in-progress">In Progress</option>
+            <option value="testing">Testing</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

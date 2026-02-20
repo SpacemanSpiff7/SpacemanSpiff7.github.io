@@ -1,5 +1,6 @@
 {
   "featured": [
+    "fakejira",
     "la-collisions-dashboard",
     "traffic-therapy",
     "dodgers-notifications",
@@ -148,6 +149,22 @@
           "url": "https://github.com/SpacemanSpiff7/EbayLookupChromePlugin",
           "type": "primary",
           "external": true
+        }
+      ]
+    },
+    {
+      "id": "fakejira",
+      "title": "Fake Jira",
+      "shortDescription": "Super simple Kanban board.",
+      "description": "Super simple Kanban board.",
+      "category": "Kanban Board",
+      "image": "assets/images/fakejira.png",
+      "tags": ["Kanban Board"],
+      "actions": [
+        {
+          "text": "Use It",
+          "url": "fakejira/index.html",
+          "type": "primary"
         }
       ]
     },
