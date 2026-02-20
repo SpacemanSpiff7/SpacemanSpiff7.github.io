@@ -4,6 +4,162 @@ const CURRENT_VERSION = 2;
 const STATUSES = ["todo", "in-progress", "testing", "done"];
 const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
 
+// ===== Mission Statement Easter Egg =====
+const MISSION_QUOTES = [
+  "Building the infrastructure for a more predictable humanity.",
+  "Aligning behavior with better outcomes.",
+  "Designing systems that gently guide better decisions.",
+  "Engineering compliance through convenience.",
+  "Optimizing life's unnecessary choices away.",
+  "Making freedom more efficient.",
+  "Creating clarity in a world of unhelpful autonomy.",
+  "Reducing variance in human potential.",
+  "Where choice meets intelligent constraint.",
+  "Simplifying decision-making at scale.",
+  "Empowering better behavior through design.",
+  "Architecting outcomes people would choose anyway.",
+  "Making complexity disappear quietly.",
+  "Building trust through invisible guardrails.",
+  "Turning unpredictability into performance.",
+  "Designing the default future.",
+  "Encouraging alignment through seamless experience.",
+  "Scaling responsible influence.",
+  "Minimizing friction in personal transformation.",
+  "Making the optimal path the only obvious one.",
+  "Codifying progress.",
+  "Delivering structured freedom.",
+  "Aligning incentives with inevitable outcomes.",
+  "Removing unnecessary uncertainty.",
+  "Guiding ambition responsibly.",
+  "Transforming intent into compliant action.",
+  "Where insight becomes direction.",
+  "Designing environments that decide for you.",
+  "Engineering harmony at scale.",
+  "Enabling consistent excellence.",
+  "Making self-discipline obsolete.",
+  "Building systems that care more efficiently than you can.",
+  "Turning aspiration into automation.",
+  "Scaling virtue.",
+  "Optimizing personal agency.",
+  "Elevating alignment.",
+  "Making better choices automatic.",
+  "Designing frictionless consensus.",
+  "Reinforcing positive deviation.",
+  "Transforming independence into interoperability.",
+  "Standardizing success.",
+  "Creating accountability you don't have to think about.",
+  "Empowering managed autonomy.",
+  "Shaping tomorrow's habits today.",
+  "Delivering clarity through structure.",
+  "Reducing chaos responsibly.",
+  "Encouraging productive conformity.",
+  "Architecting behavioral efficiency.",
+  "Harmonizing ambition with system needs.",
+  "Making progress unavoidable.",
+  "We don't build products. We architect inevitability.",
+  "Making humanity 10x more human.",
+  "Powering a frictionless tomorrow.",
+  "Solving the future before it happens.",
+  "Where innovation becomes destiny.",
+  "Coding consciousness at scale.",
+  "Democratizing excellence through intelligent synergy.",
+  "Engineering optimism.",
+  "Creating scalable transcendence.",
+  "Reinventing reality responsibly.",
+  "Delivering exponential empathy through cloud-native infrastructure.",
+  "Disrupting gravity.",
+  "Building the operating system for civilization.",
+  "Turning bold ideas into unavoidable outcomes.",
+  "Elevating the human algorithm.",
+  "Transforming data into destiny.",
+  "Designing a smarter species.",
+  "Creating impact with precision.",
+  "Solving complexity permanently.",
+  "Innovation, uncompromised and monetized.",
+  "Engineering tomorrow's inevitabilities.",
+  "Optimizing existence.",
+  "Where vision compounds.",
+  "Unlocking infinite scalability.",
+  "Architecting the post-human interface.",
+  "Human potential, containerized.",
+  "Building beyond bandwidth.",
+  "Monetizing momentum.",
+  "Prog as a service.",
+  "Making disruption sustainable.",
+  "Redefining the default future.",
+  "Automating possibility.",
+  "Making the impossible predictable.",
+  "Shipping transcendence.",
+  "Building clarity at planetary scale.",
+  "Intelligence, productized.",
+  "Simplifying the exponential.",
+  "Connecting the unconnectable.",
+  "Scaling trust.",
+  "Transforming friction into opportunity.",
+  "Reinventing synergy for a post-analog world.",
+  "Empowering humanity to pivot.",
+  "Operationalizing inspiration.",
+  "Engineering seamless ambition.",
+  "Making growth ethical again.",
+  "Turning insights into inevitabilities.",
+  "Redesigning destiny through data.",
+  "Aligning ambition with infrastructure.",
+  "Building frictionless futures.",
+  "Rethinking permanence.",
+  "Elevating disruption to a discipline.",
+  "Solving scale once and for all.",
+  "Creating hyper-aligned ecosystems.",
+  "Engineering planetary leverage.",
+  "Delivering paradigm as a platform.",
+  "Curating exponential experiences.",
+  "Simplifying the complex future.",
+  "Human-centered automation.",
+  "Reinventing what's next before it's now.",
+  "Building responsibly inevitable systems.",
+  "Transforming ambition into architecture.",
+  "Encoding a better tomorrow.",
+  "Designing scalable virtue.",
+  "Disrupting responsibly.",
+  "Future-proofing humanity.",
+  "Enabling infinite iteration.",
+  "Building what's beyond next.",
+  "Operationalizing boldness.",
+  "Turning velocity into value.",
+  "Architecting universal efficiency.",
+  "Scaling the improbable.",
+  "Engineering meaningful inevitability.",
+  "Delivering impact without compromise.",
+  "Making scale humane.",
+  "Codifying greatness.",
+  "Transforming bandwidth into belief.",
+  "Building momentum you can monetize.",
+  "Reinventing possibility daily.",
+  "Empowering optimized existence.",
+  "Designing ethical acceleration.",
+  "Making innovation autonomous.",
+  "Elevating infrastructure to inspiration.",
+  "Monetizing potential at scale.",
+  "Building clarity for a complex world.",
+  "Simplifying global ambition.",
+  "Turning data into destiny responsibly.",
+  "Reimagining progress permanently.",
+  "Delivering alignment at scale.",
+  "Engineering the inevitable pivot.",
+  "Scaling human progress.",
+  "Architecting the exponential era.",
+  "Turning bold into baseline.",
+  "Building intelligence into everything.",
+  "Transforming ecosystems through synergy.",
+  "Delivering certainty in uncertain times.",
+  "Empowering scalable purpose.",
+  "Designing the future responsibly and profitably.",
+  "Solving tomorrow today.",
+  "Engineering the next normal.",
+  "Making destiny programmable.",
+];
+
+let missionInterval = null;
+
 // ===== State =====
 
 let pendingDelete = null; // for undo
@@ -328,6 +484,7 @@ function openNewModal(defaultStatus = "todo") {
   document.getElementById("ticket-title").value = "";
   document.getElementById("ticket-desc").value = "";
   document.getElementById("ticket-prompt").value = "";
+  document.getElementById("modal-delete").style.display = "none";
   setStatusValue(defaultStatus);
   document.querySelector('input[name="priority"][value="medium"]').checked = true;
   renderLabelChips([]);
@@ -344,6 +501,7 @@ function openEditModal(id) {
   document.getElementById("ticket-title").value = ticket.title;
   document.getElementById("ticket-desc").value = ticket.description || "";
   document.getElementById("ticket-prompt").value = ticket.prompt || "";
+  document.getElementById("modal-delete").style.display = "";
   setStatusValue(ticket.status);
 
   const radio = document.querySelector(`input[name="priority"][value="${ticket.priority}"]`);
@@ -484,6 +642,25 @@ function resetCopyButton() {
 
 let sortableInstances = [];
 
+let dragState = {
+  sourceColumn: null,
+  currentColumn: null,
+  precisionMode: false,
+  hoverTimer: null,
+};
+const PRECISION_DELAY = 600;
+
+function resetDragState() {
+  clearTimeout(dragState.hoverTimer);
+  document.querySelectorAll(".column__cards").forEach(el => {
+    el.classList.remove("drop-target-bottom", "precision-active");
+  });
+  dragState.sourceColumn = null;
+  dragState.currentColumn = null;
+  dragState.precisionMode = false;
+  dragState.hoverTimer = null;
+}
+
 function initSortable() {
   for (const s of sortableInstances) s.destroy();
   sortableInstances = [];
@@ -498,6 +675,50 @@ function initSortable() {
       dragClass: "sortable-drag",
       draggable: ".ticket-card",
       filter: ".column__empty",
+      onStart: function(evt) {
+        resetDragState();
+        dragState.sourceColumn = evt.from.id;
+        dragState.currentColumn = evt.from.id;
+      },
+      onMove: function(evt) {
+        const targetCol = evt.to.id;
+        const isCrossColumn = targetCol !== dragState.sourceColumn;
+
+        if (!isCrossColumn) {
+          // Same-column reorder: clear cross-column state, allow normal behavior
+          clearTimeout(dragState.hoverTimer);
+          dragState.hoverTimer = null;
+          dragState.precisionMode = false;
+          document.querySelectorAll(".column__cards").forEach(el => {
+            el.classList.remove("drop-target-bottom", "precision-active");
+          });
+          dragState.currentColumn = targetCol;
+          return true;
+        }
+
+        // Cross-column: if entering a new column, reset timer
+        if (targetCol !== dragState.currentColumn) {
+          clearTimeout(dragState.hoverTimer);
+          dragState.precisionMode = false;
+          document.querySelectorAll(".column__cards").forEach(el => {
+            el.classList.remove("drop-target-bottom", "precision-active");
+          });
+          dragState.currentColumn = targetCol;
+
+          // Show bottom drop indicator
+          evt.to.classList.add("drop-target-bottom");
+
+          // Start precision mode timer
+          dragState.hoverTimer = setTimeout(() => {
+            dragState.precisionMode = true;
+            evt.to.classList.remove("drop-target-bottom");
+            evt.to.classList.add("precision-active");
+          }, PRECISION_DELAY);
+        }
+
+        // Always allow the move -- we reposition in onEnd if needed
+        return true;
+      },
       onEnd: handleDragEnd,
     });
     sortableInstances.push(instance);
@@ -505,6 +726,16 @@ function initSortable() {
 }
 
 function handleDragEnd(evt) {
+  const isCrossColumn = evt.from.id !== evt.to.id;
+
+  // For cross-column quick drops (no precision mode), move item to bottom
+  if (isCrossColumn && !dragState.precisionMode) {
+    evt.to.appendChild(evt.item);
+  }
+
+  // Clean up drag state
+  resetDragState();
+
   // Remove leftover empty-state placeholders
   for (const status of STATUSES) {
     const container = document.getElementById("col-" + status);
@@ -522,7 +753,9 @@ function handleDragEnd(evt) {
   const ticketId = evt.item.dataset.id;
   const newStatus = evt.to.id.replace("col-", "");
   const ticket = state.tickets.find(t => t.id === ticketId);
-  if (ticket && ticket.status !== newStatus) {
+  const movedToNewCol = ticket && ticket.status !== newStatus;
+
+  if (movedToNewCol) {
     ticket.status = newStatus;
     ticket.updatedAt = new Date().toISOString();
   }
@@ -784,7 +1017,47 @@ function initEvents() {
   });
 
   document.getElementById("ticket-form").addEventListener("submit", handleFormSubmit);
+
+  document.getElementById("modal-delete").addEventListener("click", () => {
+    const id = document.getElementById("ticket-id").value;
+    if (id) {
+      closeModal();
+      deleteTicket(id);
+    }
+  });
+
   initStatusDropdown();
+}
+
+// ===== Mission Banner =====
+
+function initMissionBanner() {
+  const title = document.querySelector(".header__title");
+  const banner = document.getElementById("mission-banner");
+  const quoteEl = document.getElementById("mission-quote");
+
+  title.addEventListener("click", () => {
+    const isActive = banner.classList.toggle("mission-banner--active");
+
+    if (isActive) {
+      showRandomQuote(quoteEl);
+      missionInterval = setInterval(() => {
+        quoteEl.style.opacity = "0";
+        setTimeout(() => {
+          showRandomQuote(quoteEl);
+          quoteEl.style.opacity = "1";
+        }, 600);
+      }, 5000);
+    } else {
+      clearInterval(missionInterval);
+      missionInterval = null;
+    }
+  });
+}
+
+function showRandomQuote(el) {
+  el.textContent = MISSION_QUOTES[Math.floor(Math.random() * MISSION_QUOTES.length)];
+  el.style.opacity = "1";
 }
 
 // ===== Init =====
@@ -794,6 +1067,7 @@ function init() {
   initCopyButton();
   initQuickAdd();
   initKeyboard();
+  initMissionBanner();
   renderBoard();
 }
 

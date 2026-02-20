@@ -153,11 +153,41 @@ body {
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.02em;
+  cursor: pointer;
   text-shadow:
     0 0 8px rgba(255, 255, 255, 0.5),
     0 0 20px rgba(99, 102, 241, 0.7),
     0 0 48px rgba(99, 102, 241, 0.4),
     0 0 96px rgba(99, 102, 241, 0.2);
+}
+
+/* Mission statement banner (easter egg) */
+.mission-banner {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  opacity: 0;
+  overflow: hidden;
+  max-width: 0;
+  white-space: nowrap;
+  transition: opacity 2500ms var(--ease-out), max-width 2000ms var(--ease-out);
+  pointer-events: none;
+}
+.mission-banner--active {
+  opacity: 1;
+  max-width: 600px;
+}
+.mission-banner span {
+  text-shadow:
+    0 0 8px rgba(99, 102, 241, 0.5),
+    0 0 20px rgba(99, 102, 241, 0.35),
+    0 0 40px rgba(99, 102, 241, 0.25),
+    0 0 80px rgba(99, 102, 241, 0.15);
+  transition: opacity 2500ms var(--ease-out);
 }
 
 .header__badge {
@@ -1016,6 +1046,20 @@ body {
   background: var(--surface-2);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
+.modal__footer-spacer {
+  flex: 1;
+}
+
+/* Danger button variant */
+.btn--danger {
+  color: var(--priority-critical);
+  border-color: rgba(248, 113, 113, 0.2);
+}
+.btn--danger:hover {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: var(--priority-critical);
+}
 
 /* ===== Toast ===== */
 .toast-container {
@@ -1096,6 +1140,41 @@ body {
 
 .sortable-drag {
   box-shadow: var(--shadow-lg);
+}
+
+/* Bottom drop indicator for quick cross-column drops */
+.column__cards.drop-target-bottom {
+  position: relative;
+}
+.column__cards.drop-target-bottom::after {
+  content: "";
+  display: block;
+  height: 3px;
+  margin: 4px 8px 8px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5), 0 0 24px rgba(99, 102, 241, 0.25);
+  animation: drop-indicator-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes drop-indicator-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Precision mode activation */
+.column__cards.precision-active {
+  animation: precision-flash 400ms var(--ease-out);
+}
+
+@keyframes precision-flash {
+  0% { box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.4); }
+  100% { box-shadow: inset 0 0 0 1px transparent; }
+}
+
+.precision-active .sortable-ghost {
+  opacity: 0.4;
+  border-width: 2px;
 }
 
 /* ===== Responsive ===== */
