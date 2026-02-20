@@ -15,10 +15,13 @@
   <meta name="description" content="Lightweight kanban board for getting things done, or at least looking like it.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Noise texture overlay -->
+  <div class="noise" aria-hidden="true"></div>
+
   <header class="header">
     <div class="header__brand">
       <h1 class="header__title">Agile This</h1>
@@ -105,74 +108,90 @@
     <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal__header">
         <h2 id="modal-title">New Ticket</h2>
-        <button class="modal__close" id="modal-close" aria-label="Close dialog">&times;</button>
+        <button class="modal__close" id="modal-close" aria-label="Close dialog">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+        </button>
       </div>
       <form id="ticket-form" class="modal__body">
         <input type="hidden" id="ticket-id">
 
+        <!-- Metadata toolbar: priority, labels, status on one line -->
+        <div class="form-toolbar">
+          <div class="form-toolbar__group">
+            <div class="priority-pills" id="priority-pills">
+              <label class="priority-pill">
+                <input type="radio" name="priority" value="low">
+                <span class="priority-pill__inner"><span class="priority-dot priority-dot--low"></span> Low</span>
+              </label>
+              <label class="priority-pill">
+                <input type="radio" name="priority" value="medium" checked>
+                <span class="priority-pill__inner"><span class="priority-dot priority-dot--medium"></span> Med</span>
+              </label>
+              <label class="priority-pill">
+                <input type="radio" name="priority" value="high">
+                <span class="priority-pill__inner"><span class="priority-dot priority-dot--high"></span> High</span>
+              </label>
+              <label class="priority-pill">
+                <input type="radio" name="priority" value="critical">
+                <span class="priority-pill__inner"><span class="priority-dot priority-dot--critical"></span> Crit</span>
+              </label>
+            </div>
+            <div class="label-chips" id="label-chips"></div>
+          </div>
+          <div class="status-dropdown" id="status-dropdown">
+            <button type="button" class="status-dropdown__trigger" id="status-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="status-dropdown__dot"></span>
+              <span class="status-dropdown__label" id="status-label">Todo</span>
+              <svg class="status-dropdown__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="status-dropdown__menu" id="status-menu" role="listbox" aria-label="Status">
+              <button type="button" class="status-dropdown__option" data-value="todo" role="option">
+                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-todo)"></span>
+                Todo
+              </button>
+              <button type="button" class="status-dropdown__option" data-value="in-progress" role="option">
+                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-progress)"></span>
+                In Progress
+              </button>
+              <button type="button" class="status-dropdown__option" data-value="testing" role="option">
+                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-testing)"></span>
+                Testing
+              </button>
+              <button type="button" class="status-dropdown__option" data-value="done" role="option">
+                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-done)"></span>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text fields -->
         <div class="form-group">
           <label for="ticket-title">Title</label>
-          <input type="text" id="ticket-title" required placeholder="Ticket title...">
+          <input type="text" id="ticket-title" required placeholder="What needs to be done...">
         </div>
 
         <div class="form-group">
           <label for="ticket-desc">Description</label>
-          <textarea id="ticket-desc" rows="3" placeholder="Describe the ticket..."></textarea>
+          <textarea id="ticket-desc" rows="4" placeholder="Add details, context, or acceptance criteria..."></textarea>
         </div>
 
-        <div class="form-group">
+        <div class="form-group form-group--grow">
           <div class="form-group__header">
             <label for="ticket-prompt">AI Prompt</label>
             <button type="button" class="btn--copy" id="btn-copy-prompt" aria-label="Copy prompt to clipboard">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/></svg>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="8" height="8" rx="1.5"/><path d="M3 11V3a1.5 1.5 0 011.5-1.5H11"/></svg>
               <span id="copy-prompt-text">Copy</span>
             </button>
           </div>
-          <textarea id="ticket-prompt" class="prompt-textarea" rows="3" placeholder="Paste or write an AI prompt for this ticket..."></textarea>
+          <textarea id="ticket-prompt" class="prompt-textarea" rows="20" placeholder="Paste or write an AI prompt for this ticket..."></textarea>
         </div>
 
-        <div class="form-group">
-          <label>Priority</label>
-          <div class="priority-pills" id="priority-pills">
-            <label class="priority-pill">
-              <input type="radio" name="priority" value="low">
-              <span class="priority-pill__inner"><span class="priority-dot priority-dot--low"></span> Low</span>
-            </label>
-            <label class="priority-pill">
-              <input type="radio" name="priority" value="medium" checked>
-              <span class="priority-pill__inner"><span class="priority-dot priority-dot--medium"></span> Medium</span>
-            </label>
-            <label class="priority-pill">
-              <input type="radio" name="priority" value="high">
-              <span class="priority-pill__inner"><span class="priority-dot priority-dot--high"></span> High</span>
-            </label>
-            <label class="priority-pill">
-              <input type="radio" name="priority" value="critical">
-              <span class="priority-pill__inner"><span class="priority-dot priority-dot--critical"></span> Critical</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Labels</label>
-          <div class="label-chips" id="label-chips"></div>
-        </div>
-
-        <div class="form-group">
-          <label for="ticket-status">Status</label>
-          <select id="ticket-status">
-            <option value="todo">Todo</option>
-            <option value="in-progress">In Progress</option>
-            <option value="testing">Testing</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-
-        <div class="modal__footer">
-            <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
-          <button type="submit" class="btn btn--primary">Save</button>
-        </div>
       </form>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" form="ticket-form" class="btn btn--primary">Save Ticket</button>
+      </div>
     </div>
   </div>
 

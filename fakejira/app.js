@@ -133,7 +133,7 @@ function renderTicketCard(ticket, index) {
 
   const del = document.createElement("button");
   del.className = "ticket-card__delete";
-  del.innerHTML = "&times;";
+  del.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>';
   del.setAttribute("aria-label", "Delete " + ticket.id);
   del.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -328,7 +328,7 @@ function openNewModal(defaultStatus = "todo") {
   document.getElementById("ticket-title").value = "";
   document.getElementById("ticket-desc").value = "";
   document.getElementById("ticket-prompt").value = "";
-  document.getElementById("ticket-status").value = defaultStatus;
+  setStatusValue(defaultStatus);
   document.querySelector('input[name="priority"][value="medium"]').checked = true;
   renderLabelChips([]);
   resetCopyButton();
@@ -344,7 +344,7 @@ function openEditModal(id) {
   document.getElementById("ticket-title").value = ticket.title;
   document.getElementById("ticket-desc").value = ticket.description || "";
   document.getElementById("ticket-prompt").value = ticket.prompt || "";
-  document.getElementById("ticket-status").value = ticket.status;
+  setStatusValue(ticket.status);
 
   const radio = document.querySelector(`input[name="priority"][value="${ticket.priority}"]`);
   if (radio) radio.checked = true;
@@ -404,6 +404,7 @@ function closeModal() {
   document.getElementById("board").removeAttribute("inert");
   document.querySelector(".header").removeAttribute("inert");
   document.body.style.overflow = "";
+  closeStatusDropdown();
 }
 
 function handleFormSubmit(e) {
@@ -413,7 +414,7 @@ function handleFormSubmit(e) {
   const title = document.getElementById("ticket-title").value.trim();
   const description = document.getElementById("ticket-desc").value.trim();
   const prompt = document.getElementById("ticket-prompt").value.trim();
-  const status = document.getElementById("ticket-status").value;
+  const status = getStatusValue();
   const priority = document.querySelector('input[name="priority"]:checked').value;
   const labels = getSelectedLabels();
 
@@ -662,6 +663,105 @@ function initKeyboard() {
   });
 }
 
+// ===== Custom Status Dropdown =====
+
+let currentStatus = "todo";
+
+function getStatusValue() {
+  return currentStatus;
+}
+
+function setStatusValue(value) {
+  currentStatus = value;
+  const dropdown = document.getElementById("status-dropdown");
+  const label = document.getElementById("status-label");
+  const labels = { "todo": "Todo", "in-progress": "In Progress", "testing": "Testing", "done": "Done" };
+  label.textContent = labels[value] || value;
+  dropdown.className = "status-dropdown status-dropdown--" + value;
+  // Update aria-selected on options
+  dropdown.querySelectorAll(".status-dropdown__option").forEach(opt => {
+    opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
+  });
+}
+
+function initStatusDropdown() {
+  const trigger = document.getElementById("status-trigger");
+  const dropdown = document.getElementById("status-dropdown");
+  const menu = document.getElementById("status-menu");
+
+  trigger.addEventListener("click", () => {
+    const isOpen = dropdown.classList.contains("open");
+    if (isOpen) {
+      closeStatusDropdown();
+    } else {
+      dropdown.classList.add("open");
+      trigger.setAttribute("aria-expanded", "true");
+      // Focus the currently selected option
+      const selected = menu.querySelector(`[data-value="${currentStatus}"]`);
+      if (selected) selected.focus();
+    }
+  });
+
+  // Option clicks
+  menu.addEventListener("click", (e) => {
+    const option = e.target.closest(".status-dropdown__option");
+    if (!option) return;
+    setStatusValue(option.dataset.value);
+    closeStatusDropdown();
+  });
+
+  // Keyboard nav
+  trigger.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      dropdown.classList.add("open");
+      trigger.setAttribute("aria-expanded", "true");
+      const selected = menu.querySelector(`[data-value="${currentStatus}"]`);
+      if (selected) selected.focus();
+    }
+  });
+
+  menu.addEventListener("keydown", (e) => {
+    const options = Array.from(menu.querySelectorAll(".status-dropdown__option"));
+    const current = document.activeElement;
+    const idx = options.indexOf(current);
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = options[(idx + 1) % options.length];
+      next.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = options[(idx - 1 + options.length) % options.length];
+      prev.focus();
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (current.dataset.value) {
+        setStatusValue(current.dataset.value);
+        closeStatusDropdown();
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      closeStatusDropdown();
+    }
+  });
+
+  // Click outside
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      closeStatusDropdown();
+    }
+  });
+}
+
+function closeStatusDropdown() {
+  const dropdown = document.getElementById("status-dropdown");
+  const trigger = document.getElementById("status-trigger");
+  dropdown.classList.remove("open");
+  trigger.setAttribute("aria-expanded", "false");
+}
+
 // ===== Event Listeners =====
 
 function initEvents() {
@@ -684,6 +784,7 @@ function initEvents() {
   });
 
   document.getElementById("ticket-form").addEventListener("submit", handleFormSubmit);
+  initStatusDropdown();
 }
 
 // ===== Init =====
