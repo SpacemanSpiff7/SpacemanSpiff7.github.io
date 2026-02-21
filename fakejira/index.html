@@ -48,6 +48,18 @@
     </div>
   </header>
 
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <input type="text" id="project-title" class="sidebar__project-title"
+             placeholder="Untitled Project" spellcheck="false" autocomplete="off">
+      <button id="btn-sidebar-toggle" class="sidebar__collapse-btn" aria-label="Collapse sidebar">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/><line x1="6" y1="3" x2="6" y2="13"/></svg>
+      </button>
+    </div>
+    <span class="sidebar__title-vertical" id="project-title-vertical" aria-hidden="true"></span>
+    <div class="sidebar__boards" id="board-tabs"></div>
+  </aside>
+
   <main class="board" id="board">
     <div class="column" data-status="todo">
       <div class="column__header">
@@ -197,6 +209,27 @@
         <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
         <button type="submit" form="ticket-form" class="btn btn--primary">Save Ticket</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Import Dialog -->
+  <div class="modal-backdrop" id="import-dialog-backdrop">
+    <div class="import-dialog" role="dialog" aria-modal="true" aria-labelledby="import-dialog-title">
+      <h2 id="import-dialog-title">Import Project</h2>
+      <p class="import-dialog__desc">How would you like to import this file?</p>
+      <div class="import-dialog__actions">
+        <button id="import-replace" class="btn btn--ghost import-dialog__btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12"/><path d="M5 4V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5V4"/><path d="M3 4v9.5a1.5 1.5 0 001.5 1.5h7a1.5 1.5 0 001.5-1.5V4"/></svg>
+          Replace Project
+          <span class="import-dialog__hint">Replaces all boards and settings</span>
+        </button>
+        <button id="import-add" class="btn btn--ghost import-dialog__btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+          Add Boards
+          <span class="import-dialog__hint">Appends boards to current project</span>
+        </button>
+      </div>
+      <button id="import-cancel" class="btn btn--ghost import-dialog__cancel">Cancel</button>
     </div>
   </div>
 

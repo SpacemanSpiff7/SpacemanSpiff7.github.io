@@ -1,8 +1,52 @@
 // ===== Constants =====
 const STORAGE_KEY = "fakejira-board";
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 const STATUSES = ["todo", "in-progress", "testing", "done"];
 const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
+
+// ===== Random Name Pools =====
+const NAME_POOL = [
+  // Subtly Corporate
+  "Initiative Zero", "Project Horizon", "Alignment Plan", "Strategic Thread",
+  "Optimization Track", "Vision Node", "Growth Vector", "Mission Draft",
+  "Impact Loop", "Execution Path", "Control Panel", "Roadmap Alpha",
+  "Core Initiative", "Project North", "Objective Field", "Target Stream",
+  "Progress Stack", "Momentum Board", "Synergy Lab", "Framework One",
+  // Slightly Sinister
+  "Behavior Model", "Influence Map", "Compliance Draft", "Default Future",
+  "Managed Scope", "Quiet Alignment", "Constraint Lab", "Outcome Engine",
+  "Incentive Grid", "Habit Design", "Guardrail Board", "Structured Freedom",
+  "Guided Track", "Soft Control", "Conformity Test", "Optimization Zone",
+  "Predictive Path", "Alignment Matrix", "Friction Removal", "Order System",
+  // Silicon Valley
+  "Project Catalyst", "Launch Sequence", "Beta Initiative", "Velocity Sprint",
+  "Disruption Plan", "Scale Engine", "Pivot Deck", "Hypergrowth Lab",
+  "Cloud Draft", "Future Stack", "Signal Project", "Feedback Loop",
+  "Core Platform", "Venture Board", "Build Track", "Systems Plan",
+  "Data Sprint", "Launchpad", "Ops Grid", "Scale Node",
+  // Vaguely Dystopian
+  "Horizon Control", "Pattern Board", "Reality Draft", "Outcome Layer",
+  "Directive One", "Silent Sprint", "Behavior Stack", "Insight Engine",
+  "Structure Plan", "Human Layer", "Input Channel", "Control Surface",
+  "Protocol Board", "Intent Grid", "Baseline Project", "Standard Model",
+  "Program Default", "Project Conform", "Order Initiative", "Precision Plan",
+  // Minimal/Cultish
+  "The Initiative", "The Program", "The System", "The Track",
+  "The Framework", "The Plan", "The Draft", "The Model",
+  "The Alignment", "The Loop", "The Path", "The Build",
+  "The Field", "The Engine", "The Stack", "The Node",
+  "The Signal", "The Directive", "The Grid", "The Pattern",
+  // Absurdly Corporate
+  "Mission Board", "Execution Room", "Strategy Deck", "Action Layer",
+  "Growth Room", "Delivery Track", "Product Field", "Alignment Room",
+  "Impact Board", "Vision Stack"
+];
+
+function randomName(exclude = []) {
+  const available = NAME_POOL.filter(n => !exclude.includes(n));
+  const pool = available.length > 0 ? available : NAME_POOL;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 // ===== Mission Statement Easter Egg =====
 const MISSION_QUOTES = [
@@ -163,10 +207,16 @@ let missionInterval = null;
 // ===== State =====
 
 let pendingDelete = null; // for undo
+let pendingImportData = null; // for import dialog
 
-function defaultState() {
+function generateBoardId() {
+  return "B-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
+}
+
+function defaultBoard(title) {
   return {
-    version: CURRENT_VERSION,
+    id: generateBoardId(),
+    title: title || randomName(),
     tickets: [],
     columnOrder: {
       "todo": [],
@@ -176,6 +226,21 @@ function defaultState() {
     },
     labelPresets: [...LABEL_PRESETS]
   };
+}
+
+function defaultState() {
+  const projectTitle = randomName();
+  const boardTitle = randomName([projectTitle]);
+  return {
+    version: CURRENT_VERSION,
+    title: projectTitle,
+    boards: [defaultBoard(boardTitle)],
+    activeBoardIndex: 0
+  };
+}
+
+function activeBoard() {
+  return state.boards[state.activeBoardIndex];
 }
 
 function migrateState(data) {
@@ -190,6 +255,23 @@ function migrateState(data) {
     data.version = 2;
   }
 
+  if (data.version === 2) {
+    const projectTitle = randomName();
+    const boardTitle = randomName([projectTitle]);
+    data = {
+      version: 3,
+      title: projectTitle,
+      boards: [{
+        id: generateBoardId(),
+        title: boardTitle,
+        tickets: data.tickets || [],
+        columnOrder: data.columnOrder || { "todo": [], "in-progress": [], "testing": [], "done": [] },
+        labelPresets: data.labelPresets || [...LABEL_PRESETS]
+      }],
+      activeBoardIndex: 0
+    };
+  }
+
   if (data.version !== CURRENT_VERSION) return null;
   return data;
 }
@@ -200,10 +282,21 @@ function loadBoardState() {
     if (raw) {
       const parsed = JSON.parse(raw);
       const migrated = migrateState(parsed);
-      if (migrated && migrated.columnOrder) {
-        for (const s of STATUSES) {
-          if (!Array.isArray(migrated.columnOrder[s])) {
-            migrated.columnOrder[s] = [];
+      if (migrated && Array.isArray(migrated.boards) && migrated.boards.length > 0) {
+        // Clamp activeBoardIndex
+        if (migrated.activeBoardIndex < 0 || migrated.activeBoardIndex >= migrated.boards.length) {
+          migrated.activeBoardIndex = 0;
+        }
+        // Validate each board's columnOrder
+        for (const board of migrated.boards) {
+          for (const s of STATUSES) {
+            if (!board.columnOrder || !Array.isArray(board.columnOrder[s])) {
+              if (!board.columnOrder) board.columnOrder = {};
+              board.columnOrder[s] = [];
+            }
+          }
+          if (!Array.isArray(board.labelPresets)) {
+            board.labelPresets = [...LABEL_PRESETS];
           }
         }
         return migrated;
@@ -237,11 +330,12 @@ const ICONS = {
 // ===== Rendering =====
 
 function renderBoard() {
+  const board = activeBoard();
   for (const status of STATUSES) {
     const container = document.getElementById("col-" + status);
     container.innerHTML = "";
 
-    const ids = state.columnOrder[status];
+    const ids = board.columnOrder[status];
     if (ids.length === 0) {
       const empty = document.createElement("div");
       empty.className = "column__empty";
@@ -251,7 +345,7 @@ function renderBoard() {
       container.appendChild(empty);
     } else {
       ids.forEach((id, index) => {
-        const ticket = state.tickets.find(t => t.id === id);
+        const ticket = board.tickets.find(t => t.id === id);
         if (ticket) {
           container.appendChild(renderTicketCard(ticket, index));
         }
@@ -356,10 +450,11 @@ function renderTicketCard(ticket, index) {
 }
 
 function renderColumnCounts() {
+  const board = activeBoard();
   for (const status of STATUSES) {
     const badge = document.querySelector(`[data-count="${status}"]`);
     if (badge) {
-      const newCount = String(state.columnOrder[status].length);
+      const newCount = String(board.columnOrder[status].length);
       if (badge.textContent !== newCount) {
         badge.textContent = newCount;
         badge.classList.add("column__count--pop");
@@ -375,9 +470,176 @@ function formatDate(iso) {
   return month + " " + d.getDate();
 }
 
+// ===== Board Tabs =====
+
+function renderTabs() {
+  const container = document.getElementById("board-tabs");
+  if (!container) return;
+  container.innerHTML = "";
+
+  state.boards.forEach((board, index) => {
+    const tab = document.createElement("button");
+    tab.className = "board-tab" + (index === state.activeBoardIndex ? " board-tab--active" : "");
+    tab.dataset.index = index;
+
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "board-tab__title";
+    titleSpan.textContent = board.title;
+    tab.appendChild(titleSpan);
+
+    if (state.boards.length > 1) {
+      const delBtn = document.createElement("span");
+      delBtn.className = "board-tab__delete";
+      delBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>';
+      delBtn.setAttribute("aria-label", "Delete board " + board.title);
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteBoard(index);
+      });
+      tab.appendChild(delBtn);
+    }
+
+    tab.addEventListener("click", () => switchBoard(index));
+    tab.addEventListener("dblclick", (e) => {
+      e.preventDefault();
+      startRenameBoard(index, titleSpan);
+    });
+
+    container.appendChild(tab);
+  });
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "board-tab board-tab--add";
+  addBtn.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="7" y1="3" x2="7" y2="11"/><line x1="3" y1="7" x2="11" y2="7"/></svg> Add Board';
+  addBtn.setAttribute("aria-label", "Add new board");
+  addBtn.addEventListener("click", addBoard);
+  container.appendChild(addBtn);
+}
+
+function switchBoard(index) {
+  if (index === state.activeBoardIndex) return;
+  state.activeBoardIndex = index;
+  saveBoardState();
+  renderBoard();
+  renderTabs();
+}
+
+function addBoard() {
+  const existingTitles = state.boards.map(b => b.title);
+  existingTitles.push(state.title);
+  const newBoard = defaultBoard(randomName(existingTitles));
+  state.boards.push(newBoard);
+  state.activeBoardIndex = state.boards.length - 1;
+  saveBoardState();
+  renderBoard();
+  renderTabs();
+  showToast("Board added");
+}
+
+function deleteBoard(index) {
+  if (state.boards.length <= 1) return;
+
+  const deletedBoard = state.boards[index];
+  const deletedIndex = index;
+  const wasActive = state.activeBoardIndex;
+
+  state.boards.splice(index, 1);
+  if (state.activeBoardIndex >= state.boards.length) {
+    state.activeBoardIndex = state.boards.length - 1;
+  } else if (state.activeBoardIndex > index) {
+    state.activeBoardIndex--;
+  }
+
+  saveBoardState();
+  renderBoard();
+  renderTabs();
+
+  showToast("Board deleted", {
+    undo: () => {
+      state.boards.splice(deletedIndex, 0, deletedBoard);
+      state.activeBoardIndex = wasActive;
+      if (state.activeBoardIndex >= state.boards.length) {
+        state.activeBoardIndex = state.boards.length - 1;
+      }
+      saveBoardState();
+      renderBoard();
+      renderTabs();
+      showToast("Board restored");
+    }
+  });
+}
+
+function startRenameBoard(index, titleSpan) {
+  const board = state.boards[index];
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "board-tab__rename";
+  input.value = board.title;
+
+  const finish = () => {
+    const newTitle = input.value.trim();
+    board.title = newTitle || randomName(state.boards.map(b => b.title).concat(state.title));
+    saveBoardState();
+    renderTabs();
+  };
+
+  input.addEventListener("blur", finish);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      input.blur();
+    }
+    if (e.key === "Escape") {
+      input.value = board.title;
+      input.blur();
+    }
+  });
+
+  titleSpan.replaceWith(input);
+  input.focus();
+  input.select();
+}
+
+// ===== Project Title =====
+
+function syncVerticalTitle() {
+  const span = document.getElementById("project-title-vertical");
+  if (span) span.textContent = state.title;
+}
+
+function initProjectTitle() {
+  const input = document.getElementById("project-title");
+  if (!input) return;
+  input.value = state.title;
+  syncVerticalTitle();
+
+  const save = () => {
+    const newTitle = input.value.trim();
+    state.title = newTitle || randomName(state.boards.map(b => b.title));
+    input.value = state.title;
+    syncVerticalTitle();
+    saveBoardState();
+  };
+
+  input.addEventListener("blur", save);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      input.blur();
+    }
+  });
+}
+
+function updateProjectTitleUI() {
+  const input = document.getElementById("project-title");
+  if (input) input.value = state.title;
+  syncVerticalTitle();
+}
+
 // ===== CRUD =====
 
 function createTicket({ title, description = "", status = "todo", priority = "medium", labels = [], prompt = "" }) {
+  const board = activeBoard();
   const now = new Date().toISOString();
   const ticket = {
     id: generateId(),
@@ -390,8 +652,8 @@ function createTicket({ title, description = "", status = "todo", priority = "me
     createdAt: now,
     updatedAt: now
   };
-  state.tickets.push(ticket);
-  state.columnOrder[status].push(ticket.id);
+  board.tickets.push(ticket);
+  board.columnOrder[status].push(ticket.id);
   saveBoardState();
   renderBoard();
 
@@ -408,7 +670,8 @@ function createTicket({ title, description = "", status = "todo", priority = "me
 }
 
 function updateTicket(id, updates) {
-  const ticket = state.tickets.find(t => t.id === id);
+  const board = activeBoard();
+  const ticket = board.tickets.find(t => t.id === id);
   if (!ticket) return;
 
   const oldStatus = ticket.status;
@@ -416,9 +679,9 @@ function updateTicket(id, updates) {
   Object.assign(ticket, updates, { updatedAt: new Date().toISOString() });
 
   if (updates.status && updates.status !== oldStatus) {
-    state.columnOrder[oldStatus] = state.columnOrder[oldStatus].filter(tid => tid !== id);
-    if (!state.columnOrder[updates.status].includes(id)) {
-      state.columnOrder[updates.status].push(id);
+    board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+    if (!board.columnOrder[updates.status].includes(id)) {
+      board.columnOrder[updates.status].push(id);
     }
   }
 
@@ -427,17 +690,19 @@ function updateTicket(id, updates) {
 }
 
 function deleteTicket(id) {
-  const ticket = state.tickets.find(t => t.id === id);
+  const board = activeBoard();
+  const boardIndex = state.activeBoardIndex;
+  const ticket = board.tickets.find(t => t.id === id);
   if (!ticket) return;
 
   // Store for undo
   const deletedTicket = { ...ticket };
-  const deletedIndex = state.columnOrder[ticket.status].indexOf(id);
+  const deletedIndex = board.columnOrder[ticket.status].indexOf(id);
 
   // Remove immediately
-  state.tickets = state.tickets.filter(t => t.id !== id);
+  board.tickets = board.tickets.filter(t => t.id !== id);
   for (const status of STATUSES) {
-    state.columnOrder[status] = state.columnOrder[status].filter(tid => tid !== id);
+    board.columnOrder[status] = board.columnOrder[status].filter(tid => tid !== id);
   }
 
   saveBoardState();
@@ -457,17 +722,21 @@ function deleteTicket(id) {
   pendingDelete = {
     ticket: deletedTicket,
     index: deletedIndex,
+    boardIndex: boardIndex,
     timeout: undoTimeout
   };
 
   showToast("Ticket deleted", {
     undo: () => {
       clearTimeout(undoTimeout);
-      // Restore ticket
-      state.tickets.push(pendingDelete.ticket);
-      const col = state.columnOrder[pendingDelete.ticket.status];
-      const idx = Math.min(pendingDelete.index, col.length);
-      col.splice(idx, 0, pendingDelete.ticket.id);
+      // Restore ticket to the specific board it was deleted from
+      const targetBoard = state.boards[pendingDelete.boardIndex];
+      if (targetBoard) {
+        targetBoard.tickets.push(pendingDelete.ticket);
+        const col = targetBoard.columnOrder[pendingDelete.ticket.status];
+        const idx = Math.min(pendingDelete.index, col.length);
+        col.splice(idx, 0, pendingDelete.ticket.id);
+      }
       pendingDelete = null;
       saveBoardState();
       renderBoard();
@@ -493,7 +762,8 @@ function openNewModal(defaultStatus = "todo") {
 }
 
 function openEditModal(id) {
-  const ticket = state.tickets.find(t => t.id === id);
+  const board = activeBoard();
+  const ticket = board.tickets.find(t => t.id === id);
   if (!ticket) return;
 
   document.getElementById("modal-title").textContent = "Edit " + ticket.id;
@@ -513,9 +783,10 @@ function openEditModal(id) {
 }
 
 function renderLabelChips(selectedLabels) {
+  const board = activeBoard();
   const container = document.getElementById("label-chips");
   container.innerHTML = "";
-  for (const label of state.labelPresets) {
+  for (const label of board.labelPresets) {
     const chip = document.createElement("span");
     chip.className = "label-chip label-chip--selectable";
     chip.textContent = label;
@@ -553,6 +824,8 @@ function showModal() {
   document.getElementById("modal-backdrop").classList.add("active");
   document.getElementById("board").setAttribute("inert", "");
   document.querySelector(".header").setAttribute("inert", "");
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) sidebar.setAttribute("inert", "");
   document.body.style.overflow = "hidden";
   document.getElementById("ticket-title").focus();
 }
@@ -561,6 +834,8 @@ function closeModal() {
   document.getElementById("modal-backdrop").classList.remove("active");
   document.getElementById("board").removeAttribute("inert");
   document.querySelector(".header").removeAttribute("inert");
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) sidebar.removeAttribute("inert");
   document.body.style.overflow = "";
   closeStatusDropdown();
 }
@@ -726,6 +1001,7 @@ function initSortable() {
 }
 
 function handleDragEnd(evt) {
+  const board = activeBoard();
   const isCrossColumn = evt.from.id !== evt.to.id;
 
   // For cross-column quick drops (no precision mode), move item to bottom
@@ -746,13 +1022,13 @@ function handleDragEnd(evt) {
   for (const status of STATUSES) {
     const container = document.getElementById("col-" + status);
     const cards = container.querySelectorAll(".ticket-card");
-    state.columnOrder[status] = Array.from(cards).map(c => c.dataset.id);
+    board.columnOrder[status] = Array.from(cards).map(c => c.dataset.id);
   }
 
   // Update ticket status if moved to a different column
   const ticketId = evt.item.dataset.id;
   const newStatus = evt.to.id.replace("col-", "");
-  const ticket = state.tickets.find(t => t.id === ticketId);
+  const ticket = board.tickets.find(t => t.id === ticketId);
   const movedToNewCol = ticket && ticket.status !== newStatus;
 
   if (movedToNewCol) {
@@ -765,7 +1041,7 @@ function handleDragEnd(evt) {
   // Re-add empty states to now-empty columns
   for (const status of STATUSES) {
     const container = document.getElementById("col-" + status);
-    if (state.columnOrder[status].length === 0) {
+    if (board.columnOrder[status].length === 0) {
       const empty = document.createElement("div");
       empty.className = "column__empty";
       empty.innerHTML = ICONS.empty
@@ -786,44 +1062,151 @@ function exportBoard() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "agile-this-board-" + new Date().toISOString().slice(0, 10) + ".json";
+  const sanitized = state.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  a.download = "agile-this-" + (sanitized || "project") + "-" + new Date().toISOString().slice(0, 10) + ".json";
   a.click();
   URL.revokeObjectURL(url);
-  showToast("Board exported");
+  showToast("Project exported");
 }
 
 function importBoard(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
-      if (!data || !data.tickets || !data.columnOrder) {
-        showToast("Invalid board file");
-        return;
-      }
-      const migrated = migrateState(data);
-      if (!migrated) {
-        showToast("Unsupported board version");
-        return;
-      }
-      // Show undo-style confirmation
-      const oldState = JSON.parse(JSON.stringify(state));
-      state = migrated;
-      saveBoardState();
-      renderBoard();
-      showToast("Board imported", {
-        undo: () => {
-          state = oldState;
-          saveBoardState();
-          renderBoard();
-          showToast("Import undone");
+      let data = JSON.parse(e.target.result);
+
+      // Detect v1/v2 format (has tickets + columnOrder at root)
+      if (data && data.tickets && data.columnOrder && (!data.version || data.version <= 2)) {
+        data = migrateState(data);
+        if (!data) {
+          showToast("Unsupported board version");
+          return;
         }
-      });
+      }
+
+      // Validate v3 format
+      if (!data || !Array.isArray(data.boards) || data.boards.length === 0) {
+        // Try migrating if it looks like v1/v2
+        if (data && data.tickets && data.columnOrder) {
+          data = migrateState(data);
+          if (!data) {
+            showToast("Invalid board file");
+            return;
+          }
+        } else {
+          showToast("Invalid board file");
+          return;
+        }
+      }
+
+      // Migrate if needed
+      if (data.version !== CURRENT_VERSION) {
+        data = migrateState(data);
+        if (!data) {
+          showToast("Unsupported board version");
+          return;
+        }
+      }
+
+      pendingImportData = data;
+      showImportDialog();
     } catch (err) {
       showToast("Failed to import: invalid JSON");
     }
   };
   reader.readAsText(file);
+}
+
+function showImportDialog() {
+  const dialog = document.getElementById("import-dialog-backdrop");
+  if (dialog) {
+    dialog.classList.add("active");
+    document.getElementById("board").setAttribute("inert", "");
+    document.querySelector(".header").setAttribute("inert", "");
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.setAttribute("inert", "");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeImportDialog() {
+  const dialog = document.getElementById("import-dialog-backdrop");
+  if (dialog) {
+    dialog.classList.remove("active");
+    document.getElementById("board").removeAttribute("inert");
+    document.querySelector(".header").removeAttribute("inert");
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.removeAttribute("inert");
+    document.body.style.overflow = "";
+  }
+  pendingImportData = null;
+}
+
+function handleImportReplace() {
+  if (!pendingImportData) return;
+  const oldState = JSON.parse(JSON.stringify(state));
+  state = pendingImportData;
+  pendingImportData = null;
+  closeImportDialog();
+  saveBoardState();
+  renderBoard();
+  renderTabs();
+  updateProjectTitleUI();
+  showToast("Project replaced", {
+    undo: () => {
+      state = oldState;
+      saveBoardState();
+      renderBoard();
+      renderTabs();
+      updateProjectTitleUI();
+      showToast("Import undone");
+    }
+  });
+}
+
+function handleImportAddBoards() {
+  if (!pendingImportData) return;
+  const oldState = JSON.parse(JSON.stringify(state));
+  const importedBoards = pendingImportData.boards;
+
+  // Regenerate board IDs to avoid collisions
+  const existingTitles = state.boards.map(b => b.title).concat(state.title);
+  for (const board of importedBoards) {
+    board.id = generateBoardId();
+    // Avoid duplicate titles within the project
+    if (existingTitles.includes(board.title)) {
+      board.title = randomName(existingTitles);
+    }
+    existingTitles.push(board.title);
+    state.boards.push(board);
+  }
+
+  pendingImportData = null;
+  closeImportDialog();
+  saveBoardState();
+  renderTabs();
+  showToast(importedBoards.length + " board" + (importedBoards.length > 1 ? "s" : "") + " added", {
+    undo: () => {
+      state = oldState;
+      saveBoardState();
+      renderBoard();
+      renderTabs();
+      showToast("Import undone");
+    }
+  });
+}
+
+function initImportDialog() {
+  const backdrop = document.getElementById("import-dialog-backdrop");
+  if (!backdrop) return;
+
+  document.getElementById("import-replace").addEventListener("click", handleImportReplace);
+  document.getElementById("import-add").addEventListener("click", handleImportAddBoards);
+  document.getElementById("import-cancel").addEventListener("click", closeImportDialog);
+
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeImportDialog();
+  });
 }
 
 // ===== Toast =====
@@ -881,6 +1264,11 @@ function initKeyboard() {
     const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 
     if (e.key === "Escape") {
+      const importDialog = document.getElementById("import-dialog-backdrop");
+      if (importDialog && importDialog.classList.contains("active")) {
+        closeImportDialog();
+        return;
+      }
       closeModal();
       return;
     }
@@ -1027,6 +1415,7 @@ function initEvents() {
   });
 
   initStatusDropdown();
+  initImportDialog();
 }
 
 // ===== Mission Banner =====
@@ -1060,6 +1449,141 @@ function showRandomQuote(el) {
   el.style.opacity = "1";
 }
 
+// ===== Sidebar =====
+
+const SIDEBAR_KEY = "fakejira-sidebar";
+
+function initSidebar() {
+  const collapsed = localStorage.getItem(SIDEBAR_KEY) === "collapsed";
+  if (collapsed) document.body.classList.add("sidebar-collapsed");
+
+  document.getElementById("btn-sidebar-toggle").addEventListener("click", toggleSidebar);
+}
+
+function toggleSidebar() {
+  document.body.classList.toggle("sidebar-collapsed");
+  const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+  localStorage.setItem(SIDEBAR_KEY, isCollapsed ? "collapsed" : "open");
+}
+
+// ===== Column Resize =====
+
+const COL_WIDTHS_KEY = "fakejira-col-widths";
+
+function initColumnResize() {
+  const board = document.getElementById("board");
+  const columns = board.querySelectorAll(".column");
+
+  // Load saved widths
+  loadColumnWidths(columns);
+
+  // Insert resize handles between columns
+  insertResizeHandles(board, columns);
+}
+
+function loadColumnWidths(columns) {
+  try {
+    const saved = localStorage.getItem(COL_WIDTHS_KEY);
+    if (saved) {
+      const widths = JSON.parse(saved);
+      columns.forEach((col, i) => {
+        if (widths[i]) {
+          col.style.flex = "0 0 " + widths[i] + "px";
+          col.style.minWidth = "200px";
+        }
+      });
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function saveColumnWidths() {
+  const columns = document.querySelectorAll("#board > .column");
+  const widths = Array.from(columns).map(col => col.getBoundingClientRect().width);
+  localStorage.setItem(COL_WIDTHS_KEY, JSON.stringify(widths));
+}
+
+function insertResizeHandles(board, columns) {
+  // Remove existing handles first
+  board.querySelectorAll(".column-resize-handle").forEach(h => h.remove());
+
+  for (let i = 0; i < columns.length - 1; i++) {
+    const handle = document.createElement("div");
+    handle.className = "column-resize-handle";
+    handle.dataset.index = i;
+    columns[i].after(handle);
+
+    handle.addEventListener("mousedown", (e) => startColumnResize(e, i));
+    handle.addEventListener("touchstart", (e) => startColumnResize(e, i), { passive: false });
+    handle.addEventListener("dblclick", resetColumnWidths);
+  }
+}
+
+function startColumnResize(e, index) {
+  e.preventDefault();
+  const board = document.getElementById("board");
+  const columns = board.querySelectorAll(".column");
+  const leftCol = columns[index];
+  const rightCol = columns[index + 1];
+  if (!leftCol || !rightCol) return;
+
+  const handle = board.querySelectorAll(".column-resize-handle")[index];
+  handle.classList.add("column-resize-handle--active");
+  document.body.classList.add("col-resizing");
+
+  const startX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+  const leftWidth = leftCol.getBoundingClientRect().width;
+  const rightWidth = rightCol.getBoundingClientRect().width;
+  const minW = 200;
+
+  // Set all columns to fixed flex so they don't reflow during drag
+  columns.forEach(col => {
+    const w = col.getBoundingClientRect().width;
+    col.style.flex = "0 0 " + w + "px";
+    col.style.minWidth = minW + "px";
+  });
+
+  function onMove(ev) {
+    const clientX = ev.type === "touchmove" ? ev.touches[0].clientX : ev.clientX;
+    const delta = clientX - startX;
+    const newLeft = Math.max(minW, Math.min(leftWidth + delta, leftWidth + rightWidth - minW));
+    const newRight = leftWidth + rightWidth - newLeft;
+    leftCol.style.flex = "0 0 " + newLeft + "px";
+    rightCol.style.flex = "0 0 " + newRight + "px";
+  }
+
+  function onEnd() {
+    handle.classList.remove("column-resize-handle--active");
+    document.body.classList.remove("col-resizing");
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+    saveColumnWidths();
+  }
+
+  document.addEventListener("mousemove", onMove);
+  document.addEventListener("mouseup", onEnd);
+  document.addEventListener("touchmove", onMove, { passive: false });
+  document.addEventListener("touchend", onEnd);
+}
+
+function resetColumnWidths() {
+  const columns = document.querySelectorAll("#board > .column");
+  columns.forEach(col => {
+    col.style.flex = "";
+    col.style.minWidth = "";
+  });
+  localStorage.removeItem(COL_WIDTHS_KEY);
+}
+
+// Re-insert handles after board re-renders
+function refreshResizeHandles() {
+  const board = document.getElementById("board");
+  const columns = board.querySelectorAll(".column");
+  loadColumnWidths(columns);
+  insertResizeHandles(board, columns);
+}
+
 // ===== Init =====
 
 function init() {
@@ -1068,7 +1592,11 @@ function init() {
   initQuickAdd();
   initKeyboard();
   initMissionBanner();
+  initSidebar();
+  initProjectTitle();
+  renderTabs();
   renderBoard();
+  initColumnResize();
 }
 
 document.addEventListener("DOMContentLoaded", init);
