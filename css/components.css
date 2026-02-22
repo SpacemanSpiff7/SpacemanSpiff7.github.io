@@ -910,7 +910,7 @@
     height: calc(var(--vh, 1vh) * 100);
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
-    scroll-padding-top: 73px; /* Account for fixed nav height */
+    scroll-padding-top: var(--nav-height); /* Account for fixed nav height */
     scroll-behavior: smooth;
     background: transparent;
 }
@@ -922,7 +922,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: var(--bottom-chrome-height);
     background: #000000;
     z-index: 150;
     pointer-events: none;
@@ -948,7 +948,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2rem 2rem calc(2rem + 133px);
+    padding: 2rem 2rem calc(2rem + var(--snap-bottom-offset));
     overflow: hidden;
     text-align: center;
     background: transparent;

@@ -101,4 +101,9 @@
     --container-narrow: 800px;            /* For long-form content */
     --container-wide: 1400px;             /* For grids */
     --container-padding: var(--space-6);
+
+    /* Scroll-snap layout constants */
+    --nav-height: 73px;
+    --bottom-chrome-height: 60px;
+    --snap-bottom-offset: calc(var(--nav-height) + var(--bottom-chrome-height));
 }

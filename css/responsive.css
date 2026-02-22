@@ -215,7 +215,7 @@
     }
 
     .snap-section {
-        padding: 1.5rem 1.5rem 12vh;
+        padding: 1.5rem 1.5rem calc(1.5rem + var(--snap-bottom-offset));
     }
 
     /* Progress indicator mobile */
