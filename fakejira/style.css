@@ -1597,12 +1597,8 @@ body.col-resizing * {
     box-shadow: var(--shadow-lg);
   }
   body.sidebar-collapsed .sidebar {
-    width: 0;
-    border-right: none;
-  }
-  body.sidebar-collapsed .sidebar__collapse-btn {
-    opacity: 0;
-    pointer-events: none;
+    width: 44px;
+    border-right: 1px solid var(--border);
   }
   .column-resize-handle {
     display: none;

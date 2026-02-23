@@ -1454,10 +1454,15 @@ function showRandomQuote(el) {
 const SIDEBAR_KEY = "fakejira-sidebar";
 
 function initSidebar() {
-  const collapsed = localStorage.getItem(SIDEBAR_KEY) === "collapsed";
-  if (collapsed) document.body.classList.add("sidebar-collapsed");
+  const saved = localStorage.getItem(SIDEBAR_KEY);
+  if (saved === "collapsed" || (saved === null && window.innerWidth <= 640)) {
+    document.body.classList.add("sidebar-collapsed");
+  }
 
   document.getElementById("btn-sidebar-toggle").addEventListener("click", toggleSidebar);
+
+  const backdrop = document.getElementById("sidebar-backdrop");
+  if (backdrop) backdrop.addEventListener("click", toggleSidebar);
 }
 
 function toggleSidebar() {
