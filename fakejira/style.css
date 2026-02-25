@@ -307,7 +307,7 @@ body {
   left: 0;
   top: 56px;
   bottom: 0;
-  width: 220px;
+  width: var(--sidebar-width, 220px);
   background: rgba(15, 15, 18, 0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -321,6 +321,56 @@ body {
 
 body.sidebar-collapsed .sidebar {
   width: 56px;
+}
+
+/* Sidebar resize handle */
+.sidebar__resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  bottom: 0;
+  cursor: col-resize;
+  z-index: 99;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sidebar__resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 28px;
+  border-radius: 1px;
+  background: transparent;
+  transition: background var(--duration-fast) var(--ease-out), height var(--duration-fast) var(--ease-out);
+}
+.sidebar__resize-handle:hover::after {
+  background: var(--border-hover);
+  height: 48px;
+}
+.sidebar__resize-handle--active::after {
+  background: var(--accent) !important;
+  height: 100% !important;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+}
+body.sidebar-collapsed .sidebar__resize-handle {
+  display: none;
+}
+body.sidebar-resizing {
+  cursor: col-resize !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body.sidebar-resizing * {
+  cursor: col-resize !important;
+}
+/* Disable transition during drag */
+body.sidebar-resizing .sidebar,
+body.sidebar-resizing .board {
+  transition: none !important;
 }
 
 .sidebar__header {
@@ -470,23 +520,19 @@ body.sidebar-collapsed .sidebar__collapse-btn {
   position: relative;
   transition:
     color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
-  border-left: 3px solid transparent;
-  text-shadow:
-    0 0 4px rgba(99, 102, 241, 0.15),
-    0 0 12px rgba(99, 102, 241, 0.08);
+    background var(--duration-fast) var(--ease-out),
+    border-left-color var(--duration-fast) var(--ease-out);
+  border-left: 3px solid color-mix(in srgb, var(--board-color, #6366f1) 20%, transparent);
 }
 .board-tab:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.02);
+  border-left-color: var(--board-color, #6366f1);
 }
 .board-tab--active {
   color: var(--text-primary);
-  border-left-color: var(--accent);
-  background: var(--accent-subtle);
-  text-shadow:
-    0 0 6px rgba(99, 102, 241, 0.35),
-    0 0 20px rgba(99, 102, 241, 0.2);
+  border-left: 4px solid var(--board-color, #6366f1);
+  background: color-mix(in srgb, var(--board-color, #6366f1) 8%, transparent);
 }
 .board-tab__title {
   pointer-events: none;
@@ -522,6 +568,31 @@ body.sidebar-collapsed .sidebar__collapse-btn {
   opacity: 1 !important;
   color: var(--priority-critical);
   background: rgba(248, 113, 113, 0.1);
+}
+.board-tab__drag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0;
+  cursor: grab;
+  color: var(--text-tertiary);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.board-tab__drag svg {
+  width: 6px;
+  height: 14px;
+}
+.board-tab:hover .board-tab__drag {
+  opacity: 0.5;
+}
+.board-tab--active .board-tab__drag {
+  opacity: 0.4;
+}
+.board-tab__drag:hover {
+  opacity: 1 !important;
 }
 .board-tab__rename {
   font-family: var(--font);
@@ -575,8 +646,23 @@ body.sidebar-collapsed .sidebar__collapse-btn {
   padding: 20px 28px;
   min-height: calc(100vh - 56px);
   align-items: flex-start;
-  margin-left: 220px;
+  margin-left: var(--sidebar-width, 220px);
   transition: margin-left 280ms var(--ease-out);
+  position: relative;
+}
+.board::before {
+  content: '';
+  position: fixed;
+  top: -250px;
+  right: -250px;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--active-board-color, #6366f1) 12%, transparent) 0%,
+    transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 400ms ease;
 }
 
 body.sidebar-collapsed .board {
@@ -593,6 +679,15 @@ body.sidebar-collapsed .board {
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 96px);
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    inset 1px 0 0 0 rgba(255, 255, 255, 0.04),
+    inset -1px -1px 0 0 rgba(255, 255, 255, 0.015),
+    inset 0 0 30px -8px rgba(255, 255, 255, 0.03);
+}
+.column[data-status="canceled"] {
+  box-shadow: none;
 }
 
 .column__header {
@@ -692,12 +787,18 @@ body.col-resizing * {
 /* ===== Ticket Card ===== */
 .ticket-card {
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius);
   padding: 12px 14px;
   margin-bottom: 6px;
   cursor: pointer;
   position: relative;
+  box-shadow:
+    inset 1px 1px 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 70%, transparent),
+    inset 0 1px 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 40%, transparent),
+    inset 1px 0 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 35%, transparent),
+    inset -1px -1px 0 0 rgba(255, 255, 255, 0.03),
+    inset 0 0 30px -8px color-mix(in srgb, var(--active-board-color, #6366f1) 15%, transparent);
   transition:
     box-shadow var(--duration) var(--ease-out),
     transform var(--duration) var(--ease-out),
@@ -708,13 +809,18 @@ body.col-resizing * {
 .ticket-card:hover {
   background: var(--surface-2);
   border-color: var(--border-hover);
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    inset 1px 1px 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 85%, transparent),
+    inset 0 1px 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 55%, transparent),
+    inset 1px 0 0 0 color-mix(in srgb, var(--active-board-color, #6366f1) 50%, transparent),
+    inset -1px -1px 0 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 30px -8px color-mix(in srgb, var(--active-board-color, #6366f1) 22%, transparent),
+    var(--shadow-sm);
   transform: translateY(-1px);
 }
 .ticket-card:focus-visible {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), var(--shadow-sm);
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-sm);
 }
 
 /* Prompt accent border */
@@ -741,9 +847,12 @@ body.col-resizing * {
 
 .ticket-card__top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   margin-bottom: 2px;
+}
+.ticket-card__delete {
+  align-self: flex-start;
 }
 
 .ticket-card__title {
@@ -945,11 +1054,13 @@ body.col-resizing * {
   z-index: 200;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 200ms var(--ease-out), visibility 200ms var(--ease-out);
 }
 .modal-backdrop.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal {
@@ -1560,6 +1671,50 @@ body.col-resizing * {
   border: none;
 }
 
+/* ===== View All Button (sidebar) ===== */
+.sidebar__view-all {
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 9px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border-left: 3px solid transparent;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    border-left-color var(--duration-fast) var(--ease-out);
+}
+.sidebar__view-all svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.sidebar__view-all:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
+  border-left-color: rgba(255, 255, 255, 0.4);
+}
+.sidebar__view-all--active {
+  color: var(--text-primary);
+  border-left: 4px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+body.sidebar-collapsed .sidebar__view-all {
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .board {
@@ -1601,6 +1756,9 @@ body.col-resizing * {
     border-right: 1px solid var(--border);
   }
   .column-resize-handle {
+    display: none;
+  }
+  .sidebar__resize-handle {
     display: none;
   }
   .board {
@@ -1653,4 +1811,312 @@ body.col-resizing * {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ===== Canceled Column Token ===== */
+:root {
+  --col-canceled: #71717a;
+}
+
+/* ===== Collapsible Column ===== */
+.column--collapsible .column__header--toggle {
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+.column--collapsible .column__header--toggle:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.column__header-right {
+  display: flex;
+  align-items: center;
+}
+.column__chevron {
+  width: 10px;
+  height: 6px;
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  transition: transform var(--duration) var(--ease-out);
+}
+.column--collapsed .column__chevron {
+  transform: rotate(-90deg);
+}
+.column--collapsed .column__cards,
+.column--collapsed .column__quickadd {
+  display: none;
+}
+.column[data-status="canceled"] .column__header h2 {
+  color: var(--col-canceled);
+}
+.column[data-status="canceled"] .ticket-card {
+  opacity: 0.55;
+  filter: saturate(0.4);
+  transition:
+    box-shadow var(--duration) var(--ease-out),
+    transform var(--duration) var(--ease-out),
+    border-color var(--duration) var(--ease-out),
+    background var(--duration) var(--ease-out),
+    opacity var(--duration) var(--ease-out),
+    filter var(--duration) var(--ease-out);
+}
+.column[data-status="canceled"] .ticket-card:hover {
+  opacity: 0.8;
+  filter: saturate(0.6);
+}
+.status-dropdown--canceled .status-dropdown__trigger {
+  border-color: rgba(113, 113, 122, 0.25);
+  background: rgba(113, 113, 122, 0.08);
+  color: var(--col-canceled);
+}
+
+/* ===== Ticket Card Checkbox (slides in from left on hover) ===== */
+/*
+  Checkbox appears to the LEFT of the priority dot, pushing the title right.
+  max-width: 0 + margin-right: -8px collapses it to zero space (cancels flex gap).
+  On hover/selected, it expands to 14px wide with margin-right: 0 (restores the gap).
+  The dot is always visible to the right of it.
+*/
+.ticket-card__checkbox-wrap {
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  margin-right: -8px; /* cancel the flex gap from .ticket-card__top when collapsed */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    max-width var(--duration-fast) var(--ease-out),
+    margin-right var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+.ticket-card__checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+/* Expand checkbox on hover, when selected, or when board is in selection mode */
+.ticket-card:hover .ticket-card__checkbox-wrap,
+.ticket-card--selected .ticket-card__checkbox-wrap,
+.selection-active .ticket-card__checkbox-wrap {
+  max-width: 22px;
+  margin-right: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tick box (shared by card checkbox and column select-all) */
+.tick-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border-active);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+.tick-box svg {
+  width: 8px;
+  height: 6px;
+  stroke: transparent;
+  transition: stroke var(--duration-fast) var(--ease-out);
+}
+input[type="checkbox"]:checked + .tick-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+input[type="checkbox"]:checked + .tick-box svg {
+  stroke: #fff;
+}
+input[type="checkbox"]:indeterminate + .tick-box {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+}
+input[type="checkbox"]:indeterminate + .tick-box svg {
+  stroke: var(--accent-hover);
+  stroke-dasharray: 6;
+  stroke-dashoffset: 3;
+}
+
+/* Selected card state */
+.ticket-card--selected {
+  border-color: var(--accent) !important;
+  background: rgba(99, 102, 241, 0.07) !important;
+  box-shadow: 0 0 0 1px var(--accent-glow) !important;
+}
+
+/* ===== Column Select-All Checkbox ===== */
+.column__select-all-wrap {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.column__select-all-cb {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.column__header:hover .column__select-all-wrap,
+.selection-active .column__select-all-wrap {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Bulk Action Bar ===== */
+.bulk-bar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  opacity: 0;
+  background: rgba(22, 22, 26, 0.94);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  padding: 8px 10px 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 150;
+  pointer-events: none;
+  transition:
+    transform var(--duration-slow) var(--ease-out),
+    opacity var(--duration-slow) var(--ease-out);
+}
+.bulk-bar--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.bulk-bar__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  padding-right: 10px;
+  border-right: 1px solid var(--border);
+}
+.bulk-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bulk-bar__clear {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.bulk-bar__clear svg {
+  width: 12px;
+  height: 12px;
+}
+.bulk-bar__clear:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Bulk dropdowns */
+.bulk-dropdown {
+  position: relative;
+}
+.bulk-dropdown__trigger {
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.bulk-dropdown__trigger:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--surface-4);
+}
+.bulk-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 130px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  padding: 4px;
+  z-index: 160;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.97);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    visibility var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.bulk-dropdown.open .bulk-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.bulk-dropdown__option {
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+.bulk-dropdown__option:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
+}
+.bulk-dropdown__empty {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  padding: 8px 10px;
+  display: block;
+  font-style: italic;
 }

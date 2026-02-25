@@ -1,8 +1,19 @@
 // ===== Constants =====
 const STORAGE_KEY = "fakejira-board";
 const CURRENT_VERSION = 3;
-const STATUSES = ["todo", "in-progress", "testing", "done"];
+const STATUSES = ["todo", "in-progress", "testing", "done", "canceled"];
+const COL_COLLAPSED_KEY = "fakejira-col-collapsed";
 const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
+const BOARD_COLORS = [
+  "#6366f1", // indigo
+  "#06b6d4", // cyan
+  "#f43f5e", // rose
+  "#f59e0b", // amber
+  "#10b981", // emerald
+  "#a78bfa", // violet
+  "#f97316", // orange
+  "#0ea5e9", // sky
+];
 
 // ===== Random Name Pools =====
 const NAME_POOL = [
@@ -208,21 +219,26 @@ let missionInterval = null;
 
 let pendingDelete = null; // for undo
 let pendingImportData = null; // for import dialog
+let collapsedColumns = new Set();
+let selectedTicketIds = new Set();
+let viewAllActive = false;
 
 function generateBoardId() {
   return "B-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
 }
 
-function defaultBoard(title) {
+function defaultBoard(title, color) {
   return {
     id: generateBoardId(),
     title: title || randomName(),
+    color: color || BOARD_COLORS[0],
     tickets: [],
     columnOrder: {
       "todo": [],
       "in-progress": [],
       "testing": [],
-      "done": []
+      "done": [],
+      "canceled": []
     },
     labelPresets: [...LABEL_PRESETS]
   };
@@ -265,7 +281,7 @@ function migrateState(data) {
         id: generateBoardId(),
         title: boardTitle,
         tickets: data.tickets || [],
-        columnOrder: data.columnOrder || { "todo": [], "in-progress": [], "testing": [], "done": [] },
+        columnOrder: data.columnOrder || { "todo": [], "in-progress": [], "testing": [], "done": [], "canceled": [] },
         labelPresets: data.labelPresets || [...LABEL_PRESETS]
       }],
       activeBoardIndex: 0
@@ -287,8 +303,8 @@ function loadBoardState() {
         if (migrated.activeBoardIndex < 0 || migrated.activeBoardIndex >= migrated.boards.length) {
           migrated.activeBoardIndex = 0;
         }
-        // Validate each board's columnOrder
-        for (const board of migrated.boards) {
+        // Validate each board's columnOrder and assign missing colors
+        migrated.boards.forEach((board, i) => {
           for (const s of STATUSES) {
             if (!board.columnOrder || !Array.isArray(board.columnOrder[s])) {
               if (!board.columnOrder) board.columnOrder = {};
@@ -298,7 +314,10 @@ function loadBoardState() {
           if (!Array.isArray(board.labelPresets)) {
             board.labelPresets = [...LABEL_PRESETS];
           }
-        }
+          if (!board.color) {
+            board.color = BOARD_COLORS[i % BOARD_COLORS.length];
+          }
+        });
         return migrated;
       }
     }
@@ -330,7 +349,52 @@ const ICONS = {
 // ===== Rendering =====
 
 function renderBoard() {
+  const boardEl = document.getElementById("board");
+
+  if (viewAllActive) {
+    // Remove board-level color — cards carry their own
+    if (boardEl) boardEl.style.removeProperty("--active-board-color");
+
+    for (const status of STATUSES) {
+      const container = document.getElementById("col-" + status);
+      container.innerHTML = "";
+
+      // Gather tickets from every board for this status
+      let cardIndex = 0;
+      let hasCards = false;
+      for (let bi = 0; bi < state.boards.length; bi++) {
+        const board = state.boards[bi];
+        const boardColor = board.color || BOARD_COLORS[bi % BOARD_COLORS.length];
+        const ids = board.columnOrder[status] || [];
+        for (const id of ids) {
+          const ticket = board.tickets.find(t => t.id === id);
+          if (!ticket) continue;
+          const card = renderTicketCard(ticket, cardIndex++);
+          card.style.setProperty("--active-board-color", boardColor);
+          card.dataset.boardIndex = bi;
+          container.appendChild(card);
+          hasCards = true;
+        }
+      }
+
+      if (!hasCards) {
+        const empty = document.createElement("div");
+        empty.className = "column__empty";
+        empty.innerHTML = ICONS.empty
+          + '<span>No tickets</span>';
+        container.appendChild(empty);
+      }
+    }
+
+    renderColumnCounts();
+    applyCollapsedState();
+    return;
+  }
+
   const board = activeBoard();
+  if (boardEl) {
+    boardEl.style.setProperty("--active-board-color", board.color || BOARD_COLORS[0]);
+  }
   for (const status of STATUSES) {
     const container = document.getElementById("col-" + status);
     container.innerHTML = "";
@@ -354,6 +418,9 @@ function renderBoard() {
   }
   renderColumnCounts();
   initSortable();
+  applyCollapsedState();
+  renderColumnSelectAllCheckboxes();
+  updateSelectionUI();
 }
 
 function renderTicketCard(ticket, index) {
@@ -368,8 +435,34 @@ function renderTicketCard(ticket, index) {
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", ticket.title + ", " + ticket.priority + " priority");
 
+  if (selectedTicketIds.has(ticket.id)) {
+    card.classList.add("ticket-card--selected");
+  }
+
   const top = document.createElement("div");
   top.className = "ticket-card__top";
+
+  // Checkbox slides in from the left on hover; dot stays visible to its right
+  const checkWrap = document.createElement("label");
+  checkWrap.className = "ticket-card__checkbox-wrap";
+  checkWrap.addEventListener("click", e => e.stopPropagation());
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "ticket-card__checkbox";
+  checkbox.checked = selectedTicketIds.has(ticket.id);
+  checkbox.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleTicketSelection(ticket.id);
+  });
+
+  const tickBox = document.createElement("span");
+  tickBox.className = "tick-box";
+  tickBox.innerHTML = '<svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>';
+
+  checkWrap.appendChild(checkbox);
+  checkWrap.appendChild(tickBox);
+  top.appendChild(checkWrap);
 
   const dot = document.createElement("span");
   dot.className = "priority-dot priority-dot--" + ticket.priority;
@@ -450,16 +543,22 @@ function renderTicketCard(ticket, index) {
 }
 
 function renderColumnCounts() {
-  const board = activeBoard();
   for (const status of STATUSES) {
     const badge = document.querySelector(`[data-count="${status}"]`);
-    if (badge) {
-      const newCount = String(board.columnOrder[status].length);
-      if (badge.textContent !== newCount) {
-        badge.textContent = newCount;
-        badge.classList.add("column__count--pop");
-        setTimeout(() => badge.classList.remove("column__count--pop"), 200);
-      }
+    if (!badge) continue;
+
+    let count;
+    if (viewAllActive) {
+      count = state.boards.reduce((sum, b) => sum + (b.columnOrder[status] || []).length, 0);
+    } else {
+      count = activeBoard().columnOrder[status].length;
+    }
+
+    const newCount = String(count);
+    if (badge.textContent !== newCount) {
+      badge.textContent = newCount;
+      badge.classList.add("column__count--pop");
+      setTimeout(() => badge.classList.remove("column__count--pop"), 200);
     }
   }
 }
@@ -477,10 +576,23 @@ function renderTabs() {
   if (!container) return;
   container.innerHTML = "";
 
+  // Update View All button active state
+  const viewAllBtn = document.getElementById("btn-view-all");
+  if (viewAllBtn) {
+    viewAllBtn.classList.toggle("sidebar__view-all--active", viewAllActive);
+  }
+
   state.boards.forEach((board, index) => {
     const tab = document.createElement("button");
-    tab.className = "board-tab" + (index === state.activeBoardIndex ? " board-tab--active" : "");
+    tab.className = "board-tab" + (!viewAllActive && index === state.activeBoardIndex ? " board-tab--active" : "");
     tab.dataset.index = index;
+    tab.style.setProperty("--board-color", board.color || BOARD_COLORS[index % BOARD_COLORS.length]);
+
+    const dragHandle = document.createElement("span");
+    dragHandle.className = "board-tab__drag";
+    dragHandle.innerHTML = '<svg viewBox="0 0 6 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="4" cy="2" r="1"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/></svg>';
+    dragHandle.setAttribute("aria-hidden", "true");
+    tab.appendChild(dragHandle);
 
     const titleSpan = document.createElement("span");
     titleSpan.className = "board-tab__title";
@@ -514,10 +626,14 @@ function renderTabs() {
   addBtn.setAttribute("aria-label", "Add new board");
   addBtn.addEventListener("click", addBoard);
   container.appendChild(addBtn);
+
+  initBoardSortable();
 }
 
 function switchBoard(index) {
-  if (index === state.activeBoardIndex) return;
+  if (!viewAllActive && index === state.activeBoardIndex) return;
+  clearSelection();
+  if (viewAllActive) exitViewAll();
   state.activeBoardIndex = index;
   saveBoardState();
   renderBoard();
@@ -525,9 +641,11 @@ function switchBoard(index) {
 }
 
 function addBoard() {
+  if (viewAllActive) exitViewAll();
   const existingTitles = state.boards.map(b => b.title);
   existingTitles.push(state.title);
-  const newBoard = defaultBoard(randomName(existingTitles));
+  const colorIndex = state.boards.length;
+  const newBoard = defaultBoard(randomName(existingTitles), BOARD_COLORS[colorIndex % BOARD_COLORS.length]);
   state.boards.push(newBoard);
   state.activeBoardIndex = state.boards.length - 1;
   saveBoardState();
@@ -554,7 +672,7 @@ function deleteBoard(index) {
   renderBoard();
   renderTabs();
 
-  showToast("Board deleted", {
+  showToast("Deleted \u201c" + deletedBoard.title + "\u201d", {
     undo: () => {
       state.boards.splice(deletedIndex, 0, deletedBoard);
       state.activeBoardIndex = wasActive;
@@ -690,6 +808,12 @@ function updateTicket(id, updates) {
 }
 
 function deleteTicket(id) {
+  // In View All mode, find which board owns this ticket
+  if (viewAllActive) {
+    const boardIdx = state.boards.findIndex(b => b.tickets.some(t => t.id === id));
+    if (boardIdx !== -1) state.activeBoardIndex = boardIdx;
+  }
+
   const board = activeBoard();
   const boardIndex = state.activeBoardIndex;
   const ticket = board.tickets.find(t => t.id === id);
@@ -726,7 +850,10 @@ function deleteTicket(id) {
     timeout: undoTimeout
   };
 
-  showToast("Ticket deleted", {
+  const ticketLabel = deletedTicket.title.length > 28
+    ? deletedTicket.title.slice(0, 27) + "\u2026"
+    : deletedTicket.title;
+  showToast("Deleted \u201c" + ticketLabel + "\u201d", {
     undo: () => {
       clearTimeout(undoTimeout);
       // Restore ticket to the specific board it was deleted from
@@ -748,6 +875,7 @@ function deleteTicket(id) {
 // ===== Modal =====
 
 function openNewModal(defaultStatus = "todo") {
+  clearSelection();
   document.getElementById("modal-title").textContent = "New Ticket";
   document.getElementById("ticket-id").value = "";
   document.getElementById("ticket-title").value = "";
@@ -762,6 +890,14 @@ function openNewModal(defaultStatus = "todo") {
 }
 
 function openEditModal(id) {
+  clearSelection();
+
+  // In View All mode, find which board owns this ticket
+  if (viewAllActive) {
+    const boardIdx = state.boards.findIndex(b => b.tickets.some(t => t.id === id));
+    if (boardIdx !== -1) state.activeBoardIndex = boardIdx;
+  }
+
   const board = activeBoard();
   const ticket = board.tickets.find(t => t.id === id);
   if (!ticket) return;
@@ -862,6 +998,7 @@ function handleFormSubmit(e) {
   }
 
   closeModal();
+  if (viewAllActive) renderBoard();
 }
 
 // ===== Copy Prompt =====
@@ -911,6 +1048,32 @@ function resetCopyButton() {
   const label = document.getElementById("copy-prompt-text");
   btn.classList.remove("copied");
   label.textContent = "Copy";
+}
+
+// ===== Board Tab Drag Reorder =====
+
+let boardSortable = null;
+
+function initBoardSortable() {
+  if (boardSortable) boardSortable.destroy();
+  const container = document.getElementById("board-tabs");
+  if (!container) return;
+  boardSortable = new Sortable(container, {
+    animation: 150,
+    handle: ".board-tab__drag",
+    draggable: ".board-tab:not(.board-tab--add)",
+    ghostClass: "sortable-ghost",
+    chosenClass: "sortable-chosen",
+    onEnd(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+      const activeB = state.boards[state.activeBoardIndex];
+      const moved = state.boards.splice(evt.oldIndex, 1)[0];
+      state.boards.splice(evt.newIndex, 0, moved);
+      state.activeBoardIndex = state.boards.indexOf(activeB);
+      saveBoardState();
+      renderTabs();
+    }
+  });
 }
 
 // ===== Drag & Drop =====
@@ -1117,9 +1280,27 @@ function importBoard(file) {
   reader.readAsText(file);
 }
 
+function hasAnyTickets() {
+  return state.boards.some(b => b.tickets.length > 0);
+}
+
+function startNewProject() {
+  clearSelection();
+  if (viewAllActive) exitViewAll();
+  state = defaultState();
+  saveBoardState();
+  renderBoard();
+  renderTabs();
+  updateProjectTitleUI();
+  showToast("New project started");
+}
+
 function showImportDialog() {
   const dialog = document.getElementById("import-dialog-backdrop");
   if (dialog) {
+    // Reset to step 1
+    document.getElementById("import-step-1").hidden = false;
+    document.getElementById("import-step-2").hidden = true;
     dialog.classList.add("active");
     document.getElementById("board").setAttribute("inert", "");
     document.querySelector(".header").setAttribute("inert", "");
@@ -1138,12 +1319,48 @@ function closeImportDialog() {
     const sidebar = document.getElementById("sidebar");
     if (sidebar) sidebar.removeAttribute("inert");
     document.body.style.overflow = "";
+    // Reset step for next open
+    document.getElementById("import-step-1").hidden = false;
+    document.getElementById("import-step-2").hidden = true;
   }
   pendingImportData = null;
 }
 
-function handleImportReplace() {
+function handleImportAddToBoard() {
   if (!pendingImportData) return;
+  clearSelection();
+  const oldState = JSON.parse(JSON.stringify(state));
+  const board = activeBoard();
+  let count = 0;
+  for (const importedBoard of pendingImportData.boards) {
+    for (const ticket of importedBoard.tickets) {
+      const newId = generateId();
+      const newTicket = { ...ticket, id: newId };
+      board.tickets.push(newTicket);
+      const col = newTicket.status && board.columnOrder[newTicket.status] ? newTicket.status : "todo";
+      board.columnOrder[col].push(newId);
+      count++;
+    }
+  }
+  pendingImportData = null;
+  closeImportDialog();
+  saveBoardState();
+  renderBoard();
+  showToast(count + " ticket" + (count !== 1 ? "s" : "") + " added", {
+    undo: () => {
+      state = oldState;
+      saveBoardState();
+      renderBoard();
+      renderTabs();
+      showToast("Import undone");
+    }
+  });
+}
+
+function doImportReplace() {
+  if (!pendingImportData) return;
+  clearSelection();
+  if (viewAllActive) exitViewAll();
   const oldState = JSON.parse(JSON.stringify(state));
   state = pendingImportData;
   pendingImportData = null;
@@ -1164,8 +1381,33 @@ function handleImportReplace() {
   });
 }
 
+function handleImportNewProject() {
+  if (!pendingImportData) return;
+  if (hasAnyTickets()) {
+    document.getElementById("import-step-1").hidden = true;
+    document.getElementById("import-step-2").hidden = false;
+  } else {
+    doImportReplace();
+  }
+}
+
+function handleImportSaveAndReplace() {
+  exportBoard();
+  doImportReplace();
+}
+
+function handleImportSkipSave() {
+  doImportReplace();
+}
+
+function handleImportStepBack() {
+  document.getElementById("import-step-1").hidden = false;
+  document.getElementById("import-step-2").hidden = true;
+}
+
 function handleImportAddBoards() {
   if (!pendingImportData) return;
+  clearSelection();
   const oldState = JSON.parse(JSON.stringify(state));
   const importedBoards = pendingImportData.boards;
 
@@ -1200,12 +1442,70 @@ function initImportDialog() {
   const backdrop = document.getElementById("import-dialog-backdrop");
   if (!backdrop) return;
 
-  document.getElementById("import-replace").addEventListener("click", handleImportReplace);
+  document.getElementById("import-add-to-board").addEventListener("click", handleImportAddToBoard);
   document.getElementById("import-add").addEventListener("click", handleImportAddBoards);
+  document.getElementById("import-replace").addEventListener("click", handleImportNewProject);
+  document.getElementById("import-save-and-replace").addEventListener("click", handleImportSaveAndReplace);
+  document.getElementById("import-skip-save").addEventListener("click", handleImportSkipSave);
+  document.getElementById("import-step-back").addEventListener("click", handleImportStepBack);
   document.getElementById("import-cancel").addEventListener("click", closeImportDialog);
 
   backdrop.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeImportDialog();
+  });
+}
+
+function showNewProjectModal() {
+  const modal = document.getElementById("new-project-modal-backdrop");
+  if (modal) {
+    modal.classList.add("active");
+    document.getElementById("board").setAttribute("inert", "");
+    document.querySelector(".header").setAttribute("inert", "");
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.setAttribute("inert", "");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeNewProjectModal() {
+  const modal = document.getElementById("new-project-modal-backdrop");
+  if (modal) {
+    modal.classList.remove("active");
+    document.getElementById("board").removeAttribute("inert");
+    document.querySelector(".header").removeAttribute("inert");
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.removeAttribute("inert");
+    document.body.style.overflow = "";
+  }
+}
+
+function initNewProjectButton() {
+  const btn = document.getElementById("btn-new-project");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    if (hasAnyTickets()) {
+      showNewProjectModal();
+    } else {
+      startNewProject();
+    }
+  });
+
+  document.getElementById("new-project-save-new").addEventListener("click", () => {
+    exportBoard();
+    closeNewProjectModal();
+    startNewProject();
+  });
+
+  document.getElementById("new-project-skip-save").addEventListener("click", () => {
+    closeNewProjectModal();
+    startNewProject();
+  });
+
+  document.getElementById("new-project-cancel").addEventListener("click", closeNewProjectModal);
+
+  document.getElementById("new-project-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeNewProjectModal();
   });
 }
 
@@ -1264,9 +1564,24 @@ function initKeyboard() {
     const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 
     if (e.key === "Escape") {
+      const newProjectModal = document.getElementById("new-project-modal-backdrop");
+      if (newProjectModal && newProjectModal.classList.contains("active")) {
+        closeNewProjectModal();
+        return;
+      }
       const importDialog = document.getElementById("import-dialog-backdrop");
       if (importDialog && importDialog.classList.contains("active")) {
         closeImportDialog();
+        return;
+      }
+      const modalBackdrop = document.getElementById("modal-backdrop");
+      if (modalBackdrop && modalBackdrop.classList.contains("active")) {
+        closeModal();
+        return;
+      }
+      // No modal open — clear bulk selection
+      if (selectedTicketIds.size > 0) {
+        clearSelection();
         return;
       }
       closeModal();
@@ -1296,7 +1611,7 @@ function setStatusValue(value) {
   currentStatus = value;
   const dropdown = document.getElementById("status-dropdown");
   const label = document.getElementById("status-label");
-  const labels = { "todo": "Todo", "in-progress": "In Progress", "testing": "Testing", "done": "Done" };
+  const labels = { "todo": "Todo", "in-progress": "In Progress", "testing": "Testing", "done": "Done", "canceled": "Canceled" };
   label.textContent = labels[value] || value;
   dropdown.className = "status-dropdown status-dropdown--" + value;
   // Update aria-selected on options
@@ -1416,6 +1731,7 @@ function initEvents() {
 
   initStatusDropdown();
   initImportDialog();
+  initNewProjectButton();
 }
 
 // ===== Mission Banner =====
@@ -1469,6 +1785,70 @@ function toggleSidebar() {
   document.body.classList.toggle("sidebar-collapsed");
   const isCollapsed = document.body.classList.contains("sidebar-collapsed");
   localStorage.setItem(SIDEBAR_KEY, isCollapsed ? "collapsed" : "open");
+}
+
+// ===== Sidebar Resize =====
+
+const SIDEBAR_WIDTH_KEY = "fakejira-sidebar-width";
+const SIDEBAR_MIN_W = 160;
+const SIDEBAR_MAX_W = 400;
+
+function initSidebarResize() {
+  const handle = document.getElementById("sidebar-resize-handle");
+  if (!handle) return;
+
+  // Load saved width
+  const savedWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY);
+  if (savedWidth) {
+    const w = parseInt(savedWidth, 10);
+    if (w >= SIDEBAR_MIN_W && w <= SIDEBAR_MAX_W) {
+      document.documentElement.style.setProperty("--sidebar-width", w + "px");
+    }
+  }
+
+  handle.addEventListener("mousedown", startSidebarResize);
+  handle.addEventListener("touchstart", startSidebarResize, { passive: false });
+  handle.addEventListener("dblclick", resetSidebarWidth);
+}
+
+function startSidebarResize(e) {
+  e.preventDefault();
+  const handle = document.getElementById("sidebar-resize-handle");
+  handle.classList.add("sidebar__resize-handle--active");
+  document.body.classList.add("sidebar-resizing");
+
+  const startX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+  const sidebar = document.getElementById("sidebar");
+  const startWidth = sidebar.getBoundingClientRect().width;
+
+  function onMove(ev) {
+    const clientX = ev.type === "touchmove" ? ev.touches[0].clientX : ev.clientX;
+    const delta = clientX - startX;
+    const newWidth = Math.max(SIDEBAR_MIN_W, Math.min(startWidth + delta, SIDEBAR_MAX_W));
+    document.documentElement.style.setProperty("--sidebar-width", newWidth + "px");
+  }
+
+  function onEnd() {
+    handle.classList.remove("sidebar__resize-handle--active");
+    document.body.classList.remove("sidebar-resizing");
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+    // Save
+    const finalWidth = document.getElementById("sidebar").getBoundingClientRect().width;
+    localStorage.setItem(SIDEBAR_WIDTH_KEY, Math.round(finalWidth));
+  }
+
+  document.addEventListener("mousemove", onMove);
+  document.addEventListener("mouseup", onEnd);
+  document.addEventListener("touchmove", onMove, { passive: false });
+  document.addEventListener("touchend", onEnd);
+}
+
+function resetSidebarWidth() {
+  document.documentElement.style.removeProperty("--sidebar-width");
+  localStorage.removeItem(SIDEBAR_WIDTH_KEY);
 }
 
 // ===== Column Resize =====
@@ -1589,19 +1969,377 @@ function refreshResizeHandles() {
   insertResizeHandles(board, columns);
 }
 
+// ===== View All =====
+
+function toggleViewAll() {
+  viewAllActive = true;
+  clearSelection();
+  renderBoard();
+  renderTabs();
+}
+
+function exitViewAll() {
+  viewAllActive = false;
+  renderBoard();
+  renderTabs();
+}
+
 // ===== Init =====
 
 function init() {
+  loadCollapsedColumns(); // must run before first renderBoard
   initEvents();
   initCopyButton();
   initQuickAdd();
   initKeyboard();
   initMissionBanner();
   initSidebar();
+  initSidebarResize();
   initProjectTitle();
   renderTabs();
   renderBoard();
   initColumnResize();
+  initCollapsibleColumns();
+  initBulkBar();
+  initBoardClickToDeselect();
+
+  // View All button
+  const viewAllBtn = document.getElementById("btn-view-all");
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener("click", () => {
+      if (viewAllActive) {
+        exitViewAll();
+      } else {
+        toggleViewAll();
+      }
+    });
+  }
+}
+
+// ===== Collapsible Columns =====
+
+function loadCollapsedColumns() {
+  try {
+    const saved = localStorage.getItem(COL_COLLAPSED_KEY);
+    if (saved !== null) {
+      collapsedColumns = new Set(JSON.parse(saved));
+    } else {
+      collapsedColumns = new Set(["canceled"]);
+    }
+  } catch (e) {
+    collapsedColumns = new Set(["canceled"]);
+  }
+}
+
+function saveCollapsedColumns() {
+  localStorage.setItem(COL_COLLAPSED_KEY, JSON.stringify(Array.from(collapsedColumns)));
+}
+
+function applyCollapsedState() {
+  for (const status of STATUSES) {
+    const col = document.querySelector(`.column[data-status="${status}"]`);
+    if (!col) continue;
+    if (collapsedColumns.has(status)) {
+      col.classList.add("column--collapsed");
+    } else {
+      col.classList.remove("column--collapsed");
+    }
+  }
+}
+
+function toggleColumnCollapse(status) {
+  const col = document.querySelector(`.column[data-status="${status}"]`);
+  if (!col) return;
+  if (collapsedColumns.has(status)) {
+    collapsedColumns.delete(status);
+    col.classList.remove("column--collapsed");
+  } else {
+    collapsedColumns.add(status);
+    col.classList.add("column--collapsed");
+  }
+  saveCollapsedColumns();
+}
+
+function initCollapsibleColumns() {
+  loadCollapsedColumns();
+  applyCollapsedState();
+  document.querySelectorAll(".column__header--toggle").forEach(header => {
+    header.addEventListener("click", () => {
+      const status = header.dataset.toggleStatus;
+      toggleColumnCollapse(status);
+    });
+  });
+}
+
+// ===== Bulk Selection =====
+
+function toggleTicketSelection(id) {
+  if (selectedTicketIds.has(id)) {
+    selectedTicketIds.delete(id);
+  } else {
+    selectedTicketIds.add(id);
+  }
+  updateSelectionUI();
+}
+
+function clearSelection() {
+  selectedTicketIds.clear();
+  updateSelectionUI();
+}
+
+function getColumnSelectionState(status) {
+  const board = activeBoard();
+  const ticketIds = board.columnOrder[status] || [];
+  const allSelected = ticketIds.length > 0 && ticketIds.every(id => selectedTicketIds.has(id));
+  const someSelected = ticketIds.some(id => selectedTicketIds.has(id));
+  return { allSelected, someSelected };
+}
+
+function toggleColumnSelection(status, selectAll) {
+  const board = activeBoard();
+  const ticketIds = board.columnOrder[status] || [];
+  if (selectAll) {
+    ticketIds.forEach(id => selectedTicketIds.add(id));
+  } else {
+    ticketIds.forEach(id => selectedTicketIds.delete(id));
+  }
+  updateSelectionUI();
+}
+
+function renderColumnSelectAllCheckboxes() {
+  const board = activeBoard();
+  for (const status of STATUSES) {
+    const col = document.querySelector(`.column[data-status="${status}"]`);
+    if (!col) continue;
+    const headerLeft = col.querySelector(".column__header-left");
+    if (!headerLeft) continue;
+
+    // Remove old
+    const old = headerLeft.querySelector(".column__select-all-wrap");
+    if (old) old.remove();
+
+    const ticketIds = board.columnOrder[status] || [];
+    const { allSelected, someSelected } = getColumnSelectionState(status);
+
+    const wrap = document.createElement("label");
+    wrap.className = "column__select-all-wrap";
+    wrap.title = "Select all in column";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "column__select-all-cb";
+    checkbox.checked = allSelected;
+    checkbox.indeterminate = !allSelected && someSelected;
+
+    checkbox.addEventListener("change", (e) => {
+      e.stopPropagation();
+      toggleColumnSelection(status, checkbox.checked);
+    });
+    checkbox.addEventListener("click", e => e.stopPropagation());
+    wrap.addEventListener("click", e => e.stopPropagation());
+
+    const tick = document.createElement("span");
+    tick.className = "tick-box";
+    tick.innerHTML = '<svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>';
+
+    wrap.appendChild(checkbox);
+    wrap.appendChild(tick);
+    headerLeft.prepend(wrap);
+  }
+}
+
+function updateSelectionUI() {
+  const boardEl = document.getElementById("board");
+  if (!boardEl) return;
+
+  // Update each card's selected state
+  document.querySelectorAll(".ticket-card").forEach(card => {
+    const id = card.dataset.id;
+    const isSelected = selectedTicketIds.has(id);
+    card.classList.toggle("ticket-card--selected", isSelected);
+    const cb = card.querySelector(".ticket-card__checkbox");
+    if (cb) cb.checked = isSelected;
+  });
+
+  // Toggle selection-active on board
+  boardEl.classList.toggle("selection-active", selectedTicketIds.size > 0);
+
+  // Update column select-all checkboxes (update existing without full re-render)
+  for (const status of STATUSES) {
+    const col = document.querySelector(`.column[data-status="${status}"]`);
+    if (!col) continue;
+    const headerLeft = col.querySelector(".column__header-left");
+    if (!headerLeft) continue;
+    const cb = headerLeft.querySelector(".column__select-all-cb");
+    if (!cb) continue;
+    const { allSelected, someSelected } = getColumnSelectionState(status);
+    cb.checked = allSelected;
+    cb.indeterminate = !allSelected && someSelected;
+  }
+
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  if (!bar) return;
+  const count = selectedTicketIds.size;
+  bar.classList.toggle("bulk-bar--visible", count > 0);
+  const countEl = document.getElementById("bulk-count");
+  if (countEl) countEl.textContent = count + " selected";
+}
+
+function populateBulkAddLabelMenu() {
+  const board = activeBoard();
+  const menu = document.getElementById("bulk-add-label-menu");
+  if (!menu) return;
+  menu.innerHTML = "";
+  for (const label of board.labelPresets) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bulk-dropdown__option";
+    btn.dataset.bulkAction = "add-label";
+    btn.dataset.value = label;
+    btn.textContent = label;
+    menu.appendChild(btn);
+  }
+}
+
+function populateBulkRemoveLabelMenu() {
+  const board = activeBoard();
+  const menu = document.getElementById("bulk-remove-label-menu");
+  if (!menu) return;
+  menu.innerHTML = "";
+
+  const labels = new Set();
+  for (const id of selectedTicketIds) {
+    const ticket = board.tickets.find(t => t.id === id);
+    if (ticket && ticket.labels) {
+      ticket.labels.forEach(l => labels.add(l));
+    }
+  }
+
+  if (labels.size === 0) {
+    const empty = document.createElement("span");
+    empty.className = "bulk-dropdown__empty";
+    empty.textContent = "No labels";
+    menu.appendChild(empty);
+    return;
+  }
+
+  for (const label of labels) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bulk-dropdown__option";
+    btn.dataset.bulkAction = "remove-label";
+    btn.dataset.value = label;
+    btn.textContent = label;
+    menu.appendChild(btn);
+  }
+}
+
+function executeBulkAction(action, value) {
+  const board = activeBoard();
+  const ids = Array.from(selectedTicketIds);
+  if (ids.length === 0) return;
+
+  if (action === "status") {
+    for (const id of ids) {
+      const ticket = board.tickets.find(t => t.id === id);
+      if (!ticket) continue;
+      const oldStatus = ticket.status;
+      if (oldStatus === value) continue;
+      board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+      if (!board.columnOrder[value].includes(id)) {
+        board.columnOrder[value].push(id);
+      }
+      ticket.status = value;
+      ticket.updatedAt = new Date().toISOString();
+    }
+  } else if (action === "priority") {
+    for (const id of ids) {
+      const ticket = board.tickets.find(t => t.id === id);
+      if (!ticket) continue;
+      ticket.priority = value;
+      ticket.updatedAt = new Date().toISOString();
+    }
+  } else if (action === "add-label") {
+    for (const id of ids) {
+      const ticket = board.tickets.find(t => t.id === id);
+      if (!ticket) continue;
+      if (!ticket.labels) ticket.labels = [];
+      if (!ticket.labels.includes(value)) {
+        ticket.labels.push(value);
+      }
+      ticket.updatedAt = new Date().toISOString();
+    }
+  } else if (action === "remove-label") {
+    for (const id of ids) {
+      const ticket = board.tickets.find(t => t.id === id);
+      if (!ticket) continue;
+      ticket.labels = (ticket.labels || []).filter(l => l !== value);
+      ticket.updatedAt = new Date().toISOString();
+    }
+  }
+
+  saveBoardState();
+  renderBoard();
+  showToast(ids.length + " ticket" + (ids.length !== 1 ? "s" : "") + " updated");
+}
+
+function initBulkBar() {
+  const clearBtn = document.getElementById("bulk-clear");
+  if (clearBtn) clearBtn.addEventListener("click", clearSelection);
+
+  // Wire dropdown triggers
+  document.querySelectorAll("[data-bulk-trigger]").forEach(trigger => {
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const type = trigger.dataset.bulkTrigger;
+      const dropdown = trigger.closest(".bulk-dropdown");
+      const isOpen = dropdown.classList.contains("open");
+
+      // Close all dropdowns
+      document.querySelectorAll(".bulk-dropdown.open").forEach(d => d.classList.remove("open"));
+
+      if (!isOpen) {
+        if (type === "add-label") populateBulkAddLabelMenu();
+        if (type === "remove-label") populateBulkRemoveLabelMenu();
+        dropdown.classList.add("open");
+      }
+    });
+  });
+
+  // Wire option clicks via delegation on the bulk-bar actions area
+  document.getElementById("bulk-bar").addEventListener("click", (e) => {
+    const option = e.target.closest(".bulk-dropdown__option");
+    if (!option) return;
+    const action = option.dataset.bulkAction;
+    const value = option.dataset.value;
+    if (action && value) {
+      document.querySelectorAll(".bulk-dropdown.open").forEach(d => d.classList.remove("open"));
+      executeBulkAction(action, value);
+    }
+  });
+
+  // Close bulk dropdowns on outside click
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".bulk-dropdown") && !e.target.closest(".bulk-bar")) {
+      document.querySelectorAll(".bulk-dropdown.open").forEach(d => d.classList.remove("open"));
+    }
+  });
+}
+
+function initBoardClickToDeselect() {
+  document.getElementById("board").addEventListener("click", (e) => {
+    if (
+      !e.target.closest(".ticket-card") &&
+      !e.target.closest(".bulk-bar") &&
+      !e.target.closest(".column__header")
+    ) {
+      clearSelection();
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", init);

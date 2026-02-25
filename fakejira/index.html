@@ -31,6 +31,10 @@
       <span id="mission-quote"></span>
     </div>
     <div class="header__actions">
+      <button id="btn-new-project" class="btn btn--ghost">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4.5A1.5 1.5 0 003 3.5v9A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5V6l-4-4z"/><path d="M9 2v4h4"/></svg>
+        New Project
+      </button>
       <button id="btn-new-ticket" class="btn btn--primary">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
         New Ticket
@@ -57,11 +61,54 @@
       </button>
     </div>
     <span class="sidebar__title-vertical" id="project-title-vertical" aria-hidden="true"></span>
+    <button class="sidebar__view-all" id="btn-view-all">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+      View All
+    </button>
     <div class="sidebar__boards" id="board-tabs"></div>
+    <div class="sidebar__resize-handle" id="sidebar-resize-handle"></div>
   </aside>
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
   <main class="board" id="board">
+
+    <!-- Bulk Action Bar -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-bar__count" id="bulk-count">0 selected</span>
+      <div class="bulk-bar__actions">
+        <div class="bulk-dropdown" id="bulk-status-dropdown">
+          <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="status">Move to</button>
+          <div class="bulk-dropdown__menu" id="bulk-status-menu">
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="todo">Todo</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="in-progress">In Progress</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="testing">Testing</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="done">Done</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="canceled">Canceled</button>
+          </div>
+        </div>
+        <div class="bulk-dropdown" id="bulk-priority-dropdown">
+          <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="priority">Priority</button>
+          <div class="bulk-dropdown__menu" id="bulk-priority-menu">
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="low">Low</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="medium">Medium</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="high">High</button>
+            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="critical">Critical</button>
+          </div>
+        </div>
+        <div class="bulk-dropdown" id="bulk-add-label-dropdown">
+          <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="add-label">Add Label</button>
+          <div class="bulk-dropdown__menu" id="bulk-add-label-menu"></div>
+        </div>
+        <div class="bulk-dropdown" id="bulk-remove-label-dropdown">
+          <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="remove-label">Remove Label</button>
+          <div class="bulk-dropdown__menu" id="bulk-remove-label-menu"></div>
+        </div>
+      </div>
+      <button class="bulk-bar__clear" id="bulk-clear" aria-label="Clear selection">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+    </div>
+
     <div class="column" data-status="todo">
       <div class="column__header">
         <div class="column__header-left">
@@ -115,6 +162,23 @@
       <div class="column__cards" id="col-done"></div>
       <div class="column__quickadd">
         <input type="text" class="quickadd-input" data-status="done" placeholder="+ Add to Done...">
+      </div>
+    </div>
+
+    <div class="column column--collapsible" data-status="canceled">
+      <div class="column__header column__header--toggle" data-toggle-status="canceled">
+        <div class="column__header-left">
+          <span class="status-dot" style="--dot-color: var(--col-canceled)"></span>
+          <h2>Canceled</h2>
+          <span class="column__count" data-count="canceled">0</span>
+        </div>
+        <div class="column__header-right">
+          <svg class="column__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        </div>
+      </div>
+      <div class="column__cards" id="col-canceled"></div>
+      <div class="column__quickadd">
+        <input type="text" class="quickadd-input" data-status="canceled" placeholder="+ Add to Canceled...">
       </div>
     </div>
   </main>
@@ -177,6 +241,10 @@
                 <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-done)"></span>
                 Done
               </button>
+              <button type="button" class="status-dropdown__option" data-value="canceled" role="option">
+                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-canceled)"></span>
+                Canceled
+              </button>
             </div>
           </div>
         </div>
@@ -216,21 +284,68 @@
   <!-- Import Dialog -->
   <div class="modal-backdrop" id="import-dialog-backdrop">
     <div class="import-dialog" role="dialog" aria-modal="true" aria-labelledby="import-dialog-title">
-      <h2 id="import-dialog-title">Import Project</h2>
-      <p class="import-dialog__desc">How would you like to import this file?</p>
+      <!-- Step 1: Choose import mode -->
+      <div id="import-step-1">
+        <h2 id="import-dialog-title">Import Project</h2>
+        <p class="import-dialog__desc">How would you like to import this file?</p>
+        <div class="import-dialog__actions">
+          <button id="import-add-to-board" class="btn btn--ghost import-dialog__btn">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10l.8-4A1 1 0 013.8 5h8.4a1 1 0 01.98.8L14 10"/><path d="M2 10h12v2.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5V10z"/></svg>
+            Add to Active Board
+            <span class="import-dialog__hint">Merges all tickets into the current board</span>
+          </button>
+          <button id="import-add" class="btn btn--ghost import-dialog__btn">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+            Add as New Board
+            <span class="import-dialog__hint">Appends boards to current project</span>
+          </button>
+          <button id="import-replace" class="btn btn--ghost import-dialog__btn">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4.5A1.5 1.5 0 003 3.5v9A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5V6l-4-4z"/><path d="M9 2v4h4"/></svg>
+            New Project
+            <span class="import-dialog__hint">Replaces all boards and settings</span>
+          </button>
+        </div>
+        <button id="import-cancel" class="btn btn--ghost import-dialog__cancel">Cancel</button>
+      </div>
+      <!-- Step 2: Save before replacing -->
+      <div id="import-step-2" hidden>
+        <h2>Save current project?</h2>
+        <p class="import-dialog__desc">Starting a new project will replace all current boards and data.</p>
+        <div class="import-dialog__actions">
+          <button id="import-save-and-replace" class="btn btn--ghost import-dialog__btn">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 3v7"/><path d="M5 7l3 3 3-3"/></svg>
+            Save &amp; Import
+            <span class="import-dialog__hint">Export current project, then import the file</span>
+          </button>
+          <button id="import-skip-save" class="btn btn--ghost import-dialog__btn">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12"/><path d="M5 4V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5V4"/><path d="M3 4v9.5a1.5 1.5 0 001.5 1.5h7a1.5 1.5 0 001.5-1.5V4"/></svg>
+            Import without saving
+            <span class="import-dialog__hint">Discard current project and import</span>
+          </button>
+        </div>
+        <button id="import-step-back" class="btn btn--ghost import-dialog__cancel">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Project Confirmation Modal -->
+  <div class="modal-backdrop" id="new-project-modal-backdrop">
+    <div class="import-dialog" role="dialog" aria-modal="true" aria-labelledby="new-project-modal-title">
+      <h2 id="new-project-modal-title">Start a new project?</h2>
+      <p class="import-dialog__desc">Your current project will be cleared. Save it first to avoid losing your work.</p>
       <div class="import-dialog__actions">
-        <button id="import-replace" class="btn btn--ghost import-dialog__btn">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12"/><path d="M5 4V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5V4"/><path d="M3 4v9.5a1.5 1.5 0 001.5 1.5h7a1.5 1.5 0 001.5-1.5V4"/></svg>
-          Replace Project
-          <span class="import-dialog__hint">Replaces all boards and settings</span>
+        <button id="new-project-save-new" class="btn btn--ghost import-dialog__btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 3v7"/><path d="M5 7l3 3 3-3"/></svg>
+          Save &amp; New
+          <span class="import-dialog__hint">Export current project, then start fresh</span>
         </button>
-        <button id="import-add" class="btn btn--ghost import-dialog__btn">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
-          Add Boards
-          <span class="import-dialog__hint">Appends boards to current project</span>
+        <button id="new-project-skip-save" class="btn btn--ghost import-dialog__btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12"/><path d="M5 4V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5V4"/><path d="M3 4v9.5a1.5 1.5 0 001.5 1.5h7a1.5 1.5 0 001.5-1.5V4"/></svg>
+          New without saving
+          <span class="import-dialog__hint">Discard current project and start fresh</span>
         </button>
       </div>
-      <button id="import-cancel" class="btn btn--ghost import-dialog__cancel">Cancel</button>
+      <button id="new-project-cancel" class="btn btn--ghost import-dialog__cancel">Cancel</button>
     </div>
   </div>
 
