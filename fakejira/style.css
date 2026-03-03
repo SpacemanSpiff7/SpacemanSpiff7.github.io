@@ -680,11 +680,11 @@ body.sidebar-collapsed .board {
   flex-direction: column;
   max-height: calc(100vh - 96px);
   box-shadow:
-    inset 1px 1px 0 0 rgba(255, 255, 255, 0.08),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
-    inset 1px 0 0 0 rgba(255, 255, 255, 0.04),
-    inset -1px -1px 0 0 rgba(255, 255, 255, 0.015),
-    inset 0 0 30px -8px rgba(255, 255, 255, 0.03);
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.025),
+    inset 1px 0 0 0 rgba(255, 255, 255, 0.02),
+    inset -1px -1px 0 0 rgba(255, 255, 255, 0.008),
+    inset 0 0 30px -8px rgba(255, 255, 255, 0.015);
 }
 .column[data-status="canceled"] {
   box-shadow: none;

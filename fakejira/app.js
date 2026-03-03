@@ -1238,35 +1238,52 @@ function importBoard(file) {
     try {
       let data = JSON.parse(e.target.result);
 
-      // Detect v1/v2 format (has tickets + columnOrder at root)
-      if (data && data.tickets && data.columnOrder && (!data.version || data.version <= 2)) {
+      // Normalize: bare array of tickets -> v1 wrapper
+      if (Array.isArray(data)) {
+        if (data.length === 0 || typeof data[0] !== "object" || !data[0].title) {
+          showToast("Import failed: array does not contain valid tickets (need title field)");
+          return;
+        }
+        data = { version: 1, tickets: data };
+      }
+
+      if (!data || typeof data !== "object") {
+        showToast("Import failed: file is not a JSON object or array");
+        return;
+      }
+
+      // Detect v1/v2 format: has tickets at root (columnOrder is optional)
+      if (Array.isArray(data.tickets) && (!data.version || data.version <= 2)) {
+        const srcVersion = data.version || 1;
         data = migrateState(data);
         if (!data) {
-          showToast("Unsupported board version");
+          showToast("Import failed: could not migrate v" + srcVersion + " format");
           return;
         }
       }
 
       // Validate v3 format
-      if (!data || !Array.isArray(data.boards) || data.boards.length === 0) {
-        // Try migrating if it looks like v1/v2
-        if (data && data.tickets && data.columnOrder) {
+      if (!Array.isArray(data.boards) || data.boards.length === 0) {
+        // Try one more migration pass if it has tickets
+        if (Array.isArray(data.tickets)) {
           data = migrateState(data);
-          if (!data) {
-            showToast("Invalid board file");
+          if (!data || !Array.isArray(data.boards)) {
+            showToast("Import failed: file has tickets but could not be converted to a board");
             return;
           }
         } else {
-          showToast("Invalid board file");
+          const keys = Object.keys(data).join(", ");
+          showToast("Import failed: expected boards or tickets, found: " + (keys || "empty object"));
           return;
         }
       }
 
       // Migrate if needed
       if (data.version !== CURRENT_VERSION) {
+        const srcVersion = data.version;
         data = migrateState(data);
         if (!data) {
-          showToast("Unsupported board version");
+          showToast("Import failed: unsupported version (v" + srcVersion + ")");
           return;
         }
       }
@@ -1274,7 +1291,7 @@ function importBoard(file) {
       pendingImportData = data;
       showImportDialog();
     } catch (err) {
-      showToast("Failed to import: invalid JSON");
+      showToast("Import failed: " + (err.message || "invalid JSON"));
     }
   };
   reader.readAsText(file);
