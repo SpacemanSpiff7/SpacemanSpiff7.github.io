@@ -1,0 +1,103 @@
+# CurlBro — LLM Workout Generation Guide
+
+> CurlBro is a client-side gym workout builder at simonelongo.com/curlbro/.
+> Users can import workouts by pasting text into the app's import sheet.
+> This file describes how to generate importable workout routines.
+
+## Exercise Catalog
+
+The full catalog of 162 exercises is available as JSON:
+  /curlbro/exercises.json
+
+Each exercise includes: id, name, category, movement_pattern, force_type,
+equipment, primary_muscles, secondary_muscles, workout_position, difficulty,
+bilateral, rep_range_hypertrophy, rep_range_strength, substitutes,
+complements, superset_candidates, and notes.
+
+## Import Format
+
+The import format is line-based plain text.
+
+### Grammar
+
+```
+Header:    ## {workout_name} | {YYYY-MM-DD}
+Separator: ---
+Exercise:  {name} [{exercise_id}] | {sets}x{reps} | {weight}{unit} | Rest: {seconds}s
+Tip:         tip: {text}
+```
+
+### Rules
+
+- The header line starts with `## ` followed by the workout name, a pipe, and a date (YYYY-MM-DD).
+- A `---` separator follows the header.
+- Each exercise line has the exercise name, its ID in square brackets, then pipe-separated fields for sets×reps, weight (optional), and rest period.
+- `[exercise_id]` ensures the exercise is matched exactly on import. Use IDs from exercises.json.
+- Weight is optional — leave the field empty between pipes if not specified.
+- Tips are optional indented lines starting with `  tip: `.
+- Unrecognized exercise IDs generate warnings, not errors.
+- Malformed lines generate errors.
+
+## Building Good Workouts
+
+### Exercise Order (workout_position)
+Place exercises in this order within a session:
+1. **early** — Heavy compound lifts (squats, bench, deadlifts). Do first when fresh.
+2. **early_mid** — Demanding compounds that can follow the main lift.
+3. **mid** — Moderate compounds or heavy isolations.
+4. **mid_late** — Transitioning to lighter accessory work.
+5. **late** — Small isolations, finishers, abs, calves. Safe when fatigued.
+
+### Push/Pull Balance
+Match pushing volume with pulling volume across the training week to prevent
+imbalances and shoulder injuries. Every program should include face pulls or
+band pull-aparts.
+
+### Rep Ranges
+- 1-5 reps: strength focus
+- 6-12 reps: strength + hypertrophy (most common)
+- 12-20 reps: endurance + hypertrophy
+
+Use the exercise's `rep_range_hypertrophy` and `rep_range_strength` fields
+as guides. Default to hypertrophy ranges for most users.
+
+### Session Structure
+- 60-70% compound exercises, 30-40% isolation
+- 15-25 total sets per session
+- Start with 1-2 early-position compounds, add mid-position work, finish with isolations
+- Use the `complements` field to find exercises that pair well in the same session
+- Use `substitutes` to swap exercises when equipment is unavailable
+
+### Rest Periods
+- Heavy compounds: 120-300s
+- Moderate work: 90-120s
+- Isolations: 60-90s
+
+## Example Workout
+
+```
+## Push Day A | 2026-03-04
+---
+Barbell Bench Press (Flat) [barbell_bench_press] | 4x8 | 155lb | Rest: 180s
+  tip: Grip 1.5x shoulder width, squeeze shoulder blades together
+Incline Dumbbell Press [incline_dumbbell_press] | 3x10 | 50lb | Rest: 120s
+Barbell Overhead Press (Standing) [overhead_press] | 3x8 | 95lb | Rest: 120s
+Dumbbell Lateral Raise [lateral_raise] | 3x15 | | Rest: 60s
+Cable Flye [cable_flye] | 3x12 | | Rest: 60s
+Tricep Pushdown (Cable) [tricep_pushdown] | 3x12 | | Rest: 60s
+Overhead Tricep Extension (Cable) [overhead_tricep_extension] | 3x12 | | Rest: 60s
+```
+
+## Common Splits
+
+### Full Body (3x/week, beginners)
+Squat → Press → Row → Pulldown → Leg Curl → Face Pull → Calves → Abs
+
+### Upper/Lower (4x/week, intermediate)
+Upper: Bench → Row → OHP → Pulldown → Lateral Raise → Curls → Pushdowns
+Lower: Squat → RDL → Leg Press → Leg Curl → Lunges → Calves → Abs
+
+### Push/Pull/Legs (6x/week, advanced)
+Push: Bench → Incline Press → OHP → Lateral Raise → Flyes → Triceps
+Pull: Pull-up → Row → Cable Row → Face Pull → Curls → Rear Delts
+Legs: Squat → RDL → Leg Press → Leg Curl → Lunges → Calves → Abs

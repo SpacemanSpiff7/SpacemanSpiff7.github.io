@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# LLM instructions for generating CurlBro workouts
+# See: /curlbro/llms.txt
+# Exercise catalog: /curlbro/exercises.json
