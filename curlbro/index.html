@@ -2,25 +2,139 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
+
+    <!-- Consent Mode v2 defaults — MUST come before any Google tags -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied',
+        'wait_for_update': 500
+      });
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
+    <script>
       gtag('js', new Date());
       gtag('config', 'G-P9G5CS83DZ');
     </script>
-    <link rel="icon" type="image/png" href="/curlbro/logo.png" />
+
+    <!-- SEO Meta -->
+    <title>CurlBro — Free Science-Backed Workout Builder | 201 Exercises</title>
+    <meta name="description" content="Free science-backed workout builder with 201 exercises, smart conflict detection, superset grouping, and gap analysis. Build balanced gym routines — no signup, no subscription." />
+    <meta name="author" content="Simone Longo" />
+    <meta name="keywords" content="workout builder, exercise planner, gym workout generator, workout tracker, science-based workout, free workout app, curlbro" />
+    <meta name="robots" content="index, follow" />
+    <meta name="application-name" content="CurlBro" />
+    <link rel="canonical" href="https://simonelongo.com/curlbro/" />
+
+    <!-- Viewport & Theme -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#09090b" />
-    <title>CurlBro</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/curlbro/manifest.json" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://simonelongo.com/curlbro/" />
+    <meta property="og:title" content="CurlBro — Free Science-Backed Workout Builder" />
+    <meta property="og:description" content="Build balanced gym workouts with 201 exercises, smart conflict detection, superset grouping, and gap analysis. Free, no signup required." />
+    <meta property="og:image" content="https://simonelongo.com/curlbro/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="CurlBro workout builder app showing exercise selection and workout building interface" />
+    <meta property="og:site_name" content="CurlBro" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CurlBro — Free Science-Backed Workout Builder" />
+    <meta name="twitter:description" content="Build balanced gym workouts with 201 exercises, smart conflict detection, and gap analysis. Free, no signup." />
+    <meta name="twitter:image" content="https://simonelongo.com/curlbro/og-image.png" />
+    <meta name="twitter:image:alt" content="CurlBro workout builder app interface" />
+
+    <!-- Google Search Console verification (replace after setup) -->
+    <meta name="google-site-verification" content="REPLACE_WITH_YOUR_CODE" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "CurlBro",
+      "url": "https://simonelongo.com/curlbro/",
+      "description": "Free science-backed workout builder with 201 exercises, smart conflict detection, superset grouping, and gap analysis for balanced gym training.",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Any (Web Browser)",
+      "browserRequirements": "Requires JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "201 exercises (strength, stretching, mobility, cardio)",
+        "Smart exercise conflict detection",
+        "Muscle gap analysis",
+        "Superset/tri-set/circuit grouping",
+        "Active workout timer with set tracking",
+        "Body state tracking (soreness and activities)",
+        "Context-aware exercise recommendations",
+        "16 pre-built workout templates",
+        "Import/export workouts as text"
+      ],
+      "author": {
+        "@type": "Person",
+        "name": "Simone Longo",
+        "url": "https://simonelongo.com"
+      },
+      "screenshot": "https://simonelongo.com/curlbro/og-image.png",
+      "inLanguage": "en"
+    }
+    </script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/curlbro/assets/index-CMGIu6lx.js"></script>
-    <link rel="stylesheet" crossorigin href="/curlbro/assets/index-4iiBYdDs.css">
+    <script type="module" crossorigin src="/curlbro/assets/index-CcMokt3h.js"></script>
+    <link rel="stylesheet" crossorigin href="/curlbro/assets/index-DBANC07z.css">
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Noscript fallback — gives crawlers indexable content on first pass -->
+    <noscript>
+      <div style="padding:2rem;font-family:sans-serif;color:#fafafa;background:#09090b;min-height:100vh">
+        <h1>CurlBro — Free Workout Builder</h1>
+        <p>CurlBro is a free, science-backed workout builder with 201 exercises covering 14 muscle groups.</p>
+        <h2>Features</h2>
+        <ul>
+          <li>Build custom gym workouts from 201 exercises (162 strength, 32 stretching/mobility, 7 cardio)</li>
+          <li>Smart conflict detection prevents exercise pairing mistakes</li>
+          <li>Gap analysis identifies missing muscle groups in your routine</li>
+          <li>Superset, tri-set, and circuit grouping</li>
+          <li>Active workout timer with set tracking</li>
+          <li>Workout logging and history</li>
+          <li>Body state tracking (soreness and recent activities)</li>
+          <li>Context-aware exercise recommendations</li>
+          <li>16 pre-built workout templates across 4 difficulty tiers</li>
+          <li>Import/export workouts as text</li>
+        </ul>
+        <h2>Supported Workout Splits</h2>
+        <p>Push/Pull/Legs, Upper/Lower, Full Body, and custom splits.</p>
+        <p>Built by <a href="https://simonelongo.com" style="color:#06b6d4">Simone Longo</a>.
+           Contact: <a href="mailto:contact@simonelongo.com" style="color:#06b6d4">contact@simonelongo.com</a></p>
+        <p>This application requires JavaScript to run.</p>
+      </div>
+    </noscript>
   </body>
 </html>
