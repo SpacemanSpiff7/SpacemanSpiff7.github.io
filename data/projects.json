@@ -25,7 +25,7 @@
       "actions": [
         {
           "text": "Use App",
-          "url": "curlbro/",
+          "url": "https://www.curlbro.com",
           "type": "primary"
         },
         {
