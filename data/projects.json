@@ -3,7 +3,7 @@
     "fakejira",
     "la-collisions-dashboard",
     "traffic-therapy",
-    "dodgers-notifications",
+    "curlbro",
     "glowy-blob-ball"
   ],
   "featuredConfig": {
@@ -14,6 +14,28 @@
     "showDescription": true
   },
   "projects": [
+    {
+      "id": "curlbro",
+      "title": "CurlBro",
+      "shortDescription": "Gym workout builder with an exercise graph of 162 exercises and 1,340 relationships",
+      "description": "A client-side workout builder that uses a graph of 162 exercises and 1,340 relationships to suggest complementary exercises and supersets. Features fuzzy search, drag-to-reorder workout building, live session tracking with per-set weight/rep logging, a rest timer with audio cues, and human-readable text export/import. Mobile-first, dark mode, no server required.",
+      "category": "Fitness",
+      "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop&crop=center",
+      "tags": ["React", "TypeScript", "Fitness"],
+      "actions": [
+        {
+          "text": "Use App",
+          "url": "curlbro/",
+          "type": "primary"
+        },
+        {
+          "text": "Github",
+          "url": "https://github.com/SpacemanSpiff7/CurlBro",
+          "type": "secondary",
+          "external": true
+        }
+      ]
+    },
     {
       "id": "stock-analytics",
       "title": "Stock Analytics Widget", 
