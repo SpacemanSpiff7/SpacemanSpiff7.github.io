@@ -24,6 +24,7 @@ The import format is line-based plain text.
 Header:    ## {workout_name} | {YYYY-MM-DD}
 Separator: ---
 Exercise:  {name} [{exercise_id}] | {sets}x{reps} | {weight}{unit} | Rest: {seconds}s
+Superset:  {name} [{exercise_id}] | {sets}x{reps} | {weight}{unit} | Rest: {seconds}s [superset:{group_id}]
 Tip:         tip: {text}
 ```
 
@@ -37,6 +38,21 @@ Tip:         tip: {text}
 - Tips are optional indented lines starting with `  tip: `.
 - Unrecognized exercise IDs generate warnings, not errors.
 - Malformed lines generate errors.
+
+### Supersets and Grouping
+
+Exercises can be grouped into supersets, tri-sets, or circuits by appending a `[superset:GROUP_ID]` tag at the end of the exercise line. Exercises sharing the same GROUP_ID are performed back-to-back with minimal rest between them.
+
+- 2 exercises with the same group ID = **Superset**
+- 3 exercises with the same group ID = **Tri-set**
+- 4+ exercises with the same group ID = **Circuit**
+
+Rules:
+- GROUP_ID can be any unique string (e.g., `ss1`, `group_a`, a UUID)
+- Grouped exercises MUST be consecutive lines — the app groups by adjacency
+- Exercises without a `[superset:...]` tag are standalone
+- Old format (no tags) imports normally — the tag is fully backward compatible
+- Use the `superset_candidates` field from exercises.json to find good pairings
 
 ## Building Good Workouts
 
@@ -87,6 +103,27 @@ Cable Flye [cable_flye] | 3x12 | | Rest: 60s
 Tricep Pushdown (Cable) [tricep_pushdown] | 3x12 | | Rest: 60s
 Overhead Tricep Extension (Cable) [overhead_tricep_extension] | 3x12 | | Rest: 60s
 ```
+
+## Example Workout with Supersets
+
+```
+## Upper Body | 2026-03-04
+---
+Barbell Bench Press (Flat) [barbell_bench_press] | 4x8 | 155lb | Rest: 120s [superset:ss1]
+Barbell Bent-Over Row [barbell_row] | 4x8 | 135lb | Rest: 120s [superset:ss1]
+
+Barbell Overhead Press (Standing) [overhead_press] | 3x10 | 85lb | Rest: 90s [superset:ss2]
+Lat Pulldown (Wide Grip) [lat_pulldown] | 3x10 | | Rest: 90s [superset:ss2]
+
+Dumbbell Lateral Raise [lateral_raise] | 3x15 | | Rest: 60s [superset:ss3]
+Cable Flye [cable_flye] | 3x12 | | Rest: 60s [superset:ss3]
+Face Pull (Cable) [face_pull] | 3x15 | | Rest: 60s [superset:ss3]
+```
+
+In this example:
+- `ss1` groups Bench Press + Row as a **Superset** (push/pull antagonist pair)
+- `ss2` groups OHP + Pulldown as a **Superset**
+- `ss3` groups Lateral Raise + Cable Flye + Face Pull as a **Tri-set**
 
 ## Common Splits
 
