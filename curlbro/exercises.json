@@ -1,7 +1,7 @@
 {
-  "description": "CurlBro exercise catalog — 162 exercises for gym workout building",
+  "description": "CurlBro exercise catalog — strength, stretching, and mobility exercises for gym workout building",
   "import_instructions_url": "/curlbro/llms.txt",
-  "exercise_count": 162,
+  "exercise_count": 201,
   "exercises": [
     {
       "id": "bodyweight_squat",
@@ -6435,6 +6435,1270 @@
         "conventional_deadlift"
       ],
       "notes": "One of the best functional anti-lateral flexion exercises — trains the same stabilization pattern as a side plank but under heavy load while walking. Directly builds the lateral core strength needed to prevent shifting during heavy squats and deadlifts. More core-specific than a bilateral farmer's walk because the unilateral loading creates a strong rotational and lateral demand. Also reveals left/right asymmetries. Can be done with very heavy weight relative to bilateral carries."
+    },
+    {
+      "id": "leg_swing_forward",
+      "name": "Leg Swings (Forward/Back)",
+      "category": "stretch_dynamic",
+      "movement_pattern": "hip_flexion_extension",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "hamstrings",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "glutes"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "leg_swing_lateral",
+        "walking_lunge_dynamic",
+        "butt_kick"
+      ],
+      "complements": [
+        "leg_swing_lateral",
+        "hip_circle",
+        "walking_lunge_dynamic"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 swings per leg. Excellent pre-squat and pre-deadlift warm-up. Progressively increase the range of motion over the first few reps rather than starting at full amplitude."
+    },
+    {
+      "id": "leg_swing_lateral",
+      "name": "Leg Swings (Lateral)",
+      "category": "stretch_dynamic",
+      "movement_pattern": "hip_adduction_abduction",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "adductors",
+        "abductors"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "leg_swing_forward",
+        "hip_circle",
+        "hip_ninety_ninety"
+      ],
+      "complements": [
+        "leg_swing_forward",
+        "hip_circle",
+        "hip_ninety_ninety"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 swings per leg. Targets the inner and outer thigh. Particularly useful before sumo deadlifts, wide-stance squats, or any lateral movement work."
+    },
+    {
+      "id": "arm_circle",
+      "name": "Arm Circles",
+      "category": "stretch_dynamic",
+      "movement_pattern": "shoulder_circumduction",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "band_dislocate",
+        "wall_slide"
+      ],
+      "complements": [
+        "band_dislocate",
+        "wall_slide",
+        "thoracic_rotation"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 circles in each direction. A simple but effective way to warm up the shoulder girdle before any pressing or overhead work. Progress to band dislocates for a deeper shoulder warm-up."
+    },
+    {
+      "id": "hip_circle",
+      "name": "Hip Circles",
+      "category": "stretch_dynamic",
+      "movement_pattern": "hip_circumduction",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "leg_swing_lateral",
+        "hip_ninety_ninety"
+      ],
+      "complements": [
+        "leg_swing_forward",
+        "leg_swing_lateral",
+        "hip_ninety_ninety"
+      ],
+      "superset_candidates": [],
+      "notes": "10 circles per direction per leg. Lubricates the hip joint and activates the stabilizer muscles around the hip. Essential warm-up for squats, lunges, and deadlifts."
+    },
+    {
+      "id": "walking_lunge_dynamic",
+      "name": "Walking Lunge (Dynamic)",
+      "category": "stretch_dynamic",
+      "movement_pattern": "lunge",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "leg_swing_forward",
+        "high_knee",
+        "worlds_greatest_stretch"
+      ],
+      "complements": [
+        "leg_swing_forward",
+        "hip_flexor_stretch",
+        "worlds_greatest_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "8-10 lunges per leg. Doubles as both a dynamic stretch and glute activation drill. The longer the stride, the more hip flexor and hamstring stretch you get. Keep the movement controlled — this is a warm-up, not a loaded exercise."
+    },
+    {
+      "id": "butt_kick",
+      "name": "Butt Kicks",
+      "category": "stretch_dynamic",
+      "movement_pattern": "knee_flexion_dynamic",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "quadriceps"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "high_knee",
+        "leg_swing_forward",
+        "a_skip"
+      ],
+      "complements": [
+        "high_knee",
+        "a_skip",
+        "leg_swing_forward"
+      ],
+      "superset_candidates": [],
+      "notes": "15-20 reps per leg. Dynamically stretches the quadriceps while warming up the hamstrings. Also raises heart rate and body temperature. Pair with high knees for a complete lower body dynamic warm-up."
+    },
+    {
+      "id": "inchworm",
+      "name": "Inchworm",
+      "category": "stretch_dynamic",
+      "movement_pattern": "full_body_flexion_extension",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "core",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "shoulders"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "worlds_greatest_stretch",
+        "cat_cow"
+      ],
+      "complements": [
+        "worlds_greatest_stretch",
+        "cat_cow",
+        "thoracic_rotation"
+      ],
+      "superset_candidates": [],
+      "notes": "5-8 reps. A full-body dynamic stretch that warms up the hamstrings, shoulders, and core simultaneously. Add a push-up at the bottom for extra upper body activation. Excellent all-purpose warm-up for any workout."
+    },
+    {
+      "id": "high_knee",
+      "name": "High Knees",
+      "category": "stretch_dynamic",
+      "movement_pattern": "hip_flexion_dynamic",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "core",
+        "calves"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "butt_kick",
+        "a_skip",
+        "walking_lunge_dynamic"
+      ],
+      "complements": [
+        "butt_kick",
+        "a_skip",
+        "leg_swing_forward"
+      ],
+      "superset_candidates": [],
+      "notes": "15-20 reps per leg. Raises heart rate and dynamically warms up the hip flexors, quads, and calves. Also improves coordination and prepares the nervous system for explosive lower body work."
+    },
+    {
+      "id": "a_skip",
+      "name": "A-Skip",
+      "category": "stretch_dynamic",
+      "movement_pattern": "hip_flexion_dynamic",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "calves",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "high_knee",
+        "butt_kick"
+      ],
+      "complements": [
+        "high_knee",
+        "butt_kick",
+        "ankle_mobility_drill"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 skips per leg over 20-30 meters. A classic track and field warm-up drill that activates the calves, quads, and hip flexors while improving coordination. Great before any lower body session or plyometric work."
+    },
+    {
+      "id": "worlds_greatest_stretch",
+      "name": "World's Greatest Stretch",
+      "category": "stretch_dynamic",
+      "movement_pattern": "multi_joint_mobility",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "core",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "shoulders",
+        "glutes"
+      ],
+      "workout_position": "early",
+      "difficulty": "intermediate",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "inchworm",
+        "walking_lunge_dynamic"
+      ],
+      "complements": [
+        "inchworm",
+        "thoracic_rotation",
+        "hip_flexor_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "3-5 reps per side. Nicknamed the world's greatest stretch because it hits the hip flexors, hamstrings, thoracic spine, adductors, and shoulders in one movement. One of the most efficient warm-up drills you can do."
+    },
+    {
+      "id": "cat_cow",
+      "name": "Cat-Cow",
+      "category": "stretch_dynamic",
+      "movement_pattern": "spinal_flexion_extension",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "core",
+        "upper_back"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "thoracic_rotation",
+        "thoracic_spine_extension"
+      ],
+      "complements": [
+        "thoracic_rotation",
+        "thoracic_spine_extension",
+        "childs_pose"
+      ],
+      "superset_candidates": [],
+      "notes": "8-10 slow cycles. Gently mobilizes the entire spine from cervical to lumbar. Ideal first movement of any warm-up, especially after sitting all day. Synchronize breathing with the movement for a calming effect."
+    },
+    {
+      "id": "thoracic_rotation",
+      "name": "Thoracic Rotation",
+      "category": "stretch_dynamic",
+      "movement_pattern": "spinal_rotation",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "upper_back"
+      ],
+      "secondary_muscles": [
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "cat_cow",
+        "worlds_greatest_stretch"
+      ],
+      "complements": [
+        "cat_cow",
+        "thoracic_spine_extension",
+        "worlds_greatest_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "8-10 rotations per side. Targets the thoracic spine (mid-back), which tends to stiffen from desk work. Improved thoracic rotation translates to better overhead pressing position and reduced lower back compensation."
+    },
+    {
+      "id": "standing_quad_stretch",
+      "name": "Standing Quad Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "knee_flexion_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "quadriceps"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "hip_flexor_stretch",
+        "foam_roll_quads"
+      ],
+      "complements": [
+        "seated_hamstring_stretch",
+        "hip_flexor_stretch",
+        "foam_roll_quads"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Keep your pelvis neutral — avoid arching your lower back. To increase the stretch, gently push your hips forward. Best performed after squats, lunges, or any quad-dominant work."
+    },
+    {
+      "id": "seated_hamstring_stretch",
+      "name": "Seated Hamstring Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "hip_flexion_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "standing_quad_stretch",
+        "pigeon_pose"
+      ],
+      "complements": [
+        "standing_quad_stretch",
+        "pigeon_pose",
+        "hip_flexor_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Also called the modified hurdler stretch. Keeping the back flat ensures the stretch targets the hamstrings rather than the lower back. Especially important after deadlifts and RDLs."
+    },
+    {
+      "id": "pigeon_pose",
+      "name": "Pigeon Pose",
+      "category": "stretch_static",
+      "movement_pattern": "hip_external_rotation_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "adductors"
+      ],
+      "workout_position": "late",
+      "difficulty": "intermediate",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "figure_four_stretch",
+        "hip_ninety_ninety"
+      ],
+      "complements": [
+        "figure_four_stretch",
+        "hip_flexor_stretch",
+        "seated_spinal_twist"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. A deep hip opener that targets the piriformis and external rotators of the hip. If knee discomfort occurs, switch to the supine figure-4 stretch which provides the same stretch with less stress on the knee."
+    },
+    {
+      "id": "doorway_chest_stretch",
+      "name": "Doorway Chest Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "horizontal_shoulder_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "chest"
+      ],
+      "secondary_muscles": [
+        "shoulders"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "cross_body_shoulder_stretch",
+        "lat_stretch"
+      ],
+      "complements": [
+        "cross_body_shoulder_stretch",
+        "lat_stretch",
+        "childs_pose"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Counteracts the forward-rounded shoulder posture from desk work and heavy pressing. Can also be done with both arms simultaneously on either side of a doorway for a bilateral stretch."
+    },
+    {
+      "id": "cross_body_shoulder_stretch",
+      "name": "Cross-Body Shoulder Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "shoulder_horizontal_adduction_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "doorway_chest_stretch",
+        "tricep_overhead_stretch"
+      ],
+      "complements": [
+        "doorway_chest_stretch",
+        "tricep_overhead_stretch",
+        "lat_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Primarily targets the posterior deltoid and infraspinatus. Important for maintaining shoulder mobility, especially after heavy rowing or pulling work. Avoid this stretch immediately before pressing — it can temporarily reduce shoulder stability."
+    },
+    {
+      "id": "tricep_overhead_stretch",
+      "name": "Tricep Overhead Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "shoulder_flexion_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "triceps"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "cross_body_shoulder_stretch"
+      ],
+      "complements": [
+        "cross_body_shoulder_stretch",
+        "doorway_chest_stretch",
+        "lat_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Stretches the long head of the triceps, which crosses the shoulder joint. Particularly useful after overhead pressing, dips, and skull crushers."
+    },
+    {
+      "id": "standing_calf_stretch",
+      "name": "Standing Calf Stretch",
+      "category": "stretch_static",
+      "movement_pattern": "ankle_dorsiflexion_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "calves"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "ankle_mobility_drill"
+      ],
+      "complements": [
+        "ankle_mobility_drill",
+        "standing_quad_stretch",
+        "seated_hamstring_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Do one set with the back knee straight (targets gastrocnemius) and one set with the back knee slightly bent (targets soleus). Important after calf raises, running, and any lower body work."
+    },
+    {
+      "id": "hip_flexor_stretch",
+      "name": "Hip Flexor Stretch (Kneeling)",
+      "category": "stretch_static",
+      "movement_pattern": "hip_extension_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "glutes"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "standing_quad_stretch",
+        "walking_lunge_dynamic"
+      ],
+      "complements": [
+        "standing_quad_stretch",
+        "pigeon_pose",
+        "seated_hamstring_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Tight hip flexors from prolonged sitting can cause anterior pelvic tilt and lower back pain. Squeezing the glute on the kneeling side posteriorly tilts the pelvis, deepening the stretch. Raise the arm on the kneeling side overhead for an additional stretch through the psoas."
+    },
+    {
+      "id": "childs_pose",
+      "name": "Child's Pose",
+      "category": "stretch_static",
+      "movement_pattern": "spinal_flexion_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "upper_back"
+      ],
+      "secondary_muscles": [
+        "shoulders"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "lat_stretch",
+        "cat_cow"
+      ],
+      "complements": [
+        "lat_stretch",
+        "cat_cow",
+        "seated_spinal_twist"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds. A restorative position that gently stretches the lats, thoracolumbar fascia, and shoulders. Walk your hands to one side to add a lateral stretch. Excellent cool-down finisher after back or shoulder workouts."
+    },
+    {
+      "id": "seated_spinal_twist",
+      "name": "Seated Spinal Twist",
+      "category": "stretch_static",
+      "movement_pattern": "spinal_rotation_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "core"
+      ],
+      "secondary_muscles": [
+        "upper_back"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "thoracic_rotation",
+        "childs_pose"
+      ],
+      "complements": [
+        "childs_pose",
+        "pigeon_pose",
+        "seated_hamstring_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Stretches the obliques, erector spinae, and glutes while improving rotational mobility. Breathe deeply and try to rotate a little further on each exhale. Avoid forcing the twist — let gravity and your breathing deepen the stretch."
+    },
+    {
+      "id": "lat_stretch",
+      "name": "Lat Stretch (Doorway/Overhead)",
+      "category": "stretch_static",
+      "movement_pattern": "shoulder_flexion_lateral_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "upper_back"
+      ],
+      "secondary_muscles": [
+        "shoulders"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "childs_pose",
+        "doorway_chest_stretch"
+      ],
+      "complements": [
+        "childs_pose",
+        "doorway_chest_stretch",
+        "tricep_overhead_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. Targets the latissimus dorsi, teres major, and posterior shoulder. Particularly helpful after pull-ups, rows, and pulldowns. Lean slightly forward or backward to shift the stretch emphasis."
+    },
+    {
+      "id": "figure_four_stretch",
+      "name": "Figure-4 Stretch (Supine)",
+      "category": "stretch_static",
+      "movement_pattern": "hip_external_rotation_stretch",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "adductors"
+      ],
+      "workout_position": "late",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "pigeon_pose",
+        "hip_ninety_ninety"
+      ],
+      "complements": [
+        "pigeon_pose",
+        "seated_spinal_twist",
+        "hip_flexor_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold 30-60 seconds per side. A supine alternative to pigeon pose that is easier on the knees. Targets the piriformis and deep external rotators. Especially effective for sciatic nerve relief. Gently push the crossed knee away from you to deepen the stretch."
+    },
+    {
+      "id": "hip_ninety_ninety",
+      "name": "Hip 90/90",
+      "category": "mobility",
+      "movement_pattern": "hip_rotation_mobility",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "adductors",
+        "abductors"
+      ],
+      "workout_position": "early",
+      "difficulty": "intermediate",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "pigeon_pose",
+        "figure_four_stretch",
+        "hip_circle"
+      ],
+      "complements": [
+        "pigeon_pose",
+        "figure_four_stretch",
+        "hip_circle"
+      ],
+      "superset_candidates": [],
+      "notes": "Hold each position 30-45 seconds, or flow side-to-side for 8-10 transitions. A comprehensive hip mobility drill that simultaneously trains internal and external rotation. Popularized by functional range conditioning (FRC). If you can't sit upright, place your hands behind you for support."
+    },
+    {
+      "id": "band_dislocate",
+      "name": "Band Dislocates",
+      "category": "mobility",
+      "movement_pattern": "shoulder_circumduction_loaded",
+      "force_type": "isometric",
+      "equipment": [
+        "resistance_band"
+      ],
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [
+        "upper_back"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "arm_circle",
+        "wall_slide"
+      ],
+      "complements": [
+        "arm_circle",
+        "wall_slide",
+        "thoracic_spine_extension"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 reps. Can also be done with a PVC pipe or broomstick. Progressively narrow your grip as mobility improves. One of the best shoulder warm-up drills before bench press, overhead press, or pull-ups. Avoid jerky movements — smooth and controlled throughout."
+    },
+    {
+      "id": "ankle_mobility_drill",
+      "name": "Ankle Mobility Drill",
+      "category": "mobility",
+      "movement_pattern": "ankle_dorsiflexion_mobility",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "calves"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "standing_calf_stretch"
+      ],
+      "complements": [
+        "standing_calf_stretch",
+        "a_skip",
+        "foam_roll_quads"
+      ],
+      "superset_candidates": [],
+      "notes": "10-15 reps per side, or hold the end position for 30 seconds. Also called the knee-to-wall test. Ankle dorsiflexion is essential for deep squats — limited ankle mobility forces excessive forward lean. Test both ankles and spend extra time on the tighter side."
+    },
+    {
+      "id": "foam_roll_quads",
+      "name": "Foam Roll Quads",
+      "category": "mobility",
+      "movement_pattern": "soft_tissue_mobilization",
+      "force_type": "isometric",
+      "equipment": [
+        "foam_roller"
+      ],
+      "primary_muscles": [
+        "quadriceps"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "foam_roll_it_band",
+        "standing_quad_stretch"
+      ],
+      "complements": [
+        "foam_roll_it_band",
+        "standing_quad_stretch",
+        "ankle_mobility_drill"
+      ],
+      "superset_candidates": [],
+      "notes": "60-90 seconds per leg. Self-myofascial release reduces muscle tension and may improve range of motion before training. Useful before squats and lunges. Research is mixed on performance benefits, but most lifters report improved squat depth after foam rolling the quads."
+    },
+    {
+      "id": "foam_roll_it_band",
+      "name": "Foam Roll IT Band",
+      "category": "mobility",
+      "movement_pattern": "soft_tissue_mobilization",
+      "force_type": "isometric",
+      "equipment": [
+        "foam_roller"
+      ],
+      "primary_muscles": [
+        "abductors"
+      ],
+      "secondary_muscles": [
+        "quadriceps"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "foam_roll_quads",
+        "leg_swing_lateral"
+      ],
+      "complements": [
+        "foam_roll_quads",
+        "hip_ninety_ninety",
+        "leg_swing_lateral"
+      ],
+      "superset_candidates": [],
+      "notes": "60-90 seconds per side. The IT band itself doesn't actually stretch much — the goal is to release tension in the surrounding muscles (vastus lateralis and TFL). Particularly helpful for runners and those with knee tracking issues. If the pressure is unbearable, stack your legs to reduce the load."
+    },
+    {
+      "id": "thoracic_spine_extension",
+      "name": "Thoracic Spine Extension (Foam Roller)",
+      "category": "mobility",
+      "movement_pattern": "spinal_extension_mobilization",
+      "force_type": "isometric",
+      "equipment": [
+        "foam_roller"
+      ],
+      "primary_muscles": [
+        "upper_back"
+      ],
+      "secondary_muscles": [
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "cat_cow",
+        "thoracic_rotation"
+      ],
+      "complements": [
+        "cat_cow",
+        "thoracic_rotation",
+        "band_dislocate"
+      ],
+      "superset_candidates": [],
+      "notes": "5-8 extensions at each spinal segment, working from mid-back to upper back. Improves thoracic extension which is critical for overhead pressing and front squat rack position. Keep the movement in the upper back — avoid extending through the lower back by bracing your core."
+    },
+    {
+      "id": "wall_slide",
+      "name": "Wall Slides",
+      "category": "mobility",
+      "movement_pattern": "scapular_upward_rotation",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [
+        "upper_back"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "band_dislocate",
+        "arm_circle"
+      ],
+      "complements": [
+        "band_dislocate",
+        "arm_circle",
+        "thoracic_spine_extension"
+      ],
+      "superset_candidates": [],
+      "notes": "8-12 reps. Also called wall angels. Trains scapular upward rotation and shoulder flexion in a controlled range. If you cannot keep your lower back flat against the wall, you likely have tight lats or poor thoracic extension — address those first. An excellent diagnostic tool for shoulder mobility."
+    },
+    {
+      "id": "controlled_articular_rotation",
+      "name": "Controlled Articular Rotations (Shoulders)",
+      "category": "mobility",
+      "movement_pattern": "shoulder_circumduction_controlled",
+      "force_type": "isometric",
+      "equipment": [
+        "bodyweight"
+      ],
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [],
+      "workout_position": "early",
+      "difficulty": "intermediate",
+      "bilateral": false,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "arm_circle",
+        "band_dislocate"
+      ],
+      "complements": [
+        "arm_circle",
+        "band_dislocate",
+        "wall_slide"
+      ],
+      "superset_candidates": [],
+      "notes": "3-5 slow rotations per direction per arm. A Functional Range Conditioning (FRC) staple. Unlike arm circles, CARs use maximal tension and the slowest speed possible to explore and maintain joint range of motion. Think of irradiating tension through your entire body while moving only the shoulder. Can be performed daily for joint health."
+    },
+    {
+      "id": "treadmill_walk",
+      "name": "Treadmill Walk",
+      "category": "cardio",
+      "movement_pattern": "gait_walking",
+      "force_type": "isometric",
+      "equipment": [
+        "treadmill"
+      ],
+      "primary_muscles": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "calves"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "treadmill_jog",
+        "stationary_bike",
+        "elliptical"
+      ],
+      "complements": [
+        "leg_swing_forward",
+        "hip_circle",
+        "walking_lunge_dynamic"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at a brisk pace. The simplest and most accessible cardio warm-up. Adding an incline (3-5%) increases glute and hamstring activation without impact stress. A walking warm-up is especially beneficial for older lifters or those recovering from lower body injuries."
+    },
+    {
+      "id": "treadmill_jog",
+      "name": "Treadmill Jog",
+      "category": "cardio",
+      "movement_pattern": "gait_running",
+      "force_type": "isometric",
+      "equipment": [
+        "treadmill"
+      ],
+      "primary_muscles": [
+        "quadriceps",
+        "calves"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "glutes",
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "treadmill_walk",
+        "elliptical",
+        "jump_rope"
+      ],
+      "complements": [
+        "high_knee",
+        "butt_kick",
+        "a_skip"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at conversational pace. Raises core body temperature, increases blood flow to the legs, and elevates heart rate for the session ahead. Keep the pace easy — this is a warm-up, not a conditioning session. If your legs feel heavy from a previous leg day, switch to the bike or elliptical for a lower-impact option."
+    },
+    {
+      "id": "elliptical",
+      "name": "Elliptical",
+      "category": "cardio",
+      "movement_pattern": "elliptical_stride",
+      "force_type": "isometric",
+      "equipment": [
+        "elliptical"
+      ],
+      "primary_muscles": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "calves",
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "stationary_bike",
+        "treadmill_jog",
+        "stair_climber"
+      ],
+      "complements": [
+        "hip_circle",
+        "leg_swing_forward",
+        "arm_circle"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at moderate effort. Zero-impact warm-up that engages both upper and lower body. The elliptical motion closely mimics walking/running without the joint stress, making it ideal for those with knee or ankle issues. Reverse pedaling shifts emphasis to the hamstrings and glutes."
+    },
+    {
+      "id": "stationary_bike",
+      "name": "Stationary Bike",
+      "category": "cardio",
+      "movement_pattern": "cycling",
+      "force_type": "isometric",
+      "equipment": [
+        "stationary_bike"
+      ],
+      "primary_muscles": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "calves"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "elliptical",
+        "stair_climber",
+        "rowing_machine"
+      ],
+      "complements": [
+        "leg_swing_forward",
+        "hip_circle",
+        "standing_quad_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at easy to moderate effort. Low-impact and non-weight-bearing, making it the gentlest cardio warm-up option. Particularly useful on leg day when your quads need blood flow without added joint stress. Recumbent bikes are even easier on the lower back."
+    },
+    {
+      "id": "rowing_machine",
+      "name": "Rowing Machine",
+      "category": "cardio",
+      "movement_pattern": "rowing",
+      "force_type": "pull",
+      "equipment": [
+        "rowing_machine"
+      ],
+      "primary_muscles": [
+        "upper_back",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "glutes",
+        "core",
+        "biceps"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "elliptical",
+        "treadmill_jog",
+        "stationary_bike"
+      ],
+      "complements": [
+        "thoracic_rotation",
+        "band_dislocate",
+        "hip_circle"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at a steady pace. The only cardio warm-up that significantly engages the upper body pulling muscles, making it ideal before back or full-body sessions. Uses 60% legs, 20% core, 20% arms. The most common form error is pulling with the arms first — always initiate the drive with your legs."
+    },
+    {
+      "id": "stair_climber",
+      "name": "Stair Climber",
+      "category": "cardio",
+      "movement_pattern": "stair_stepping",
+      "force_type": "isometric",
+      "equipment": [
+        "stair_climber"
+      ],
+      "primary_muscles": [
+        "glutes",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "calves",
+        "hamstrings"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "treadmill_walk",
+        "elliptical",
+        "stationary_bike"
+      ],
+      "complements": [
+        "hip_circle",
+        "walking_lunge_dynamic",
+        "standing_quad_stretch"
+      ],
+      "superset_candidates": [],
+      "notes": "5-10 minutes at a steady pace. High glute activation compared to other cardio machines, making it an excellent warm-up before squat or glute-focused sessions. Also raises heart rate quickly due to the constant uphill nature. Avoid the common mistake of hunching over the console — stand tall to get full hip extension."
+    },
+    {
+      "id": "jump_rope",
+      "name": "Jump Rope",
+      "category": "cardio",
+      "movement_pattern": "jump_skip",
+      "force_type": "isometric",
+      "equipment": [
+        "jump_rope"
+      ],
+      "primary_muscles": [
+        "calves",
+        "shoulders"
+      ],
+      "secondary_muscles": [
+        "quadriceps",
+        "core"
+      ],
+      "workout_position": "early",
+      "difficulty": "beginner",
+      "bilateral": true,
+      "rep_range_hypertrophy": "n/a",
+      "rep_range_strength": "n/a",
+      "substitutes": [
+        "high_knee",
+        "treadmill_jog",
+        "a_skip"
+      ],
+      "complements": [
+        "ankle_mobility_drill",
+        "standing_calf_stretch",
+        "arm_circle"
+      ],
+      "superset_candidates": [],
+      "notes": "3-5 minutes for warm-up. Excellent for coordination, calf activation, and raising heart rate quickly. Also warms up the shoulders and wrists. If you trip frequently, practice the two-foot bounce without the rope first. Boxers and CrossFit athletes use this as their primary warm-up — it's time-efficient and portable."
     }
   ]
 }
