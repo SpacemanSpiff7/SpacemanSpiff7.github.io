@@ -1,9 +1,8 @@
 {
   "featured": [
-    "fakejira",
-    "la-collisions-dashboard",
-    "traffic-therapy",
     "curlbro",
+    "fakejira",
+    "traffic-therapy",
     "glowy-blob-ball"
   ],
   "featuredConfig": {
@@ -17,11 +16,11 @@
     {
       "id": "curlbro",
       "title": "CurlBro",
-      "shortDescription": "Gym workout builder with an exercise graph of 162 exercises and 1,340 relationships",
-      "description": "A client-side workout builder that uses a graph of 162 exercises and 1,340 relationships to suggest complementary exercises and supersets. Features fuzzy search, drag-to-reorder workout building, live session tracking with per-set weight/rep logging, a rest timer with audio cues, and human-readable text export/import. Mobile-first, dark mode, no server required.",
+      "shortDescription": "Gym workout builder with an workout timer and log",
+      "description": "A free workout builder and tracker all in the browser.",
       "category": "Fitness",
       "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop&crop=center",
-      "tags": ["React", "TypeScript", "Fitness"],
+      "tags": ["Fitness"],
       "actions": [
         {
           "text": "Use App",
@@ -42,6 +41,7 @@
       "shortDescription": "Fancy graphs that make losing money look scientific",
       "description": "A stock analysis tool with more buttons and charts than I know what to do with. Features Monte Carlo simulations because apparently regular mistakes weren't random enough. Helps you lose money with confidence and statistical backing.",
       "category": "Financial",
+      "hidden": true,
       "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop&crop=center",
       "tags": ["Financial Analysis"],
       "actions": [
@@ -65,6 +65,7 @@
       "shortDescription": "My attempt to make chemistry look like a screensaver",
       "description": "3D particle simulation that bounces dots around the screen while pretending to do actual science. Uses the Metropolis algorithm, which sounds way more impressive than it actually is. Perfect for when you want to feel smart about physics you half-remember from college.",
       "category": "Physics Simulation", 
+      "hidden": true,
       "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop&crop=center",
       "tags": ["Particle Physics", "3D Visualization", "JavaScript"],
       "actions": [
