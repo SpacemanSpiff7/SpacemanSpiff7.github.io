@@ -954,10 +954,16 @@
     background: transparent;
 }
 
-/* Non-hero snap sections: center content in visible area (between nav bar and bottom chrome) */
+/* Non-hero snap sections: center content in visible area (between nav and bottom chrome) */
 .snap-section:not(#hero) {
-    padding-top: calc(var(--nav-height) + 2rem);
-    padding-bottom: calc(var(--bottom-chrome-height) + 2rem);
+    justify-content: flex-start;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.snap-section:not(#hero) .section-title,
+.snap-section:not(#hero) > h2 {
+    margin-top: 30vh;
 }
 
 
