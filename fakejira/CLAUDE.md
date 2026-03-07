@@ -1,7 +1,7 @@
 # Agile This - Project Conventions
 
 ## Overview
-Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). No server, no build tools - just open `index.html`. Formerly "FakeJira" -- renamed to avoid trademark issues.
+Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). No server, no build tools - just open `index.html`. No server, no build tools.
 
 ## Tech Stack
 - Vanilla HTML5, CSS3, JavaScript (ES6+)
@@ -14,8 +14,41 @@ Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). 
 - `style.css` - All styles (dark theme, design tokens, layout, cards, tabs, modal, import dialog, responsive, animations)
 - `app.js` - All JavaScript (state, rendering, board CRUD, drag-drop, export/import, copy-to-clipboard)
 
+## URL Routing & Multi-Project Storage
+
+### Hash-Based Routing
+- URLs use `#project/<N>` format (e.g., `#project/0`, `#project/1`)
+- On first load, hash normalizes to `#project/0` if missing
+- `hashchange` event triggers save-current → load-new → re-render cycle
+- Navigating to a non-existent project ID auto-creates a default project
+
+### localStorage Keys
+| Key | Purpose |
+|-----|---------|
+| `agilethis-projects` | Project registry: `{ nextId: N, list: [0, 1, ...] }` |
+| `agilethis-project-<N>` | Per-project state (v4 format, see below) |
+| `agilethis-col-collapsed-<N>` | Per-project collapsed column state |
+| `agilethis-sidebar` | Sidebar expand/collapse (shared) |
+| `agilethis-sidebar-width` | Sidebar width (shared) |
+| `agilethis-col-widths` | Column widths (shared) |
+
+### Migration
+On first load, `migrateToProjectRegistry()` runs:
+1. If `agilethis-projects` exists, skip (already migrated)
+2. Check for `agilethis-board` or `fakejira-board` data
+3. Copy to `agilethis-project-0`, migrate collapsed columns key
+4. Create registry `{ nextId: 1, list: [0] }`
+5. Clean up old keys
+
+### "New" Dropdown
+Replaces the old separate "New Project" and "New Ticket" buttons:
+- **Ticket** — opens the new ticket modal (keyboard shortcut `N` still works)
+- **Project in New Window** — allocates a new project ID, opens in new tab
+- **Duplicate this Project** — deep-copies current state to a new project slot, opens in new tab
+- **Clear this Project** — resets current project to defaults (shows save prompt if tickets exist)
+
 ## Data Model (v4)
-State object stored in localStorage under key `fakejira-board`:
+State object stored in localStorage under key `agilethis-project-<N>`:
 ```json
 {
   "version": 4,
@@ -84,6 +117,7 @@ State object stored in localStorage under key `fakejira-board`:
 - **v1 -> v2**: Added `prompt` field to tickets
 - **v2 -> v3**: Wraps existing `tickets`, `columnOrder`, `labelPresets` into a single board inside the project envelope. Assigns random names from themed pools
 - **v3 -> v4**: Adds `columns`, `priorities`, `color` to each board, adds `defaults` to state
+- **Storage migration**: Old `agilethis-board`/`fakejira-board` keys migrated to per-project `agilethis-project-0` on first load
 - Migration runs automatically on load and import
 - v1, v2, and v3 board files are accepted and migrated seamlessly
 

@@ -1,8 +1,9 @@
 // ===== Constants =====
-const STORAGE_KEY = "fakejira-board";
+const STORAGE_KEY = "agilethis-board"; // legacy, migrated to per-project keys
 const CURRENT_VERSION = 4;
 const STATUSES = ["todo", "in-progress", "testing", "done", "canceled"];
-const COL_COLLAPSED_KEY = "fakejira-col-collapsed";
+const COL_COLLAPSED_KEY = "agilethis-col-collapsed"; // legacy, migrated to per-project keys
+const REGISTRY_KEY = "agilethis-projects";
 const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
 const BOARD_COLORS = [
   "#6366f1", // indigo
@@ -81,6 +82,48 @@ function randomName(exclude = []) {
   const available = NAME_POOL.filter(n => !exclude.includes(n));
   const pool = available.length > 0 ? available : NAME_POOL;
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ===== Project Registry =====
+
+function projectStorageKey(id) {
+  return "agilethis-project-" + id;
+}
+
+function collapsedStorageKey(id) {
+  return "agilethis-col-collapsed-" + id;
+}
+
+function getProjectRegistry() {
+  try {
+    const raw = localStorage.getItem(REGISTRY_KEY);
+    if (raw) {
+      const reg = JSON.parse(raw);
+      if (reg && typeof reg.nextId === "number" && Array.isArray(reg.list)) {
+        return reg;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function saveProjectRegistry(reg) {
+  localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+}
+
+function allocateProjectId() {
+  let reg = getProjectRegistry();
+  if (!reg) reg = { nextId: 1, list: [0] };
+  const id = reg.nextId;
+  reg.nextId = id + 1;
+  reg.list.push(id);
+  saveProjectRegistry(reg);
+  return id;
+}
+
+function currentProjectId() {
+  const match = location.hash.match(/^#project\/(\d+)$/);
+  return match ? parseInt(match[1], 10) : 0;
 }
 
 // ===== Column/Priority Helpers =====
@@ -375,37 +418,94 @@ function migrateState(data) {
   return data;
 }
 
+function migrateToProjectRegistry() {
+  // Already migrated?
+  if (getProjectRegistry()) return;
+
+  // Check for old keys: agilethis-board or fakejira-board
+  let oldData = localStorage.getItem(STORAGE_KEY);
+  const oldKey = "fakejira-board";
+  if (!oldData && localStorage.getItem(oldKey)) {
+    oldData = localStorage.getItem(oldKey);
+    localStorage.removeItem(oldKey);
+    // Migrate auxiliary fakejira keys
+    const keyMigrations = [
+      ["fakejira-sidebar", "agilethis-sidebar"],
+      ["fakejira-sidebar-width", "agilethis-sidebar-width"],
+      ["fakejira-col-widths", "agilethis-col-widths"],
+    ];
+    for (const [oldK, newK] of keyMigrations) {
+      const val = localStorage.getItem(oldK);
+      if (val !== null) {
+        localStorage.setItem(newK, val);
+        localStorage.removeItem(oldK);
+      }
+    }
+  }
+
+  if (oldData) {
+    // Copy data to project-0
+    localStorage.setItem(projectStorageKey(0), oldData);
+    // Migrate collapsed columns
+    const oldCollapsed = localStorage.getItem(COL_COLLAPSED_KEY) || localStorage.getItem("fakejira-col-collapsed");
+    if (oldCollapsed !== null) {
+      localStorage.setItem(collapsedStorageKey(0), oldCollapsed);
+    }
+    // Clean up old keys
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(COL_COLLAPSED_KEY);
+    localStorage.removeItem("fakejira-col-collapsed");
+  }
+
+  // Create registry
+  const reg = { nextId: 1, list: [0] };
+  saveProjectRegistry(reg);
+}
+
+function validateState(data) {
+  if (!data || !Array.isArray(data.boards) || data.boards.length === 0) return null;
+  // Clamp activeBoardIndex
+  if (data.activeBoardIndex < 0 || data.activeBoardIndex >= data.boards.length) {
+    data.activeBoardIndex = 0;
+  }
+  // Validate each board
+  data.boards.forEach((board, i) => {
+    if (!board.columns) board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+    if (!board.priorities) board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
+    for (const col of board.columns) {
+      if (!board.columnOrder || !Array.isArray(board.columnOrder[col.id])) {
+        if (!board.columnOrder) board.columnOrder = {};
+        board.columnOrder[col.id] = [];
+      }
+    }
+    if (!Array.isArray(board.labelPresets)) {
+      board.labelPresets = [...LABEL_PRESETS];
+    }
+    if (!board.color) {
+      board.color = BOARD_COLORS[i % BOARD_COLORS.length];
+    }
+  });
+  if (!data.defaults) data.defaults = defaultDefaults();
+  return data;
+}
+
 function loadBoardState() {
+  migrateToProjectRegistry();
+  const pid = currentProjectId();
+  // Ensure this project exists in registry
+  const reg = getProjectRegistry();
+  if (reg && !reg.list.includes(pid)) {
+    reg.list.push(pid);
+    if (pid >= reg.nextId) reg.nextId = pid + 1;
+    saveProjectRegistry(reg);
+  }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(projectStorageKey(pid));
     if (raw) {
       const parsed = JSON.parse(raw);
       const migrated = migrateState(parsed);
-      if (migrated && Array.isArray(migrated.boards) && migrated.boards.length > 0) {
-        // Clamp activeBoardIndex
-        if (migrated.activeBoardIndex < 0 || migrated.activeBoardIndex >= migrated.boards.length) {
-          migrated.activeBoardIndex = 0;
-        }
-        // Validate each board's columnOrder and assign missing colors
-        migrated.boards.forEach((board, i) => {
-          if (!board.columns) board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
-          if (!board.priorities) board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
-          for (const col of board.columns) {
-            if (!board.columnOrder || !Array.isArray(board.columnOrder[col.id])) {
-              if (!board.columnOrder) board.columnOrder = {};
-              board.columnOrder[col.id] = [];
-            }
-          }
-          if (!Array.isArray(board.labelPresets)) {
-            board.labelPresets = [...LABEL_PRESETS];
-          }
-          if (!board.color) {
-            board.color = BOARD_COLORS[i % BOARD_COLORS.length];
-          }
-        });
-        if (!migrated.defaults) migrated.defaults = defaultDefaults();
-        return migrated;
-      }
+      const validated = validateState(migrated);
+      if (validated) return validated;
     }
   } catch (e) {
     console.warn("Failed to load board state:", e);
@@ -414,7 +514,7 @@ function loadBoardState() {
 }
 
 function saveBoardState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(projectStorageKey(currentProjectId()), JSON.stringify(state));
 }
 
 let state = loadBoardState();
@@ -1571,10 +1671,12 @@ function startNewProject() {
   if (viewAllActive) exitViewAll();
   state = defaultState();
   saveBoardState();
+  loadCollapsedColumns();
   renderBoard();
   renderTabs();
+  applyCollapsedState();
   updateProjectTitleUI();
-  showToast("New project started");
+  showToast("Project cleared");
 }
 
 function showImportDialog() {
@@ -1763,18 +1865,54 @@ function closeNewProjectModal() {
   }
 }
 
-function initNewProjectButton() {
-  const btn = document.getElementById("btn-new-project");
-  if (!btn) return;
+function initNewDropdown() {
+  const dropdown = document.getElementById("new-dropdown");
+  const btn = document.getElementById("btn-new");
+  const menu = document.getElementById("new-dropdown-menu");
+  if (!dropdown || !btn || !menu) return;
 
-  btn.addEventListener("click", () => {
-    if (hasAnyTickets()) {
-      showNewProjectModal();
-    } else {
-      startNewProject();
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("open");
+  });
+
+  // Close on outside click
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.classList.remove("open");
     }
   });
 
+  // Wire up menu items
+  menu.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-action]");
+    if (!item) return;
+    dropdown.classList.remove("open");
+    const action = item.dataset.action;
+
+    if (action === "ticket") {
+      openNewModal();
+    } else if (action === "project-window") {
+      const id = allocateProjectId();
+      window.open(location.pathname + "#project/" + id, "_blank");
+    } else if (action === "duplicate") {
+      const id = allocateProjectId();
+      // Deep-copy current state with new board IDs
+      const copy = JSON.parse(JSON.stringify(state));
+      copy.boards.forEach(b => { b.id = generateBoardId(); });
+      copy.title = copy.title + " (copy)";
+      localStorage.setItem(projectStorageKey(id), JSON.stringify(copy));
+      window.open(location.pathname + "#project/" + id, "_blank");
+    } else if (action === "project-clear") {
+      if (hasAnyTickets()) {
+        showNewProjectModal();
+      } else {
+        startNewProject();
+      }
+    }
+  });
+
+  // Save prompt modal wiring
   document.getElementById("new-project-save-new").addEventListener("click", () => {
     exportBoard();
     closeNewProjectModal();
@@ -1851,6 +1989,11 @@ function initKeyboard() {
     const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 
     if (e.key === "Escape") {
+      const newDropdown = document.getElementById("new-dropdown");
+      if (newDropdown && newDropdown.classList.contains("open")) {
+        newDropdown.classList.remove("open");
+        return;
+      }
       const settingsDrawer = document.getElementById("settings-drawer");
       if (settingsDrawer && settingsDrawer.classList.contains("active")) {
         closeSettingsDrawer();
@@ -2000,7 +2143,6 @@ function closeStatusDropdown() {
 // ===== Event Listeners =====
 
 function initEvents() {
-  document.getElementById("btn-new-ticket").addEventListener("click", () => openNewModal());
   document.getElementById("btn-export").addEventListener("click", exportBoard);
   document.getElementById("btn-import").addEventListener("click", () => {
     document.getElementById("file-import").click();
@@ -2030,7 +2172,7 @@ function initEvents() {
 
   initStatusDropdown();
   initImportDialog();
-  initNewProjectButton();
+  initNewDropdown();
 }
 
 // ===== Mission Banner =====
@@ -2066,7 +2208,7 @@ function showRandomQuote(el) {
 
 // ===== Sidebar =====
 
-const SIDEBAR_KEY = "fakejira-sidebar";
+const SIDEBAR_KEY = "agilethis-sidebar";
 
 function initSidebar() {
   const saved = localStorage.getItem(SIDEBAR_KEY);
@@ -2088,7 +2230,7 @@ function toggleSidebar() {
 
 // ===== Sidebar Resize =====
 
-const SIDEBAR_WIDTH_KEY = "fakejira-sidebar-width";
+const SIDEBAR_WIDTH_KEY = "agilethis-sidebar-width";
 const SIDEBAR_MIN_W = 160;
 const SIDEBAR_MAX_W = 400;
 
@@ -2152,7 +2294,7 @@ function resetSidebarWidth() {
 
 // ===== Column Resize =====
 
-const COL_WIDTHS_KEY = "fakejira-col-widths";
+const COL_WIDTHS_KEY = "agilethis-col-widths";
 
 function initColumnResize() {
   const board = document.getElementById("board");
@@ -2286,6 +2428,11 @@ function exitViewAll() {
 // ===== Init =====
 
 function init() {
+  // Normalize hash on first load
+  if (!location.hash.match(/^#project\/\d+$/)) {
+    history.replaceState(null, "", "#project/" + currentProjectId());
+  }
+
   loadCollapsedColumns(); // must run before first renderBoard
   initEvents();
   initCopyButton();
@@ -2301,6 +2448,7 @@ function init() {
   initBulkBar();
   initBoardClickToDeselect();
   initSettingsDrawer();
+  initRouting();
 
   // View All button
   const viewAllBtn = document.getElementById("btn-view-all");
@@ -2315,11 +2463,27 @@ function init() {
   }
 }
 
+function initRouting() {
+  window.addEventListener("hashchange", () => {
+    // Save current project before switching
+    saveBoardState();
+    // Load the new project
+    clearSelection();
+    if (viewAllActive) exitViewAll();
+    state = loadBoardState();
+    loadCollapsedColumns();
+    renderTabs();
+    renderBoard();
+    applyCollapsedState();
+    updateProjectTitleUI();
+  });
+}
+
 // ===== Collapsible Columns =====
 
 function loadCollapsedColumns() {
   try {
-    const saved = localStorage.getItem(COL_COLLAPSED_KEY);
+    const saved = localStorage.getItem(collapsedStorageKey(currentProjectId()));
     if (saved !== null) {
       collapsedColumns = new Set(JSON.parse(saved));
     } else {
@@ -2331,7 +2495,7 @@ function loadCollapsedColumns() {
 }
 
 function saveCollapsedColumns() {
-  localStorage.setItem(COL_COLLAPSED_KEY, JSON.stringify(Array.from(collapsedColumns)));
+  localStorage.setItem(collapsedStorageKey(currentProjectId()), JSON.stringify(Array.from(collapsedColumns)));
 }
 
 function applyCollapsedState() {

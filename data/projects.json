@@ -1,7 +1,7 @@
 {
   "featured": [
     "curlbro",
-    "fakejira",
+    "agile-this",
     "traffic-therapy",
     "glowy-blob-ball"
   ],
@@ -176,12 +176,12 @@
       ]
     },
     {
-      "id": "fakejira",
-      "title": "Fake Jira",
+      "id": "agile-this",
+      "title": "Agile This",
       "shortDescription": "Super simple Kanban board.",
       "description": "Super simple Kanban board.",
       "category": "Kanban Board",
-      "image": "assets/images/fakejira.png",
+      "image": "assets/images/agile-this.png",
       "tags": ["Kanban Board"],
       "actions": [
         {

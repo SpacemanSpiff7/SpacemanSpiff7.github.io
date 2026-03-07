@@ -2078,6 +2078,77 @@ input[type="checkbox"]:indeterminate + .tick-box svg {
   font-style: italic;
 }
 
+/* ===== New Dropdown ===== */
+.new-dropdown {
+  position: relative;
+}
+.new-dropdown__chevron {
+  width: 12px;
+  height: 12px;
+  margin-left: -2px;
+  opacity: 0.6;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.new-dropdown.open .new-dropdown__chevron {
+  transform: rotate(180deg);
+}
+.new-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 200px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  padding: 4px;
+  z-index: 160;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.97);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    visibility var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.new-dropdown.open .new-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.new-dropdown__item {
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+.new-dropdown__item:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
+}
+.new-dropdown__item .btn__kbd {
+  margin-left: auto;
+}
+.new-dropdown__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
+}
+
 /* ===== Settings Drawer ===== */
 .settings-backdrop {
   position: fixed;
@@ -2161,7 +2232,7 @@ input[type="checkbox"]:indeterminate + .tick-box svg {
 .settings-item:hover {
   background: rgba(255, 255, 255, 0.03);
 }
-.settings-item--locked {
+.settings-item--locked > :not(.color-picker-popup) {
   opacity: 0.7;
 }
 .settings-item__drag {
