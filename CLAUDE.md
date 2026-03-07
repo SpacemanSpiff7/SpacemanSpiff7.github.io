@@ -33,8 +33,8 @@ git push origin master
 JavaScript files use version query strings for cache busting.
 When modifying `js/animations.js` or `js/main.js`:
 1. Make your code changes
-2. Increment the version number in index.html (e.g., `?v=2` → `?v=3`)
-3. Update all three references: preload hint + 2 script tags
+2. Increment the version number in index.html (e.g., `?v=3` → `?v=4`)
+3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only)
 4. Commit and push together
 
 This ensures users get fresh JavaScript immediately after deployment.
@@ -43,7 +43,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 
 ### Current Design
 - **Scroll-snap single page** with animated backgrounds
-- **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js)
+- **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js) with HiDPI scaling and quadratic curve wireframe
 - **Dynamic content**: Projects loaded from data/projects.json
 - **Control panel**: Blob parameter tweaking (collapsible UI)
 - **Modular CSS**: Split into tokens, base, components, and responsive files
@@ -58,7 +58,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 | `css/responsive.css` | Media queries, reduced motion, print styles |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
 | `js/main.js` | Navigation, project loading, progress indicator |
-| `js/animations.js` | Starfield and 3D blob rendering |
+| `js/animations.js` | Starfield and 3D blob rendering (HiDPI, quadratic curve wireframe) |
 | `components/nav.html` | Navigation bar (only component loaded dynamically) |
 | `data/projects.json` | Single source of truth for projects |
 

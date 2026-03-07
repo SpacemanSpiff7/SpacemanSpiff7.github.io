@@ -8,8 +8,8 @@
 // ==========================================
 const CONFIG = {
     // Blob parameters
-    gridResolution: { lat: 40, lon: 40 },
-    gridResolutionMobile: { lat: 28, lon: 28 },
+    gridResolution: { lat: 60, lon: 60 },
+    gridResolutionMobile: { lat: 40, lon: 40 },
     noiseAmplitude: 0.10,  // Subtle morphing
     noiseFrequency: 0.003,
     morphSpeed: 0.003,     // Base morph speed when scrolling
@@ -49,6 +49,7 @@ const CONFIG = {
 const isMobile = window.innerWidth < 768;
 const targetFPS = isMobile ? CONFIG.targetFPSMobile : CONFIG.targetFPS;
 const frameInterval = 1000 / targetFPS;
+const dpr = window.devicePixelRatio || 1;
 
 // ==========================================
 // SIMPLEX NOISE (Inline Implementation)
@@ -261,13 +262,11 @@ function initStarfield() {
         const w = window.innerWidth;
         const h = window.innerHeight;
 
-        // Set internal canvas resolution
-        starfieldCanvas.width = w;
-        starfieldCanvas.height = h;
-
-        // Set CSS dimensions to match exactly (eliminates gaps)
+        starfieldCanvas.width = w * dpr;
+        starfieldCanvas.height = h * dpr;
         starfieldCanvas.style.width = w + 'px';
         starfieldCanvas.style.height = h + 'px';
+        starfieldCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resizeStarfield();
     window.addEventListener('resize', resizeStarfield);
@@ -275,8 +274,8 @@ function initStarfield() {
     // Generate stars
     for (let i = 0; i < CONFIG.starCount; i++) {
         stars.push({
-            x: Math.random() * starfieldCanvas.width,
-            y: Math.random() * starfieldCanvas.height,
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
             radius: Math.random() * 1.5 + 0.5,
             opacity: Math.random() * 0.5 + 0.5,
             twinkleSpeed: Math.random() * 0.02 + 0.01,
@@ -289,7 +288,7 @@ function renderStarfield(time) {
     if (!starfieldCtx) return;
 
     starfieldCtx.fillStyle = '#000000';
-    starfieldCtx.fillRect(0, 0, starfieldCanvas.width, starfieldCanvas.height);
+    starfieldCtx.fillRect(0, 0, starfieldCanvas.width / dpr, starfieldCanvas.height / dpr);
 
     stars.forEach(star => {
         const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
@@ -318,13 +317,11 @@ function initBlobMesh() {
         const w = window.innerWidth;
         const h = window.innerHeight;
 
-        // Set internal canvas resolution
-        blobCanvas.width = w;
-        blobCanvas.height = h;
-
-        // Set CSS dimensions to match exactly (eliminates gaps)
+        blobCanvas.width = w * dpr;
+        blobCanvas.height = h * dpr;
         blobCanvas.style.width = w + 'px';
         blobCanvas.style.height = h + 'px';
+        blobCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resizeBlob();
     window.addEventListener('resize', resizeBlob);
@@ -388,8 +385,8 @@ function project3D(x, y, z) {
     const perspective = 600;
     const scale = perspective / (perspective + z);
     return {
-        x: blobCanvas.width / 2 + x * scale,
-        y: blobCanvas.height / 2 + y * scale,
+        x: (blobCanvas.width / dpr) / 2 + x * scale,
+        y: (blobCanvas.height / dpr) / 2 + y * scale,
         scale,
     };
 }
@@ -443,7 +440,7 @@ function renderBlob(currentTime) {
     time += currentMorphSpeed;
 
     // Clear canvas
-    blobCtx.clearRect(0, 0, blobCanvas.width, blobCanvas.height);
+    blobCtx.clearRect(0, 0, blobCanvas.width / dpr, blobCanvas.height / dpr);
 
     // Update rotation based on scroll velocity
     rotation.y += scrollVelocity;
@@ -504,8 +501,8 @@ function renderBlob(currentTime) {
     const blobColor = adjustBrightness(CONFIG.displayColor, CONFIG.brightnessMultiplier);
 
     // Draw 3D shading glow behind wireframe
-    const centerX = blobCanvas.width / 2;
-    const centerY = blobCanvas.height / 2;
+    const centerX = (blobCanvas.width / dpr) / 2;
+    const centerY = (blobCanvas.height / dpr) / 2;
     const glowRadius = currentRadius * 1.5;
 
     const gradient = blobCtx.createRadialGradient(
@@ -531,6 +528,8 @@ function renderBlob(currentTime) {
 
     // Draw wireframe
     blobCtx.lineWidth = CONFIG.lineWidth;
+    blobCtx.lineJoin = 'round';
+    blobCtx.lineCap = 'round';
 
     // Draw latitude lines
     for (let lat = 0; lat <= gridRes.lat; lat++) {
@@ -542,18 +541,28 @@ function renderBlob(currentTime) {
             const depthFade = (vertex.z / currentRadius + 1) / 2;
             const lighting = vertex.lighting;
 
-            // Enhanced lighting contrast for more 3D pop
-            const baseOpacity = 0.15;           // Lower base (darker shadows)
-            const lightBoost = lighting * 0.7;  // Higher light boost (brighter highlights)
-            const depthBoost = depthFade * 0.4; // More depth variation
+            const baseOpacity = 0.15;
+            const lightBoost = lighting * 0.7;
+            const depthBoost = depthFade * 0.4;
             const opacity = baseOpacity + lightBoost + depthBoost;
 
             blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
 
             if (lon === 0) {
                 blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+            } else if (lon === 1) {
+                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                const midX = (prev.projected.x + vertex.projected.x) / 2;
+                const midY = (prev.projected.y + vertex.projected.y) / 2;
+                blobCtx.lineTo(midX, midY);
+            } else if (lon === gridRes.lon) {
+                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
             } else {
-                blobCtx.lineTo(vertex.projected.x, vertex.projected.y);
+                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                const midX = (prev.projected.x + vertex.projected.x) / 2;
+                const midY = (prev.projected.y + vertex.projected.y) / 2;
+                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
             }
         }
         blobCtx.stroke();
@@ -569,18 +578,28 @@ function renderBlob(currentTime) {
             const depthFade = (vertex.z / currentRadius + 1) / 2;
             const lighting = vertex.lighting;
 
-            // Enhanced lighting contrast for more 3D pop
-            const baseOpacity = 0.15;           // Lower base (darker shadows)
-            const lightBoost = lighting * 0.7;  // Higher light boost (brighter highlights)
-            const depthBoost = depthFade * 0.4; // More depth variation
+            const baseOpacity = 0.15;
+            const lightBoost = lighting * 0.7;
+            const depthBoost = depthFade * 0.4;
             const opacity = baseOpacity + lightBoost + depthBoost;
 
             blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
 
             if (lat === 0) {
                 blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+            } else if (lat === 1) {
+                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                const midX = (prev.projected.x + vertex.projected.x) / 2;
+                const midY = (prev.projected.y + vertex.projected.y) / 2;
+                blobCtx.lineTo(midX, midY);
+            } else if (lat === gridRes.lat) {
+                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
             } else {
-                blobCtx.lineTo(vertex.projected.x, vertex.projected.y);
+                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                const midX = (prev.projected.x + vertex.projected.x) / 2;
+                const midY = (prev.projected.y + vertex.projected.y) / 2;
+                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
             }
         }
         blobCtx.stroke();
