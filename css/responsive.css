@@ -218,6 +218,11 @@
         padding: calc(1.5rem + var(--snap-bottom-offset)) 1.5rem calc(1.5rem + var(--snap-bottom-offset));
     }
 
+    .snap-section:not(#hero) {
+        padding-top: calc(var(--nav-height) + 1.5rem);
+        padding-bottom: calc(var(--bottom-chrome-height) + 1.5rem);
+    }
+
     /* Progress indicator mobile */
     .progress-indicator {
         right: var(--space-3);
