@@ -40,6 +40,10 @@
         New Ticket
         <kbd class="btn__kbd">N</kbd>
       </button>
+      <button id="btn-project-settings" class="btn btn--ghost" aria-label="Project defaults">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M13.3 10a1.1 1.1 0 00.22 1.21l.04.04a1.33 1.33 0 11-1.88 1.88l-.04-.04a1.1 1.1 0 00-1.21-.22 1.1 1.1 0 00-.67 1.01v.12a1.33 1.33 0 11-2.67 0v-.06a1.1 1.1 0 00-.72-1.01 1.1 1.1 0 00-1.21.22l-.04.04a1.33 1.33 0 11-1.88-1.88l.04-.04a1.1 1.1 0 00.22-1.21 1.1 1.1 0 00-1.01-.67h-.12a1.33 1.33 0 110-2.67h.06a1.1 1.1 0 001.01-.72 1.1 1.1 0 00-.22-1.21l-.04-.04A1.33 1.33 0 115 3.21l.04.04a1.1 1.1 0 001.21.22h.05a1.1 1.1 0 00.67-1.01v-.12a1.33 1.33 0 112.67 0v.06a1.1 1.1 0 00.67 1.01 1.1 1.1 0 001.21-.22l.04-.04a1.33 1.33 0 111.88 1.88l-.04.04a1.1 1.1 0 00-.22 1.21v.05a1.1 1.1 0 001.01.67h.12a1.33 1.33 0 110 2.67h-.06a1.1 1.1 0 00-1.01.67z"/></svg>
+        Defaults
+      </button>
       <button id="btn-export" class="btn btn--ghost">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 3v7"/><path d="M5 7l3 3 3-3"/></svg>
         Export
@@ -78,22 +82,11 @@
       <div class="bulk-bar__actions">
         <div class="bulk-dropdown" id="bulk-status-dropdown">
           <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="status">Move to</button>
-          <div class="bulk-dropdown__menu" id="bulk-status-menu">
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="todo">Todo</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="in-progress">In Progress</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="testing">Testing</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="done">Done</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="status" data-value="canceled">Canceled</button>
-          </div>
+          <div class="bulk-dropdown__menu" id="bulk-status-menu"></div>
         </div>
         <div class="bulk-dropdown" id="bulk-priority-dropdown">
           <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="priority">Priority</button>
-          <div class="bulk-dropdown__menu" id="bulk-priority-menu">
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="low">Low</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="medium">Medium</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="high">High</button>
-            <button type="button" class="bulk-dropdown__option" data-bulk-action="priority" data-value="critical">Critical</button>
-          </div>
+          <div class="bulk-dropdown__menu" id="bulk-priority-menu"></div>
         </div>
         <div class="bulk-dropdown" id="bulk-add-label-dropdown">
           <button type="button" class="bulk-dropdown__trigger" data-bulk-trigger="add-label">Add Label</button>
@@ -109,78 +102,7 @@
       </button>
     </div>
 
-    <div class="column" data-status="todo">
-      <div class="column__header">
-        <div class="column__header-left">
-          <span class="status-dot" style="--dot-color: var(--col-todo)"></span>
-          <h2>Todo</h2>
-        </div>
-        <span class="column__count" data-count="todo">0</span>
-      </div>
-      <div class="column__cards" id="col-todo"></div>
-      <div class="column__quickadd">
-        <input type="text" class="quickadd-input" data-status="todo" placeholder="+ Add to Todo...">
-      </div>
-    </div>
-
-    <div class="column" data-status="in-progress">
-      <div class="column__header">
-        <div class="column__header-left">
-          <span class="status-dot" style="--dot-color: var(--col-progress)"></span>
-          <h2>In Progress</h2>
-        </div>
-        <span class="column__count" data-count="in-progress">0</span>
-      </div>
-      <div class="column__cards" id="col-in-progress"></div>
-      <div class="column__quickadd">
-        <input type="text" class="quickadd-input" data-status="in-progress" placeholder="+ Add to In Progress...">
-      </div>
-    </div>
-
-    <div class="column" data-status="testing">
-      <div class="column__header">
-        <div class="column__header-left">
-          <span class="status-dot" style="--dot-color: var(--col-testing)"></span>
-          <h2>Testing</h2>
-        </div>
-        <span class="column__count" data-count="testing">0</span>
-      </div>
-      <div class="column__cards" id="col-testing"></div>
-      <div class="column__quickadd">
-        <input type="text" class="quickadd-input" data-status="testing" placeholder="+ Add to Testing...">
-      </div>
-    </div>
-
-    <div class="column" data-status="done">
-      <div class="column__header">
-        <div class="column__header-left">
-          <span class="status-dot" style="--dot-color: var(--col-done)"></span>
-          <h2>Done</h2>
-        </div>
-        <span class="column__count" data-count="done">0</span>
-      </div>
-      <div class="column__cards" id="col-done"></div>
-      <div class="column__quickadd">
-        <input type="text" class="quickadd-input" data-status="done" placeholder="+ Add to Done...">
-      </div>
-    </div>
-
-    <div class="column column--collapsible" data-status="canceled">
-      <div class="column__header column__header--toggle" data-toggle-status="canceled">
-        <div class="column__header-left">
-          <span class="status-dot" style="--dot-color: var(--col-canceled)"></span>
-          <h2>Canceled</h2>
-          <span class="column__count" data-count="canceled">0</span>
-        </div>
-        <div class="column__header-right">
-          <svg class="column__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
-        </div>
-      </div>
-      <div class="column__cards" id="col-canceled"></div>
-      <div class="column__quickadd">
-        <input type="text" class="quickadd-input" data-status="canceled" placeholder="+ Add to Canceled...">
-      </div>
-    </div>
+    <!-- Columns generated dynamically by renderColumns() -->
   </main>
 
   <!-- Edit/Create Modal -->
@@ -198,24 +120,7 @@
         <!-- Metadata toolbar: priority, labels, status on one line -->
         <div class="form-toolbar">
           <div class="form-toolbar__group">
-            <div class="priority-pills" id="priority-pills">
-              <label class="priority-pill">
-                <input type="radio" name="priority" value="low">
-                <span class="priority-pill__inner"><span class="priority-dot priority-dot--low"></span> Low</span>
-              </label>
-              <label class="priority-pill">
-                <input type="radio" name="priority" value="medium" checked>
-                <span class="priority-pill__inner"><span class="priority-dot priority-dot--medium"></span> Med</span>
-              </label>
-              <label class="priority-pill">
-                <input type="radio" name="priority" value="high">
-                <span class="priority-pill__inner"><span class="priority-dot priority-dot--high"></span> High</span>
-              </label>
-              <label class="priority-pill">
-                <input type="radio" name="priority" value="critical">
-                <span class="priority-pill__inner"><span class="priority-dot priority-dot--critical"></span> Crit</span>
-              </label>
-            </div>
+            <div class="priority-pills" id="priority-pills"></div>
             <div class="label-chips" id="label-chips"></div>
           </div>
           <div class="status-dropdown" id="status-dropdown">
@@ -224,28 +129,7 @@
               <span class="status-dropdown__label" id="status-label">Todo</span>
               <svg class="status-dropdown__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
             </button>
-            <div class="status-dropdown__menu" id="status-menu" role="listbox" aria-label="Status">
-              <button type="button" class="status-dropdown__option" data-value="todo" role="option">
-                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-todo)"></span>
-                Todo
-              </button>
-              <button type="button" class="status-dropdown__option" data-value="in-progress" role="option">
-                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-progress)"></span>
-                In Progress
-              </button>
-              <button type="button" class="status-dropdown__option" data-value="testing" role="option">
-                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-testing)"></span>
-                Testing
-              </button>
-              <button type="button" class="status-dropdown__option" data-value="done" role="option">
-                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-done)"></span>
-                Done
-              </button>
-              <button type="button" class="status-dropdown__option" data-value="canceled" role="option">
-                <span class="status-dropdown__opt-dot" style="--dot-color: var(--col-canceled)"></span>
-                Canceled
-              </button>
-            </div>
+            <div class="status-dropdown__menu" id="status-menu" role="listbox" aria-label="Status"></div>
           </div>
         </div>
 
@@ -347,6 +231,18 @@
       </div>
       <button id="new-project-cancel" class="btn btn--ghost import-dialog__cancel">Cancel</button>
     </div>
+  </div>
+
+  <!-- Settings Drawer -->
+  <div class="settings-backdrop" id="settings-backdrop"></div>
+  <div class="settings-drawer" id="settings-drawer">
+    <div class="settings-drawer__header">
+      <h2 id="settings-title">Settings</h2>
+      <button class="modal__close" id="settings-close" aria-label="Close settings">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="settings-drawer__body" id="settings-body"></div>
   </div>
 
   <!-- Toast container -->

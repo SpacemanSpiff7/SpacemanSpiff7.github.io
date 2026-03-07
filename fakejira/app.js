@@ -1,6 +1,6 @@
 // ===== Constants =====
 const STORAGE_KEY = "fakejira-board";
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 4;
 const STATUSES = ["todo", "in-progress", "testing", "done", "canceled"];
 const COL_COLLAPSED_KEY = "fakejira-col-collapsed";
 const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
@@ -13,6 +13,30 @@ const BOARD_COLORS = [
   "#a78bfa", // violet
   "#f97316", // orange
   "#0ea5e9", // sky
+];
+
+const DEFAULT_COLUMNS = [
+  { id: "todo", name: "Todo", color: "#818cf8" },
+  { id: "in-progress", name: "In Progress", color: "#f59e42" },
+  { id: "testing", name: "Testing", color: "#a78bfa" },
+  { id: "done", name: "Done", color: "#34d399" },
+  { id: "canceled", name: "Canceled", color: "#71717a" },
+];
+
+const DEFAULT_PRIORITIES = [
+  { id: "low", name: "Low", color: "#34d399" },
+  { id: "medium", name: "Medium", color: "#fbbf24" },
+  { id: "high", name: "High", color: "#fb923c" },
+  { id: "critical", name: "Critical", color: "#f87171" },
+];
+
+const COLOR_PALETTE = [
+  "#6366f1", "#818cf8", "#a78bfa", "#c084fc",
+  "#e879f9", "#f472b6", "#f43f5e", "#fb7185",
+  "#f87171", "#fb923c", "#f59e0b", "#fbbf24",
+  "#facc15", "#a3e635", "#34d399", "#10b981",
+  "#2dd4bf", "#22d3ee", "#06b6d4", "#0ea5e9",
+  "#3b82f6", "#6366f1", "#71717a", "#a1a1aa",
 ];
 
 // ===== Random Name Pools =====
@@ -57,6 +81,38 @@ function randomName(exclude = []) {
   const available = NAME_POOL.filter(n => !exclude.includes(n));
   const pool = available.length > 0 ? available : NAME_POOL;
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ===== Column/Priority Helpers =====
+
+function boardColumns(board) {
+  const b = board || activeBoard();
+  return b.columns || DEFAULT_COLUMNS;
+}
+
+function boardPriorities(board) {
+  const b = board || activeBoard();
+  return b.priorities || DEFAULT_PRIORITIES;
+}
+
+function getColumnById(id, board) {
+  return boardColumns(board).find(c => c.id === id);
+}
+
+function getPriorityById(id, board) {
+  return boardPriorities(board).find(p => p.id === id);
+}
+
+function generateColumnId(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).substring(2, 5);
+}
+
+function defaultDefaults() {
+  return {
+    columns: JSON.parse(JSON.stringify(DEFAULT_COLUMNS)),
+    priorities: JSON.parse(JSON.stringify(DEFAULT_PRIORITIES)),
+    labelPresets: [...LABEL_PRESETS]
+  };
 }
 
 // ===== Mission Statement Easter Egg =====
@@ -227,31 +283,33 @@ function generateBoardId() {
   return "B-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
 }
 
-function defaultBoard(title, color) {
+function defaultBoard(title, color, defaults) {
+  const defs = defaults || (typeof state !== "undefined" && state.defaults) || defaultDefaults();
+  const cols = JSON.parse(JSON.stringify(defs.columns || DEFAULT_COLUMNS));
+  const columnOrder = {};
+  for (const col of cols) columnOrder[col.id] = [];
   return {
     id: generateBoardId(),
     title: title || randomName(),
     color: color || BOARD_COLORS[0],
     tickets: [],
-    columnOrder: {
-      "todo": [],
-      "in-progress": [],
-      "testing": [],
-      "done": [],
-      "canceled": []
-    },
-    labelPresets: [...LABEL_PRESETS]
+    columns: cols,
+    priorities: JSON.parse(JSON.stringify(defs.priorities || DEFAULT_PRIORITIES)),
+    columnOrder,
+    labelPresets: [...(defs.labelPresets || LABEL_PRESETS)]
   };
 }
 
 function defaultState() {
   const projectTitle = randomName();
   const boardTitle = randomName([projectTitle]);
+  const defs = defaultDefaults();
   return {
     version: CURRENT_VERSION,
     title: projectTitle,
-    boards: [defaultBoard(boardTitle)],
-    activeBoardIndex: 0
+    boards: [defaultBoard(boardTitle, undefined, defs)],
+    activeBoardIndex: 0,
+    defaults: defs
   };
 }
 
@@ -288,6 +346,31 @@ function migrateState(data) {
     };
   }
 
+  if (data.version === 3) {
+    // Migrate v3 → v4: add columns, priorities, defaults
+    for (const board of data.boards) {
+      if (!board.columns) {
+        board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+      }
+      if (!board.priorities) {
+        board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
+      }
+      if (!board.color) {
+        board.color = BOARD_COLORS[0];
+      }
+      // Ensure columnOrder has entries for all columns
+      for (const col of board.columns) {
+        if (!board.columnOrder[col.id]) {
+          board.columnOrder[col.id] = [];
+        }
+      }
+    }
+    if (!data.defaults) {
+      data.defaults = defaultDefaults();
+    }
+    data.version = 4;
+  }
+
   if (data.version !== CURRENT_VERSION) return null;
   return data;
 }
@@ -305,10 +388,12 @@ function loadBoardState() {
         }
         // Validate each board's columnOrder and assign missing colors
         migrated.boards.forEach((board, i) => {
-          for (const s of STATUSES) {
-            if (!board.columnOrder || !Array.isArray(board.columnOrder[s])) {
+          if (!board.columns) board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+          if (!board.priorities) board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
+          for (const col of board.columns) {
+            if (!board.columnOrder || !Array.isArray(board.columnOrder[col.id])) {
               if (!board.columnOrder) board.columnOrder = {};
-              board.columnOrder[s] = [];
+              board.columnOrder[col.id] = [];
             }
           }
           if (!Array.isArray(board.labelPresets)) {
@@ -318,6 +403,7 @@ function loadBoardState() {
             board.color = BOARD_COLORS[i % BOARD_COLORS.length];
           }
         });
+        if (!migrated.defaults) migrated.defaults = defaultDefaults();
         return migrated;
       }
     }
@@ -348,28 +434,106 @@ const ICONS = {
 
 // ===== Rendering =====
 
+function renderColumns() {
+  const boardEl = document.getElementById("board");
+  if (!boardEl) return;
+
+  // Remove existing columns and resize handles (keep bulk-bar)
+  boardEl.querySelectorAll(".column, .column-resize-handle").forEach(el => el.remove());
+
+  const cols = viewAllActive ? (state.defaults ? state.defaults.columns : DEFAULT_COLUMNS) : boardColumns();
+
+  for (const col of cols) {
+    const isLast = col.id === "canceled" || col === cols[cols.length - 1];
+    const colDiv = document.createElement("div");
+    colDiv.className = "column" + (isLast && col.id === "canceled" ? " column--collapsible" : "");
+    colDiv.dataset.status = col.id;
+
+    const header = document.createElement("div");
+    header.className = "column__header" + (isLast && col.id === "canceled" ? " column__header--toggle" : "");
+    if (isLast && col.id === "canceled") header.dataset.toggleStatus = col.id;
+
+    const headerLeft = document.createElement("div");
+    headerLeft.className = "column__header-left";
+
+    const dot = document.createElement("span");
+    dot.className = "status-dot";
+    dot.style.setProperty("--dot-color", col.color);
+    headerLeft.appendChild(dot);
+
+    const h2 = document.createElement("h2");
+    h2.textContent = col.name;
+    if (col.id === "canceled") h2.style.color = col.color;
+    headerLeft.appendChild(h2);
+
+    header.appendChild(headerLeft);
+
+    if (isLast && col.id === "canceled") {
+      const count = document.createElement("span");
+      count.className = "column__count";
+      count.dataset.count = col.id;
+      count.textContent = "0";
+      headerLeft.appendChild(count);
+
+      const headerRight = document.createElement("div");
+      headerRight.className = "column__header-right";
+      headerRight.innerHTML = '<svg class="column__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>';
+      header.appendChild(headerRight);
+    } else {
+      const count = document.createElement("span");
+      count.className = "column__count";
+      count.dataset.count = col.id;
+      count.textContent = "0";
+      header.appendChild(count);
+    }
+
+    colDiv.appendChild(header);
+
+    const cards = document.createElement("div");
+    cards.className = "column__cards";
+    cards.id = "col-" + col.id;
+    colDiv.appendChild(cards);
+
+    const quickadd = document.createElement("div");
+    quickadd.className = "column__quickadd";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "quickadd-input";
+    input.dataset.status = col.id;
+    input.placeholder = "+ Add to " + col.name + "...";
+    quickadd.appendChild(input);
+    colDiv.appendChild(quickadd);
+
+    boardEl.appendChild(colDiv);
+  }
+}
+
 function renderBoard() {
   const boardEl = document.getElementById("board");
 
-  if (viewAllActive) {
-    // Remove board-level color — cards carry their own
-    if (boardEl) boardEl.style.removeProperty("--active-board-color");
+  renderColumns();
+  bindQuickAdd();
+  bindCollapsibleHeaders();
 
-    for (const status of STATUSES) {
-      const container = document.getElementById("col-" + status);
+  if (viewAllActive) {
+    if (boardEl) boardEl.style.removeProperty("--active-board-color");
+    const cols = state.defaults ? state.defaults.columns : DEFAULT_COLUMNS;
+
+    for (const col of cols) {
+      const container = document.getElementById("col-" + col.id);
+      if (!container) continue;
       container.innerHTML = "";
 
-      // Gather tickets from every board for this status
       let cardIndex = 0;
       let hasCards = false;
       for (let bi = 0; bi < state.boards.length; bi++) {
         const board = state.boards[bi];
         const boardColor = board.color || BOARD_COLORS[bi % BOARD_COLORS.length];
-        const ids = board.columnOrder[status] || [];
+        const ids = board.columnOrder[col.id] || [];
         for (const id of ids) {
           const ticket = board.tickets.find(t => t.id === id);
           if (!ticket) continue;
-          const card = renderTicketCard(ticket, cardIndex++);
+          const card = renderTicketCard(ticket, cardIndex++, board);
           card.style.setProperty("--active-board-color", boardColor);
           card.dataset.boardIndex = bi;
           container.appendChild(card);
@@ -380,14 +544,14 @@ function renderBoard() {
       if (!hasCards) {
         const empty = document.createElement("div");
         empty.className = "column__empty";
-        empty.innerHTML = ICONS.empty
-          + '<span>No tickets</span>';
+        empty.innerHTML = ICONS.empty + '<span>No tickets</span>';
         container.appendChild(empty);
       }
     }
 
     renderColumnCounts();
     applyCollapsedState();
+    refreshResizeHandles();
     return;
   }
 
@@ -395,11 +559,28 @@ function renderBoard() {
   if (boardEl) {
     boardEl.style.setProperty("--active-board-color", board.color || BOARD_COLORS[0]);
   }
-  for (const status of STATUSES) {
-    const container = document.getElementById("col-" + status);
+
+  // Orphan check: move tickets with unknown statuses to first column
+  const colIds = new Set(board.columns.map(c => c.id));
+  const firstColId = board.columns[0].id;
+  for (const ticket of board.tickets) {
+    if (!colIds.has(ticket.status)) {
+      // Remove from old columnOrder if it exists
+      for (const key of Object.keys(board.columnOrder)) {
+        board.columnOrder[key] = board.columnOrder[key].filter(tid => tid !== ticket.id);
+      }
+      ticket.status = firstColId;
+      if (!board.columnOrder[firstColId]) board.columnOrder[firstColId] = [];
+      board.columnOrder[firstColId].push(ticket.id);
+    }
+  }
+
+  for (const col of board.columns) {
+    const container = document.getElementById("col-" + col.id);
+    if (!container) continue;
     container.innerHTML = "";
 
-    const ids = board.columnOrder[status];
+    const ids = board.columnOrder[col.id] || [];
     if (ids.length === 0) {
       const empty = document.createElement("div");
       empty.className = "column__empty";
@@ -421,9 +602,10 @@ function renderBoard() {
   applyCollapsedState();
   renderColumnSelectAllCheckboxes();
   updateSelectionUI();
+  refreshResizeHandles();
 }
 
-function renderTicketCard(ticket, index) {
+function renderTicketCard(ticket, index, forBoard) {
   const card = document.createElement("div");
   card.className = "ticket-card";
   if (ticket.prompt) {
@@ -465,7 +647,14 @@ function renderTicketCard(ticket, index) {
   top.appendChild(checkWrap);
 
   const dot = document.createElement("span");
-  dot.className = "priority-dot priority-dot--" + ticket.priority;
+  dot.className = "priority-dot";
+  const prio = getPriorityById(ticket.priority, forBoard);
+  if (prio) {
+    dot.style.background = prio.color;
+    if (prio.id === "critical") dot.style.boxShadow = "0 0 6px " + prio.color + "66";
+  } else {
+    dot.style.background = "#fbbf24";
+  }
   top.appendChild(dot);
 
   const title = document.createElement("span");
@@ -543,15 +732,16 @@ function renderTicketCard(ticket, index) {
 }
 
 function renderColumnCounts() {
-  for (const status of STATUSES) {
-    const badge = document.querySelector(`[data-count="${status}"]`);
+  const cols = viewAllActive ? (state.defaults ? state.defaults.columns : DEFAULT_COLUMNS) : boardColumns();
+  for (const col of cols) {
+    const badge = document.querySelector(`[data-count="${col.id}"]`);
     if (!badge) continue;
 
     let count;
     if (viewAllActive) {
-      count = state.boards.reduce((sum, b) => sum + (b.columnOrder[status] || []).length, 0);
+      count = state.boards.reduce((sum, b) => sum + (b.columnOrder[col.id] || []).length, 0);
     } else {
-      count = activeBoard().columnOrder[status].length;
+      count = (activeBoard().columnOrder[col.id] || []).length;
     }
 
     const newCount = String(count);
@@ -611,6 +801,16 @@ function renderTabs() {
       tab.appendChild(delBtn);
     }
 
+    const gearBtn = document.createElement("span");
+    gearBtn.className = "board-tab__gear";
+    gearBtn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M13.3 10a1.1 1.1 0 00.22 1.21l.04.04a1.33 1.33 0 11-1.88 1.88l-.04-.04a1.1 1.1 0 00-1.21-.22 1.1 1.1 0 00-.67 1.01v.12a1.33 1.33 0 11-2.67 0v-.06a1.1 1.1 0 00-.72-1.01 1.1 1.1 0 00-1.21.22l-.04.04a1.33 1.33 0 11-1.88-1.88l.04-.04a1.1 1.1 0 00.22-1.21 1.1 1.1 0 00-1.01-.67h-.12a1.33 1.33 0 110-2.67h.06a1.1 1.1 0 001.01-.72 1.1 1.1 0 00-.22-1.21l-.04-.04A1.33 1.33 0 115 3.21l.04.04a1.1 1.1 0 001.21.22h.05a1.1 1.1 0 00.67-1.01v-.12a1.33 1.33 0 112.67 0v.06a1.1 1.1 0 00.67 1.01 1.1 1.1 0 001.21-.22l.04-.04a1.33 1.33 0 111.88 1.88l-.04.04a1.1 1.1 0 00-.22 1.21v.05a1.1 1.1 0 001.01.67h.12a1.33 1.33 0 110 2.67h-.06a1.1 1.1 0 00-1.01.67z"/></svg>';
+    gearBtn.setAttribute("aria-label", "Board settings");
+    gearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openBoardSettings(index);
+    });
+    tab.appendChild(gearBtn);
+
     tab.addEventListener("click", () => switchBoard(index));
     tab.addEventListener("dblclick", (e) => {
       e.preventDefault();
@@ -645,7 +845,7 @@ function addBoard() {
   const existingTitles = state.boards.map(b => b.title);
   existingTitles.push(state.title);
   const colorIndex = state.boards.length;
-  const newBoard = defaultBoard(randomName(existingTitles), BOARD_COLORS[colorIndex % BOARD_COLORS.length]);
+  const newBoard = defaultBoard(randomName(existingTitles), BOARD_COLORS[colorIndex % BOARD_COLORS.length], state.defaults);
   state.boards.push(newBoard);
   state.activeBoardIndex = state.boards.length - 1;
   saveBoardState();
@@ -771,6 +971,7 @@ function createTicket({ title, description = "", status = "todo", priority = "me
     updatedAt: now
   };
   board.tickets.push(ticket);
+  if (!board.columnOrder[status]) board.columnOrder[status] = [];
   board.columnOrder[status].push(ticket.id);
   saveBoardState();
   renderBoard();
@@ -797,7 +998,10 @@ function updateTicket(id, updates) {
   Object.assign(ticket, updates, { updatedAt: new Date().toISOString() });
 
   if (updates.status && updates.status !== oldStatus) {
-    board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+    if (board.columnOrder[oldStatus]) {
+      board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+    }
+    if (!board.columnOrder[updates.status]) board.columnOrder[updates.status] = [];
     if (!board.columnOrder[updates.status].includes(id)) {
       board.columnOrder[updates.status].push(id);
     }
@@ -825,8 +1029,10 @@ function deleteTicket(id) {
 
   // Remove immediately
   board.tickets = board.tickets.filter(t => t.id !== id);
-  for (const status of STATUSES) {
-    board.columnOrder[status] = board.columnOrder[status].filter(tid => tid !== id);
+  for (const col of boardColumns()) {
+    if (board.columnOrder[col.id]) {
+      board.columnOrder[col.id] = board.columnOrder[col.id].filter(tid => tid !== id);
+    }
   }
 
   saveBoardState();
@@ -874,16 +1080,67 @@ function deleteTicket(id) {
 
 // ===== Modal =====
 
-function openNewModal(defaultStatus = "todo") {
+function populateStatusDropdown() {
+  const menu = document.getElementById("status-menu");
+  menu.innerHTML = "";
+  const cols = boardColumns();
+  for (const col of cols) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "status-dropdown__option";
+    btn.dataset.value = col.id;
+    btn.setAttribute("role", "option");
+    const dot = document.createElement("span");
+    dot.className = "status-dropdown__opt-dot";
+    dot.style.setProperty("--dot-color", col.color);
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(" " + col.name));
+    menu.appendChild(btn);
+  }
+}
+
+function populatePriorityPills() {
+  const container = document.getElementById("priority-pills");
+  container.innerHTML = "";
+  const prios = boardPriorities();
+  for (const prio of prios) {
+    const label = document.createElement("label");
+    label.className = "priority-pill";
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "priority";
+    radio.value = prio.id;
+    const inner = document.createElement("span");
+    inner.className = "priority-pill__inner";
+    const dot = document.createElement("span");
+    dot.className = "priority-dot";
+    dot.style.background = prio.color;
+    inner.appendChild(dot);
+    inner.appendChild(document.createTextNode(" " + (prio.name.length > 4 ? prio.name.substring(0, 4) : prio.name)));
+    label.appendChild(radio);
+    label.appendChild(inner);
+    container.appendChild(label);
+  }
+}
+
+function openNewModal(defaultStatus) {
   clearSelection();
+  const cols = boardColumns();
+  const firstStatus = defaultStatus || cols[0].id;
   document.getElementById("modal-title").textContent = "New Ticket";
   document.getElementById("ticket-id").value = "";
   document.getElementById("ticket-title").value = "";
   document.getElementById("ticket-desc").value = "";
   document.getElementById("ticket-prompt").value = "";
   document.getElementById("modal-delete").style.display = "none";
-  setStatusValue(defaultStatus);
-  document.querySelector('input[name="priority"][value="medium"]').checked = true;
+  populateStatusDropdown();
+  populatePriorityPills();
+  setStatusValue(firstStatus);
+  // Default priority: second in list (or first if only one)
+  const prios = boardPriorities();
+  const defaultPrio = prios.length > 1 ? prios[1].id : prios[0].id;
+  const radio = document.querySelector(`input[name="priority"][value="${defaultPrio}"]`);
+  if (radio) radio.checked = true;
   renderLabelChips([]);
   resetCopyButton();
   showModal();
@@ -908,6 +1165,8 @@ function openEditModal(id) {
   document.getElementById("ticket-desc").value = ticket.description || "";
   document.getElementById("ticket-prompt").value = ticket.prompt || "";
   document.getElementById("modal-delete").style.display = "";
+  populateStatusDropdown();
+  populatePriorityPills();
   setStatusValue(ticket.status);
 
   const radio = document.querySelector(`input[name="priority"][value="${ticket.priority}"]`);
@@ -1103,8 +1362,10 @@ function initSortable() {
   for (const s of sortableInstances) s.destroy();
   sortableInstances = [];
 
-  for (const status of STATUSES) {
-    const el = document.getElementById("col-" + status);
+  const cols = boardColumns();
+  for (const col of cols) {
+    const el = document.getElementById("col-" + col.id);
+    if (!el) continue;
     const instance = new Sortable(el, {
       group: "kanban",
       animation: 150,
@@ -1176,16 +1437,19 @@ function handleDragEnd(evt) {
   resetDragState();
 
   // Remove leftover empty-state placeholders
-  for (const status of STATUSES) {
-    const container = document.getElementById("col-" + status);
+  const cols = boardColumns();
+  for (const col of cols) {
+    const container = document.getElementById("col-" + col.id);
+    if (!container) continue;
     container.querySelectorAll(".column__empty").forEach(el => el.remove());
   }
 
   // Rebuild columnOrder from DOM
-  for (const status of STATUSES) {
-    const container = document.getElementById("col-" + status);
+  for (const col of cols) {
+    const container = document.getElementById("col-" + col.id);
+    if (!container) continue;
     const cards = container.querySelectorAll(".ticket-card");
-    board.columnOrder[status] = Array.from(cards).map(c => c.dataset.id);
+    board.columnOrder[col.id] = Array.from(cards).map(c => c.dataset.id);
   }
 
   // Update ticket status if moved to a different column
@@ -1202,9 +1466,10 @@ function handleDragEnd(evt) {
   saveBoardState();
 
   // Re-add empty states to now-empty columns
-  for (const status of STATUSES) {
-    const container = document.getElementById("col-" + status);
-    if (board.columnOrder[status].length === 0) {
+  for (const col of cols) {
+    const container = document.getElementById("col-" + col.id);
+    if (!container) continue;
+    if ((board.columnOrder[col.id] || []).length === 0) {
       const empty = document.createElement("div");
       empty.className = "column__empty";
       empty.innerHTML = ICONS.empty
@@ -1354,7 +1619,9 @@ function handleImportAddToBoard() {
       const newId = generateId();
       const newTicket = { ...ticket, id: newId };
       board.tickets.push(newTicket);
-      const col = newTicket.status && board.columnOrder[newTicket.status] ? newTicket.status : "todo";
+      const colIds = new Set(board.columns.map(c => c.id));
+      const col = newTicket.status && colIds.has(newTicket.status) ? newTicket.status : board.columns[0].id;
+      if (!board.columnOrder[col]) board.columnOrder[col] = [];
       board.columnOrder[col].push(newId);
       count++;
     }
@@ -1559,17 +1826,20 @@ function showToast(message, options = {}) {
 
 // ===== Quick Add =====
 
+function bindQuickAdd() {
+  // Uses event delegation — no need to rebind per input
+}
+
 function initQuickAdd() {
-  document.querySelectorAll(".quickadd-input").forEach(input => {
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const title = input.value.trim();
-        if (!title) return;
-        const status = input.dataset.status;
-        createTicket({ title, status });
-        input.value = "";
-      }
-    });
+  document.getElementById("board").addEventListener("keydown", (e) => {
+    if (e.target.classList.contains("quickadd-input") && e.key === "Enter") {
+      const input = e.target;
+      const title = input.value.trim();
+      if (!title) return;
+      const status = input.dataset.status;
+      createTicket({ title, status });
+      input.value = "";
+    }
   });
 }
 
@@ -1581,6 +1851,12 @@ function initKeyboard() {
     const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 
     if (e.key === "Escape") {
+      const settingsDrawer = document.getElementById("settings-drawer");
+      if (settingsDrawer && settingsDrawer.classList.contains("active")) {
+        closeSettingsDrawer();
+        renderBoard();
+        return;
+      }
       const newProjectModal = document.getElementById("new-project-modal-backdrop");
       if (newProjectModal && newProjectModal.classList.contains("active")) {
         closeNewProjectModal();
@@ -1628,9 +1904,15 @@ function setStatusValue(value) {
   currentStatus = value;
   const dropdown = document.getElementById("status-dropdown");
   const label = document.getElementById("status-label");
-  const labels = { "todo": "Todo", "in-progress": "In Progress", "testing": "Testing", "done": "Done", "canceled": "Canceled" };
-  label.textContent = labels[value] || value;
-  dropdown.className = "status-dropdown status-dropdown--" + value;
+  const col = getColumnById(value);
+  label.textContent = col ? col.name : value;
+  // Apply dynamic color to trigger
+  const trigger = dropdown.querySelector(".status-dropdown__trigger");
+  if (col) {
+    trigger.style.borderColor = col.color + "40";
+    trigger.style.background = col.color + "14";
+    trigger.style.color = col.color;
+  }
   // Update aria-selected on options
   dropdown.querySelectorAll(".status-dropdown__option").forEach(opt => {
     opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
@@ -2015,10 +2297,10 @@ function init() {
   initProjectTitle();
   renderTabs();
   renderBoard();
-  initColumnResize();
   initCollapsibleColumns();
   initBulkBar();
   initBoardClickToDeselect();
+  initSettingsDrawer();
 
   // View All button
   const viewAllBtn = document.getElementById("btn-view-all");
@@ -2053,10 +2335,11 @@ function saveCollapsedColumns() {
 }
 
 function applyCollapsedState() {
-  for (const status of STATUSES) {
-    const col = document.querySelector(`.column[data-status="${status}"]`);
+  const cols = viewAllActive ? (state.defaults ? state.defaults.columns : DEFAULT_COLUMNS) : boardColumns();
+  for (const c of cols) {
+    const col = document.querySelector(`.column[data-status="${c.id}"]`);
     if (!col) continue;
-    if (collapsedColumns.has(status)) {
+    if (collapsedColumns.has(c.id)) {
       col.classList.add("column--collapsed");
     } else {
       col.classList.remove("column--collapsed");
@@ -2077,14 +2360,18 @@ function toggleColumnCollapse(status) {
   saveCollapsedColumns();
 }
 
+function bindCollapsibleHeaders() {
+  // Uses event delegation — no need to rebind per header
+}
+
 function initCollapsibleColumns() {
   loadCollapsedColumns();
   applyCollapsedState();
-  document.querySelectorAll(".column__header--toggle").forEach(header => {
-    header.addEventListener("click", () => {
-      const status = header.dataset.toggleStatus;
-      toggleColumnCollapse(status);
-    });
+  document.getElementById("board").addEventListener("click", (e) => {
+    const header = e.target.closest(".column__header--toggle");
+    if (!header) return;
+    const status = header.dataset.toggleStatus;
+    if (status) toggleColumnCollapse(status);
   });
 }
 
@@ -2125,7 +2412,8 @@ function toggleColumnSelection(status, selectAll) {
 
 function renderColumnSelectAllCheckboxes() {
   const board = activeBoard();
-  for (const status of STATUSES) {
+  for (const c of boardColumns()) {
+    const status = c.id;
     const col = document.querySelector(`.column[data-status="${status}"]`);
     if (!col) continue;
     const headerLeft = col.querySelector(".column__header-left");
@@ -2182,7 +2470,9 @@ function updateSelectionUI() {
   boardEl.classList.toggle("selection-active", selectedTicketIds.size > 0);
 
   // Update column select-all checkboxes (update existing without full re-render)
-  for (const status of STATUSES) {
+  const selCols = viewAllActive ? (state.defaults ? state.defaults.columns : DEFAULT_COLUMNS) : boardColumns();
+  for (const c of selCols) {
+    const status = c.id;
     const col = document.querySelector(`.column[data-status="${status}"]`);
     if (!col) continue;
     const headerLeft = col.querySelector(".column__header-left");
@@ -2204,6 +2494,36 @@ function updateBulkBar() {
   bar.classList.toggle("bulk-bar--visible", count > 0);
   const countEl = document.getElementById("bulk-count");
   if (countEl) countEl.textContent = count + " selected";
+}
+
+function populateBulkStatusMenu() {
+  const menu = document.getElementById("bulk-status-menu");
+  if (!menu) return;
+  menu.innerHTML = "";
+  for (const col of boardColumns()) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bulk-dropdown__option";
+    btn.dataset.bulkAction = "status";
+    btn.dataset.value = col.id;
+    btn.textContent = col.name;
+    menu.appendChild(btn);
+  }
+}
+
+function populateBulkPriorityMenu() {
+  const menu = document.getElementById("bulk-priority-menu");
+  if (!menu) return;
+  menu.innerHTML = "";
+  for (const prio of boardPriorities()) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bulk-dropdown__option";
+    btn.dataset.bulkAction = "priority";
+    btn.dataset.value = prio.id;
+    btn.textContent = prio.name;
+    menu.appendChild(btn);
+  }
 }
 
 function populateBulkAddLabelMenu() {
@@ -2266,7 +2586,10 @@ function executeBulkAction(action, value) {
       if (!ticket) continue;
       const oldStatus = ticket.status;
       if (oldStatus === value) continue;
-      board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+      if (board.columnOrder[oldStatus]) {
+        board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+      }
+      if (!board.columnOrder[value]) board.columnOrder[value] = [];
       if (!board.columnOrder[value].includes(id)) {
         board.columnOrder[value].push(id);
       }
@@ -2320,6 +2643,8 @@ function initBulkBar() {
       document.querySelectorAll(".bulk-dropdown.open").forEach(d => d.classList.remove("open"));
 
       if (!isOpen) {
+        if (type === "status") populateBulkStatusMenu();
+        if (type === "priority") populateBulkPriorityMenu();
         if (type === "add-label") populateBulkAddLabelMenu();
         if (type === "remove-label") populateBulkRemoveLabelMenu();
         dropdown.classList.add("open");
@@ -2357,6 +2682,479 @@ function initBoardClickToDeselect() {
       clearSelection();
     }
   });
+}
+
+// ===== Settings Drawer =====
+
+let settingsMode = null; // "board" or "project"
+let settingsBoardIndex = null;
+let settingsSortables = [];
+
+function openBoardSettings(boardIndex) {
+  settingsMode = "board";
+  settingsBoardIndex = boardIndex;
+  renderSettingsDrawer();
+  const backdrop = document.getElementById("settings-backdrop");
+  const drawer = document.getElementById("settings-drawer");
+  backdrop.classList.add("active");
+  drawer.classList.add("active");
+}
+
+function openProjectSettings() {
+  settingsMode = "project";
+  settingsBoardIndex = null;
+  renderSettingsDrawer();
+  const backdrop = document.getElementById("settings-backdrop");
+  const drawer = document.getElementById("settings-drawer");
+  backdrop.classList.add("active");
+  drawer.classList.add("active");
+}
+
+function closeSettingsDrawer() {
+  const backdrop = document.getElementById("settings-backdrop");
+  const drawer = document.getElementById("settings-drawer");
+  backdrop.classList.remove("active");
+  drawer.classList.remove("active");
+  for (const s of settingsSortables) s.destroy();
+  settingsSortables = [];
+  settingsMode = null;
+  settingsBoardIndex = null;
+}
+
+function getSettingsTarget() {
+  if (settingsMode === "board") {
+    return state.boards[settingsBoardIndex];
+  }
+  return state.defaults;
+}
+
+function renderSettingsDrawer() {
+  const body = document.getElementById("settings-body");
+  const title = document.getElementById("settings-title");
+  body.innerHTML = "";
+  for (const s of settingsSortables) s.destroy();
+  settingsSortables = [];
+
+  if (settingsMode === "board") {
+    const board = state.boards[settingsBoardIndex];
+    title.textContent = "Board Settings";
+    renderColumnsSection(body, board.columns, board);
+    renderPrioritiesSection(body, board.priorities, board);
+    renderLabelsSection(body, board.labelPresets, board);
+    renderBoardColorSection(body, board);
+  } else {
+    title.textContent = "Project Defaults";
+    renderColumnsSection(body, state.defaults.columns, state.defaults);
+    renderPrioritiesSection(body, state.defaults.priorities, state.defaults);
+    renderLabelsSection(body, state.defaults.labelPresets, state.defaults);
+  }
+}
+
+function renderColumnsSection(body, columns, target) {
+  const section = document.createElement("div");
+  section.className = "settings-section";
+  section.innerHTML = '<h3 class="settings-section__title">Columns</h3>';
+
+  const list = document.createElement("div");
+  list.className = "settings-list";
+  list.id = "settings-columns-list";
+
+  columns.forEach((col, i) => {
+    list.appendChild(createColumnItem(col, i, columns, target));
+  });
+
+  section.appendChild(list);
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "settings-add-btn";
+  addBtn.textContent = "+ Add Column";
+  addBtn.addEventListener("click", () => {
+    const newCol = { id: generateColumnId("column"), name: "New Column", color: "#818cf8" };
+    // Insert before last column (canceled)
+    const insertAt = columns.length > 0 ? columns.length - 1 : 0;
+    columns.splice(insertAt, 0, newCol);
+    if (target.columnOrder) {
+      target.columnOrder[newCol.id] = [];
+    }
+    saveBoardState();
+    renderSettingsDrawer();
+  });
+  section.appendChild(addBtn);
+  body.appendChild(section);
+
+  // Make middle columns sortable
+  const sortable = new Sortable(list, {
+    animation: 150,
+    handle: ".settings-item__drag",
+    draggable: ".settings-item:not(.settings-item--locked)",
+    ghostClass: "sortable-ghost",
+    onEnd(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+      const moved = columns.splice(evt.oldIndex, 1)[0];
+      columns.splice(evt.newIndex, 0, moved);
+      saveBoardState();
+      renderSettingsDrawer();
+    }
+  });
+  settingsSortables.push(sortable);
+}
+
+function createColumnItem(col, index, columns, target) {
+  const isFirst = index === 0;
+  const isLast = index === columns.length - 1;
+  const isLocked = isFirst || isLast;
+
+  const item = document.createElement("div");
+  item.className = "settings-item" + (isLocked ? " settings-item--locked" : "");
+
+  const drag = document.createElement("span");
+  drag.className = "settings-item__drag";
+  drag.innerHTML = '<svg viewBox="0 0 6 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="4" cy="2" r="1"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/></svg>';
+  if (isLocked) drag.style.opacity = "0.2";
+  item.appendChild(drag);
+
+  const swatch = document.createElement("button");
+  swatch.className = "settings-item__swatch";
+  swatch.style.background = col.color;
+  swatch.addEventListener("click", () => {
+    showColorPicker(swatch, col.color, (newColor) => {
+      col.color = newColor;
+      swatch.style.background = newColor;
+      saveBoardState();
+    });
+  });
+  item.appendChild(swatch);
+
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "settings-item__name";
+  nameInput.value = col.name;
+  if (isLast && col.id === "canceled") {
+    nameInput.disabled = true;
+    nameInput.title = "Canceled column name is fixed";
+  }
+  nameInput.addEventListener("blur", () => {
+    const newName = nameInput.value.trim();
+    if (newName && newName !== col.name) {
+      col.name = newName;
+      saveBoardState();
+    } else {
+      nameInput.value = col.name;
+    }
+  });
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") nameInput.blur();
+  });
+  item.appendChild(nameInput);
+
+  if (!isLocked) {
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "settings-item__remove";
+    removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>';
+    removeBtn.addEventListener("click", () => {
+      removeColumn(col, index, columns, target);
+    });
+    item.appendChild(removeBtn);
+  }
+
+  return item;
+}
+
+function removeColumn(col, index, columns, target) {
+  // If this is a board and the column has tickets, ask where to move them
+  if (target.tickets) {
+    const ticketIds = target.columnOrder[col.id] || [];
+    if (ticketIds.length > 0) {
+      showColumnMoveDialog(col, index, columns, target);
+      return;
+    }
+  }
+
+  columns.splice(index, 1);
+  if (target.columnOrder) {
+    delete target.columnOrder[col.id];
+  }
+  saveBoardState();
+  renderSettingsDrawer();
+}
+
+function showColumnMoveDialog(col, index, columns, target) {
+  const ticketIds = target.columnOrder[col.id] || [];
+  const otherCols = columns.filter((c, i) => i !== index);
+
+  // Replace the settings body content with a migration dialog
+  const body = document.getElementById("settings-body");
+  body.innerHTML = "";
+
+  const dialog = document.createElement("div");
+  dialog.className = "settings-section";
+  dialog.innerHTML = `<h3 class="settings-section__title">Move ${ticketIds.length} ticket${ticketIds.length !== 1 ? "s" : ""}</h3>
+    <p class="settings-migrate-desc">Column "${col.name}" has tickets. Choose where to move them:</p>`;
+
+  const select = document.createElement("select");
+  select.className = "settings-migrate-select";
+  for (const oc of otherCols) {
+    const opt = document.createElement("option");
+    opt.value = oc.id;
+    opt.textContent = oc.name;
+    select.appendChild(opt);
+  }
+  dialog.appendChild(select);
+
+  const actions = document.createElement("div");
+  actions.className = "settings-migrate-actions";
+
+  const confirmBtn = document.createElement("button");
+  confirmBtn.className = "btn btn--primary";
+  confirmBtn.textContent = "Move & Remove";
+  confirmBtn.addEventListener("click", () => {
+    const destId = select.value;
+    // Move tickets
+    if (!target.columnOrder[destId]) target.columnOrder[destId] = [];
+    for (const tid of ticketIds) {
+      target.columnOrder[destId].push(tid);
+      const ticket = target.tickets.find(t => t.id === tid);
+      if (ticket) ticket.status = destId;
+    }
+    // Remove column
+    columns.splice(index, 1);
+    delete target.columnOrder[col.id];
+    saveBoardState();
+    renderBoard();
+    renderSettingsDrawer();
+  });
+  actions.appendChild(confirmBtn);
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "btn btn--ghost";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", () => renderSettingsDrawer());
+  actions.appendChild(cancelBtn);
+
+  dialog.appendChild(actions);
+  body.appendChild(dialog);
+}
+
+function renderPrioritiesSection(body, priorities, target) {
+  const section = document.createElement("div");
+  section.className = "settings-section";
+  section.innerHTML = '<h3 class="settings-section__title">Priorities</h3>';
+
+  const list = document.createElement("div");
+  list.className = "settings-list";
+  list.id = "settings-priorities-list";
+
+  priorities.forEach((prio, i) => {
+    list.appendChild(createPriorityItem(prio, i, priorities, target));
+  });
+
+  section.appendChild(list);
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "settings-add-btn";
+  addBtn.textContent = "+ Add Priority";
+  addBtn.addEventListener("click", () => {
+    const newPrio = { id: "p-" + Math.random().toString(36).substring(2, 5), name: "New Priority", color: "#818cf8" };
+    priorities.push(newPrio);
+    saveBoardState();
+    renderSettingsDrawer();
+  });
+  section.appendChild(addBtn);
+  body.appendChild(section);
+
+  const sortable = new Sortable(list, {
+    animation: 150,
+    handle: ".settings-item__drag",
+    ghostClass: "sortable-ghost",
+    onEnd(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+      const moved = priorities.splice(evt.oldIndex, 1)[0];
+      priorities.splice(evt.newIndex, 0, moved);
+      saveBoardState();
+      renderSettingsDrawer();
+    }
+  });
+  settingsSortables.push(sortable);
+}
+
+function createPriorityItem(prio, index, priorities, target) {
+  const item = document.createElement("div");
+  item.className = "settings-item";
+
+  const drag = document.createElement("span");
+  drag.className = "settings-item__drag";
+  drag.innerHTML = '<svg viewBox="0 0 6 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="4" cy="2" r="1"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/></svg>';
+  item.appendChild(drag);
+
+  const swatch = document.createElement("button");
+  swatch.className = "settings-item__swatch";
+  swatch.style.background = prio.color;
+  swatch.addEventListener("click", () => {
+    showColorPicker(swatch, prio.color, (newColor) => {
+      prio.color = newColor;
+      swatch.style.background = newColor;
+      saveBoardState();
+    });
+  });
+  item.appendChild(swatch);
+
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "settings-item__name";
+  nameInput.value = prio.name;
+  nameInput.addEventListener("blur", () => {
+    const newName = nameInput.value.trim();
+    if (newName && newName !== prio.name) {
+      prio.name = newName;
+      saveBoardState();
+    } else {
+      nameInput.value = prio.name;
+    }
+  });
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") nameInput.blur();
+  });
+  item.appendChild(nameInput);
+
+  if (priorities.length > 1) {
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "settings-item__remove";
+    removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>';
+    removeBtn.addEventListener("click", () => {
+      // If board, update tickets using this priority to first remaining
+      if (target.tickets) {
+        const remaining = priorities.filter((_, i) => i !== index);
+        const fallback = remaining[0].id;
+        for (const ticket of target.tickets) {
+          if (ticket.priority === prio.id) ticket.priority = fallback;
+        }
+      }
+      priorities.splice(index, 1);
+      saveBoardState();
+      renderSettingsDrawer();
+    });
+    item.appendChild(removeBtn);
+  }
+
+  return item;
+}
+
+function renderLabelsSection(body, labelPresets, target) {
+  const section = document.createElement("div");
+  section.className = "settings-section";
+  section.innerHTML = '<h3 class="settings-section__title">Label Presets</h3>';
+
+  const chipContainer = document.createElement("div");
+  chipContainer.className = "settings-labels";
+
+  for (let i = 0; i < labelPresets.length; i++) {
+    const chip = document.createElement("span");
+    chip.className = "settings-label-chip";
+    chip.textContent = labelPresets[i];
+    const x = document.createElement("button");
+    x.className = "settings-label-chip__remove";
+    x.innerHTML = '<svg viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="2" x2="6" y2="6"/><line x1="6" y1="2" x2="2" y2="6"/></svg>';
+    x.addEventListener("click", () => {
+      labelPresets.splice(i, 1);
+      saveBoardState();
+      renderSettingsDrawer();
+    });
+    chip.appendChild(x);
+    chipContainer.appendChild(chip);
+  }
+
+  const addInput = document.createElement("input");
+  addInput.type = "text";
+  addInput.className = "settings-label-input";
+  addInput.placeholder = "Add label...";
+  addInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const val = addInput.value.trim();
+      if (val && !labelPresets.includes(val)) {
+        labelPresets.push(val);
+        saveBoardState();
+        renderSettingsDrawer();
+      }
+    }
+  });
+  chipContainer.appendChild(addInput);
+
+  section.appendChild(chipContainer);
+  body.appendChild(section);
+}
+
+function renderBoardColorSection(body, board) {
+  const section = document.createElement("div");
+  section.className = "settings-section";
+  section.innerHTML = '<h3 class="settings-section__title">Board Color</h3>';
+
+  const palette = document.createElement("div");
+  palette.className = "color-palette";
+
+  for (const color of COLOR_PALETTE) {
+    const swatch = document.createElement("button");
+    swatch.className = "color-swatch" + (board.color === color ? " color-swatch--active" : "");
+    swatch.style.background = color;
+    swatch.addEventListener("click", () => {
+      board.color = color;
+      saveBoardState();
+      renderBoard();
+      renderTabs();
+      renderSettingsDrawer();
+    });
+    palette.appendChild(swatch);
+  }
+
+  section.appendChild(palette);
+  body.appendChild(section);
+}
+
+function showColorPicker(anchor, currentColor, onChange) {
+  // Remove any existing picker
+  document.querySelectorAll(".color-picker-popup").forEach(el => el.remove());
+
+  const popup = document.createElement("div");
+  popup.className = "color-picker-popup";
+
+  for (const color of COLOR_PALETTE) {
+    const swatch = document.createElement("button");
+    swatch.className = "color-swatch" + (color === currentColor ? " color-swatch--active" : "");
+    swatch.style.background = color;
+    swatch.addEventListener("click", () => {
+      onChange(color);
+      popup.remove();
+    });
+    popup.appendChild(swatch);
+  }
+
+  anchor.parentElement.style.position = "relative";
+  anchor.parentElement.appendChild(popup);
+
+  // Close on outside click
+  const closeHandler = (e) => {
+    if (!popup.contains(e.target) && e.target !== anchor) {
+      popup.remove();
+      document.removeEventListener("click", closeHandler);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", closeHandler), 0);
+}
+
+function initSettingsDrawer() {
+  const backdrop = document.getElementById("settings-backdrop");
+  const closeBtn = document.getElementById("settings-close");
+
+  const closeAndRefresh = () => {
+    closeSettingsDrawer();
+    renderBoard();
+    renderTabs();
+  };
+  if (backdrop) backdrop.addEventListener("click", closeAndRefresh);
+  if (closeBtn) closeBtn.addEventListener("click", closeAndRefresh);
+
+  // Project defaults gear
+  const projectGear = document.getElementById("btn-project-settings");
+  if (projectGear) projectGear.addEventListener("click", openProjectSettings);
 }
 
 document.addEventListener("DOMContentLoaded", init);
