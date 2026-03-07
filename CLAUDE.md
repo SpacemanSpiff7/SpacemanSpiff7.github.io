@@ -33,7 +33,7 @@ git push origin master
 JavaScript files use version query strings for cache busting.
 When modifying `js/animations.js` or `js/main.js`:
 1. Make your code changes
-2. Increment the version number in index.html (e.g., `?v=3` → `?v=4`)
+2. Increment the version number in index.html (e.g., `?v=4` → `?v=5`)
 3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only)
 4. Commit and push together
 
@@ -45,7 +45,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 - **Scroll-snap single page** with animated backgrounds
 - **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js) with HiDPI scaling and quadratic curve wireframe
 - **Dynamic content**: Projects loaded from data/projects.json
-- **Control panel**: Blob parameter tweaking (collapsible UI)
+- **Control panel**: 13-slider control panel with 3 collapsible sections (Shape, Style, Stars), hue override, and rainbow easter egg
 - **Modular CSS**: Split into tokens, base, components, and responsive files
 
 ### Key Files
@@ -58,7 +58,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 | `css/responsive.css` | Media queries, reduced motion, print styles |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
 | `js/main.js` | Navigation, project loading, progress indicator |
-| `js/animations.js` | Starfield and 3D blob rendering (HiDPI, quadratic curve wireframe) |
+| `js/animations.js` | Starfield, 3D blob rendering, and 13-slider control panel (Shape/Style/Stars sections, rainbow easter egg) |
 | `components/nav.html` | Navigation bar (only component loaded dynamically) |
 | `data/projects.json` | Single source of truth for projects |
 
@@ -83,6 +83,10 @@ This ensures users get fresh JavaScript immediately after deployment.
 - Do not use emojis anywhere on this website
 - This includes code comments, UI elements, and generated content
 - Use text or icons instead for visual indicators
+
+### Rainbow Easter Egg
+
+The blob control panel hue slider has a rainbow easter egg: hold the slider at max (360) for ~2 seconds to activate rainbow mode. This is intentional — the blob cycles through hues rapidly with a pulsing glow, and the panel caret glows rainbow. It is session-only (not persisted to localStorage). Do not remove it.
 
 ### CSS Architecture
 

@@ -147,44 +147,153 @@
             <span class="controls-caret">▲</span>
         </div>
         <div class="controls-drawer">
-            <div class="controls-grid">
-                <div class="control-item">
-                    <label for="morph-speed">Morph Speed</label>
-                    <input type="range" id="morph-speed" min="0" max="0.02" step="0.001" value="0.005">
-                    <span class="control-value" id="morph-speed-value">0.005</span>
+            <!-- Shape Section -->
+            <div class="controls-section" data-section="shape">
+                <div class="controls-section-header">
+                    <span class="controls-section-title">Shape</span>
+                    <span class="controls-section-caret">▼</span>
                 </div>
-                <div class="control-item">
-                    <label for="noise-amplitude">Noise Amount</label>
-                    <input type="range" id="noise-amplitude" min="0" max="0.5" step="0.01" value="0.10">
-                    <span class="control-value" id="noise-amplitude-value">0.10</span>
-                </div>
-                <div class="control-item">
-                    <label for="noise-frequency">Noise Detail</label>
-                    <input type="range" id="noise-frequency" min="0.001" max="0.01" step="0.0001" value="0.003">
-                    <span class="control-value" id="noise-frequency-value">0.003</span>
-                </div>
-                <div class="control-item">
-                    <label for="base-radius">Size</label>
-                    <input type="range" id="base-radius" min="100" max="400" step="10" value="200">
-                    <span class="control-value" id="base-radius-value">200px</span>
-                </div>
-                <div class="control-item">
-                    <label for="brightness">Brightness</label>
-                    <input type="range" id="brightness" min="0.3" max="1.5" step="0.05" value="1.0">
-                    <span class="control-value" id="brightness-value">1.00</span>
-                </div>
-                <div class="control-item">
-                    <label for="line-width">Line Width</label>
-                    <input type="range" id="line-width" min="0.1" max="3" step="0.1" value="1.0">
-                    <span class="control-value" id="line-width-value">1.0</span>
+                <div class="controls-section-body">
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <label for="base-radius">Size</label>
+                            <input type="range" id="base-radius" min="30" max="500" step="10" value="200">
+                            <span class="control-value" id="base-radius-value">200px</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="noise-amplitude">Noise Amount</label>
+                            <input type="range" id="noise-amplitude" min="0" max="0.5" step="0.01" value="0.10">
+                            <span class="control-value" id="noise-amplitude-value">0.10</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="noise-frequency">Noise Detail</label>
+                            <input type="range" id="noise-frequency" min="0.001" max="0.01" step="0.0001" value="0.003">
+                            <span class="control-value" id="noise-frequency-value">Smooth</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="morph-speed">Morph Speed</label>
+                            <input type="range" id="morph-speed" min="0" max="0.02" step="0.001" value="0.005">
+                            <span class="control-value" id="morph-speed-value">Medium</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="perspective">Perspective</label>
+                            <input type="range" id="perspective" min="400" max="1200" step="50" value="600">
+                            <span class="control-value" id="perspective-value">600</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Style Section -->
+            <div class="controls-section" data-section="style">
+                <div class="controls-section-header">
+                    <span class="controls-section-title">Style</span>
+                    <span class="controls-section-caret">▼</span>
+                </div>
+                <div class="controls-section-body">
+                    <div class="controls-grid">
+                        <div class="control-item control-item-hue">
+                            <label for="hue-slider">Color <span class="hue-clear hidden" id="hue-clear" title="Reset to auto">x</span></label>
+                            <div class="hue-slider-wrap">
+                                <input type="range" id="hue-slider" min="0" max="360" step="1" value="0">
+                                <div id="easter-egg-icon">
+                                    <div class="dot-thumb"></div>
+                                    <svg viewBox="0 -10 100 95" class="rainbow-cloud-svg">
+                                        <defs>
+                                            <linearGradient id="vertical-rainbow" x1="0" y1="1" x2="0" y2="0">
+                                                <stop offset="0%" stop-color="#9400d3" />
+                                                <stop offset="20%" stop-color="#0000ff" />
+                                                <stop offset="40%" stop-color="#00ff00" />
+                                                <stop offset="60%" stop-color="#ffff00" />
+                                                <stop offset="80%" stop-color="#ff7f00" />
+                                                <stop offset="100%" stop-color="#ff0000" />
+                                            </linearGradient>
+                                            <clipPath id="cloud-clip">
+                                                <path d="M 25 75 A 12 12 0 0 1 25 51 A 18 18 0 0 1 55 40 A 16 16 0 0 1 80 55 A 12 12 0 0 1 75 75 Z" />
+                                            </clipPath>
+                                        </defs>
+                                        <g class="rainbow-arcs">
+                                            <path class="arc" stroke="#ff0000" pathLength="100" d="M 30 50 A 55 55 0 0 1 85 -5" />
+                                            <path class="arc" stroke="#ff7f00" pathLength="100" d="M 36 50 A 49 49 0 0 1 85 1" />
+                                            <path class="arc" stroke="#ffff00" pathLength="100" d="M 42 50 A 43 43 0 0 1 85 7" />
+                                            <path class="arc" stroke="#00ff00" pathLength="100" d="M 48 50 A 37 37 0 0 1 85 13" />
+                                            <path class="arc" stroke="#0000ff" pathLength="100" d="M 54 50 A 31 31 0 0 1 85 19" />
+                                            <path class="arc" stroke="#9400d3" pathLength="100" d="M 60 50 A 25 25 0 0 1 85 25" />
+                                        </g>
+                                        <path class="cloud-base" d="M 25 75 A 12 12 0 0 1 25 51 A 18 18 0 0 1 55 40 A 16 16 0 0 1 80 55 A 12 12 0 0 1 75 75 Z" />
+                                        <g clip-path="url(#cloud-clip)">
+                                            <rect class="cloud-fill-rect" x="0" y="10" width="100" height="70" fill="url(#vertical-rainbow)" />
+                                        </g>
+                                        <path class="cloud-outline" d="M 25 75 A 12 12 0 0 1 25 51 A 18 18 0 0 1 55 40 A 16 16 0 0 1 80 55 A 12 12 0 0 1 75 75 Z" />
+                                        <g class="confetti-group" transform="translate(85, 10)">
+                                            <circle class="confetti c1" cx="0" cy="0" r="2.5" fill="#ff0000" />
+                                            <circle class="confetti c2" cx="0" cy="0" r="2.5" fill="#ffff00" />
+                                            <circle class="confetti c3" cx="0" cy="0" r="2.5" fill="#00ff00" />
+                                            <circle class="confetti c4" cx="0" cy="0" r="2.5" fill="#0000ff" />
+                                            <circle class="confetti c5" cx="0" cy="0" r="2.5" fill="#9400d3" />
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="control-value" id="hue-slider-value">Auto</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="brightness">Brightness</label>
+                            <input type="range" id="brightness" min="0.3" max="1.5" step="0.05" value="1.0">
+                            <span class="control-value" id="brightness-value">1.00</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="line-width">Line Width</label>
+                            <input type="range" id="line-width" min="0.1" max="3" step="0.1" value="1.0">
+                            <span class="control-value" id="line-width-value">1.0</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="glow-intensity">Glow</label>
+                            <input type="range" id="glow-intensity" min="0" max="0.5" step="0.05" value="0.15">
+                            <span class="control-value" id="glow-intensity-value">0.15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stars Section -->
+            <div class="controls-section" data-section="stars">
+                <div class="controls-section-header">
+                    <span class="controls-section-title">Stars</span>
+                    <span class="controls-section-caret">▼</span>
+                </div>
+                <div class="controls-section-body">
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <label for="star-count">Star Count</label>
+                            <input type="range" id="star-count" min="0" max="500" step="10" value="250">
+                            <span class="control-value" id="star-count-value">250</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="star-twinkle">Twinkle Speed</label>
+                            <input type="range" id="star-twinkle" min="0" max="3" step="0.1" value="1.0">
+                            <span class="control-value" id="star-twinkle-value">1.0</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="star-size">Star Size</label>
+                            <input type="range" id="star-size" min="0.3" max="5" step="0.1" value="2.0">
+                            <span class="control-value" id="star-size-value">2.0</span>
+                        </div>
+                        <div class="control-item">
+                            <label for="star-brightness">Star Brightness</label>
+                            <input type="range" id="star-brightness" min="0.2" max="2" step="0.1" value="1.0">
+                            <span class="control-value" id="star-brightness-value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button class="controls-reset" id="controls-reset">Reset to Defaults</button>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/animations.js?v=3"></script>
+    <script src="js/animations.js?v=4"></script>
     <script src="js/main.js?v=6"></script>
 </body>
 </html>

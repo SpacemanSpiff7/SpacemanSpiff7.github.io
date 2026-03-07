@@ -18,6 +18,14 @@ const CONFIG = {
     baseRadius: 200,
     brightnessMultiplier: 1.0,
     lineWidth: 1.0,
+    perspective: 600,
+    glowMaxOpacity: 0.15,
+    hueOverride: null,    // null = section-controlled, 0-360 = user hue
+    rainbowMode: false,
+    rainbowHue: 0,
+    starTwinkleSpeed: 1.0,  // multiplier on per-star twinkleSpeed
+    starMaxRadius: 2.0,     // max star radius in px
+    starBrightness: 1.0,    // multiplier on per-star opacity
 
     // Color themes per section (dark enough to not interfere with text)
     sectionColors: {
@@ -236,6 +244,25 @@ function hslToRgb(h, s, l) {
     };
 }
 
+function hslToHex(h, s, l) {
+    const rgb = hslToRgb(h, s, l);
+    return rgbToHex(rgb.r, rgb.g, rgb.b);
+}
+
+function getMorphSpeedLabel(value) {
+    const pct = value / 0.02;
+    if (pct <= 0.25) return 'Slow';
+    if (pct <= 0.75) return 'Medium';
+    return 'Fast';
+}
+
+function getNoiseDetailLabel(value) {
+    const pct = (value - 0.001) / (0.01 - 0.001);
+    if (pct <= 0.33) return 'Smooth';
+    if (pct <= 0.66) return 'Textured';
+    return 'Chaotic';
+}
+
 function adjustBrightness(hexColor, multiplier) {
     const rgb = hexToRgb(hexColor);
     if (!rgb) return hexColor;
@@ -251,6 +278,21 @@ function adjustBrightness(hexColor, multiplier) {
 // STARFIELD RENDERING
 // ==========================================
 let starfieldCanvas, starfieldCtx, stars = [];
+
+function regenerateStars(count) {
+    stars.length = 0;
+    const maxR = CONFIG.starMaxRadius;
+    for (let i = 0; i < count; i++) {
+        stars.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            radius: Math.random() * (maxR - 0.3) + 0.3,
+            opacity: Math.random() * 0.5 + 0.5,
+            twinkleSpeed: Math.random() * 0.02 + 0.01,
+            twinklePhase: Math.random() * Math.PI * 2,
+        });
+    }
+}
 
 function initStarfield() {
     starfieldCanvas = document.getElementById('starfield');
@@ -271,17 +313,7 @@ function initStarfield() {
     resizeStarfield();
     window.addEventListener('resize', resizeStarfield);
 
-    // Generate stars
-    for (let i = 0; i < CONFIG.starCount; i++) {
-        stars.push({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            radius: Math.random() * 1.5 + 0.5,
-            opacity: Math.random() * 0.5 + 0.5,
-            twinkleSpeed: Math.random() * 0.02 + 0.01,
-            twinklePhase: Math.random() * Math.PI * 2,
-        });
-    }
+    regenerateStars(CONFIG.starCount);
 }
 
 function renderStarfield(time) {
@@ -291,12 +323,12 @@ function renderStarfield(time) {
     starfieldCtx.fillRect(0, 0, starfieldCanvas.width / dpr, starfieldCanvas.height / dpr);
 
     stars.forEach(star => {
-        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
-        const opacity = star.opacity + twinkle * 0.3;
+        const twinkle = Math.sin(time * star.twinkleSpeed * CONFIG.starTwinkleSpeed + star.twinklePhase);
+        const opacity = (star.opacity + twinkle * 0.3) * CONFIG.starBrightness;
 
         starfieldCtx.beginPath();
         starfieldCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        starfieldCtx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        starfieldCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`;
         starfieldCtx.fill();
     });
 }
@@ -382,7 +414,7 @@ function rotateZ(x, y, z, angle) {
 }
 
 function project3D(x, y, z) {
-    const perspective = 600;
+    const perspective = CONFIG.perspective;
     const scale = perspective / (perspective + z);
     return {
         x: (blobCanvas.width / dpr) / 2 + x * scale,
@@ -494,115 +526,227 @@ function renderBlob(currentTime) {
         vertex.lighting = Math.max(0, vertex.normal.x * lightNorm.x + vertex.normal.y * lightNorm.y + vertex.normal.z * lightNorm.z);
     });
 
-    // Lerp displayColor toward targetColor for smooth transitions
-    if (CONFIG.displayColor !== CONFIG.targetColor) {
-        CONFIG.displayColor = lerpColor(CONFIG.displayColor, CONFIG.targetColor, CONFIG.colorTransitionSpeed);
+    // Color logic: rainbow > hue override > section color
+    let blobColor;
+    const isRainbow = CONFIG.rainbowMode;
+    if (!isRainbow) {
+        if (CONFIG.hueOverride !== null) {
+            blobColor = adjustBrightness(hslToHex(CONFIG.hueOverride / 360, 1, 0.3), CONFIG.brightnessMultiplier);
+        } else {
+            if (CONFIG.displayColor !== CONFIG.targetColor) {
+                CONFIG.displayColor = lerpColor(CONFIG.displayColor, CONFIG.targetColor, CONFIG.colorTransitionSpeed);
+            }
+            blobColor = adjustBrightness(CONFIG.displayColor, CONFIG.brightnessMultiplier);
+        }
     }
-    const blobColor = adjustBrightness(CONFIG.displayColor, CONFIG.brightnessMultiplier);
 
     // Draw 3D shading glow behind wireframe
     const centerX = (blobCanvas.width / dpr) / 2;
     const centerY = (blobCanvas.height / dpr) / 2;
     const glowRadius = currentRadius * 1.5;
 
-    const gradient = blobCtx.createRadialGradient(
-        centerX - currentRadius * 0.3,  // Offset light source
-        centerY - currentRadius * 0.3,
-        0,
-        centerX,
-        centerY,
-        glowRadius
-    );
-
-    const rgb = hexToRgb(blobColor);
-    if (rgb) {
-        gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);   // Bright center
-        gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`); // Mid fade
-        gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);      // Transparent edge
-
-        blobCtx.fillStyle = gradient;
-        blobCtx.beginPath();
-        blobCtx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2);
-        blobCtx.fill();
+    if (isRainbow) {
+        // Multi-colored rotating glow blobs — neon party sign look
+        const neonColors = [
+            [255, 30, 80],   // hot pink
+            [0, 255, 140],   // neon green
+            [80, 40, 255],   // electric purple
+            [255, 220, 0],   // neon yellow
+            [0, 180, 255],   // cyan
+            [255, 100, 0],   // neon orange
+        ];
+        const glowR = glowRadius * 1.3;
+        neonColors.forEach((c, i) => {
+            const phase = time * 2.5 + i * Math.PI * 2 / neonColors.length;
+            const ox = Math.sin(phase) * currentRadius * 0.4;
+            const oy = Math.cos(phase) * currentRadius * 0.4;
+            const pulse = (Math.sin(time * 6 + i * 1.7) + 1) / 2;
+            const intensity = 0.25 + pulse * 0.35;
+            const g = blobCtx.createRadialGradient(centerX + ox, centerY + oy, 0, centerX, centerY, glowR);
+            g.addColorStop(0, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${intensity})`);
+            g.addColorStop(0.4, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${intensity * 0.4})`);
+            g.addColorStop(1, `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0)`);
+            blobCtx.fillStyle = g;
+            blobCtx.beginPath();
+            blobCtx.arc(centerX, centerY, glowR, 0, Math.PI * 2);
+            blobCtx.fill();
+        });
+    } else {
+        const gradient = blobCtx.createRadialGradient(
+            centerX - currentRadius * 0.3,
+            centerY - currentRadius * 0.3,
+            0,
+            centerX,
+            centerY,
+            glowRadius
+        );
+        const rgb = hexToRgb(blobColor);
+        if (rgb) {
+            const glowOpacity = CONFIG.glowMaxOpacity;
+            gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowOpacity})`);
+            gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowOpacity * 0.33})`);
+            gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
+            blobCtx.fillStyle = gradient;
+            blobCtx.beginPath();
+            blobCtx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2);
+            blobCtx.fill();
+        }
     }
 
     // Draw wireframe
-    blobCtx.lineWidth = CONFIG.lineWidth;
     blobCtx.lineJoin = 'round';
     blobCtx.lineCap = 'round';
 
-    // Draw latitude lines
-    for (let lat = 0; lat <= gridRes.lat; lat++) {
-        blobCtx.beginPath();
-        for (let lon = 0; lon <= gridRes.lon; lon++) {
-            const index = lat * (gridRes.lon + 1) + lon;
-            const vertex = vertices[index];
+    if (isRainbow) {
+        // Per-line rainbow: each lat/lon line gets its own hue, two-pass for neon glow
+        // Pass 1: thick transparent lines (glow halo)
+        // Pass 2: crisp bright lines on top
 
-            const depthFade = (vertex.z / currentRadius + 1) / 2;
-            const lighting = vertex.lighting;
+        function drawRainbowWireframe(lineWidthMult, opacityMult) {
+            blobCtx.lineWidth = CONFIG.lineWidth * lineWidthMult;
 
-            const baseOpacity = 0.15;
-            const lightBoost = lighting * 0.7;
-            const depthBoost = depthFade * 0.4;
-            const opacity = baseOpacity + lightBoost + depthBoost;
+            // Latitude lines
+            for (let lat = 0; lat <= gridRes.lat; lat++) {
+                const hue = (lat / gridRes.lat * 360 + time * 200) % 360;
+                const pulse = (Math.sin(time * 10 + lat * 0.7) + 1) / 2;
+                const l = 0.45 + pulse * 0.25;
+                const color = hslToRgb(hue / 360, 1, l);
 
-            blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+                blobCtx.beginPath();
+                blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityMult})`;
 
-            if (lon === 0) {
-                blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-            } else if (lon === 1) {
-                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                const midX = (prev.projected.x + vertex.projected.x) / 2;
-                const midY = (prev.projected.y + vertex.projected.y) / 2;
-                blobCtx.lineTo(midX, midY);
-            } else if (lon === gridRes.lon) {
-                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-            } else {
-                const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                const midX = (prev.projected.x + vertex.projected.x) / 2;
-                const midY = (prev.projected.y + vertex.projected.y) / 2;
-                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
+                for (let lon = 0; lon <= gridRes.lon; lon++) {
+                    const index = lat * (gridRes.lon + 1) + lon;
+                    const vertex = vertices[index];
+
+                    if (lon === 0) {
+                        blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+                    } else if (lon === 1) {
+                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                        blobCtx.lineTo((prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
+                    } else if (lon === gridRes.lon) {
+                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
+                    } else {
+                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, (prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
+                    }
+                }
+                blobCtx.stroke();
+            }
+
+            // Longitude lines
+            for (let lon = 0; lon <= gridRes.lon; lon++) {
+                const hue = (lon / gridRes.lon * 360 + time * 200 + 180) % 360;
+                const pulse = (Math.sin(time * 10 + lon * 0.9 + 2) + 1) / 2;
+                const l = 0.45 + pulse * 0.25;
+                const color = hslToRgb(hue / 360, 1, l);
+
+                blobCtx.beginPath();
+                blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityMult})`;
+
+                for (let lat = 0; lat <= gridRes.lat; lat++) {
+                    const index = lat * (gridRes.lon + 1) + lon;
+                    const vertex = vertices[index];
+
+                    if (lat === 0) {
+                        blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+                    } else if (lat === 1) {
+                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                        blobCtx.lineTo((prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
+                    } else if (lat === gridRes.lat) {
+                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
+                    } else {
+                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, (prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
+                    }
+                }
+                blobCtx.stroke();
             }
         }
-        blobCtx.stroke();
-    }
 
-    // Draw longitude lines
-    for (let lon = 0; lon <= gridRes.lon; lon++) {
-        blobCtx.beginPath();
+        // Glow pass — thick, semi-transparent
+        drawRainbowWireframe(5, 0.25);
+        // Crisp pass — normal width, bright
+        drawRainbowWireframe(1.5, 0.95);
+    } else {
+        // Normal single-color wireframe
+        blobCtx.lineWidth = CONFIG.lineWidth;
+
+        // Draw latitude lines
         for (let lat = 0; lat <= gridRes.lat; lat++) {
-            const index = lat * (gridRes.lon + 1) + lon;
-            const vertex = vertices[index];
+            blobCtx.beginPath();
+            for (let lon = 0; lon <= gridRes.lon; lon++) {
+                const index = lat * (gridRes.lon + 1) + lon;
+                const vertex = vertices[index];
 
-            const depthFade = (vertex.z / currentRadius + 1) / 2;
-            const lighting = vertex.lighting;
+                const depthFade = (vertex.z / currentRadius + 1) / 2;
+                const lighting = vertex.lighting;
 
-            const baseOpacity = 0.15;
-            const lightBoost = lighting * 0.7;
-            const depthBoost = depthFade * 0.4;
-            const opacity = baseOpacity + lightBoost + depthBoost;
+                const baseOpacity = 0.15;
+                const lightBoost = lighting * 0.7;
+                const depthBoost = depthFade * 0.4;
+                const opacity = baseOpacity + lightBoost + depthBoost;
 
-            blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
 
-            if (lat === 0) {
-                blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-            } else if (lat === 1) {
-                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                const midX = (prev.projected.x + vertex.projected.x) / 2;
-                const midY = (prev.projected.y + vertex.projected.y) / 2;
-                blobCtx.lineTo(midX, midY);
-            } else if (lat === gridRes.lat) {
-                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-            } else {
-                const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                const midX = (prev.projected.x + vertex.projected.x) / 2;
-                const midY = (prev.projected.y + vertex.projected.y) / 2;
-                blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
+                if (lon === 0) {
+                    blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+                } else if (lon === 1) {
+                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                    const midX = (prev.projected.x + vertex.projected.x) / 2;
+                    const midY = (prev.projected.y + vertex.projected.y) / 2;
+                    blobCtx.lineTo(midX, midY);
+                } else if (lon === gridRes.lon) {
+                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
+                } else {
+                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
+                    const midX = (prev.projected.x + vertex.projected.x) / 2;
+                    const midY = (prev.projected.y + vertex.projected.y) / 2;
+                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
+                }
             }
+            blobCtx.stroke();
         }
-        blobCtx.stroke();
+
+        // Draw longitude lines
+        for (let lon = 0; lon <= gridRes.lon; lon++) {
+            blobCtx.beginPath();
+            for (let lat = 0; lat <= gridRes.lat; lat++) {
+                const index = lat * (gridRes.lon + 1) + lon;
+                const vertex = vertices[index];
+
+                const depthFade = (vertex.z / currentRadius + 1) / 2;
+                const lighting = vertex.lighting;
+
+                const baseOpacity = 0.15;
+                const lightBoost = lighting * 0.7;
+                const depthBoost = depthFade * 0.4;
+                const opacity = baseOpacity + lightBoost + depthBoost;
+
+                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+
+                if (lat === 0) {
+                    blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
+                } else if (lat === 1) {
+                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                    const midX = (prev.projected.x + vertex.projected.x) / 2;
+                    const midY = (prev.projected.y + vertex.projected.y) / 2;
+                    blobCtx.lineTo(midX, midY);
+                } else if (lat === gridRes.lat) {
+                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
+                } else {
+                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
+                    const midX = (prev.projected.x + vertex.projected.x) / 2;
+                    const midY = (prev.projected.y + vertex.projected.y) / 2;
+                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
+                }
+            }
+            blobCtx.stroke();
+        }
     }
 
     requestAnimationFrame(renderBlob);
@@ -631,7 +775,9 @@ function initBlobSystem() {
 // Listen for section changes from script.js
 window.addEventListener('sectionChanged', (event) => {
     CONFIG.currentSection = event.detail.section;
-    CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+    if (CONFIG.hueOverride === null && !CONFIG.rainbowMode) {
+        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+    }
 });
 
 // Auto-init when DOM ready
@@ -651,7 +797,6 @@ function initControlPanel() {
 
     if (!controlPanel || !toggleBtn || !resetBtn) return;
 
-    // Store defaults
     const DEFAULT_CONFIG = {
         noiseAmplitude: 0.10,
         noiseFrequency: 0.003,
@@ -659,6 +804,13 @@ function initControlPanel() {
         baseRadius: 200,
         brightnessMultiplier: 1.0,
         lineWidth: 1.0,
+        perspective: 600,
+        glowMaxOpacity: 0.15,
+        hueOverride: null,
+        starCount: 250,
+        starTwinkleSpeed: 1.0,
+        starMaxRadius: 2.0,
+        starBrightness: 1.0,
     };
 
     // Toggle panel open/closed
@@ -674,10 +826,17 @@ function initControlPanel() {
         }
     });
 
-    // Prevent clicks inside panel from closing it
     controlPanel.addEventListener('click', (e) => {
         e.stopPropagation();
     });
+
+    // Section collapse
+    document.querySelectorAll('.controls-section-header').forEach(header => {
+        header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
+    });
+    if (isMobile) {
+        document.querySelectorAll('.controls-section').forEach(s => s.classList.add('collapsed'));
+    }
 
     // Update display value helper
     function updateValueDisplay(sliderId, value, suffix = '') {
@@ -687,74 +846,251 @@ function initControlPanel() {
         }
     }
 
-    // Morph Speed slider
-    const morphSlider = document.getElementById('morph-speed');
-    if (morphSlider) {
-        morphSlider.addEventListener('input', (e) => {
+    // Slider references
+    const sliders = {
+        morphSpeed: document.getElementById('morph-speed'),
+        noiseAmplitude: document.getElementById('noise-amplitude'),
+        noiseFrequency: document.getElementById('noise-frequency'),
+        baseRadius: document.getElementById('base-radius'),
+        perspective: document.getElementById('perspective'),
+        hueSlider: document.getElementById('hue-slider'),
+        brightness: document.getElementById('brightness'),
+        lineWidth: document.getElementById('line-width'),
+        glowIntensity: document.getElementById('glow-intensity'),
+        starCount: document.getElementById('star-count'),
+        starTwinkle: document.getElementById('star-twinkle'),
+        starSize: document.getElementById('star-size'),
+        starBrightness: document.getElementById('star-brightness'),
+    };
+
+    // --- Shape section ---
+    if (sliders.baseRadius) {
+        sliders.baseRadius.addEventListener('input', (e) => {
+            CONFIG.baseRadius = parseInt(e.target.value);
+            updateValueDisplay('base-radius', CONFIG.baseRadius, 'px');
+            saveSettings();
+        });
+    }
+
+    if (sliders.noiseAmplitude) {
+        sliders.noiseAmplitude.addEventListener('input', (e) => {
+            CONFIG.noiseAmplitude = parseFloat(e.target.value);
+            updateValueDisplay('noise-amplitude', CONFIG.noiseAmplitude.toFixed(2));
+            saveSettings();
+        });
+    }
+
+    if (sliders.noiseFrequency) {
+        sliders.noiseFrequency.addEventListener('input', (e) => {
+            CONFIG.noiseFrequency = parseFloat(e.target.value);
+            updateValueDisplay('noise-frequency', getNoiseDetailLabel(CONFIG.noiseFrequency));
+            saveSettings();
+        });
+    }
+
+    if (sliders.morphSpeed) {
+        sliders.morphSpeed.addEventListener('input', (e) => {
             const value = parseFloat(e.target.value);
             CONFIG.idleMorphSpeed = value;
-            CONFIG.morphSpeed = value * 0.6; // Keep proportion
-            updateValueDisplay('morph-speed', value.toFixed(3));
+            CONFIG.morphSpeed = value * 0.6;
+            updateValueDisplay('morph-speed', getMorphSpeedLabel(value));
             saveSettings();
         });
     }
 
-    // Noise Amplitude slider
-    const noiseAmpSlider = document.getElementById('noise-amplitude');
-    if (noiseAmpSlider) {
-        noiseAmpSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            CONFIG.noiseAmplitude = value;
-            updateValueDisplay('noise-amplitude', value.toFixed(2));
+    if (sliders.perspective) {
+        sliders.perspective.addEventListener('input', (e) => {
+            CONFIG.perspective = parseInt(e.target.value);
+            updateValueDisplay('perspective', CONFIG.perspective);
             saveSettings();
         });
     }
 
-    // Noise Frequency slider
-    const noiseFreqSlider = document.getElementById('noise-frequency');
-    if (noiseFreqSlider) {
-        noiseFreqSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            CONFIG.noiseFrequency = value;
-            updateValueDisplay('noise-frequency', value.toFixed(4));
+    // --- Style section ---
+    if (sliders.brightness) {
+        sliders.brightness.addEventListener('input', (e) => {
+            CONFIG.brightnessMultiplier = parseFloat(e.target.value);
+            updateValueDisplay('brightness', CONFIG.brightnessMultiplier.toFixed(2));
             saveSettings();
         });
     }
 
-    // Base Radius slider
-    const radiusSlider = document.getElementById('base-radius');
-    if (radiusSlider) {
-        radiusSlider.addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            CONFIG.baseRadius = value;
-            updateValueDisplay('base-radius', value, 'px');
+    if (sliders.lineWidth) {
+        sliders.lineWidth.addEventListener('input', (e) => {
+            CONFIG.lineWidth = parseFloat(e.target.value);
+            updateValueDisplay('line-width', CONFIG.lineWidth.toFixed(1));
             saveSettings();
         });
     }
 
-    // Brightness slider
-    const brightnessSlider = document.getElementById('brightness');
-    if (brightnessSlider) {
-        brightnessSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            CONFIG.brightnessMultiplier = value;
-            updateValueDisplay('brightness', value.toFixed(2));
+    if (sliders.glowIntensity) {
+        sliders.glowIntensity.addEventListener('input', (e) => {
+            CONFIG.glowMaxOpacity = parseFloat(e.target.value);
+            updateValueDisplay('glow-intensity', CONFIG.glowMaxOpacity.toFixed(2));
             saveSettings();
         });
     }
 
-    // Line Width slider
-    const lineWidthSlider = document.getElementById('line-width');
-    if (lineWidthSlider) {
-        lineWidthSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            CONFIG.lineWidth = value;
-            updateValueDisplay('line-width', value.toFixed(1));
+    // --- Hue slider + rainbow cloud easter egg ---
+    const hueSlider = sliders.hueSlider;
+    const easterEggIcon = document.getElementById('easter-egg-icon');
+    const hueClear = document.getElementById('hue-clear');
+
+    let eggFillTimer = null;
+    let eggActivated = false;
+
+    function updateEasterEggPosition() {
+        if (!hueSlider || !easterEggIcon) return;
+        const rect = hueSlider.getBoundingClientRect();
+        const thumbWidth = 16;
+        const pct = (hueSlider.value - hueSlider.min) / (hueSlider.max - hueSlider.min);
+        const trackWidth = rect.width - thumbWidth;
+        const left = thumbWidth / 2 + pct * trackWidth;
+        easterEggIcon.style.left = left + 'px';
+    }
+
+    function startEggFill() {
+        if (eggActivated || eggFillTimer) return;
+        if (easterEggIcon) easterEggIcon.classList.add('is-filling');
+        eggFillTimer = setTimeout(() => {
+            // Timer completed — activate permanently
+            eggActivated = true;
+            eggFillTimer = null;
+            if (easterEggIcon) {
+                easterEggIcon.classList.remove('is-filling');
+                easterEggIcon.classList.add('is-activated');
+            }
+            activateGlobalRainbowMode();
+        }, 1600);
+    }
+
+    function cancelEggFill() {
+        if (eggActivated) return; // Already won, no cancellation
+        if (eggFillTimer) { clearTimeout(eggFillTimer); eggFillTimer = null; }
+        if (easterEggIcon) easterEggIcon.classList.remove('is-filling');
+    }
+
+    function activateGlobalRainbowMode() {
+        CONFIG.rainbowMode = true;
+        CONFIG.hueOverride = null;
+        controlPanel.classList.add('rainbow-active');
+        updateValueDisplay('hue-slider', 'Rainbow');
+        if (hueClear) hueClear.classList.remove('hidden');
+    }
+
+    function deactivateRainbow() {
+        CONFIG.rainbowMode = false;
+        eggActivated = false;
+        cancelEggFill();
+        if (easterEggIcon) easterEggIcon.classList.remove('is-filling', 'is-activated');
+        controlPanel.classList.remove('rainbow-active');
+    }
+
+    if (hueSlider) {
+        hueSlider.addEventListener('input', (e) => {
+            updateEasterEggPosition();
+            const val = parseInt(e.target.value);
+
+            if (eggActivated) {
+                // Dragging away from max deactivates rainbow
+                if (val < parseInt(hueSlider.max)) {
+                    deactivateRainbow();
+                    CONFIG.hueOverride = val;
+                    updateValueDisplay('hue-slider', val + ' deg');
+                    if (hueClear) hueClear.classList.remove('hidden');
+                    saveSettings();
+                }
+                return;
+            }
+
+            if (val === parseInt(hueSlider.max)) {
+                startEggFill();
+            } else {
+                cancelEggFill();
+                CONFIG.hueOverride = val;
+                updateValueDisplay('hue-slider', val + ' deg');
+                if (hueClear) hueClear.classList.remove('hidden');
+            }
+            saveSettings();
+        });
+
+        // Handle click directly on max — pointerdown starts fill if already at max
+        hueSlider.addEventListener('pointerdown', () => {
+            if (eggActivated) return;
+            if (parseInt(hueSlider.value) === parseInt(hueSlider.max)) {
+                startEggFill();
+            }
+        });
+
+        // Cancel on release if not yet activated
+        const cancelEvents = ['pointerup', 'pointercancel', 'pointerleave'];
+        cancelEvents.forEach(evt => {
+            hueSlider.addEventListener(evt, () => {
+                cancelEggFill();
+            });
+        });
+    }
+
+    function clearHueOverride() {
+        deactivateRainbow();
+        CONFIG.hueOverride = null;
+        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+        updateValueDisplay('hue-slider', 'Auto');
+        if (hueClear) hueClear.classList.add('hidden');
+        saveSettings();
+    }
+
+    if (easterEggIcon) {
+        easterEggIcon.addEventListener('click', () => {
+            if (!eggActivated) return;
+            clearHueOverride();
+        });
+    }
+
+    if (hueClear) {
+        hueClear.addEventListener('click', clearHueOverride);
+    }
+
+    // --- Stars section ---
+    if (sliders.starCount) {
+        sliders.starCount.addEventListener('input', (e) => {
+            updateValueDisplay('star-count', parseInt(e.target.value));
+        });
+        sliders.starCount.addEventListener('change', (e) => {
+            CONFIG.starCount = parseInt(e.target.value);
+            regenerateStars(CONFIG.starCount);
             saveSettings();
         });
     }
 
-    // LocalStorage persistence
+    if (sliders.starTwinkle) {
+        sliders.starTwinkle.addEventListener('input', (e) => {
+            CONFIG.starTwinkleSpeed = parseFloat(e.target.value);
+            updateValueDisplay('star-twinkle', CONFIG.starTwinkleSpeed.toFixed(1));
+            saveSettings();
+        });
+    }
+
+    if (sliders.starSize) {
+        sliders.starSize.addEventListener('input', (e) => {
+            updateValueDisplay('star-size', parseFloat(e.target.value).toFixed(1));
+        });
+        sliders.starSize.addEventListener('change', (e) => {
+            CONFIG.starMaxRadius = parseFloat(e.target.value);
+            regenerateStars(CONFIG.starCount);
+            saveSettings();
+        });
+    }
+
+    if (sliders.starBrightness) {
+        sliders.starBrightness.addEventListener('input', (e) => {
+            CONFIG.starBrightness = parseFloat(e.target.value);
+            updateValueDisplay('star-brightness', CONFIG.starBrightness.toFixed(1));
+            saveSettings();
+        });
+    }
+
+    // --- LocalStorage persistence ---
     function saveSettings() {
         const settings = {
             morphSpeed: CONFIG.idleMorphSpeed,
@@ -762,73 +1098,131 @@ function initControlPanel() {
             noiseFrequency: CONFIG.noiseFrequency,
             baseRadius: CONFIG.baseRadius,
             brightnessMultiplier: CONFIG.brightnessMultiplier,
-            lineWidth: CONFIG.lineWidth
+            lineWidth: CONFIG.lineWidth,
+            perspective: CONFIG.perspective,
+            glowMaxOpacity: CONFIG.glowMaxOpacity,
+            hueOverride: CONFIG.hueOverride,
+            starCount: CONFIG.starCount,
+            starTwinkleSpeed: CONFIG.starTwinkleSpeed,
+            starMaxRadius: CONFIG.starMaxRadius,
+            starBrightness: CONFIG.starBrightness,
         };
         localStorage.setItem('blobSettings', JSON.stringify(settings));
     }
 
     function loadSettings() {
         const saved = localStorage.getItem('blobSettings');
-        if (saved) {
-            try {
-                const settings = JSON.parse(saved);
+        if (!saved) return;
+        try {
+            const s = JSON.parse(saved);
 
-                if (settings.morphSpeed !== undefined) {
-                    CONFIG.idleMorphSpeed = settings.morphSpeed;
-                    CONFIG.morphSpeed = settings.morphSpeed * 0.6;
-                    if (morphSlider) {
-                        morphSlider.value = settings.morphSpeed;
-                        updateValueDisplay('morph-speed', settings.morphSpeed.toFixed(3));
-                    }
+            if (s.morphSpeed !== undefined) {
+                CONFIG.idleMorphSpeed = s.morphSpeed;
+                CONFIG.morphSpeed = s.morphSpeed * 0.6;
+                if (sliders.morphSpeed) {
+                    sliders.morphSpeed.value = s.morphSpeed;
+                    updateValueDisplay('morph-speed', getMorphSpeedLabel(s.morphSpeed));
                 }
-
-                if (settings.noiseAmplitude !== undefined) {
-                    CONFIG.noiseAmplitude = settings.noiseAmplitude;
-                    if (noiseAmpSlider) {
-                        noiseAmpSlider.value = settings.noiseAmplitude;
-                        updateValueDisplay('noise-amplitude', settings.noiseAmplitude.toFixed(2));
-                    }
-                }
-
-                if (settings.noiseFrequency !== undefined) {
-                    CONFIG.noiseFrequency = settings.noiseFrequency;
-                    if (noiseFreqSlider) {
-                        noiseFreqSlider.value = settings.noiseFrequency;
-                        updateValueDisplay('noise-frequency', settings.noiseFrequency.toFixed(4));
-                    }
-                }
-
-                if (settings.baseRadius !== undefined) {
-                    CONFIG.baseRadius = settings.baseRadius;
-                    if (radiusSlider) {
-                        radiusSlider.value = settings.baseRadius;
-                        updateValueDisplay('base-radius', settings.baseRadius, 'px');
-                    }
-                }
-
-                if (settings.brightnessMultiplier !== undefined) {
-                    CONFIG.brightnessMultiplier = settings.brightnessMultiplier;
-                    if (brightnessSlider) {
-                        brightnessSlider.value = settings.brightnessMultiplier;
-                        updateValueDisplay('brightness', settings.brightnessMultiplier.toFixed(2));
-                    }
-                }
-
-                if (settings.lineWidth !== undefined) {
-                    CONFIG.lineWidth = settings.lineWidth;
-                    if (lineWidthSlider) {
-                        lineWidthSlider.value = settings.lineWidth;
-                        updateValueDisplay('line-width', settings.lineWidth.toFixed(1));
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to load settings:', e);
             }
+            if (s.noiseAmplitude !== undefined) {
+                CONFIG.noiseAmplitude = s.noiseAmplitude;
+                if (sliders.noiseAmplitude) {
+                    sliders.noiseAmplitude.value = s.noiseAmplitude;
+                    updateValueDisplay('noise-amplitude', s.noiseAmplitude.toFixed(2));
+                }
+            }
+            if (s.noiseFrequency !== undefined) {
+                CONFIG.noiseFrequency = s.noiseFrequency;
+                if (sliders.noiseFrequency) {
+                    sliders.noiseFrequency.value = s.noiseFrequency;
+                    updateValueDisplay('noise-frequency', getNoiseDetailLabel(s.noiseFrequency));
+                }
+            }
+            if (s.baseRadius !== undefined) {
+                CONFIG.baseRadius = s.baseRadius;
+                if (sliders.baseRadius) {
+                    sliders.baseRadius.value = s.baseRadius;
+                    updateValueDisplay('base-radius', s.baseRadius, 'px');
+                }
+            }
+            if (s.brightnessMultiplier !== undefined) {
+                CONFIG.brightnessMultiplier = s.brightnessMultiplier;
+                if (sliders.brightness) {
+                    sliders.brightness.value = s.brightnessMultiplier;
+                    updateValueDisplay('brightness', s.brightnessMultiplier.toFixed(2));
+                }
+            }
+            if (s.lineWidth !== undefined) {
+                CONFIG.lineWidth = s.lineWidth;
+                if (sliders.lineWidth) {
+                    sliders.lineWidth.value = s.lineWidth;
+                    updateValueDisplay('line-width', s.lineWidth.toFixed(1));
+                }
+            }
+            if (s.perspective !== undefined) {
+                CONFIG.perspective = s.perspective;
+                if (sliders.perspective) {
+                    sliders.perspective.value = s.perspective;
+                    updateValueDisplay('perspective', s.perspective);
+                }
+            }
+            if (s.glowMaxOpacity !== undefined) {
+                CONFIG.glowMaxOpacity = s.glowMaxOpacity;
+                if (sliders.glowIntensity) {
+                    sliders.glowIntensity.value = s.glowMaxOpacity;
+                    updateValueDisplay('glow-intensity', s.glowMaxOpacity.toFixed(2));
+                }
+            }
+            if (s.hueOverride !== undefined && s.hueOverride !== null) {
+                CONFIG.hueOverride = s.hueOverride;
+                if (hueSlider) hueSlider.value = s.hueOverride;
+                updateValueDisplay('hue-slider', s.hueOverride + ' deg');
+                if (hueClear) hueClear.classList.remove('hidden');
+                updateEasterEggPosition();
+            }
+            if (s.starCount !== undefined) {
+                CONFIG.starCount = s.starCount;
+                if (sliders.starCount) {
+                    sliders.starCount.value = s.starCount;
+                    updateValueDisplay('star-count', s.starCount);
+                }
+            }
+            if (s.starTwinkleSpeed !== undefined) {
+                CONFIG.starTwinkleSpeed = s.starTwinkleSpeed;
+                if (sliders.starTwinkle) {
+                    sliders.starTwinkle.value = s.starTwinkleSpeed;
+                    updateValueDisplay('star-twinkle', s.starTwinkleSpeed.toFixed(1));
+                }
+            }
+            if (s.starMaxRadius !== undefined) {
+                CONFIG.starMaxRadius = s.starMaxRadius;
+                if (sliders.starSize) {
+                    sliders.starSize.value = s.starMaxRadius;
+                    updateValueDisplay('star-size', s.starMaxRadius.toFixed(1));
+                }
+            }
+            if (s.starBrightness !== undefined) {
+                CONFIG.starBrightness = s.starBrightness;
+                if (sliders.starBrightness) {
+                    sliders.starBrightness.value = s.starBrightness;
+                    updateValueDisplay('star-brightness', s.starBrightness.toFixed(1));
+                }
+            }
+            // Regenerate stars with loaded settings
+            if (s.starCount !== undefined || s.starMaxRadius !== undefined) {
+                regenerateStars(CONFIG.starCount);
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
         }
     }
 
     // Reset to defaults
     resetBtn.addEventListener('click', () => {
+        // Deactivate rainbow
+        deactivateRainbow();
+
+        // Reset all CONFIG
         CONFIG.noiseAmplitude = DEFAULT_CONFIG.noiseAmplitude;
         CONFIG.noiseFrequency = DEFAULT_CONFIG.noiseFrequency;
         CONFIG.idleMorphSpeed = DEFAULT_CONFIG.idleMorphSpeed;
@@ -836,43 +1230,39 @@ function initControlPanel() {
         CONFIG.baseRadius = DEFAULT_CONFIG.baseRadius;
         CONFIG.brightnessMultiplier = DEFAULT_CONFIG.brightnessMultiplier;
         CONFIG.lineWidth = DEFAULT_CONFIG.lineWidth;
+        CONFIG.perspective = DEFAULT_CONFIG.perspective;
+        CONFIG.glowMaxOpacity = DEFAULT_CONFIG.glowMaxOpacity;
+        CONFIG.hueOverride = null;
+        CONFIG.starCount = DEFAULT_CONFIG.starCount;
+        CONFIG.starTwinkleSpeed = DEFAULT_CONFIG.starTwinkleSpeed;
+        CONFIG.starMaxRadius = DEFAULT_CONFIG.starMaxRadius;
+        CONFIG.starBrightness = DEFAULT_CONFIG.starBrightness;
 
-        // Update all sliders
-        if (morphSlider) {
-            morphSlider.value = DEFAULT_CONFIG.idleMorphSpeed;
-            updateValueDisplay('morph-speed', DEFAULT_CONFIG.idleMorphSpeed.toFixed(3));
-        }
+        // Re-sync section color
+        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
 
-        if (noiseAmpSlider) {
-            noiseAmpSlider.value = DEFAULT_CONFIG.noiseAmplitude;
-            updateValueDisplay('noise-amplitude', DEFAULT_CONFIG.noiseAmplitude.toFixed(2));
-        }
+        // Update all sliders + displays
+        if (sliders.morphSpeed) { sliders.morphSpeed.value = DEFAULT_CONFIG.idleMorphSpeed; updateValueDisplay('morph-speed', getMorphSpeedLabel(DEFAULT_CONFIG.idleMorphSpeed)); }
+        if (sliders.noiseAmplitude) { sliders.noiseAmplitude.value = DEFAULT_CONFIG.noiseAmplitude; updateValueDisplay('noise-amplitude', DEFAULT_CONFIG.noiseAmplitude.toFixed(2)); }
+        if (sliders.noiseFrequency) { sliders.noiseFrequency.value = DEFAULT_CONFIG.noiseFrequency; updateValueDisplay('noise-frequency', getNoiseDetailLabel(DEFAULT_CONFIG.noiseFrequency)); }
+        if (sliders.baseRadius) { sliders.baseRadius.value = DEFAULT_CONFIG.baseRadius; updateValueDisplay('base-radius', DEFAULT_CONFIG.baseRadius, 'px'); }
+        if (sliders.perspective) { sliders.perspective.value = DEFAULT_CONFIG.perspective; updateValueDisplay('perspective', DEFAULT_CONFIG.perspective); }
+        if (sliders.brightness) { sliders.brightness.value = DEFAULT_CONFIG.brightnessMultiplier; updateValueDisplay('brightness', DEFAULT_CONFIG.brightnessMultiplier.toFixed(2)); }
+        if (sliders.lineWidth) { sliders.lineWidth.value = DEFAULT_CONFIG.lineWidth; updateValueDisplay('line-width', DEFAULT_CONFIG.lineWidth.toFixed(1)); }
+        if (sliders.glowIntensity) { sliders.glowIntensity.value = DEFAULT_CONFIG.glowMaxOpacity; updateValueDisplay('glow-intensity', DEFAULT_CONFIG.glowMaxOpacity.toFixed(2)); }
+        if (hueSlider) { hueSlider.value = 0; updateValueDisplay('hue-slider', 'Auto'); updateEasterEggPosition(); }
+        if (hueClear) hueClear.classList.add('hidden');
+        if (sliders.starCount) { sliders.starCount.value = DEFAULT_CONFIG.starCount; updateValueDisplay('star-count', DEFAULT_CONFIG.starCount); }
+        if (sliders.starTwinkle) { sliders.starTwinkle.value = DEFAULT_CONFIG.starTwinkleSpeed; updateValueDisplay('star-twinkle', DEFAULT_CONFIG.starTwinkleSpeed.toFixed(1)); }
+        if (sliders.starSize) { sliders.starSize.value = DEFAULT_CONFIG.starMaxRadius; updateValueDisplay('star-size', DEFAULT_CONFIG.starMaxRadius.toFixed(1)); }
+        if (sliders.starBrightness) { sliders.starBrightness.value = DEFAULT_CONFIG.starBrightness; updateValueDisplay('star-brightness', DEFAULT_CONFIG.starBrightness.toFixed(1)); }
 
-        if (noiseFreqSlider) {
-            noiseFreqSlider.value = DEFAULT_CONFIG.noiseFrequency;
-            updateValueDisplay('noise-frequency', DEFAULT_CONFIG.noiseFrequency.toFixed(4));
-        }
-
-        if (radiusSlider) {
-            radiusSlider.value = DEFAULT_CONFIG.baseRadius;
-            updateValueDisplay('base-radius', DEFAULT_CONFIG.baseRadius, 'px');
-        }
-
-        if (brightnessSlider) {
-            brightnessSlider.value = DEFAULT_CONFIG.brightnessMultiplier;
-            updateValueDisplay('brightness', DEFAULT_CONFIG.brightnessMultiplier.toFixed(2));
-        }
-
-        if (lineWidthSlider) {
-            lineWidthSlider.value = DEFAULT_CONFIG.lineWidth;
-            updateValueDisplay('line-width', DEFAULT_CONFIG.lineWidth.toFixed(1));
-        }
-
+        regenerateStars(DEFAULT_CONFIG.starCount);
         saveSettings();
     });
 
-    // Load saved settings on page load
     loadSettings();
+    updateEasterEggPosition();
 }
 
 // Initialize control panel when DOM is ready

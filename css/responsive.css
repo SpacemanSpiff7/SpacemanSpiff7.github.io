@@ -245,8 +245,9 @@
     }
 
     .blob-controls.open .controls-drawer {
-        max-height: 450px;
+        max-height: calc(60vh - env(safe-area-inset-bottom));
         overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     .control-item {
