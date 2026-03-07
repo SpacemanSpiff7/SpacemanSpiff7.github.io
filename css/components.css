@@ -954,6 +954,12 @@
     background: transparent;
 }
 
+/* Non-hero snap sections: center content in visible area (between nav and bottom chrome) */
+.snap-section:not(#hero) {
+    padding-top: calc(var(--nav-height) + 2rem);
+    padding-bottom: calc(var(--bottom-chrome-height) + 2rem);
+}
+
 /* Featured project sections */
 .featured-project h2 {
     font-family: 'Silkscreen', 'Courier New', monospace;
