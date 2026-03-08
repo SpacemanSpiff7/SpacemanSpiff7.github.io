@@ -209,6 +209,7 @@ body {
   border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
+  text-decoration: none;
   transition:
     background var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),

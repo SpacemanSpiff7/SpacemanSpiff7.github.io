@@ -132,6 +132,50 @@
     }
     .guide__tab-panel { display: none; }
     .guide__tab-panel--active { display: block; }
+    /* Collapsible aside */
+    .guide details {
+      background: var(--surface-0);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin: 16px 0;
+      overflow: hidden;
+    }
+    .guide details summary {
+      padding: 12px 16px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide details summary::-webkit-details-marker { display: none; }
+    .guide details summary::before {
+      content: '';
+      display: inline-block;
+      width: 0; height: 0;
+      border-left: 5px solid var(--text-secondary);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      transition: transform 150ms;
+    }
+    .guide details[open] summary::before {
+      transform: rotate(90deg);
+    }
+    .guide details ul {
+      margin: 0;
+      padding: 0 16px 14px 34px;
+      list-style: disc;
+    }
+    .guide details li {
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+    .guide details li:last-child { margin-bottom: 0; }
     /* Hide sidebar/board/header chrome on guide page */
     .sidebar, .board, .header, .sidebar-backdrop { display: none !important; }
   </style>
@@ -260,6 +304,29 @@
         <div class="guide__color-swatch" style="background: #a3e635;"></div>
       </div>
     </div>
+
+    <!-- Data & Storage -->
+    <h2>Data &amp; Storage</h2>
+    <p>
+      All your data lives in your browser's <code style="color: var(--accent); font-size: 0.8125rem;">localStorage</code>. There is no server, no cloud sync, no account. This means your boards are fast and private, but the data only exists in this browser. Clearing your browser data or switching to a different browser means starting fresh.
+    </p>
+    <p>
+      If you have projects you care about, export backups using the Export button in the header. The exported JSON file is a complete snapshot you can re-import at any time.
+    </p>
+    <p>
+      Think of localStorage as a whiteboard, not a filing cabinet. Great for active work, but not a long-term archive. Save backups frequently.
+    </p>
+    <details>
+      <summary>How localStorage works</summary>
+      <ul>
+        <li>Key-value store built into every modern browser</li>
+        <li>Data is scoped to the domain -- other sites cannot read it</li>
+        <li>Typically capped at 5-10 MB per domain</li>
+        <li>Persists until you (or your browser) explicitly clear it</li>
+        <li>Not shared across browsers, devices, or profiles</li>
+        <li>Private/incognito windows use a separate, temporary store</li>
+      </ul>
+    </details>
 
     <!-- Import / Export -->
     <h2>Import / Export</h2>
