@@ -1126,6 +1126,23 @@
     justify-content: center;
     padding: 2rem;
     background: transparent;
+    position: relative;
+}
+
+.field-notes-link {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
+}
+
+.field-notes-link:hover {
+    color: rgba(255, 255, 255, 0.35);
 }
 
 /* ==========================================

@@ -1023,6 +1023,7 @@ function startRenameBoard(index, titleSpan) {
 function syncVerticalTitle() {
   const span = document.getElementById("project-title-vertical");
   if (span) span.textContent = state.title;
+  document.title = state.title ? `${state.title} - Agile This` : "Agile This";
 }
 
 function initProjectTitle() {

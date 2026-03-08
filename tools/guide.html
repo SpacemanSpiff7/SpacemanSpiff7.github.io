@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-P9G5CS83DZ');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explorer's Field Guide to simonelongo.com — documenting hidden features, easter eggs, interactive tools, and the living geometry behind this portfolio site.">
+    <meta name="keywords" content="interactive portfolio, easter eggs, 3D animation, creative coding, webGL wireframe, simplex noise, data visualization, hidden features">
+    <meta name="author" content="Simone Longo">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://simonelongo.com/tools/guide.html">
+    <meta property="og:title" content="Explorer's Field Guide - Simone Longo">
+    <meta property="og:description" content="A cartographer's notes on the hidden mechanics, easter eggs, and interactive tools found across simonelongo.com.">
+    <meta property="og:image" content="https://simonelongo.com/assets/images/og-image.png">
+    <meta property="og:site_name" content="Simone Longo">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Explorer's Field Guide - Simone Longo">
+    <meta name="twitter:description" content="A cartographer's notes on the hidden mechanics, easter eggs, and interactive tools found across simonelongo.com.">
+    <meta name="twitter:image" content="https://simonelongo.com/assets/images/og-image.png">
+
+    <title>Explorer's Field Guide - Simone Longo</title>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Explorer's Field Guide",
+      "description": "A cartographer's notes on the hidden mechanics, easter eggs, and interactive tools found across simonelongo.com.",
+      "author": {
+        "@type": "Person",
+        "name": "Simone Longo",
+        "url": "https://simonelongo.com"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Simone Longo"
+      },
+      "mainEntityOfPage": "https://simonelongo.com/tools/guide.html"
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+
+    <style>
+        body {
+            overflow-y: auto;
+            background: #000;
+            color: #fff;
+        }
+
+        /* Reading progress bar — above nav */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #DA00FF, #00FFFF);
+            z-index: 1001;
+            transition: width 0.1s linear;
+            width: 0%;
+        }
+
+        /* Guide container */
+        .guide {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 88px 24px 120px;
+        }
+
+        /* Typography */
+        .guide h1 {
+            font-family: 'Silkscreen', cursive;
+            font-size: var(--text-3xl);
+            color: #fff;
+            margin: 0 0 var(--space-3);
+            line-height: var(--leading-tight);
+        }
+
+        .guide-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: var(--text-sm);
+            font-style: italic;
+            margin: 0 0 var(--space-12);
+            line-height: var(--leading-normal);
+        }
+
+        .guide h2 {
+            font-family: 'Silkscreen', cursive;
+            font-size: var(--text-xl);
+            color: #fff;
+            margin: var(--space-16) 0 var(--space-4);
+            padding-bottom: var(--space-3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .guide h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin: var(--space-8) 0 var(--space-3);
+        }
+
+        .guide p {
+            color: rgba(255, 255, 255, 0.75);
+            font-family: 'Inter', sans-serif;
+            font-size: var(--text-base);
+            line-height: var(--leading-relaxed);
+            margin: 0 0 var(--space-4);
+        }
+
+        .guide code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875em;
+            color: #DA00FF;
+            background: rgba(218, 0, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+
+        /* Slider documentation table */
+        .slider-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0 var(--space-6);
+        }
+
+        .slider-table th {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: left;
+            padding: var(--space-2) var(--space-3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider-table td {
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .slider-table td:nth-child(2) {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: var(--text-xs);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Spoiler blocks */
+        .spoiler {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .spoiler-content {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+        }
+
+        .spoiler.revealed .spoiler-content {
+            filter: none;
+        }
+
+        .spoiler-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-lg);
+            transition: opacity 0.3s ease;
+        }
+
+        .spoiler.revealed .spoiler-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Discovery checklist */
+        .discovery-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .discovery-counter {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: var(--space-4);
+        }
+
+        .discovery-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .discovery-item:last-child {
+            border-bottom: none;
+        }
+
+        .discovery-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            margin-top: 2px;
+            transition: all var(--transition-fast);
+        }
+
+        .discovery-checkbox:checked {
+            background: #DA00FF;
+            border-color: #DA00FF;
+        }
+
+        .discovery-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 5px;
+            height: 9px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .discovery-label {
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, 0.7);
+            line-height: var(--leading-normal);
+            cursor: pointer;
+        }
+
+        .discovery-item.checked .discovery-label {
+            color: rgba(255, 255, 255, 0.35);
+            text-decoration: line-through;
+        }
+
+        /* Blockquote styling for field notes */
+        .guide blockquote {
+            border-left: 3px solid rgba(218, 0, 255, 0.3);
+            padding-left: var(--space-4);
+            margin: var(--space-4) 0;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* Links */
+        .guide a:not(.nav-link) {
+            color: #DA00FF;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(218, 0, 255, 0.3);
+            transition: border-color var(--transition-fast);
+        }
+
+        .guide a:not(.nav-link):hover {
+            border-color: #DA00FF;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .guide {
+                padding: 72px 16px 80px;
+            }
+
+            .guide h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .guide h2 {
+                font-size: var(--text-lg);
+                margin-top: var(--space-12);
+            }
+
+            .slider-table {
+                font-size: var(--text-xs);
+            }
+
+            .slider-table td,
+            .slider-table th {
+                padding: var(--space-1) var(--space-2);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reading-progress,
+            .spoiler-content,
+            .spoiler-overlay {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Reading progress bar -->
+    <div class="reading-progress" id="reading-progress"></div>
+
+    <!-- Navigation (uses main site nav classes) -->
+    <nav class="nav" role="navigation" aria-label="Page navigation">
+        <div class="nav-container">
+            <a href="../" class="nav-logo" aria-label="Home">
+                <img src="../assets/images/simone_logo.png" alt="SL" class="nav-logo-img">
+            </a>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#living-geometry" class="nav-link">Living Geometry</a></li>
+                <li><a href="#scroll-current" class="nav-link">Scroll Current</a></li>
+                <li><a href="#prismatic-override" class="nav-link">Prismatic Override</a></li>
+                <li><a href="#traffic-therapy" class="nav-link">Traffic Therapy</a></li>
+                <li><a href="#dodgers" class="nav-link">Dodgers Notifier</a></li>
+                <li><a href="#public-art" class="nav-link">Public Art</a></li>
+                <li><a href="#ebay-plugin" class="nav-link">eBay Plugin</a></li>
+                <li><a href="#collisions" class="nav-link">Collisions</a></li>
+                <li><a href="#discovery-log" class="nav-link">Discovery Log</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <article class="guide">
+        <!-- Header -->
+        <header>
+            <h1>Explorer's Field Guide</h1>
+            <p class="guide-subtitle">A cartographer's notes on the hidden mechanics of this site</p>
+        </header>
+
+        <!-- Section 1: The Living Geometry -->
+        <section id="living-geometry">
+            <h2>The Living Geometry</h2>
+
+            <p>Behind every page of this site lives a wireframe sphere. Not a static model, but a continuously deforming surface driven by 3D simplex noise. The mesh is built from a grid of 60 latitude lines by 60 longitude lines -- 3,600 vertices in total, recalculated every frame.</p>
+
+            <p>Each vertex sits on a unit sphere, then gets displaced outward by a noise function that samples three-dimensional space. The noise field itself drifts over time, so the surface never repeats. The result is something that looks organic -- like a deep-sea creature caught mid-thought.</p>
+
+            <p>The wireframe renders using quadratic Bezier curves rather than straight line segments. This gives the mesh a smoother appearance even at lower resolutions, and makes the whole shape feel less like a polygon and more like a living membrane.</p>
+
+            <h3>The Control Panel</h3>
+
+            <p>At the bottom of the main page, a small caret hides a 13-slider control panel. It is organized into three collapsible sections.</p>
+
+            <h3>Shape</h3>
+            <table class="slider-table">
+                <thead>
+                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Size</td><td>30 - 500 px</td><td>Base radius of the sphere before noise displacement</td></tr>
+                    <tr><td>Noise Amount</td><td>0 - 0.5</td><td>How far vertices push outward from the surface</td></tr>
+                    <tr><td>Noise Detail</td><td>Smooth - Chaotic</td><td>Frequency of the simplex noise field</td></tr>
+                    <tr><td>Morph Speed</td><td>Slow - Fast</td><td>How quickly the noise field drifts through time</td></tr>
+                    <tr><td>Perspective</td><td>200 - 1200</td><td>Camera distance. Lower values create more dramatic foreshortening</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Style</h3>
+            <table class="slider-table">
+                <thead>
+                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Hue</td><td>0 - 360 deg</td><td>Override the section-driven color with a custom hue</td></tr>
+                    <tr><td>Brightness</td><td>0.2 - 3.0</td><td>Multiplier on the wireframe luminance</td></tr>
+                    <tr><td>Line Width</td><td>0.5 - 4.0 px</td><td>Thickness of each wireframe curve</td></tr>
+                    <tr><td>Glow Intensity</td><td>0 - 0.5</td><td>Opacity of the radial glow halo behind the blob</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Stars</h3>
+            <table class="slider-table">
+                <thead>
+                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Star Count</td><td>0 - 600</td><td>Number of twinkling stars in the background field</td></tr>
+                    <tr><td>Twinkle Speed</td><td>0.1 - 3.0x</td><td>Multiplier on each star's oscillation rate</td></tr>
+                    <tr><td>Star Size</td><td>0.5 - 5.0 px</td><td>Maximum radius of the largest stars</td></tr>
+                    <tr><td>Star Brightness</td><td>0.1 - 2.0x</td><td>Opacity multiplier across all stars</td></tr>
+                </tbody>
+            </table>
+
+            <p>All slider positions persist to <code>localStorage</code>. A "Reset to Defaults" button at the bottom of the panel returns everything to factory settings. The HiDPI canvas scales to <code>devicePixelRatio</code>, so the wireframe stays crisp on Retina displays.</p>
+        </section>
+
+        <!-- Section 2: The Scroll Current -->
+        <section id="scroll-current">
+            <h2>The Scroll Current</h2>
+
+            <p>The blob responds to scrolling. Scroll fast enough and the geometry spins with you -- the Y-axis rotation tracks scroll velocity, so quick flicks send it whirling. Stop, and it breathes deeper. The idle morph speed is set higher than the active speed, which means the shape actually moves more when you are still.</p>
+
+            <p>Each section of the main page assigns a different hue to the wireframe. The transitions between them are not instant -- the color lerps smoothly from one value to the next using linear interpolation on the RGB channels. Scroll from the hero into the first featured project and watch the purple bleed into deep pink. The section detection fires a custom <code>sectionChanged</code> event on the window, and the animation system begins interpolating toward the new target. If you have set a hue override through the control panel, the section colors are bypassed entirely.</p>
+        </section>
+
+        <!-- Section 3: Prismatic Override (Spoiler) -->
+        <section id="prismatic-override">
+            <h2>Prismatic Override</h2>
+
+            <p>There is something hidden at the far end of the hue slider.</p>
+
+            <div class="spoiler" role="button" tabindex="0" aria-label="Click to reveal spoiler">
+                <div class="spoiler-overlay">[click to reveal]</div>
+                <div class="spoiler-content">
+                    <p>Drag the hue slider to its maximum value -- 360 degrees -- and hold it there. After roughly 1.6 seconds, the wireframe ignites.</p>
+
+                    <p>Rainbow mode. Each latitude and longitude line of the wireframe gets its own hue, cycling rapidly through the spectrum. A pulsing glow radiates outward. The control panel caret itself glows with a shifting rainbow border.</p>
+
+                    <p>This state is session-only. Refresh the page and it vanishes. It was never meant to be permanent -- just a reward for the curious.</p>
+
+                    <p>To deactivate, drag the hue slider away from the maximum, or hit "Reset to Defaults." The blob returns to its section-controlled colors as if nothing happened.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Traffic Therapy -->
+        <section id="traffic-therapy">
+            <h2>Traffic Therapy</h2>
+
+            <p><a href="../traffic-therapy/">Traffic Therapy</a> is a sliding block puzzle in the tradition of Rush Hour. A grid of interlocking blocks, one of which -- the target -- needs to reach the exit. Blocks slide along their axis only: horizontal blocks move left and right, vertical blocks move up and down. The 1x1 target block moves in any direction.</p>
+
+            <p>Five hand-crafted levels, each verified solvable by a built-in BFS solver. The solver explores every possible board state to find the optimal solution, which sets the par for each level. Your move count determines your star rating -- four stars if you beat par, one star if you take the scenic route.</p>
+
+            <p>Progress persists via cookies. Star ratings only go up, never down. Replaying a level with a worse score does not overwrite your best.</p>
+
+            <div class="spoiler" role="button" tabindex="0" aria-label="Click to reveal spoiler">
+                <div class="spoiler-overlay">[click to reveal]</div>
+                <div class="spoiler-content">
+                    <h3>Admin Mode</h3>
+
+                    <p>On the title screen, there is a subtle element near the title text. It does not look clickable. Click it anyway.</p>
+
+                    <p>A prompt appears: <code>are you god?</code></p>
+
+                    <p>Type <code>ya</code>.</p>
+
+                    <p>An "ADMIN" badge appears in the corner. All levels unlock immediately. A new "Level Editor" button materializes on the level select screen.</p>
+
+                    <p>The editor is a full authoring tool. Set the grid size, place blocks from a toolbar, drag them into position, designate the exit. A "Test" button runs the BFS solver against your creation and reports whether it is solvable and the optimal move count. You can play-test your level without leaving the editor. Export individual levels or the entire set as JSON.</p>
+
+                    <p>Admin mode does not persist. Refresh, and it is gone. The puzzle resets to civilian access.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Dodgers Win Deal Notifier -->
+        <section id="dodgers">
+            <h2>Dodgers Win Deal Notifier</h2>
+
+            <p>Dodgers win at home? $6 meal deal at Panda Express. Dodgers throw 7 or more strikeouts? Free Jumbo Jack at Jack in the Box (with purchase of a large drink). This is the most important public service on this entire website.</p>
+
+            <p>Sign up with your phone number and get a text whenever your local fast food joints turn on the free food faucet. No app to install, no account to create -- just a Google Form and an automated pipeline that watches the box scores so you do not have to.</p>
+
+            <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSetWqGm38ikUq30kZ6osUY525_reyPu1Z0XJigzqb34x5e3Dw/viewform">Sign up for notifications here.</a></p>
+        </section>
+
+        <!-- Section 6: Public Art Submission -->
+        <section id="public-art">
+            <h2>Public Art Submission</h2>
+
+            <p>The <a href="public-art-submission.html">Public Art Submission Form</a> is a mobile-friendly tool for documenting street art, murals, and other interesting things you find while wandering around. It grabs your photo, tags your location, and sends the data to a shared collection.</p>
+
+            <p>This is part of a larger project in progress -- a full public art map that aggregates submissions and lets you browse street art by neighborhood. The submission form is the data collection layer. A standalone app, <a href="https://street-art-hunter.vercel.app/">Street Art Hunter</a>, is also in development as a dedicated mobile experience for contributing to the map.</p>
+
+            <p>If you spot something worth documenting, submit it. Every entry helps build the dataset.</p>
+        </section>
+
+        <!-- Section 7: eBay Lookup Chrome Extension -->
+        <section id="ebay-plugin">
+            <h2>eBay Lookup Chrome Extension</h2>
+
+            <p>A Chrome extension that adds eBay price lookups directly into Craigslist listings. See what the same item is selling for on eBay without leaving the page -- useful for figuring out whether that "great deal" is actually a great deal.</p>
+
+            <p>The extension requires an eBay API key to function. Head to the <a href="https://github.com/SpacemanSpiff7/EbayLookupChromePlugin">GitHub repository</a> for installation instructions. If you actually want to give it a shot, contact me for an API key.</p>
+        </section>
+
+        <!-- Section 8: 620,000 Collisions -->
+        <section id="collisions">
+            <h2>620,000 Collisions</h2>
+
+            <p>The <a href="la-collisions-dashboard.html">LA Collisions Dashboard</a> visualizes twelve years of LAPD collision records -- every reported incident from 2010 through 2021. The raw dataset is 303 megabytes of JSON.</p>
+
+            <p>Serving that much data to a browser without a backend required some engineering. The dataset is preprocessed into 421 spatial tiles, each covering a geographic region. As you pan and zoom the map, only the relevant tiles load. The spatial index uses RBush, a high-performance R-tree implementation, to determine which tiles intersect the current viewport.</p>
+
+            <p>The map renders through MapLibre GL, an open-source vector tile renderer. Temporal analysis charts use Chart.js. There is no server processing, no database queries, no API calls. Everything runs in the browser, against static JSON files.</p>
+
+            <blockquote>The data is the data. The dashboard just makes it possible to see.</blockquote>
+        </section>
+
+        <!-- Section 9: Discovery Log -->
+        <section id="discovery-log">
+            <h2>Discovery Log</h2>
+
+            <p>A running inventory of things to find. Check them off as you go. Your progress saves automatically.</p>
+
+            <div class="discovery-section">
+                <div class="discovery-counter" id="discovery-counter">0 / 9 discovered</div>
+
+                <div class="discovery-item" data-id="blob-panel">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-blob-panel">
+                    <label class="discovery-label" for="disc-blob-panel">Open the blob control panel on the main page</label>
+                </div>
+
+                <div class="discovery-item" data-id="rainbow">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-rainbow">
+                    <label class="discovery-label" for="disc-rainbow">Activate rainbow mode</label>
+                </div>
+
+                <div class="discovery-item" data-id="blob-showcase">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-blob-showcase">
+                    <label class="discovery-label" for="disc-blob-showcase">Scroll to the blob showcase section</label>
+                </div>
+
+                <div class="discovery-item" data-id="traffic-win">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-traffic-win">
+                    <label class="discovery-label" for="disc-traffic-win">Complete any Traffic Therapy level</label>
+                </div>
+
+                <div class="discovery-item" data-id="traffic-admin">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-traffic-admin">
+                    <label class="discovery-label" for="disc-traffic-admin">Enter admin mode in Traffic Therapy</label>
+                </div>
+
+                <div class="discovery-item" data-id="dodgers-signup">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-dodgers-signup">
+                    <label class="discovery-label" for="disc-dodgers-signup">Sign up for Dodgers deal notifications</label>
+                </div>
+
+                <div class="discovery-item" data-id="art-submission">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-art-submission">
+                    <label class="discovery-label" for="disc-art-submission">Submit a piece of public art</label>
+                </div>
+
+                <div class="discovery-item" data-id="collisions-tile">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-collisions-tile">
+                    <label class="discovery-label" for="disc-collisions-tile">Load any tile cluster on the collisions dashboard</label>
+                </div>
+
+                <div class="discovery-item" data-id="field-guide">
+                    <input type="checkbox" class="discovery-checkbox" id="disc-field-guide">
+                    <label class="discovery-label" for="disc-field-guide">Find the link to this page</label>
+                </div>
+            </div>
+        </section>
+    </article>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // --- Reading progress bar ---
+        const progressBar = document.getElementById('reading-progress');
+
+        function updateProgress() {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            if (docHeight <= 0) {
+                progressBar.style.width = '100%';
+                return;
+            }
+            const scrolled = (window.scrollY / docHeight) * 100;
+            progressBar.style.width = scrolled + '%';
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress();
+
+        // --- Hamburger toggle ---
+        var navToggle = document.getElementById('nav-toggle');
+        var navLinks = document.getElementById('nav-links');
+
+        navToggle.addEventListener('click', function() {
+            var isOpen = navLinks.classList.toggle('active');
+            navToggle.setAttribute('aria-expanded', isOpen);
+        });
+
+        // --- Smooth scroll for nav links ---
+        document.querySelectorAll('.nav-links .nav-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Close mobile menu
+                navLinks.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // --- Spoiler reveals ---
+        document.querySelectorAll('.spoiler').forEach(function(spoiler) {
+            function reveal() {
+                spoiler.classList.add('revealed');
+            }
+
+            spoiler.addEventListener('click', reveal);
+            spoiler.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    reveal();
+                }
+            });
+        });
+
+        // --- Discovery checklist ---
+        var STORAGE_KEY = 'guide-discoveries';
+        var checkboxes = document.querySelectorAll('.discovery-checkbox');
+        var counterEl = document.getElementById('discovery-counter');
+
+        function loadDiscoveries() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveDiscoveries(state) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // localStorage unavailable
+            }
+        }
+
+        function updateCounter() {
+            var total = checkboxes.length;
+            var checked = document.querySelectorAll('.discovery-checkbox:checked').length;
+            counterEl.textContent = checked + ' / ' + total + ' discovered';
+        }
+
+        function initChecklist() {
+            var state = loadDiscoveries();
+
+            checkboxes.forEach(function(cb) {
+                var item = cb.closest('.discovery-item');
+                var id = item.getAttribute('data-id');
+
+                if (state[id]) {
+                    cb.checked = true;
+                    item.classList.add('checked');
+                }
+
+                cb.addEventListener('change', function() {
+                    var currentState = loadDiscoveries();
+                    if (cb.checked) {
+                        currentState[id] = true;
+                        item.classList.add('checked');
+                    } else {
+                        delete currentState[id];
+                        item.classList.remove('checked');
+                    }
+                    saveDiscoveries(currentState);
+                    updateCounter();
+                });
+            });
+
+            updateCounter();
+        }
+
+        initChecklist();
+    })();
+    </script>
+</body>
+</html>
