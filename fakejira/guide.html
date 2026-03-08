@@ -54,6 +54,84 @@
       width: 28px; height: 28px; border-radius: var(--radius-sm);
       border: 2px solid transparent;
     }
+    /* Prompt template blocks */
+    .guide__prompt-block {
+      position: relative;
+      background: var(--surface-0);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin: 16px 0;
+      overflow: hidden;
+    }
+    .guide__prompt-block pre {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .guide__prompt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-1);
+    }
+    .guide__prompt-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .guide__copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-family: 'Geist', sans-serif;
+      color: var(--text-secondary);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 150ms, color 150ms;
+    }
+    .guide__copy-btn:hover {
+      background: var(--surface-3);
+      color: var(--text-primary);
+    }
+    .guide__copy-btn svg { width: 14px; height: 14px; }
+    .guide__tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin: 24px 0 0;
+    }
+    .guide__tab {
+      padding: 8px 16px;
+      font-size: 0.8125rem;
+      font-family: 'Geist', sans-serif;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 150ms, border-color 150ms;
+    }
+    .guide__tab:hover { color: var(--text-primary); }
+    .guide__tab--active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent);
+    }
+    .guide__tab-panel { display: none; }
+    .guide__tab-panel--active { display: block; }
     /* Hide sidebar/board/header chrome on guide page */
     .sidebar, .board, .header, .sidebar-backdrop { display: none !important; }
   </style>
@@ -194,6 +272,204 @@
     <p>
       Use the "New" dropdown to create additional projects. Each project gets its own URL (<code style="color: var(--accent); font-size: 0.8125rem;">#project/0</code>, <code style="color: var(--accent); font-size: 0.8125rem;">#project/1</code>, etc.) and is stored independently in localStorage. You can also duplicate an existing project or clear it from the same dropdown.
     </p>
+
+    <!-- Generate Tickets with AI -->
+    <h2>Generate Tickets with AI</h2>
+    <p>
+      Copy one of the prompts below and paste it into any LLM (ChatGPT, Claude, etc.) along with a description of your project. Save the JSON output as a <code style="color: var(--accent); font-size: 0.8125rem;">.json</code> file and import it using the Import button.
+    </p>
+
+    <div class="guide__tabs" role="tablist">
+      <button class="guide__tab guide__tab--active" role="tab" data-tab="simple" aria-selected="true">Simple</button>
+      <button class="guide__tab" role="tab" data-tab="full" aria-selected="false">Full Format</button>
+    </div>
+
+    <!-- Simple format -->
+    <div class="guide__tab-panel guide__tab-panel--active" id="tab-simple">
+      <p style="margin-top: 16px;">
+        Generates a flat array of tickets with just the essentials. Good for quick brainstorming.
+      </p>
+      <div class="guide__prompt-block">
+        <div class="guide__prompt-header">
+          <span class="guide__prompt-label">Prompt</span>
+          <button class="guide__copy-btn" data-copy="simple">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <pre id="prompt-simple">Generate a JSON array of task tickets for my project. Return ONLY valid JSON, no commentary.
+
+Each ticket object must have these fields:
+- "title": string (concise task title)
+- "description": string (1-2 sentence details, or "" if self-explanatory)
+- "priority": one of "low", "medium", "high", "critical"
+- "status": one of "todo", "in-progress", "testing", "done"
+- "labels": array of short tag strings (e.g. ["bug", "ui", "backend", "feature", "urgent"])
+
+Example output:
+[
+  {
+    "title": "Set up project scaffolding",
+    "description": "Initialize repo with folder structure, linter, and base config.",
+    "priority": "high",
+    "status": "todo",
+    "labels": ["feature"]
+  },
+  {
+    "title": "Fix login redirect loop",
+    "description": "",
+    "priority": "critical",
+    "status": "todo",
+    "labels": ["bug", "backend"]
+  }
+]
+
+My project: [DESCRIBE YOUR PROJECT HERE]</pre>
+      </div>
+    </div>
+
+    <!-- Full format -->
+    <div class="guide__tab-panel" id="tab-full">
+      <p style="margin-top: 16px;">
+        Generates a complete project file with named boards, custom columns, priorities, and AI prompts on each ticket. Import this as a new project.
+      </p>
+      <div class="guide__prompt-block">
+        <div class="guide__prompt-header">
+          <span class="guide__prompt-label">Prompt</span>
+          <button class="guide__copy-btn" data-copy="full">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <pre id="prompt-full">Generate a full project file for a task board. Return ONLY valid JSON, no commentary.
+
+Use this exact schema:
+{
+  "version": 4,
+  "title": "Project Name",
+  "boards": [
+    {
+      "id": "B-XXXXX",
+      "title": "Board Name",
+      "color": "#6366f1",
+      "columns": [
+        { "id": "todo", "name": "Todo", "color": "#818cf8" },
+        { "id": "in-progress", "name": "In Progress", "color": "#f59e42" },
+        { "id": "testing", "name": "Testing", "color": "#a78bfa" },
+        { "id": "done", "name": "Done", "color": "#34d399" },
+        { "id": "canceled", "name": "Canceled", "color": "#71717a" }
+      ],
+      "priorities": [
+        { "id": "low", "name": "Low", "color": "#34d399" },
+        { "id": "medium", "name": "Medium", "color": "#fbbf24" },
+        { "id": "high", "name": "High", "color": "#fb923c" },
+        { "id": "critical", "name": "Critical", "color": "#f87171" }
+      ],
+      "tickets": [
+        {
+          "id": "FJ-K8M2X",
+          "title": "Add user authentication",
+          "description": "Implement JWT-based auth with login, signup, and token refresh endpoints.",
+          "prompt": "Implement JWT authentication using bcrypt for password hashing. Create POST /auth/login and POST /auth/signup endpoints. Store refresh tokens in httpOnly cookies. Add middleware to verify tokens on protected routes.",
+          "status": "todo",
+          "priority": "high",
+          "labels": ["feature", "backend"],
+          "createdAt": "2026-03-08T10:00:00.000Z",
+          "updatedAt": "2026-03-08T10:00:00.000Z"
+        },
+        {
+          "id": "FJ-R3P7Q",
+          "title": "Design landing page",
+          "description": "Create responsive hero section with CTA and feature highlights.",
+          "prompt": "Build a responsive landing page with a hero section, 3 feature cards, and a CTA button. Use CSS grid for layout. Add smooth scroll to sections. Mobile-first with breakpoints at 768px and 1024px.",
+          "status": "in-progress",
+          "priority": "medium",
+          "labels": ["feature", "ui"],
+          "createdAt": "2026-03-08T10:00:00.000Z",
+          "updatedAt": "2026-03-08T11:30:00.000Z"
+        },
+        {
+          "id": "FJ-W5N1D",
+          "title": "Fix broken API error handling",
+          "description": "500 errors return raw stack traces instead of user-friendly messages.",
+          "prompt": "Add global error handling middleware that catches all unhandled errors. Return structured JSON error responses with appropriate HTTP status codes. Never expose stack traces in production. Log full error details server-side.",
+          "status": "todo",
+          "priority": "critical",
+          "labels": ["bug", "backend"],
+          "createdAt": "2026-03-08T09:00:00.000Z",
+          "updatedAt": "2026-03-08T09:00:00.000Z"
+        }
+      ],
+      "columnOrder": { "todo": ["FJ-K8M2X", "FJ-W5N1D"], "in-progress": ["FJ-R3P7Q"], "testing": [], "done": [], "canceled": [] },
+      "labelPresets": ["bug", "feature", "ui", "backend", "urgent"]
+    }
+  ],
+  "activeBoardIndex": 0,
+  "defaults": {
+    "columns": [
+      { "id": "todo", "name": "Todo", "color": "#818cf8" },
+      { "id": "in-progress", "name": "In Progress", "color": "#f59e42" },
+      { "id": "testing", "name": "Testing", "color": "#a78bfa" },
+      { "id": "done", "name": "Done", "color": "#34d399" },
+      { "id": "canceled", "name": "Canceled", "color": "#71717a" }
+    ],
+    "priorities": [
+      { "id": "low", "name": "Low", "color": "#34d399" },
+      { "id": "medium", "name": "Medium", "color": "#fbbf24" },
+      { "id": "high", "name": "High", "color": "#fb923c" },
+      { "id": "critical", "name": "Critical", "color": "#f87171" }
+    ],
+    "labelPresets": ["bug", "feature", "ui", "backend", "urgent"]
+  }
+}
+
+Rules:
+- Generate unique IDs: board IDs use "B-" prefix, ticket IDs use "FJ-" prefix (e.g. "FJ-A1B2C")
+- Each ticket has: id, title, description, prompt, status, priority, labels, createdAt, updatedAt
+- "prompt" is an AI instruction for implementing that ticket (write it as if instructing a coding assistant)
+- "status" must match a column id (e.g. "todo", "in-progress")
+- "priority" must match a priority id (e.g. "low", "medium", "high", "critical")
+- "labels" is an array of strings
+- "createdAt" and "updatedAt" are ISO 8601 timestamps
+- Put each ticket ID in the correct columnOrder array based on its status
+- You may create multiple boards to organize work (e.g. "Frontend", "Backend", "DevOps")
+- You may customize column names, colors, and label presets to fit the project
+
+My project: [DESCRIBE YOUR PROJECT HERE]</pre>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.guide__tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.guide__tab').forEach(t => {
+          t.classList.remove('guide__tab--active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.guide__tab-panel').forEach(p => p.classList.remove('guide__tab-panel--active'));
+        tab.classList.add('guide__tab--active');
+        tab.setAttribute('aria-selected', 'true');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('guide__tab-panel--active');
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll('.guide__copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pre = document.getElementById('prompt-' + btn.dataset.copy);
+        navigator.clipboard.writeText(pre.textContent).then(() => {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8 6 11 13 4"/></svg> Copied';
+          setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
