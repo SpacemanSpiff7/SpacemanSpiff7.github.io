@@ -30,7 +30,7 @@
     <meta name="twitter:description" content="A cartographer's notes on the hidden mechanics, easter eggs, and interactive tools found across simonelongo.com.">
     <meta name="twitter:image" content="https://simonelongo.com/assets/images/og-image.png">
 
-    <title>Explorer's Field Guide - Simone Longo</title>
+    <title>The Blob - Explorer's Field Guide - Simone Longo</title>
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -89,10 +89,14 @@
             padding: 88px 24px 120px;
         }
 
-        /* Typography */
+        /* Typography — Inter everywhere */
+        .guide {
+            font-family: 'Inter', sans-serif;
+        }
+
         .guide h1 {
-            font-family: 'Silkscreen', cursive;
             font-size: var(--text-3xl);
+            font-weight: 700;
             color: #fff;
             margin: 0 0 var(--space-3);
             line-height: var(--leading-tight);
@@ -100,7 +104,6 @@
 
         .guide-subtitle {
             color: rgba(255, 255, 255, 0.5);
-            font-family: 'IBM Plex Mono', monospace;
             font-size: var(--text-sm);
             font-style: italic;
             margin: 0 0 var(--space-12);
@@ -108,8 +111,8 @@
         }
 
         .guide h2 {
-            font-family: 'Silkscreen', cursive;
             font-size: var(--text-xl);
+            font-weight: 700;
             color: #fff;
             margin: var(--space-16) 0 var(--space-4);
             padding-bottom: var(--space-3);
@@ -117,7 +120,6 @@
         }
 
         .guide h3 {
-            font-family: 'Inter', sans-serif;
             font-size: var(--text-lg);
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
@@ -126,14 +128,13 @@
 
         .guide p {
             color: rgba(255, 255, 255, 0.75);
-            font-family: 'Inter', sans-serif;
             font-size: var(--text-base);
             line-height: var(--leading-relaxed);
             margin: 0 0 var(--space-4);
         }
 
         .guide code {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: 'Inter', sans-serif;
             font-size: 0.875em;
             color: #DA00FF;
             background: rgba(218, 0, 255, 0.08);
@@ -150,7 +151,6 @@
         }
 
         .slider-table th {
-            font-family: 'IBM Plex Mono', monospace;
             font-size: var(--text-xs);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -165,11 +165,9 @@
             font-size: var(--text-sm);
             color: rgba(255, 255, 255, 0.7);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-family: 'Inter', sans-serif;
         }
 
         .slider-table td:nth-child(2) {
-            font-family: 'IBM Plex Mono', monospace;
             font-size: var(--text-xs);
             color: rgba(255, 255, 255, 0.4);
         }
@@ -201,7 +199,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'IBM Plex Mono', monospace;
             font-size: var(--text-sm);
             color: rgba(255, 255, 255, 0.5);
             background: rgba(0, 0, 0, 0.3);
@@ -224,7 +221,6 @@
         }
 
         .discovery-counter {
-            font-family: 'IBM Plex Mono', monospace;
             font-size: var(--text-sm);
             color: rgba(255, 255, 255, 0.5);
             margin-bottom: var(--space-4);
@@ -296,15 +292,72 @@
         }
 
         /* Links */
-        .guide a:not(.nav-link) {
-            color: #DA00FF;
+        .guide a {
+            font-family: 'Silkscreen', cursive;
+            font-size: 0.85em;
+            color: #fff;
             text-decoration: none;
-            border-bottom: 1px solid rgba(218, 0, 255, 0.3);
-            transition: border-color var(--transition-fast);
+            transition: all var(--transition-fast);
         }
 
-        .guide a:not(.nav-link):hover {
-            border-color: #DA00FF;
+        .guide a:hover {
+            color: #00FFFF;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 25px rgba(0, 255, 255, 0.5), 0 0 50px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Nav dropdown submenu */
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-submenu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            padding: var(--space-2) 0;
+            min-width: 180px;
+            z-index: 1000;
+            list-style: none;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-dropdown:hover .nav-submenu {
+            display: block;
+        }
+
+        .nav-submenu li {
+            padding: 0;
+        }
+
+        .nav-submenu .nav-link {
+            display: block;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .nav-submenu .nav-link:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        @media (max-width: 768px) {
+            .nav-submenu {
+                position: static;
+                background: none;
+                border: none;
+                backdrop-filter: none;
+                padding: 0 0 0 var(--space-4);
+                display: none;
+            }
+
+            .nav-dropdown:hover .nav-submenu,
+            .nav-links.active .nav-dropdown .nav-submenu {
+                display: block;
+            }
         }
 
         /* Responsive */
@@ -359,15 +412,19 @@
                 </svg>
             </button>
             <ul class="nav-links" id="nav-links">
-                <li><a href="#living-geometry" class="nav-link">Living Geometry</a></li>
-                <li><a href="#scroll-current" class="nav-link">Scroll Current</a></li>
-                <li><a href="#prismatic-override" class="nav-link">Prismatic Override</a></li>
-                <li><a href="#traffic-therapy" class="nav-link">Traffic Therapy</a></li>
-                <li><a href="#dodgers" class="nav-link">Dodgers Notifier</a></li>
-                <li><a href="#public-art" class="nav-link">Public Art</a></li>
-                <li><a href="#ebay-plugin" class="nav-link">eBay Plugin</a></li>
-                <li><a href="#collisions" class="nav-link">Collisions</a></li>
-                <li><a href="#discovery-log" class="nav-link">Discovery Log</a></li>
+                <li><a href="#blob" class="nav-link">Blob</a></li>
+                <li class="nav-dropdown">
+                    <a href="#projects" class="nav-link">Projects</a>
+                    <ul class="nav-submenu">
+                        <li><a href="#traffic-therapy" class="nav-link">Traffic Therapy</a></li>
+                        <li><a href="#dodgers" class="nav-link">Dodgers Notifier</a></li>
+                        <li><a href="#public-art" class="nav-link">Public Art</a></li>
+                        <li><a href="#ebay-plugin" class="nav-link">eBay Plugin</a></li>
+                        <li><a href="#collisions" class="nav-link">Collisions</a></li>
+                    </ul>
+                </li>
+                <li><a href="#secrets" class="nav-link">Secrets</a></li>
+                <li><a href="#discovery-log" class="nav-link">Checklist</a></li>
             </ul>
         </div>
     </nav>
@@ -379,9 +436,11 @@
             <p class="guide-subtitle">A cartographer's notes on the hidden mechanics of this site</p>
         </header>
 
-        <!-- Section 1: The Living Geometry -->
-        <section id="living-geometry">
-            <h2>The Living Geometry</h2>
+        <!-- Section 1: Blob -->
+        <section id="blob">
+            <h2>The Blob</h2>
+
+            <h3 id="living-geometry">The Living Geometry</h3>
 
             <p>Behind every page of this site lives a wireframe sphere. Not a static model, but a continuously deforming surface driven by 3D simplex noise. The mesh is built from a grid of 60 latitude lines by 60 longitude lines -- 3,600 vertices in total, recalculated every frame.</p>
 
@@ -434,20 +493,64 @@
             </table>
 
             <p>All slider positions persist to <code>localStorage</code>. A "Reset to Defaults" button at the bottom of the panel returns everything to factory settings. The HiDPI canvas scales to <code>devicePixelRatio</code>, so the wireframe stays crisp on Retina displays.</p>
-        </section>
 
-        <!-- Section 2: The Scroll Current -->
-        <section id="scroll-current">
-            <h2>The Scroll Current</h2>
+            <h3 id="scroll-current">The Scroll Current</h3>
 
             <p>The blob responds to scrolling. Scroll fast enough and the geometry spins with you -- the Y-axis rotation tracks scroll velocity, so quick flicks send it whirling. Stop, and it breathes deeper. The idle morph speed is set higher than the active speed, which means the shape actually moves more when you are still.</p>
 
             <p>Each section of the main page assigns a different hue to the wireframe. The transitions between them are not instant -- the color lerps smoothly from one value to the next using linear interpolation on the RGB channels. Scroll from the hero into the first featured project and watch the purple bleed into deep pink. The section detection fires a custom <code>sectionChanged</code> event on the window, and the animation system begins interpolating toward the new target. If you have set a hue override through the control panel, the section colors are bypassed entirely.</p>
         </section>
 
-        <!-- Section 3: Prismatic Override (Spoiler) -->
-        <section id="prismatic-override">
-            <h2>Prismatic Override</h2>
+        <!-- Section 3: Projects -->
+        <section id="projects">
+            <h2>Projects</h2>
+
+            <h3 id="traffic-therapy">Traffic Therapy</h3>
+
+            <p><a href="../traffic-therapy/">Traffic Therapy</a> is a sliding block puzzle in the tradition of Rush Hour. A grid of interlocking blocks, one of which -- the target -- needs to reach the exit. Blocks slide along their axis only: horizontal blocks move left and right, vertical blocks move up and down. The 1x1 target block moves in any direction.</p>
+
+            <p>Five hand-crafted levels, each verified solvable by a built-in BFS solver. The solver explores every possible board state to find the optimal solution, which sets the par for each level. Your move count determines your star rating -- four stars if you beat par, one star if you take the scenic route.</p>
+
+            <p>Progress persists via cookies. Star ratings only go up, never down. Replaying a level with a worse score does not overwrite your best.</p>
+
+            <h3 id="dodgers">Dodgers Win Deal Notifier</h3>
+
+            <p>Dodgers win at home? $6 meal deal at Panda Express. Dodgers throw 7 or more strikeouts? Free Jumbo Jack at Jack in the Box (with purchase of a large drink). This is the most important public service on this entire website.</p>
+
+            <p>Sign up with your phone number and get a text whenever your local fast food joints turn on the free food faucet. No app to install, no account to create -- just a Google Form and an automated pipeline that watches the box scores so you do not have to.</p>
+
+            <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSetWqGm38ikUq30kZ6osUY525_reyPu1Z0XJigzqb34x5e3Dw/viewform">Sign up for notifications here.</a></p>
+
+            <h3 id="public-art">Public Art Submission</h3>
+
+            <p>The <a href="public-art-submission.html">Public Art Submission Form</a> is a mobile-friendly tool for documenting street art, murals, and other interesting things you find while wandering around. It grabs your photo, tags your location, and sends the data to a shared collection.</p>
+
+            <p>This is part of a larger project in progress -- a full public art map that aggregates submissions and lets you browse street art by neighborhood. The submission form is the data collection layer, and a standalone mobile app is also in development.</p>
+
+            <p>If you spot something worth documenting, submit it. Every entry helps build the dataset.</p>
+
+            <h3 id="ebay-plugin">eBay Lookup Chrome Extension</h3>
+
+            <p>A Chrome extension that adds eBay price lookups directly into Craigslist listings. See what the same item is selling for on eBay without leaving the page -- useful for figuring out whether that "great deal" is actually a great deal.</p>
+
+            <p>The extension requires an eBay API key to function. Head to the <a href="https://github.com/SpacemanSpiff7/EbayLookupChromePlugin">GitHub repository</a> for installation instructions. If you actually want to give it a shot, contact me for an API key.</p>
+
+            <h3 id="collisions">LA Collisions Dashboard</h3>
+
+            <p>The <a href="la-collisions-dashboard.html">LA Collisions Dashboard</a> visualizes twelve years of LAPD collision records -- every reported incident from 2010 through 2021. The raw dataset is 303 megabytes of JSON.</p>
+
+            <p>Serving that much data to a browser without a backend required some engineering. The dataset is preprocessed into 421 spatial tiles, each covering a geographic region. As you pan and zoom the map, only the relevant tiles load. The spatial index uses RBush, a high-performance R-tree implementation, to determine which tiles intersect the current viewport.</p>
+
+            <p>The map renders through MapLibre GL, an open-source vector tile renderer. Temporal analysis charts use Chart.js. There is no server processing, no database queries, no API calls. Everything runs in the browser, against static JSON files.</p>
+
+            <blockquote>The data is the data. The dashboard just makes it possible to see.</blockquote>
+        </section>
+
+        <!-- Section 4: Secrets -->
+        <section id="secrets">
+            <h2>Secrets</h2>
+
+            <h3>Prismatic Override</h3>
 
             <p>There is something hidden at the far end of the hue slider.</p>
 
@@ -463,23 +566,12 @@
                     <p>To deactivate, drag the hue slider away from the maximum, or hit "Reset to Defaults." The blob returns to its section-controlled colors as if nothing happened.</p>
                 </div>
             </div>
-        </section>
 
-        <!-- Section 4: Traffic Therapy -->
-        <section id="traffic-therapy">
-            <h2>Traffic Therapy</h2>
-
-            <p><a href="../traffic-therapy/">Traffic Therapy</a> is a sliding block puzzle in the tradition of Rush Hour. A grid of interlocking blocks, one of which -- the target -- needs to reach the exit. Blocks slide along their axis only: horizontal blocks move left and right, vertical blocks move up and down. The 1x1 target block moves in any direction.</p>
-
-            <p>Five hand-crafted levels, each verified solvable by a built-in BFS solver. The solver explores every possible board state to find the optimal solution, which sets the par for each level. Your move count determines your star rating -- four stars if you beat par, one star if you take the scenic route.</p>
-
-            <p>Progress persists via cookies. Star ratings only go up, never down. Replaying a level with a worse score does not overwrite your best.</p>
+            <h3>Traffic Therapy Admin Mode</h3>
 
             <div class="spoiler" role="button" tabindex="0" aria-label="Click to reveal spoiler">
                 <div class="spoiler-overlay">[click to reveal]</div>
                 <div class="spoiler-content">
-                    <h3>Admin Mode</h3>
-
                     <p>On the title screen, there is a subtle element near the title text. It does not look clickable. Click it anyway.</p>
 
                     <p>A prompt appears: <code>are you god?</code></p>
@@ -493,50 +585,6 @@
                     <p>Admin mode does not persist. Refresh, and it is gone. The puzzle resets to civilian access.</p>
                 </div>
             </div>
-        </section>
-
-        <!-- Section 5: Dodgers Win Deal Notifier -->
-        <section id="dodgers">
-            <h2>Dodgers Win Deal Notifier</h2>
-
-            <p>Dodgers win at home? $6 meal deal at Panda Express. Dodgers throw 7 or more strikeouts? Free Jumbo Jack at Jack in the Box (with purchase of a large drink). This is the most important public service on this entire website.</p>
-
-            <p>Sign up with your phone number and get a text whenever your local fast food joints turn on the free food faucet. No app to install, no account to create -- just a Google Form and an automated pipeline that watches the box scores so you do not have to.</p>
-
-            <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSetWqGm38ikUq30kZ6osUY525_reyPu1Z0XJigzqb34x5e3Dw/viewform">Sign up for notifications here.</a></p>
-        </section>
-
-        <!-- Section 6: Public Art Submission -->
-        <section id="public-art">
-            <h2>Public Art Submission</h2>
-
-            <p>The <a href="public-art-submission.html">Public Art Submission Form</a> is a mobile-friendly tool for documenting street art, murals, and other interesting things you find while wandering around. It grabs your photo, tags your location, and sends the data to a shared collection.</p>
-
-            <p>This is part of a larger project in progress -- a full public art map that aggregates submissions and lets you browse street art by neighborhood. The submission form is the data collection layer. A standalone app, <a href="https://street-art-hunter.vercel.app/">Street Art Hunter</a>, is also in development as a dedicated mobile experience for contributing to the map.</p>
-
-            <p>If you spot something worth documenting, submit it. Every entry helps build the dataset.</p>
-        </section>
-
-        <!-- Section 7: eBay Lookup Chrome Extension -->
-        <section id="ebay-plugin">
-            <h2>eBay Lookup Chrome Extension</h2>
-
-            <p>A Chrome extension that adds eBay price lookups directly into Craigslist listings. See what the same item is selling for on eBay without leaving the page -- useful for figuring out whether that "great deal" is actually a great deal.</p>
-
-            <p>The extension requires an eBay API key to function. Head to the <a href="https://github.com/SpacemanSpiff7/EbayLookupChromePlugin">GitHub repository</a> for installation instructions. If you actually want to give it a shot, contact me for an API key.</p>
-        </section>
-
-        <!-- Section 8: 620,000 Collisions -->
-        <section id="collisions">
-            <h2>620,000 Collisions</h2>
-
-            <p>The <a href="la-collisions-dashboard.html">LA Collisions Dashboard</a> visualizes twelve years of LAPD collision records -- every reported incident from 2010 through 2021. The raw dataset is 303 megabytes of JSON.</p>
-
-            <p>Serving that much data to a browser without a backend required some engineering. The dataset is preprocessed into 421 spatial tiles, each covering a geographic region. As you pan and zoom the map, only the relevant tiles load. The spatial index uses RBush, a high-performance R-tree implementation, to determine which tiles intersect the current viewport.</p>
-
-            <p>The map renders through MapLibre GL, an open-source vector tile renderer. Temporal analysis charts use Chart.js. There is no server processing, no database queries, no API calls. Everything runs in the browser, against static JSON files.</p>
-
-            <blockquote>The data is the data. The dashboard just makes it possible to see.</blockquote>
         </section>
 
         <!-- Section 9: Discovery Log -->
