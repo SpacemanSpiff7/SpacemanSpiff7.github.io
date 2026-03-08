@@ -1699,27 +1699,49 @@ body.sidebar-collapsed .sidebar__view-all {
 }
 
 @media (max-width: 640px) {
+  /* ---- Header compaction ---- */
   .header {
-    flex-direction: column;
-    gap: 10px;
-    height: auto;
-    padding: 12px 16px;
+    height: 48px;
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .header__badge {
+    display: none;
+  }
+  .mission-banner {
+    display: none;
   }
   .header__actions {
-    width: 100%;
+    gap: 4px;
+  }
+  /* Icon-only ghost buttons: hide text, show only SVG */
+  .header__actions .btn--ghost {
+    font-size: 0;
+    padding: 10px;
+    gap: 0;
+    min-width: 44px;
+    min-height: 44px;
     justify-content: center;
+  }
+  .header__actions .btn--ghost svg {
+    width: 18px;
+    height: 18px;
   }
   .btn__kbd {
     display: none;
   }
-  /* Sidebar becomes overlay on mobile */
+
+  /* ---- Sidebar: collapsed pushes content, expanded overlays ---- */
   .sidebar {
     z-index: 101;
+    top: 48px;
     box-shadow: var(--shadow-lg);
   }
   body.sidebar-collapsed .sidebar {
     width: 44px;
     border-right: 1px solid var(--border);
+    z-index: 98;
+    box-shadow: none;
   }
   .column-resize-handle {
     display: none;
@@ -1727,13 +1749,20 @@ body.sidebar-collapsed .sidebar__view-all {
   .sidebar__resize-handle {
     display: none;
   }
+
+  /* ---- Board: pushed right by collapsed sidebar width ---- */
   .board {
-    margin-left: 0 !important;
+    margin-left: 44px;
     flex-direction: column;
     padding: 12px;
     min-height: auto;
     gap: 12px;
   }
+  body.sidebar-collapsed .board {
+    margin-left: 44px;
+  }
+
+  /* ---- Backdrop: visible only when sidebar expanded ---- */
   .sidebar-backdrop {
     display: none;
     position: fixed;
@@ -1744,6 +1773,8 @@ body.sidebar-collapsed .sidebar__view-all {
   body:not(.sidebar-collapsed) .sidebar-backdrop {
     display: block;
   }
+
+  /* ---- Columns stack vertically ---- */
   .column {
     flex: none !important;
     min-width: 0 !important;
@@ -1751,6 +1782,8 @@ body.sidebar-collapsed .sidebar__view-all {
     width: 100%;
     max-height: none;
   }
+
+  /* ---- Modals ---- */
   .modal {
     border-radius: var(--radius-lg);
     width: 96%;
@@ -1767,6 +1800,14 @@ body.sidebar-collapsed .sidebar__view-all {
   .import-dialog {
     width: 94vw;
     padding: 20px 16px 16px;
+  }
+
+  /* ---- iOS auto-zoom prevention ---- */
+  .quickadd-input {
+    font-size: 16px;
+  }
+  input, textarea, select {
+    font-size: 16px;
   }
 }
 

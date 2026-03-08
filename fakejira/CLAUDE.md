@@ -13,6 +13,7 @@ Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). 
 - `index.html` - HTML structure (header, board tabs, columns, modals, import dialog, inline SVG icons)
 - `style.css` - All styles (dark theme, design tokens, layout, cards, tabs, modal, import dialog, responsive, animations)
 - `app.js` - All JavaScript (state, rendering, board CRUD, drag-drop, export/import, copy-to-clipboard)
+- `guide.html` - Quick start guide (static, imports style.css for component styling)
 
 ## URL Routing & Multi-Project Storage
 
@@ -130,6 +131,11 @@ State object stored in localStorage under key `agilethis-project-<N>`:
 
 ## UI Components
 
+### Guide Link
+- Info icon (`btn--ghost`) in header, opens `guide.html` in new tab
+- Guide uses real CSS classes from `style.css` so examples auto-update with style changes
+- No JavaScript -- purely static HTML
+
 ### Project Title
 - Editable inline text input in header between brand and actions
 - Saves on blur/Enter
@@ -168,6 +174,14 @@ State object stored in localStorage under key `agilethis-project-<N>`:
 - Keyboard shortcuts: N (new ticket), Escape (close modal/dialog)
 - Undo for ticket delete captures board index at deletion time, restores to that specific board
 - Never assume, ask clarifying questions
+
+## Mobile Layout (<=640px)
+- **Desktop-first** app -- mobile changes are scoped to `@media (max-width: 640px)` only
+- Collapsed sidebar (44px) pushes board content right (no overlap)
+- Expanded sidebar overlays board with dark backdrop; tap backdrop to close
+- Header compacts to single row (48px height) with icon-only ghost buttons
+- "New" primary button retains text label on mobile
+- iOS auto-zoom prevented with `font-size: 16px` on inputs/textareas/selects
 
 ## Testing
 Open `index.html` in any modern browser. No dev server needed.

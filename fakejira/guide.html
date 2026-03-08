@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agile This - Quick Start Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Silkscreen&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-y: auto; }
+    .guide { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; }
+    .guide__back {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-secondary); text-decoration: none; font-size: 0.8125rem;
+      margin-bottom: 24px; transition: color 150ms;
+    }
+    .guide__back:hover { color: var(--text-primary); }
+    .guide__back svg { width: 16px; height: 16px; }
+    .guide h1 {
+      font-family: 'Silkscreen', cursive; font-size: 1.5rem;
+      color: var(--text-primary); margin: 0 0 8px;
+    }
+    .guide > p.guide__intro {
+      color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;
+      margin: 0 0 32px;
+    }
+    .guide h2 {
+      font-size: 1rem; font-weight: 600; color: var(--text-primary);
+      border-bottom: 1px solid var(--border); padding-bottom: 8px;
+      margin: 40px 0 12px;
+    }
+    .guide h2:first-of-type { margin-top: 0; }
+    .guide p {
+      color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;
+      margin: 0 0 12px;
+    }
+    .guide__example {
+      background: var(--surface-0); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px; margin: 16px 0;
+      pointer-events: none;
+    }
+    .guide__example .ticket-card { animation: none; }
+    .guide__example .board-tab { width: auto; max-width: 200px; }
+    .guide__kbd-grid {
+      display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;
+      align-items: center;
+    }
+    .guide__kbd-grid kbd {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 2px 8px;
+      color: var(--text-secondary); width: fit-content;
+    }
+    .guide__kbd-grid span { color: var(--text-secondary); font-size: 0.8125rem; }
+    .guide__colors {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .guide__color-swatch {
+      width: 28px; height: 28px; border-radius: var(--radius-sm);
+      border: 2px solid transparent;
+    }
+    /* Hide sidebar/board/header chrome on guide page */
+    .sidebar, .board, .header, .sidebar-backdrop { display: none !important; }
+  </style>
+</head>
+<body class="sidebar-collapsed">
+  <div class="noise"></div>
+  <div class="guide">
+    <a href="index.html" class="guide__back">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="8" x2="13" y2="8"/><polyline points="7 4 3 8 7 12"/>
+      </svg>
+      Back to board
+    </a>
+
+    <h1>Quick Start Guide</h1>
+    <p class="guide__intro">
+      Agile This is a lightweight task board that runs entirely in your browser. No account needed -- your data stays in localStorage.
+    </p>
+
+    <!-- Board Basics -->
+    <h2>Board Basics</h2>
+    <p>
+      Each project can have multiple boards. Switch between them using the sidebar tabs. Double-click a tab to rename it, or drag tabs to reorder.
+    </p>
+    <div class="guide__example">
+      <div style="display: flex; flex-direction: column; gap: 4px; width: 200px;">
+        <div class="board-tab board-tab--active" style="--tab-color: #6366f1;">
+          <span class="board-tab__title">Sprint 1</span>
+          <span class="board-tab__count">5</span>
+        </div>
+        <div class="board-tab" style="--tab-color: #f59e42;">
+          <span class="board-tab__title">Backlog</span>
+          <span class="board-tab__count">12</span>
+        </div>
+        <div class="board-tab" style="--tab-color: #34d399;">
+          <span class="board-tab__title">Design</span>
+          <span class="board-tab__count">3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columns & Tickets -->
+    <h2>Columns &amp; Tickets</h2>
+    <p>
+      Drag tickets between columns to update their status. Use the quick-add input at the top of any column to create tickets fast. Each ticket can have a priority, labels, and a description.
+    </p>
+    <div class="guide__example">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Column header example -->
+        <div class="column__header" style="padding: 0;">
+          <div class="column__header-left">
+            <span class="status-dot" style="background: #818cf8;"></span>
+            <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-primary);">Todo</span>
+            <span class="column__count">3</span>
+          </div>
+        </div>
+        <!-- Example ticket card -->
+        <div class="ticket-card" style="animation: none;">
+          <div class="ticket-card__top">
+            <span class="priority-dot" style="background: #fb923c;" title="High"></span>
+            <span class="ticket-card__title">Add dark mode toggle</span>
+          </div>
+          <p class="ticket-card__desc">Users should be able to switch between light and dark themes</p>
+          <div class="ticket-card__footer">
+            <span class="ticket-card__id">FJ-001</span>
+            <div class="ticket-card__labels">
+              <span class="label-chip">feature</span>
+              <span class="label-chip">ui</span>
+            </div>
+          </div>
+        </div>
+        <!-- Another example ticket -->
+        <div class="ticket-card" style="animation: none;">
+          <div class="ticket-card__top">
+            <span class="priority-dot" style="background: #34d399;" title="Low"></span>
+            <span class="ticket-card__title">Update README</span>
+          </div>
+          <div class="ticket-card__footer">
+            <span class="ticket-card__id">FJ-002</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Prompt -->
+    <h2>AI Prompt</h2>
+    <p>
+      Each ticket has an optional "Prompt" field for AI instructions. When a prompt is set, the card shows an accent-colored left border and a sparkle indicator. Click the copy button to grab the prompt for use with your AI tool.
+    </p>
+    <div class="guide__example">
+      <div class="ticket-card ticket-card--has-prompt" style="animation: none;">
+        <div class="ticket-card__top">
+          <span class="priority-dot" style="background: #fbbf24;" title="Medium"></span>
+          <span class="ticket-card__title">Refactor auth module</span>
+        </div>
+        <p class="ticket-card__desc">Break the monolithic auth into smaller services</p>
+        <div class="ticket-card__footer">
+          <span class="ticket-card__id">FJ-003</span>
+          <div class="ticket-card__labels">
+            <span class="label-chip">backend</span>
+          </div>
+          <span class="ticket-card__prompt-indicator" title="Has AI prompt">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5Z"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts -->
+    <h2>Keyboard Shortcuts</h2>
+    <div class="guide__kbd-grid">
+      <kbd>N</kbd> <span>Create a new ticket</span>
+      <kbd>Esc</kbd> <span>Close modal or dialog</span>
+    </div>
+
+    <!-- Settings & Customization -->
+    <h2>Settings &amp; Customization</h2>
+    <p>
+      Click the gear icon on any board tab to open its settings. You can customize columns, priorities, label presets, and the board accent color. Use the "Defaults" button in the header to set project-wide defaults for new boards.
+    </p>
+    <div class="guide__example">
+      <p style="color: var(--text-secondary); font-size: 0.75rem; margin: 0 0 8px;">Board colors</p>
+      <div class="guide__colors">
+        <div class="guide__color-swatch" style="background: #6366f1;"></div>
+        <div class="guide__color-swatch" style="background: #8b5cf6;"></div>
+        <div class="guide__color-swatch" style="background: #ec4899;"></div>
+        <div class="guide__color-swatch" style="background: #f59e42;"></div>
+        <div class="guide__color-swatch" style="background: #34d399;"></div>
+        <div class="guide__color-swatch" style="background: #22d3ee;"></div>
+        <div class="guide__color-swatch" style="background: #f87171;"></div>
+        <div class="guide__color-swatch" style="background: #a3e635;"></div>
+      </div>
+    </div>
+
+    <!-- Import / Export -->
+    <h2>Import / Export</h2>
+    <p>
+      Export your project as a JSON file from the header. When importing, you have three options: add tickets to the active board, add as a new board in the current project, or create an entirely new project.
+    </p>
+
+    <!-- Multi-Project -->
+    <h2>Multi-Project</h2>
+    <p>
+      Use the "New" dropdown to create additional projects. Each project gets its own URL (<code style="color: var(--accent); font-size: 0.8125rem;">#project/0</code>, <code style="color: var(--accent); font-size: 0.8125rem;">#project/1</code>, etc.) and is stored independently in localStorage. You can also duplicate an existing project or clear it from the same dropdown.
+    </p>
+  </div>
+</body>
+</html>
