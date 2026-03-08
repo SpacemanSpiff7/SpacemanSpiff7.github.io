@@ -11,14 +11,7 @@
   <style>
     body { overflow-y: auto; }
     .guide { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; }
-    .guide__back {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--text-secondary); text-decoration: none; font-size: 0.8125rem;
-      margin-bottom: 24px; transition: color 150ms;
-    }
-    .guide__back:hover { color: var(--text-primary); }
-    .guide__back svg { width: 16px; height: 16px; }
-    .guide h1 {
+.guide h1 {
       font-family: 'Silkscreen', cursive; font-size: 1.5rem;
       color: var(--text-primary); margin: 0 0 8px;
     }
@@ -68,13 +61,6 @@
 <body class="sidebar-collapsed">
   <div class="noise"></div>
   <div class="guide">
-    <a href="index.html" class="guide__back">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="8" x2="13" y2="8"/><polyline points="7 4 3 8 7 12"/>
-      </svg>
-      Back to board
-    </a>
-
     <h1>Quick Start Guide</h1>
     <p class="guide__intro">
       Agile This is a lightweight task board that runs entirely in your browser. No account needed -- your data stays in localStorage.
