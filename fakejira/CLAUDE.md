@@ -15,6 +15,11 @@ Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). 
 - `app.js` - All JavaScript (state, rendering, board CRUD, drag-drop, export/import, copy-to-clipboard)
 - `guide.html` - Quick start guide (static, imports style.css for component styling)
 
+## Portfolio Integration
+- This app is linked from the root portfolio via `data/projects.json` using `fakejira/index.html`
+- Keep `index.html` as the stable entry point unless the portfolio registry is updated in the same change
+- This app is standalone; do not add dependencies on the root site's `js/main.js` or shared nav component
+
 ## URL Routing & Multi-Project Storage
 
 ### Hash-Based Routing

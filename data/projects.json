@@ -18,6 +18,7 @@
       "title": "CurlBro",
       "shortDescription": "Gym workout builder with an workout timer and log",
       "description": "A free workout builder and tracker all in the browser.",
+      "blobColor": "#7A0A45",
       "category": "Fitness",
       "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop&crop=center",
       "tags": ["Fitness"],
@@ -26,12 +27,6 @@
           "text": "Use App",
           "url": "https://www.curlbro.com",
           "type": "primary"
-        },
-        {
-          "text": "Github",
-          "url": "https://github.com/SpacemanSpiff7/CurlBro",
-          "type": "secondary",
-          "external": true
         }
       ]
     },
@@ -147,6 +142,7 @@
       "title": "Traffic Therapy",
       "shortDescription": "A sliding block puzzle game that's a pseudo-remake of Rush Hour",
       "description": "A pseudo-remake of Rush Hour with 5 hand-crafted levels, a BFS solver that verifies every puzzle is solvable, and a hidden level editor for when you want to make your friends suffer.",
+      "blobColor": "#6B2820",
       "category": "Game",
       "image": "https://images.unsplash.com/photo-1544256718-3bcf237f3974?w=400&h=300&fit=crop&crop=center",
       "tags": ["Puzzle Game"],
@@ -180,6 +176,7 @@
       "title": "Agile This",
       "shortDescription": "Super simple Kanban board.",
       "description": "Super simple Kanban board.",
+      "blobColor": "#005A5E",
       "category": "Kanban Board",
       "image": "assets/images/agile-this.png",
       "tags": ["Kanban Board"],
@@ -196,6 +193,7 @@
       "title": "Glowy Blob Ball",
       "shortDescription": "Glowy. Blob. Ball.",
       "description": "Glowy. Blob. Ball.",
+      "blobColor": "#3E2C5A",
       "category": "Background",
       "tags": ["Background"],
       "actions": [

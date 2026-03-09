@@ -25,6 +25,11 @@ traffic-therapy/
 └── README.md
 ```
 
+## Portfolio Integration
+- This game is linked from the root portfolio via `data/projects.json` using `traffic-therapy/index.html`
+- Keep `index.html` as the stable entry point unless the portfolio registry is updated in the same change
+- This game is intentionally self-contained; do not couple it to the root site's scroll-snap or shared nav logic
+
 ## Script Load Order (in index.html)
 Scripts must load in this order due to dependencies:
 1. storage.js    (no dependencies)

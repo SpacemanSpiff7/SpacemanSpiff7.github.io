@@ -8,6 +8,23 @@ function setViewportHeight() {
 setViewportHeight();
 window.addEventListener('resize', setViewportHeight);
 
+const HOMEPAGE_STATE = {
+    navReady: false,
+    projectsReady: false,
+    scrollHighlightingReady: false,
+    sectionRegistry: []
+};
+
+const BASE_SECTION_CONFIG = [
+    { id: 'hero', label: 'Home', navTarget: 'hero', progressTarget: 'hero', includeInProgress: true },
+    { id: 'about', label: 'About', navTarget: 'about', progressTarget: 'about', includeInProgress: true },
+    { id: 'contact', label: 'Contact', navTarget: 'contact', progressTarget: 'contact', includeInProgress: true },
+    { id: 'projects-grid', label: 'Projects', navTarget: 'projects-grid', progressTarget: 'projects-grid', includeInProgress: true },
+    { id: 'blob-showcase', label: 'Blob Showcase', navTarget: 'projects-grid', progressTarget: 'projects-grid', includeInProgress: false }
+];
+
+const FEATURED_BLOB_PALETTE = ['#7A0A45', '#005A5E', '#6B2820', '#3E2C5A', '#0E4D92', '#6B3F00'];
+
 document.addEventListener('DOMContentLoaded', function() {
     // Skip if this is a standalone page
     if (window.SKIP_MAIN_SCRIPT) {
@@ -26,7 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('componentLoaded', function(e) {
     // Initialize navigation when nav component loads
     if (e.detail.containerId === 'nav-container') {
-        setTimeout(setupNavigation, 50);
+        setTimeout(() => {
+            setupNavigation();
+            HOMEPAGE_STATE.navReady = true;
+            maybeInitScrollHighlighting();
+        }, 50);
     }
 });
 
@@ -72,7 +93,6 @@ function setupNavigation() {
         };
 
         navToggle.addEventListener('click', toggleMenu);
-        navToggle.addEventListener('touchstart', toggleMenu, { passive: false });
 
         // Close mobile menu when clicking on a link
         navLinks.forEach(link => {
@@ -136,26 +156,56 @@ function setupNavigation() {
     // after featured sections are dynamically created
 }
 
-// Build sectionToNav mapping dynamically based on actual featured projects count
-function buildSectionMapping(featuredCount) {
-    const mapping = {
-        'hero': 'hero',
-        'about': 'about',
-        'contact': 'contact',
-        'projects-grid': 'projects-grid',
-        'blob-showcase': 'projects-grid'  // Observe for blob color, but keep nav on projects-grid
-    };
-
-    // Add featured sections dynamically
-    for (let i = 1; i <= featuredCount; i++) {
-        mapping[`featured-${i}`] = 'hero';
-    }
-
-    return mapping;
+function getBaseSectionConfig(id) {
+    return BASE_SECTION_CONFIG.find(section => section.id === id);
 }
 
-function setupScrollHighlighting(navLinks, sectionToNav) {
+function createFeaturedSectionConfig(project, index) {
+    return {
+        id: `featured-${project.id}`,
+        label: project.title,
+        navTarget: 'hero',
+        progressTarget: `featured-${project.id}`,
+        includeInProgress: true,
+        blobColor: project.blobColor || FEATURED_BLOB_PALETTE[index % FEATURED_BLOB_PALETTE.length],
+        project
+    };
+}
+
+function buildSectionRegistry(featuredProjects) {
+    const hero = getBaseSectionConfig('hero');
+    const about = getBaseSectionConfig('about');
+    const contact = getBaseSectionConfig('contact');
+    const projectsGrid = getBaseSectionConfig('projects-grid');
+    const blobShowcase = getBaseSectionConfig('blob-showcase');
+
+    return [
+        hero,
+        ...featuredProjects.map((project, index) => createFeaturedSectionConfig(project, index)),
+        about,
+        contact,
+        projectsGrid,
+        blobShowcase
+    ];
+}
+
+function maybeInitScrollHighlighting() {
+    if (!HOMEPAGE_STATE.navReady || !HOMEPAGE_STATE.projectsReady || HOMEPAGE_STATE.scrollHighlightingReady) {
+        return;
+    }
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    if (!navLinks.length) {
+        return;
+    }
+
+    setupScrollHighlighting(navLinks, HOMEPAGE_STATE.sectionRegistry);
+    HOMEPAGE_STATE.scrollHighlightingReady = true;
+}
+
+function setupScrollHighlighting(navLinks, sectionRegistry) {
     const scrollContainer = document.querySelector('.scroll-container');
+    const sectionsById = new Map(sectionRegistry.map(section => [section.id, section]));
 
     // Create Intersection Observer
     // Use scrollContainer if it exists, otherwise use viewport (null = viewport)
@@ -173,7 +223,8 @@ function setupScrollHighlighting(navLinks, sectionToNav) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const sectionId = entry.target.id;
-                const navTarget = sectionToNav[sectionId];
+                const sectionConfig = sectionsById.get(sectionId);
+                const navTarget = sectionConfig ? sectionConfig.navTarget : null;
 
                 // Update nav highlighting (based on nav target)
                 if (navTarget && navTarget !== currentSection) {
@@ -193,7 +244,11 @@ function setupScrollHighlighting(navLinks, sectionToNav) {
                 if (sectionId !== currentBlobSection) {
                     currentBlobSection = sectionId;
                     window.dispatchEvent(new CustomEvent('sectionChanged', {
-                        detail: { section: sectionId }
+                        detail: {
+                            section: sectionId,
+                            progressSection: sectionConfig && sectionConfig.progressTarget ? sectionConfig.progressTarget : sectionId,
+                            color: sectionConfig && sectionConfig.blobColor ? sectionConfig.blobColor : null
+                        }
                     }));
                 }
             }
@@ -201,8 +256,8 @@ function setupScrollHighlighting(navLinks, sectionToNav) {
     }, observerOptions);
 
     // Observe all sections
-    Object.keys(sectionToNav).forEach(sectionId => {
-        const section = document.getElementById(sectionId);
+    sectionRegistry.forEach(sectionConfig => {
+        const section = document.getElementById(sectionConfig.id);
         if (section) {
             observer.observe(section);
         }
@@ -227,19 +282,29 @@ async function loadProjects() {
         const heroSection = document.getElementById('hero');
         const aboutSection = document.getElementById('about');
 
+        const sectionRegistry = buildSectionRegistry(featuredProjects);
+        const featuredSections = sectionRegistry.filter(section => section.project);
+
         // Dynamically create and populate featured sections
-        featuredProjects.forEach((project, index) => {
+        featuredSections.forEach((sectionConfig) => {
+            const { project } = sectionConfig;
             // Create new section element
             const section = document.createElement('section');
-            section.id = `featured-${index + 1}`;
+            section.id = sectionConfig.id;
             section.className = 'snap-section featured-project';
+            if (sectionConfig.blobColor) {
+                section.dataset.blobColor = sectionConfig.blobColor;
+            }
+            section.dataset.projectId = project.id;
 
             // Populate with project content
             section.innerHTML = `
-                <h2>${project.title}</h2>
-                <p>${project.shortDescription}</p>
-                <div class="project-actions">
-                    ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                <div class="featured-project-content">
+                    <h2>${project.title}</h2>
+                    <p>${project.shortDescription}</p>
+                    <div class="project-actions">
+                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                    </div>
                 </div>
             `;
 
@@ -274,40 +339,24 @@ async function loadProjects() {
             }
         });
 
-        // Initialize progress indicator with dynamic featured count
-        initProgressIndicator(featuredProjects.length);
+        HOMEPAGE_STATE.sectionRegistry = sectionRegistry;
+        HOMEPAGE_STATE.projectsReady = true;
 
-        // Set up scroll-based nav highlighting with dynamic section mapping
-        // This must run after featured sections are created
-        const navLinks = document.querySelectorAll('.nav-link');
-        const sectionToNav = buildSectionMapping(featuredProjects.length);
-        setupScrollHighlighting(navLinks, sectionToNav);
+        initProgressIndicator(sectionRegistry);
+        maybeInitScrollHighlighting();
 
     } catch (error) {
         console.error('Error loading projects:', error);
     }
 }
 
-// Progress indicator - dynamically generated based on projects.json
-function initProgressIndicator(featuredCount) {
+// Progress indicator - dynamically generated from the section registry
+function initProgressIndicator(sectionRegistry) {
     const container = document.querySelector('.progress-indicator');
     if (!container) return;
+    container.innerHTML = '';
 
-    // Build sections array dynamically
-    const sections = [
-        { id: 'hero', label: 'Home' }
-    ];
-
-    // Add featured sections based on projects.json count
-    for (let i = 1; i <= featuredCount; i++) {
-        sections.push({ id: `featured-${i}`, label: `Featured ${i}` });
-    }
-
-    sections.push(
-        { id: 'about', label: 'About' },
-        { id: 'contact', label: 'Contact' },
-        { id: 'projects-grid', label: 'Projects' }
-    );
+    const sections = sectionRegistry.filter(section => section.includeInProgress);
 
     // Create line
     const line = document.createElement('div');
@@ -329,7 +378,7 @@ function initProgressIndicator(featuredCount) {
 
     // Listen to section changes (dispatched by setupScrollHighlighting)
     window.addEventListener('sectionChanged', (e) => {
-        const sectionId = e.detail.section;
+        const sectionId = e.detail.progressSection || e.detail.section;
         const dots = container.querySelectorAll('.progress-dot');
         dots.forEach(dot => {
             dot.classList.toggle('active', dot.dataset.section === sectionId);

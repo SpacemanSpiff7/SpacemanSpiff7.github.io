@@ -214,6 +214,10 @@
         padding: calc(1.5rem + var(--snap-bottom-offset)) 1.5rem calc(1.5rem + var(--snap-bottom-offset));
     }
 
+    .featured-project.snap-section {
+        padding: 0 1.5rem;
+    }
+
     .snap-section:not(#hero) .section-title,
     .snap-section:not(#hero) > h2 {
         margin-top: 25vh;

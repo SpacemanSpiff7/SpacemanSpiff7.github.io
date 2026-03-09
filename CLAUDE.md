@@ -85,6 +85,61 @@ This ensures users get fresh JavaScript immediately after deployment.
 - Powers projects grid with metadata
 - **When adding projects**: Update projects.json, not CLAUDE.md (see `data/README.md`)
 
+### Homepage Stability Contract
+
+Treat the homepage scroll system as an interaction contract, not cosmetic CSS.
+
+- **The snap container is `.scroll-container`**. Do not move scrolling back to `body`/`html` without updating observers, nav clicks, progress dots, and mobile viewport logic together.
+- **Snap sections are explicit**. `#hero`, dynamic featured sections, `#about`, `#contact`, and `#blob-showcase` use `.snap-section`. `#projects-grid` is intentionally the free-scroll workbench section inside the same flow.
+- **Viewport math is centralized**. `js/main.js` sets `--vh`; `css/tokens.css` owns `--nav-height`, `--bottom-chrome-height`, and `--snap-bottom-offset`. Do not re-hardcode those values elsewhere.
+- **Section identity matters**. `js/main.js` now builds a shared section registry that drives featured sections, scroll highlighting, progress dots, and blob section events together. Keep those concerns unified.
+- **Keep one scroll owner**. Avoid mixing CSS smooth scrolling, `scrollIntoView()`, touch handlers, and custom scroll math unless there is a clear reason.
+
+### Section Layout Contract
+
+Homepage section layout currently works in layers:
+
+- Base snap sizing lives in `css/components.css` under `.snap-section`
+- Mobile snap padding and title offsets live in `css/responsive.css`
+- Hero is an explicit exception to the shared snap padding and uses an inner `.hero-content` wrapper for visible-area centering
+- `#about` and `#contact` are explicit exceptions that vertically center their content group
+- Featured sections are rendered by `js/main.js` with an inner `.featured-project-content` wrapper
+- On mobile, `.featured-project-content` is the element that should be centered within the visible area between the fixed nav and bottom chrome
+- `#projects-grid` is intentionally not a full-height centered snap section
+
+If featured sections look off-center on mobile, adjust the featured wrapper sizing/centering first instead of adding more heading-specific margin overrides.
+
+### Homepage Change Checklist
+
+When changing homepage layout, navigation, or project ordering, verify all of the following before shipping:
+
+1. Desktop wheel and trackpad snapping still land on intended section boundaries.
+2. Mobile swipe scrolling still snaps cleanly with browser chrome expanded and collapsed.
+3. Nav logo, nav links, and progress dots all scroll to the same targets.
+4. Active nav state still matches the visible section during manual and programmatic scroll.
+5. Blob color transitions still change at the intended sections.
+6. `#projects-grid` still allows free scrolling and does not trap the user in a snap loop.
+7. The `glowy-blob-ball` CTA still reaches `#blob-showcase`.
+8. Run the blob-specific checks in `docs/blob-regression.md` when changing `js/animations.js`.
+
+### Projects Data Contract
+
+`data/projects.json` is the homepage content registry. Preserve this shape:
+
+- Top-level keys: `featured`, `featuredConfig`, `projects`
+- `featured` is an ordered array of project IDs
+- `projects` is the canonical array of project objects
+- Each project should have `id`, `title`, `shortDescription`, and `actions`
+- `hidden: true` removes a project from the workbench grid but does not prevent it from being featured
+- Relative action URLs must resolve from the repository root, because `js/main.js` renders them directly into `index.html`
+
+Current reality:
+
+- There are **11** projects in `data/projects.json`
+- There are **4** featured projects
+- Several metadata fields (`featuredConfig`, `image`, `category`, `tags`, `description`) are only partially used by the current homepage renderer. Do not assume they are dead.
+- Featured projects can optionally define `blobColor`; if omitted, `js/main.js` assigns a color from the featured palette by featured order
+
 ## Important Implementation Notes
 
 ### No Emojis Policy
@@ -112,21 +167,18 @@ The CSS is split into modular files for easier maintenance:
 
 ### Standalone Tool Patterns
 
-Tools in `/tools/` use three distinct navigation approaches:
+Tools in `/tools/` currently use two live navigation approaches:
 
-**Pattern 1: SKIP_MAIN_SCRIPT + Standalone Nav** (3 tools)
-- `la-collisions-dashboard.html`, `location-map.html`, `public-art-submission.html`
+**Pattern 1: SKIP_MAIN_SCRIPT + Standalone Nav** (2 tools)
+- `la-collisions-dashboard.html`, `public-art-submission.html`
 - Sets `window.SKIP_MAIN_SCRIPT = true` to prevent SPA component loading
-- Fully standalone with own navigation structure
+- Fully standalone with their own navigation structure
 
-**Pattern 2: Inline Nav, No SKIP** (5 tools)
-- `shopping-research.html`, `monte-carlo-sim-optimized.html`, `running-game.html`, `claude-consulting-draft.html`, `consulting-coming-soon.html`
-- Creates navigation inline, references `../css/style.css`
+**Pattern 2: Local nav/styles, No SKIP** (5 tools/pages)
+- `guide.html`, `shopping-research.html`, `monte-carlo-sim-optimized.html`, `running-game.html`, `consulting-coming-soon.html`
+- Some reuse `../css/style.css`; some define more page-specific structure inline
 
-**Pattern 3: External Module** (1 file)
-- `location-map.js` (supporting JavaScript for location-map.html)
-
-**Why different patterns?**: Performance optimization (avoid loading unused SPA components) and standalone functionality requirements.
+**Why different patterns?**: Performance optimization and standalone functionality requirements.
 
 ### LA Collisions Dashboard
 
@@ -142,18 +194,13 @@ Tools in `/tools/` use three distinct navigation approaches:
 **When modifying**: Tiles are git-tracked. Regenerate with `scripts/preprocess-collisions.js` if source data changes.
 
 ### Google API Integration
-Two tools integrate with Google services:
+One live tool in this repo integrates with Google services:
 
 **Public Art Submission** (`tools/public-art-submission.html`):
 - Integrates with Google Forms for submissions
 - Uses Google Forms field IDs that must be configured
 - Includes mobile camera/location features
 - See `docs/PUBLIC_ART_SUBMISSION_README.md` for setup
-
-**Location Map** (`tools/location-map.html`):
-- Integrates with Google Maps, Sheets, and Drive APIs
-- Requires API keys and OAuth configuration
-- See `docs/LOCATION_MAP_SETUP.md` for complete setup guide
 
 ### Interactive Tools
 
@@ -181,7 +228,7 @@ Two tools integrate with Google services:
 │   └── animations.js       # Starfield and 3D blob rendering
 ├── components/
 │   └── nav.html            # Navigation bar (only component)
-├── tools/                  # 8 standalone HTML tools (see Tool Patterns above)
+├── tools/                  # Standalone HTML tools and guide page
 ├── data/
 │   ├── projects.json       # Source of truth for projects
 │   └── la_traffic_collisions.json  # 303MB collision data
@@ -204,8 +251,6 @@ Two tools integrate with Google services:
 - RBush 3.0.1 - Spatial indexing for collision tiles
 
 **Google APIs**:
-- Maps (location-map.html)
-- Sheets/Drive (location-map.html data storage)
 - Forms (public-art-submission.html)
 
 **Assets**:
@@ -215,7 +260,7 @@ Two tools integrate with Google services:
 ## Projects Configuration
 
 The site features are managed through `data/projects.json`:
-- **10 total projects** (mix of tools, games, and applications)
+- **11 total projects** (mix of tools, games, applications, and archive links)
 - **4 featured projects** highlighted on home page
 - Each project has metadata: title, description, tech stack, links, and images
 - **Source of truth**: projects.json (not CLAUDE.md - see `data/README.md`)

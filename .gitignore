@@ -1,2 +1,7 @@
 data/la_traffic_collisions.json
-
+node_modules/
+**/node_modules/
+.wrangler/
+**/.wrangler/
+dist/
+build/

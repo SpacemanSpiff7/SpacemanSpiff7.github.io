@@ -6,6 +6,146 @@
 // ==========================================
 // CONFIGURATION
 // ==========================================
+const MOBILE_DEFAULT_BASE_RADIUS = 120;
+const DESKTOP_DEFAULT_BASE_RADIUS = 200;
+const SETTINGS_STORAGE_KEY = 'blobSettings';
+
+function isMobileViewport() {
+    return window.innerWidth < 768;
+}
+
+function getViewportMode() {
+    return isMobileViewport() ? 'mobile' : 'desktop';
+}
+
+function getDefaultBaseRadius() {
+    return isMobileViewport() ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
+}
+
+function getCurrentGridResolution() {
+    return isMobileViewport() ? CONFIG.gridResolutionMobile : CONFIG.gridResolution;
+}
+
+function getDefaultBlobSettings() {
+    return {
+        noiseAmplitude: 0.10,
+        noiseFrequency: 0.003,
+        idleMorphSpeed: 0.005,
+        baseRadius: getDefaultBaseRadius(),
+        brightnessMultiplier: 1.0,
+        lineWidth: 1.0,
+        perspective: 600,
+        glowMaxOpacity: 0.15,
+        hueOverride: null,
+        starCount: 250,
+        starTwinkleSpeed: 1.0,
+        starMaxRadius: 2.0,
+        starBrightness: 1.0
+    };
+}
+
+const CONTROL_DEFS = [
+    {
+        key: 'baseRadius',
+        elementId: 'base-radius',
+        configKey: 'baseRadius',
+        parse: value => parseInt(value, 10),
+        format: value => ({ text: value, suffix: 'px' })
+    },
+    {
+        key: 'noiseAmplitude',
+        elementId: 'noise-amplitude',
+        configKey: 'noiseAmplitude',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(2) })
+    },
+    {
+        key: 'noiseFrequency',
+        elementId: 'noise-frequency',
+        configKey: 'noiseFrequency',
+        parse: value => parseFloat(value),
+        format: value => ({ text: getNoiseDetailLabel(value) })
+    },
+    {
+        key: 'morphSpeed',
+        elementId: 'morph-speed',
+        configKey: 'idleMorphSpeed',
+        parse: value => parseFloat(value),
+        apply: value => {
+            CONFIG.idleMorphSpeed = value;
+            CONFIG.morphSpeed = value * 0.6;
+        },
+        read: () => CONFIG.idleMorphSpeed,
+        format: value => ({ text: getMorphSpeedLabel(value) })
+    },
+    {
+        key: 'perspective',
+        elementId: 'perspective',
+        configKey: 'perspective',
+        parse: value => parseInt(value, 10),
+        format: value => ({ text: value })
+    },
+    {
+        key: 'brightness',
+        elementId: 'brightness',
+        configKey: 'brightnessMultiplier',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(2) })
+    },
+    {
+        key: 'lineWidth',
+        elementId: 'line-width',
+        configKey: 'lineWidth',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(1) })
+    },
+    {
+        key: 'glowIntensity',
+        elementId: 'glow-intensity',
+        configKey: 'glowMaxOpacity',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(2) })
+    },
+    {
+        key: 'starCount',
+        elementId: 'star-count',
+        configKey: 'starCount',
+        parse: value => parseInt(value, 10),
+        format: value => ({ text: value }),
+        liveDisplayOnly: true,
+        afterCommit: value => {
+            CONFIG.starCount = value;
+            regenerateStars(CONFIG.starCount);
+        }
+    },
+    {
+        key: 'starTwinkle',
+        elementId: 'star-twinkle',
+        configKey: 'starTwinkleSpeed',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(1) })
+    },
+    {
+        key: 'starSize',
+        elementId: 'star-size',
+        configKey: 'starMaxRadius',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(1) }),
+        liveDisplayOnly: true,
+        afterCommit: value => {
+            CONFIG.starMaxRadius = value;
+            regenerateStars(CONFIG.starCount);
+        }
+    },
+    {
+        key: 'starBrightness',
+        elementId: 'star-brightness',
+        configKey: 'starBrightness',
+        parse: value => parseFloat(value),
+        format: value => ({ text: value.toFixed(1) })
+    }
+];
+
 const CONFIG = {
     // Blob parameters
     gridResolution: { lat: 60, lon: 60 },
@@ -15,7 +155,7 @@ const CONFIG = {
     morphSpeed: 0.003,     // Base morph speed when scrolling
     idleMorphSpeed: 0.005, // Faster morph speed when idle
     idleThreshold: 0.001,  // Velocity below this = idle
-    baseRadius: 200,
+    baseRadius: getDefaultBaseRadius(),
     brightnessMultiplier: 1.0,
     lineWidth: 1.0,
     perspective: 600,
@@ -30,10 +170,6 @@ const CONFIG = {
     // Color themes per section (dark enough to not interfere with text)
     sectionColors: {
         'hero': '#5A0080',           // Dark purple
-        'featured-1': '#7A0A45',     // Dark pink
-        'featured-2': '#005A5E',     // Dark turquoise
-        'featured-3': '#6B2820',     // Dark tomato
-        'featured-4': '#3E2C5A',     // Dark purple
         'about': '#006640',          // Dark green
         'contact': '#6B5A00',        // Dark gold
         'projects-grid': '#6B1F00',  // Dark orange
@@ -54,10 +190,75 @@ const CONFIG = {
     targetFPSMobile: 30,
 };
 
-const isMobile = window.innerWidth < 768;
-const targetFPS = isMobile ? CONFIG.targetFPSMobile : CONFIG.targetFPS;
-const frameInterval = 1000 / targetFPS;
+function getSectionColor(sectionId, explicitColor) {
+    return explicitColor || CONFIG.sectionColors[sectionId] || CONFIG.sectionColors.hero;
+}
+
+function serializeBlobSettings() {
+    return {
+        morphSpeed: CONFIG.idleMorphSpeed,
+        noiseAmplitude: CONFIG.noiseAmplitude,
+        noiseFrequency: CONFIG.noiseFrequency,
+        baseRadius: CONFIG.baseRadius,
+        brightnessMultiplier: CONFIG.brightnessMultiplier,
+        lineWidth: CONFIG.lineWidth,
+        perspective: CONFIG.perspective,
+        glowMaxOpacity: CONFIG.glowMaxOpacity,
+        hueOverride: CONFIG.hueOverride,
+        starCount: CONFIG.starCount,
+        starTwinkleSpeed: CONFIG.starTwinkleSpeed,
+        starMaxRadius: CONFIG.starMaxRadius,
+        starBrightness: CONFIG.starBrightness
+    };
+}
+
+function readControlValue(def) {
+    if (typeof def.read === 'function') {
+        return def.read();
+    }
+    return CONFIG[def.configKey];
+}
+
+function applyControlValue(def, value) {
+    if (typeof def.apply === 'function') {
+        def.apply(value);
+        return;
+    }
+    CONFIG[def.configKey] = value;
+}
+
+function createBlobDebug() {
+    return {
+        getState() {
+            return {
+                currentSection: CONFIG.currentSection,
+                targetColor: CONFIG.targetColor,
+                displayColor: CONFIG.displayColor,
+                hueOverride: CONFIG.hueOverride,
+                rainbowMode: CONFIG.rainbowMode,
+                baseRadius: CONFIG.baseRadius,
+                perspective: CONFIG.perspective,
+                lineWidth: CONFIG.lineWidth,
+                glowMaxOpacity: CONFIG.glowMaxOpacity,
+                noiseAmplitude: CONFIG.noiseAmplitude,
+                noiseFrequency: CONFIG.noiseFrequency,
+                idleMorphSpeed: CONFIG.idleMorphSpeed,
+                morphSpeed: CONFIG.morphSpeed,
+                starCount: CONFIG.starCount,
+                starTwinkleSpeed: CONFIG.starTwinkleSpeed,
+                starMaxRadius: CONFIG.starMaxRadius,
+                starBrightness: CONFIG.starBrightness,
+                scrollVelocity,
+                rotation: { ...rotation },
+                defaults: getDefaultBlobSettings(),
+                persisted: serializeBlobSettings()
+            };
+        }
+    };
+}
+
 const dpr = window.devicePixelRatio || 1;
+let viewportMode = getViewportMode();
 
 // ==========================================
 // SIMPLEX NOISE (Inline Implementation)
@@ -339,6 +540,63 @@ function renderStarfield(time) {
 let blobCanvas, blobCtx, vertices = [];
 let rotation = { x: 0, y: 0, z: 0 };
 
+function buildBlobVertices() {
+    vertices = [];
+    const gridRes = getCurrentGridResolution();
+
+    for (let lat = 0; lat <= gridRes.lat; lat++) {
+        for (let lon = 0; lon <= gridRes.lon; lon++) {
+            const theta = (lat / gridRes.lat) * Math.PI;
+            const phi = (lon / gridRes.lon) * Math.PI * 2;
+
+            vertices.push({
+                lat,
+                lon,
+                theta,
+                phi,
+                x: 0,
+                y: 0,
+                z: 0,
+                projected: { x: 0, y: 0 }
+            });
+        }
+    }
+}
+
+function syncBlobSizeToViewportMode(previousMode, nextMode) {
+    if (previousMode === nextMode) {
+        return;
+    }
+
+    const previousDefault = previousMode === 'mobile' ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
+    const nextDefault = nextMode === 'mobile' ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
+
+    if (CONFIG.baseRadius === previousDefault) {
+        CONFIG.baseRadius = nextDefault;
+        const baseRadiusSlider = document.getElementById('base-radius');
+        const baseRadiusValue = document.getElementById('base-radius-value');
+        if (baseRadiusSlider) {
+            baseRadiusSlider.value = nextDefault;
+        }
+        if (baseRadiusValue) {
+            baseRadiusValue.textContent = `${nextDefault}px`;
+        }
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(serializeBlobSettings()));
+    }
+}
+
+function handleViewportModeChange() {
+    const nextMode = getViewportMode();
+    if (nextMode === viewportMode) {
+        return;
+    }
+
+    const previousMode = viewportMode;
+    viewportMode = nextMode;
+    buildBlobVertices();
+    syncBlobSizeToViewportMode(previousMode, nextMode);
+}
+
 function initBlobMesh() {
     blobCanvas = document.getElementById('blob-canvas');
     if (!blobCanvas) return;
@@ -354,30 +612,12 @@ function initBlobMesh() {
         blobCanvas.style.width = w + 'px';
         blobCanvas.style.height = h + 'px';
         blobCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        handleViewportModeChange();
     }
     resizeBlob();
     window.addEventListener('resize', resizeBlob);
 
-    // Generate 3D sphere mesh
-    const gridRes = isMobile ? CONFIG.gridResolutionMobile : CONFIG.gridResolution;
-
-    for (let lat = 0; lat <= gridRes.lat; lat++) {
-        for (let lon = 0; lon <= gridRes.lon; lon++) {
-            const theta = (lat / gridRes.lat) * Math.PI;
-            const phi = (lon / gridRes.lon) * Math.PI * 2;
-
-            vertices.push({
-                lat,
-                lon,
-                theta,
-                phi,
-                x: 0,
-                y: 0,
-                z: 0,
-                projected: { x: 0, y: 0 },
-            });
-        }
-    }
+    buildBlobVertices();
 }
 
 // ==========================================
@@ -428,6 +668,7 @@ function project3D(x, y, z) {
 // ==========================================
 let scrollVelocity = 0;
 let lastScrollY = 0;
+window.__blobDebug = createBlobDebug();
 
 function setupScrollListener() {
     const scrollContainer = document.querySelector('.scroll-container');
@@ -460,6 +701,7 @@ function renderBlob(currentTime) {
         return;
     }
 
+    const frameInterval = 1000 / (isMobileViewport() ? CONFIG.targetFPSMobile : CONFIG.targetFPS);
     if (currentTime - lastFrameTime < frameInterval) {
         requestAnimationFrame(renderBlob);
         return;
@@ -482,7 +724,7 @@ function renderBlob(currentTime) {
     rotation.x += 0.0002;
     rotation.z += 0.0001;
 
-    const gridRes = isMobile ? CONFIG.gridResolutionMobile : CONFIG.gridResolution;
+    const gridRes = getCurrentGridResolution();
     const currentRadius = CONFIG.baseRadius;
 
     // Update vertices with noise-based morphing
@@ -776,7 +1018,7 @@ function initBlobSystem() {
 window.addEventListener('sectionChanged', (event) => {
     CONFIG.currentSection = event.detail.section;
     if (CONFIG.hueOverride === null && !CONFIG.rainbowMode) {
-        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+        CONFIG.targetColor = getSectionColor(CONFIG.currentSection, event.detail.color);
     }
 });
 
@@ -796,22 +1038,7 @@ function initControlPanel() {
     const resetBtn = document.getElementById('controls-reset');
 
     if (!controlPanel || !toggleBtn || !resetBtn) return;
-
-    const DEFAULT_CONFIG = {
-        noiseAmplitude: 0.10,
-        noiseFrequency: 0.003,
-        idleMorphSpeed: 0.005,
-        baseRadius: 200,
-        brightnessMultiplier: 1.0,
-        lineWidth: 1.0,
-        perspective: 600,
-        glowMaxOpacity: 0.15,
-        hueOverride: null,
-        starCount: 250,
-        starTwinkleSpeed: 1.0,
-        starMaxRadius: 2.0,
-        starBrightness: 1.0,
-    };
+    const DEFAULT_CONFIG = getDefaultBlobSettings();
 
     // Toggle panel open/closed
     toggleBtn.addEventListener('click', (e) => {
@@ -834,7 +1061,7 @@ function initControlPanel() {
     document.querySelectorAll('.controls-section-header').forEach(header => {
         header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
     });
-    if (isMobile) {
+    if (isMobileViewport()) {
         document.querySelectorAll('.controls-section').forEach(s => s.classList.add('collapsed'));
     }
 
@@ -844,6 +1071,11 @@ function initControlPanel() {
         if (display) {
             display.textContent = value + suffix;
         }
+    }
+
+    function updateControlDisplay(def, value) {
+        const formatted = def.format(value);
+        updateValueDisplay(def.elementId, formatted.text, formatted.suffix || '');
     }
 
     // Slider references
@@ -860,76 +1092,55 @@ function initControlPanel() {
         starCount: document.getElementById('star-count'),
         starTwinkle: document.getElementById('star-twinkle'),
         starSize: document.getElementById('star-size'),
-        starBrightness: document.getElementById('star-brightness'),
+        starBrightness: document.getElementById('star-brightness')
     };
 
-    // --- Shape section ---
-    if (sliders.baseRadius) {
-        sliders.baseRadius.addEventListener('input', (e) => {
-            CONFIG.baseRadius = parseInt(e.target.value);
-            updateValueDisplay('base-radius', CONFIG.baseRadius, 'px');
-            saveSettings();
-        });
+    const sliderControls = new Map(
+        CONTROL_DEFS.map(def => [def.key, { ...def, element: sliders[def.key] }])
+    );
+
+    function saveSettings() {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(serializeBlobSettings()));
     }
 
-    if (sliders.noiseAmplitude) {
-        sliders.noiseAmplitude.addEventListener('input', (e) => {
-            CONFIG.noiseAmplitude = parseFloat(e.target.value);
-            updateValueDisplay('noise-amplitude', CONFIG.noiseAmplitude.toFixed(2));
-            saveSettings();
-        });
+    function commitSliderValue(def, rawValue) {
+        const value = def.parse(rawValue);
+        if (typeof def.afterCommit === 'function') {
+            def.afterCommit(value);
+        } else {
+            applyControlValue(def, value);
+        }
+        updateControlDisplay(def, readControlValue(def));
+        saveSettings();
     }
 
-    if (sliders.noiseFrequency) {
-        sliders.noiseFrequency.addEventListener('input', (e) => {
-            CONFIG.noiseFrequency = parseFloat(e.target.value);
-            updateValueDisplay('noise-frequency', getNoiseDetailLabel(CONFIG.noiseFrequency));
-            saveSettings();
-        });
+    function setSliderUIValue(def, value) {
+        if (def.element) {
+            def.element.value = value;
+        }
+        updateControlDisplay(def, value);
     }
 
-    if (sliders.morphSpeed) {
-        sliders.morphSpeed.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            CONFIG.idleMorphSpeed = value;
-            CONFIG.morphSpeed = value * 0.6;
-            updateValueDisplay('morph-speed', getMorphSpeedLabel(value));
-            saveSettings();
-        });
-    }
+    sliderControls.forEach(def => {
+        if (!def.element) return;
 
-    if (sliders.perspective) {
-        sliders.perspective.addEventListener('input', (e) => {
-            CONFIG.perspective = parseInt(e.target.value);
-            updateValueDisplay('perspective', CONFIG.perspective);
+        def.element.addEventListener('input', (e) => {
+            const value = def.parse(e.target.value);
+            if (def.liveDisplayOnly) {
+                updateControlDisplay(def, value);
+                return;
+            }
+            applyControlValue(def, value);
+            updateControlDisplay(def, readControlValue(def));
             saveSettings();
         });
-    }
 
-    // --- Style section ---
-    if (sliders.brightness) {
-        sliders.brightness.addEventListener('input', (e) => {
-            CONFIG.brightnessMultiplier = parseFloat(e.target.value);
-            updateValueDisplay('brightness', CONFIG.brightnessMultiplier.toFixed(2));
-            saveSettings();
-        });
-    }
-
-    if (sliders.lineWidth) {
-        sliders.lineWidth.addEventListener('input', (e) => {
-            CONFIG.lineWidth = parseFloat(e.target.value);
-            updateValueDisplay('line-width', CONFIG.lineWidth.toFixed(1));
-            saveSettings();
-        });
-    }
-
-    if (sliders.glowIntensity) {
-        sliders.glowIntensity.addEventListener('input', (e) => {
-            CONFIG.glowMaxOpacity = parseFloat(e.target.value);
-            updateValueDisplay('glow-intensity', CONFIG.glowMaxOpacity.toFixed(2));
-            saveSettings();
-        });
-    }
+        if (def.liveDisplayOnly || typeof def.afterCommit === 'function') {
+            def.element.addEventListener('change', (e) => {
+                commitSliderValue(def, e.target.value);
+            });
+        }
+    });
 
     // --- Hue slider + rainbow cloud easter egg ---
     const hueSlider = sliders.hueSlider;
@@ -1034,7 +1245,7 @@ function initControlPanel() {
     function clearHueOverride() {
         deactivateRainbow();
         CONFIG.hueOverride = null;
-        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+        CONFIG.targetColor = getSectionColor(CONFIG.currentSection);
         updateValueDisplay('hue-slider', 'Auto');
         if (hueClear) hueClear.classList.add('hidden');
         saveSettings();
@@ -1051,128 +1262,37 @@ function initControlPanel() {
         hueClear.addEventListener('click', clearHueOverride);
     }
 
-    // --- Stars section ---
-    if (sliders.starCount) {
-        sliders.starCount.addEventListener('input', (e) => {
-            updateValueDisplay('star-count', parseInt(e.target.value));
-        });
-        sliders.starCount.addEventListener('change', (e) => {
-            CONFIG.starCount = parseInt(e.target.value);
-            regenerateStars(CONFIG.starCount);
-            saveSettings();
-        });
-    }
-
-    if (sliders.starTwinkle) {
-        sliders.starTwinkle.addEventListener('input', (e) => {
-            CONFIG.starTwinkleSpeed = parseFloat(e.target.value);
-            updateValueDisplay('star-twinkle', CONFIG.starTwinkleSpeed.toFixed(1));
-            saveSettings();
-        });
-    }
-
-    if (sliders.starSize) {
-        sliders.starSize.addEventListener('input', (e) => {
-            updateValueDisplay('star-size', parseFloat(e.target.value).toFixed(1));
-        });
-        sliders.starSize.addEventListener('change', (e) => {
-            CONFIG.starMaxRadius = parseFloat(e.target.value);
-            regenerateStars(CONFIG.starCount);
-            saveSettings();
-        });
-    }
-
-    if (sliders.starBrightness) {
-        sliders.starBrightness.addEventListener('input', (e) => {
-            CONFIG.starBrightness = parseFloat(e.target.value);
-            updateValueDisplay('star-brightness', CONFIG.starBrightness.toFixed(1));
-            saveSettings();
-        });
-    }
-
-    // --- LocalStorage persistence ---
-    function saveSettings() {
-        const settings = {
-            morphSpeed: CONFIG.idleMorphSpeed,
-            noiseAmplitude: CONFIG.noiseAmplitude,
-            noiseFrequency: CONFIG.noiseFrequency,
-            baseRadius: CONFIG.baseRadius,
-            brightnessMultiplier: CONFIG.brightnessMultiplier,
-            lineWidth: CONFIG.lineWidth,
-            perspective: CONFIG.perspective,
-            glowMaxOpacity: CONFIG.glowMaxOpacity,
-            hueOverride: CONFIG.hueOverride,
-            starCount: CONFIG.starCount,
-            starTwinkleSpeed: CONFIG.starTwinkleSpeed,
-            starMaxRadius: CONFIG.starMaxRadius,
-            starBrightness: CONFIG.starBrightness,
-        };
-        localStorage.setItem('blobSettings', JSON.stringify(settings));
-    }
-
     function loadSettings() {
-        const saved = localStorage.getItem('blobSettings');
+        const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
         if (!saved) return;
         try {
             const s = JSON.parse(saved);
+            const configValues = {
+                morphSpeed: s.morphSpeed,
+                noiseAmplitude: s.noiseAmplitude,
+                noiseFrequency: s.noiseFrequency,
+                baseRadius: s.baseRadius,
+                brightness: s.brightnessMultiplier,
+                lineWidth: s.lineWidth,
+                perspective: s.perspective,
+                glowIntensity: s.glowMaxOpacity,
+                starCount: s.starCount,
+                starTwinkle: s.starTwinkleSpeed,
+                starSize: s.starMaxRadius,
+                starBrightness: s.starBrightness
+            };
 
-            if (s.morphSpeed !== undefined) {
-                CONFIG.idleMorphSpeed = s.morphSpeed;
-                CONFIG.morphSpeed = s.morphSpeed * 0.6;
-                if (sliders.morphSpeed) {
-                    sliders.morphSpeed.value = s.morphSpeed;
-                    updateValueDisplay('morph-speed', getMorphSpeedLabel(s.morphSpeed));
+            sliderControls.forEach(def => {
+                const value = configValues[def.key];
+                if (value === undefined) return;
+                if (typeof def.afterCommit === 'function') {
+                    def.afterCommit(value);
+                } else {
+                    applyControlValue(def, value);
                 }
-            }
-            if (s.noiseAmplitude !== undefined) {
-                CONFIG.noiseAmplitude = s.noiseAmplitude;
-                if (sliders.noiseAmplitude) {
-                    sliders.noiseAmplitude.value = s.noiseAmplitude;
-                    updateValueDisplay('noise-amplitude', s.noiseAmplitude.toFixed(2));
-                }
-            }
-            if (s.noiseFrequency !== undefined) {
-                CONFIG.noiseFrequency = s.noiseFrequency;
-                if (sliders.noiseFrequency) {
-                    sliders.noiseFrequency.value = s.noiseFrequency;
-                    updateValueDisplay('noise-frequency', getNoiseDetailLabel(s.noiseFrequency));
-                }
-            }
-            if (s.baseRadius !== undefined) {
-                CONFIG.baseRadius = s.baseRadius;
-                if (sliders.baseRadius) {
-                    sliders.baseRadius.value = s.baseRadius;
-                    updateValueDisplay('base-radius', s.baseRadius, 'px');
-                }
-            }
-            if (s.brightnessMultiplier !== undefined) {
-                CONFIG.brightnessMultiplier = s.brightnessMultiplier;
-                if (sliders.brightness) {
-                    sliders.brightness.value = s.brightnessMultiplier;
-                    updateValueDisplay('brightness', s.brightnessMultiplier.toFixed(2));
-                }
-            }
-            if (s.lineWidth !== undefined) {
-                CONFIG.lineWidth = s.lineWidth;
-                if (sliders.lineWidth) {
-                    sliders.lineWidth.value = s.lineWidth;
-                    updateValueDisplay('line-width', s.lineWidth.toFixed(1));
-                }
-            }
-            if (s.perspective !== undefined) {
-                CONFIG.perspective = s.perspective;
-                if (sliders.perspective) {
-                    sliders.perspective.value = s.perspective;
-                    updateValueDisplay('perspective', s.perspective);
-                }
-            }
-            if (s.glowMaxOpacity !== undefined) {
-                CONFIG.glowMaxOpacity = s.glowMaxOpacity;
-                if (sliders.glowIntensity) {
-                    sliders.glowIntensity.value = s.glowMaxOpacity;
-                    updateValueDisplay('glow-intensity', s.glowMaxOpacity.toFixed(2));
-                }
-            }
+                setSliderUIValue(def, readControlValue(def));
+            });
+
             if (s.hueOverride !== undefined && s.hueOverride !== null) {
                 CONFIG.hueOverride = s.hueOverride;
                 if (hueSlider) hueSlider.value = s.hueOverride;
@@ -1180,36 +1300,13 @@ function initControlPanel() {
                 if (hueClear) hueClear.classList.remove('hidden');
                 updateEasterEggPosition();
             }
-            if (s.starCount !== undefined) {
-                CONFIG.starCount = s.starCount;
-                if (sliders.starCount) {
-                    sliders.starCount.value = s.starCount;
-                    updateValueDisplay('star-count', s.starCount);
+            if (s.hueOverride === undefined || s.hueOverride === null) {
+                if (hueSlider) {
+                    hueSlider.value = 0;
                 }
+                updateValueDisplay('hue-slider', 'Auto');
             }
-            if (s.starTwinkleSpeed !== undefined) {
-                CONFIG.starTwinkleSpeed = s.starTwinkleSpeed;
-                if (sliders.starTwinkle) {
-                    sliders.starTwinkle.value = s.starTwinkleSpeed;
-                    updateValueDisplay('star-twinkle', s.starTwinkleSpeed.toFixed(1));
-                }
-            }
-            if (s.starMaxRadius !== undefined) {
-                CONFIG.starMaxRadius = s.starMaxRadius;
-                if (sliders.starSize) {
-                    sliders.starSize.value = s.starMaxRadius;
-                    updateValueDisplay('star-size', s.starMaxRadius.toFixed(1));
-                }
-            }
-            if (s.starBrightness !== undefined) {
-                CONFIG.starBrightness = s.starBrightness;
-                if (sliders.starBrightness) {
-                    sliders.starBrightness.value = s.starBrightness;
-                    updateValueDisplay('star-brightness', s.starBrightness.toFixed(1));
-                }
-            }
-            // Regenerate stars with loaded settings
-            if (s.starCount !== undefined || s.starMaxRadius !== undefined) {
+            if (s.starCount === undefined && s.starMaxRadius === undefined) {
                 regenerateStars(CONFIG.starCount);
             }
         } catch (e) {
@@ -1223,41 +1320,22 @@ function initControlPanel() {
         deactivateRainbow();
 
         // Reset all CONFIG
-        CONFIG.noiseAmplitude = DEFAULT_CONFIG.noiseAmplitude;
-        CONFIG.noiseFrequency = DEFAULT_CONFIG.noiseFrequency;
-        CONFIG.idleMorphSpeed = DEFAULT_CONFIG.idleMorphSpeed;
-        CONFIG.morphSpeed = DEFAULT_CONFIG.idleMorphSpeed * 0.6;
-        CONFIG.baseRadius = DEFAULT_CONFIG.baseRadius;
-        CONFIG.brightnessMultiplier = DEFAULT_CONFIG.brightnessMultiplier;
-        CONFIG.lineWidth = DEFAULT_CONFIG.lineWidth;
-        CONFIG.perspective = DEFAULT_CONFIG.perspective;
-        CONFIG.glowMaxOpacity = DEFAULT_CONFIG.glowMaxOpacity;
+        sliderControls.forEach(def => {
+            const defaultValue = DEFAULT_CONFIG[def.configKey];
+            if (typeof def.afterCommit === 'function') {
+                def.afterCommit(defaultValue);
+            } else {
+                applyControlValue(def, defaultValue);
+            }
+            setSliderUIValue(def, readControlValue(def));
+        });
         CONFIG.hueOverride = null;
-        CONFIG.starCount = DEFAULT_CONFIG.starCount;
-        CONFIG.starTwinkleSpeed = DEFAULT_CONFIG.starTwinkleSpeed;
-        CONFIG.starMaxRadius = DEFAULT_CONFIG.starMaxRadius;
-        CONFIG.starBrightness = DEFAULT_CONFIG.starBrightness;
 
         // Re-sync section color
-        CONFIG.targetColor = CONFIG.sectionColors[CONFIG.currentSection] || CONFIG.sectionColors['hero'];
+        CONFIG.targetColor = getSectionColor(CONFIG.currentSection);
 
-        // Update all sliders + displays
-        if (sliders.morphSpeed) { sliders.morphSpeed.value = DEFAULT_CONFIG.idleMorphSpeed; updateValueDisplay('morph-speed', getMorphSpeedLabel(DEFAULT_CONFIG.idleMorphSpeed)); }
-        if (sliders.noiseAmplitude) { sliders.noiseAmplitude.value = DEFAULT_CONFIG.noiseAmplitude; updateValueDisplay('noise-amplitude', DEFAULT_CONFIG.noiseAmplitude.toFixed(2)); }
-        if (sliders.noiseFrequency) { sliders.noiseFrequency.value = DEFAULT_CONFIG.noiseFrequency; updateValueDisplay('noise-frequency', getNoiseDetailLabel(DEFAULT_CONFIG.noiseFrequency)); }
-        if (sliders.baseRadius) { sliders.baseRadius.value = DEFAULT_CONFIG.baseRadius; updateValueDisplay('base-radius', DEFAULT_CONFIG.baseRadius, 'px'); }
-        if (sliders.perspective) { sliders.perspective.value = DEFAULT_CONFIG.perspective; updateValueDisplay('perspective', DEFAULT_CONFIG.perspective); }
-        if (sliders.brightness) { sliders.brightness.value = DEFAULT_CONFIG.brightnessMultiplier; updateValueDisplay('brightness', DEFAULT_CONFIG.brightnessMultiplier.toFixed(2)); }
-        if (sliders.lineWidth) { sliders.lineWidth.value = DEFAULT_CONFIG.lineWidth; updateValueDisplay('line-width', DEFAULT_CONFIG.lineWidth.toFixed(1)); }
-        if (sliders.glowIntensity) { sliders.glowIntensity.value = DEFAULT_CONFIG.glowMaxOpacity; updateValueDisplay('glow-intensity', DEFAULT_CONFIG.glowMaxOpacity.toFixed(2)); }
         if (hueSlider) { hueSlider.value = 0; updateValueDisplay('hue-slider', 'Auto'); updateEasterEggPosition(); }
         if (hueClear) hueClear.classList.add('hidden');
-        if (sliders.starCount) { sliders.starCount.value = DEFAULT_CONFIG.starCount; updateValueDisplay('star-count', DEFAULT_CONFIG.starCount); }
-        if (sliders.starTwinkle) { sliders.starTwinkle.value = DEFAULT_CONFIG.starTwinkleSpeed; updateValueDisplay('star-twinkle', DEFAULT_CONFIG.starTwinkleSpeed.toFixed(1)); }
-        if (sliders.starSize) { sliders.starSize.value = DEFAULT_CONFIG.starMaxRadius; updateValueDisplay('star-size', DEFAULT_CONFIG.starMaxRadius.toFixed(1)); }
-        if (sliders.starBrightness) { sliders.starBrightness.value = DEFAULT_CONFIG.starBrightness; updateValueDisplay('star-brightness', DEFAULT_CONFIG.starBrightness.toFixed(1)); }
-
-        regenerateStars(DEFAULT_CONFIG.starCount);
         saveSettings();
     });
 
