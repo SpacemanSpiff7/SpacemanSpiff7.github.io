@@ -69,6 +69,15 @@ This ensures users get fresh JavaScript immediately after deployment.
 4. **Contact** - Contact information
 5. **Projects Grid** - All projects displayed in grid
 
+### Typography
+
+| Usage | Font Family | Fallbacks |
+|-------|------------|-----------|
+| Titles / Headings | Silkscreen | 'Courier New', monospace |
+| Body copy / Section text | IBM Plex Mono | monospace |
+| UI / System text | Inter | -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif |
+| Blob system labels | Audiowide | -- |
+
 ### Data-Driven Configuration
 
 **Single Source of Truth**: `data/projects.json`

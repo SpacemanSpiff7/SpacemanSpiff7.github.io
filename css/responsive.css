@@ -223,6 +223,17 @@
         margin-top: 25vh;
     }
 
+    /* Vertically center About & Contact content as a group */
+    #about.snap-section,
+    #contact.snap-section {
+        justify-content: center;
+    }
+
+    #about.snap-section .section-title,
+    #contact.snap-section .section-title {
+        margin-top: 0;
+    }
+
     /* Progress indicator mobile */
     .progress-indicator {
         right: var(--space-3);
