@@ -2042,6 +2042,63 @@ input[type="checkbox"]:indeterminate + .tick-box svg {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.06);
 }
+.bulk-bar__delete {
+  background: none;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--priority-critical);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 4px;
+  transition: color var(--duration-fast), background var(--duration-fast), border-color var(--duration-fast);
+}
+.bulk-bar__delete svg {
+  width: 13px;
+  height: 13px;
+}
+.bulk-bar__delete:hover {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+/* ===== Confirm Dialog ===== */
+.confirm-backdrop--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.confirm-dialog {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  max-width: 380px;
+  width: calc(100% - 32px);
+}
+.confirm-dialog h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.confirm-dialog__message {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
 /* Bulk dropdowns */
 .bulk-dropdown {

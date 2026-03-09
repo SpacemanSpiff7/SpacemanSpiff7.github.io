@@ -1120,6 +1120,63 @@ function deleteTicket(id) {
   }
 
   const board = activeBoard();
+  const ticket = board.tickets.find(t => t.id === id);
+  if (!ticket) return;
+
+  const canceledCol = boardColumns().find(c => c.id === "canceled");
+  const canceledId = canceledCol ? canceledCol.id : boardColumns()[boardColumns().length - 1].id;
+
+  // If not in canceled column, move there instead of deleting
+  if (ticket.status !== canceledId) {
+    moveTicketToColumn(id, canceledId);
+    const ticketLabel = ticket.title.length > 28
+      ? ticket.title.slice(0, 27) + "\u2026"
+      : ticket.title;
+    showToast("Moved \u201c" + ticketLabel + "\u201d to Canceled");
+    return;
+  }
+
+  // Already in canceled — confirm permanent deletion
+  showConfirmDialog({
+    title: "Delete ticket?",
+    message: "\"" + ticket.title + "\" will be permanently deleted.",
+    confirmLabel: "Delete",
+    onConfirm: () => permanentlyDeleteTicket(id)
+  });
+}
+
+function moveTicketToColumn(id, targetStatus) {
+  const board = activeBoard();
+  const ticket = board.tickets.find(t => t.id === id);
+  if (!ticket) return;
+
+  const oldStatus = ticket.status;
+  if (oldStatus === targetStatus) return;
+
+  // Remove from old column
+  if (board.columnOrder[oldStatus]) {
+    board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+  }
+
+  // Add to target column
+  if (!board.columnOrder[targetStatus]) board.columnOrder[targetStatus] = [];
+  board.columnOrder[targetStatus].push(id);
+
+  ticket.status = targetStatus;
+  ticket.updatedAt = new Date().toISOString();
+
+  saveBoardState();
+  renderBoard();
+}
+
+function permanentlyDeleteTicket(id) {
+  // In View All mode, find which board owns this ticket
+  if (viewAllActive) {
+    const boardIdx = state.boards.findIndex(b => b.tickets.some(t => t.id === id));
+    if (boardIdx !== -1) state.activeBoardIndex = boardIdx;
+  }
+
+  const board = activeBoard();
   const boardIndex = state.activeBoardIndex;
   const ticket = board.tickets.find(t => t.id === id);
   if (!ticket) return;
@@ -1177,6 +1234,85 @@ function deleteTicket(id) {
       showToast("Ticket restored");
     }
   });
+}
+
+// ===== Confirm Dialog =====
+
+function showConfirmDialog({ title, message, confirmLabel, onConfirm }) {
+  // Remove any existing confirm dialog
+  const existing = document.getElementById("confirm-dialog-backdrop");
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop confirm-backdrop";
+  backdrop.id = "confirm-dialog-backdrop";
+
+  const dialog = document.createElement("div");
+  dialog.className = "confirm-dialog";
+  dialog.setAttribute("role", "alertdialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "confirm-title");
+
+  const h2 = document.createElement("h2");
+  h2.id = "confirm-title";
+  h2.textContent = title;
+  dialog.appendChild(h2);
+
+  const p = document.createElement("p");
+  p.className = "confirm-dialog__message";
+  p.textContent = message;
+  dialog.appendChild(p);
+
+  const actions = document.createElement("div");
+  actions.className = "confirm-dialog__actions";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.className = "btn btn--ghost";
+  cancelBtn.textContent = "Cancel";
+
+  const confirmBtn = document.createElement("button");
+  confirmBtn.type = "button";
+  confirmBtn.className = "btn btn--danger";
+  confirmBtn.textContent = confirmLabel || "Confirm";
+
+  actions.appendChild(cancelBtn);
+  actions.appendChild(confirmBtn);
+  dialog.appendChild(actions);
+  backdrop.appendChild(dialog);
+  document.body.appendChild(backdrop);
+
+  // Force reflow then show
+  backdrop.offsetHeight;
+  backdrop.classList.add("confirm-backdrop--visible");
+
+  function close() {
+    backdrop.classList.remove("confirm-backdrop--visible");
+    backdrop.addEventListener("transitionend", () => backdrop.remove(), { once: true });
+    // Fallback removal
+    setTimeout(() => { if (backdrop.parentNode) backdrop.remove(); }, 300);
+  }
+
+  cancelBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  confirmBtn.addEventListener("click", () => {
+    close();
+    onConfirm();
+  });
+
+  // Focus confirm button for keyboard access
+  confirmBtn.focus();
+
+  // Escape to cancel
+  function onKey(e) {
+    if (e.key === "Escape") {
+      close();
+      document.removeEventListener("keydown", onKey);
+    }
+  }
+  document.addEventListener("keydown", onKey);
 }
 
 // ===== Modal =====
@@ -2792,9 +2928,73 @@ function executeBulkAction(action, value) {
   showToast(ids.length + " ticket" + (ids.length !== 1 ? "s" : "") + " updated");
 }
 
+function executeBulkDelete() {
+  const board = activeBoard();
+  const ids = Array.from(selectedTicketIds);
+  if (ids.length === 0) return;
+
+  const canceledCol = boardColumns().find(c => c.id === "canceled");
+  const canceledId = canceledCol ? canceledCol.id : boardColumns()[boardColumns().length - 1].id;
+
+  // Split into tickets already in canceled vs not
+  const inCanceled = [];
+  const notInCanceled = [];
+  for (const id of ids) {
+    const ticket = board.tickets.find(t => t.id === id);
+    if (!ticket) continue;
+    if (ticket.status === canceledId) {
+      inCanceled.push(id);
+    } else {
+      notInCanceled.push(id);
+    }
+  }
+
+  // Move non-canceled tickets to canceled
+  if (notInCanceled.length > 0) {
+    for (const id of notInCanceled) {
+      const ticket = board.tickets.find(t => t.id === id);
+      if (!ticket) continue;
+      const oldStatus = ticket.status;
+      if (board.columnOrder[oldStatus]) {
+        board.columnOrder[oldStatus] = board.columnOrder[oldStatus].filter(tid => tid !== id);
+      }
+      if (!board.columnOrder[canceledId]) board.columnOrder[canceledId] = [];
+      board.columnOrder[canceledId].push(id);
+      ticket.status = canceledId;
+      ticket.updatedAt = new Date().toISOString();
+    }
+    saveBoardState();
+    clearSelection();
+    renderBoard();
+    showToast(notInCanceled.length + " ticket" + (notInCanceled.length !== 1 ? "s" : "") + " moved to Canceled");
+  }
+
+  // Permanently delete canceled tickets (with confirmation)
+  if (inCanceled.length > 0) {
+    const suffix = inCanceled.length === 1 ? "" : "s";
+    showConfirmDialog({
+      title: "Delete " + inCanceled.length + " ticket" + suffix + "?",
+      message: inCanceled.length === 1
+        ? "This ticket will be permanently deleted."
+        : inCanceled.length + " tickets will be permanently deleted.",
+      confirmLabel: "Delete",
+      onConfirm: () => {
+        for (const id of inCanceled) {
+          permanentlyDeleteTicket(id);
+        }
+        clearSelection();
+        showToast(inCanceled.length + " ticket" + suffix + " deleted");
+      }
+    });
+  }
+}
+
 function initBulkBar() {
   const clearBtn = document.getElementById("bulk-clear");
   if (clearBtn) clearBtn.addEventListener("click", clearSelection);
+
+  const deleteBtn = document.getElementById("bulk-delete");
+  if (deleteBtn) deleteBtn.addEventListener("click", executeBulkDelete);
 
   // Wire dropdown triggers
   document.querySelectorAll("[data-bulk-trigger]").forEach(trigger => {

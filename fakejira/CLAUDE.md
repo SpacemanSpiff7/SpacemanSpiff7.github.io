@@ -172,7 +172,9 @@ State object stored in localStorage under key `agilethis-project-<N>`:
 - All icons are inline SVGs (no icon library)
 - `prefers-reduced-motion` disables animations
 - Keyboard shortcuts: N (new ticket), Escape (close modal/dialog)
-- Undo for ticket delete captures board index at deletion time, restores to that specific board
+- Ticket deletion is two-stage: first moves to Canceled column (with toast), then permanently deletes from Canceled with a confirmation dialog and undo toast
+- Bulk delete follows the same pattern: non-canceled tickets move to Canceled, already-canceled tickets prompt for permanent deletion
+- Undo for permanent ticket delete captures board index at deletion time, restores to that specific board
 - Never assume, ask clarifying questions
 
 ## Mobile Layout (<=640px)
