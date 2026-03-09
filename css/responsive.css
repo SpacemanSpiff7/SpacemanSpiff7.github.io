@@ -125,8 +125,7 @@
 
     /* Card spacing for thumb reach */
     .tools-grid,
-    .grid,
-    .contact-grid {
+    .grid {
         grid-template-columns: 1fr;
         gap: var(--space-6);
     }
@@ -134,8 +133,7 @@
     /* Reduce hover lift on touch devices */
     @media (hover: none) {
         .tool-card:hover,
-        .card:hover,
-        .contact-item:hover {
+        .card:hover {
             transform: none;
             box-shadow: var(--shadow-sm);
         }
@@ -143,15 +141,13 @@
 
     /* Tap feedback with scale */
     .tool-card:active,
-    .card:active,
-    .contact-item:active {
+    .card:active {
         transform: scale(0.98);
         transition: transform 0.1s;
     }
 
     .tool-card,
-    .card,
-    .contact-item {
+    .card {
         border-radius: var(--radius-lg);
     }
 
@@ -223,16 +219,10 @@
         margin-top: 25vh;
     }
 
-    /* Vertically center About & Contact content within visible area */
-    #about.snap-section,
-    #contact.snap-section {
-        justify-content: center;
-        padding-top: var(--nav-height);
-        padding-bottom: var(--snap-bottom-offset);
-    }
-
-    #about.snap-section .section-title,
-    #contact.snap-section .section-title {
+    /* Re-assert About & Contact title override after the 25vh rule above
+       (same specificity, source order wins) */
+    #about.snap-section > .section-title,
+    #contact.snap-section > .section-title {
         margin-top: 0;
     }
 
@@ -341,9 +331,7 @@
         box-shadow: none;
     }
 
-    .hero-title,
-    .tools-header h2,
-    .about-content h2 {
+    .hero-title {
         color: var(--color-text-primary);
         letter-spacing: -0.03em;
     }

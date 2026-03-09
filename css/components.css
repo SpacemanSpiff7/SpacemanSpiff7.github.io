@@ -417,119 +417,6 @@
     transform: translateX(2px);
 }
 
-/* ==========================================
-   ABOUT SECTION
-   ========================================== */
-
-.about-content {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto var(--space-16);
-}
-
-.about-content h2 {
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-8);
-    line-height: var(--leading-tight);
-    letter-spacing: -0.03em;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-}
-
-.about-content p {
-    font-size: var(--text-lg);
-    color: var(--color-text-secondary);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-6);
-    max-width: var(--measure-base);
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* ==========================================
-   CONTACT SECTION
-   ========================================== */
-
-.contact-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-8);
-    margin-top: var(--space-16);
-}
-
-.contact-item {
-    background: var(--color-surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-10);
-    text-align: center;
-    border: 1.5px solid var(--color-divider);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    box-shadow: var(--shadow-sm);
-}
-
-.contact-item:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-accent-olive);
-    box-shadow: var(--shadow-lg);
-}
-
-.contact-item .contact-icon {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto var(--space-5);
-    background: var(--color-accent-olive);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-}
-
-.contact-item .contact-icon svg {
-    width: 28px;
-    height: 28px;
-    color: var(--color-surface);
-}
-
-.contact-item h3 {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-2);
-    position: relative;
-    z-index: 1;
-}
-
-.contact-item p {
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-    position: relative;
-    z-index: 1;
-    margin-bottom: var(--space-4);
-}
-
-.contact-item a {
-    color: var(--color-accent-rust);
-    text-decoration: none;
-    font-weight: 600;
-    position: relative;
-    z-index: 1;
-    display: inline-block;
-    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.contact-item a:hover {
-    color: #704032;
-    transform: translateX(3px);
-}
-
 /* Contact links for scroll-snap view */
 .contact-links {
     display: flex;
@@ -966,6 +853,22 @@
     margin-top: 30vh;
 }
 
+/* About & Contact: center the entire content group vertically.
+   Other non-hero sections (featured projects) keep flex-start + margin-top
+   because their content is structured differently (images, feature links).
+   scroll-padding-top on .scroll-container already offsets for the nav,
+   so padding-top stays 0. padding-bottom accounts for the section
+   extending below the viewport (73px) plus the bottom chrome overlay (60px). */
+#about.snap-section,
+#contact.snap-section {
+    justify-content: center;
+    padding-bottom: var(--snap-bottom-offset);
+}
+
+#about.snap-section > .section-title,
+#contact.snap-section > .section-title {
+    margin-top: 0;
+}
 
 /* Featured project sections */
 .featured-project h2 {
