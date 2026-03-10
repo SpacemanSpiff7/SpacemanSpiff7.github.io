@@ -70,12 +70,10 @@ function setFeaturedSectionExpandedState(section, expanded) {
 }
 
 function syncFeaturedSectionCollapseState() {
-    const mobileLayout = isMobileFeaturedLayout();
     const featuredSections = document.querySelectorAll('.featured-project');
 
-    featuredSections.forEach((section, index) => {
-        const shouldExpand = !mobileLayout || index === 0;
-        setFeaturedSectionExpandedState(section, shouldExpand);
+    featuredSections.forEach((section) => {
+        setFeaturedSectionExpandedState(section, true);
     });
 }
 
@@ -262,62 +260,92 @@ function maybeInitScrollHighlighting() {
 function setupScrollHighlighting(navLinks, sectionRegistry) {
     const scrollContainer = document.querySelector('.scroll-container');
     const sectionsById = new Map(sectionRegistry.map(section => [section.id, section]));
-
-    // Create Intersection Observer
-    // Use scrollContainer if it exists, otherwise use viewport (null = viewport)
-    const observerOptions = {
-        root: scrollContainer || null,
-        rootMargin: '-40% 0px -40% 0px',  // Trigger when section is in middle 20%
-        threshold: 0
-    };
-
     let currentSection = 'hero';
-
     let currentBlobSection = 'hero';
+    const sectionElements = sectionRegistry
+        .map(sectionConfig => ({
+            config: sectionConfig,
+            element: document.getElementById(sectionConfig.id)
+        }))
+        .filter(section => section.element);
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const sectionId = entry.target.id;
-                const sectionConfig = sectionsById.get(sectionId);
-                const navTarget = sectionConfig ? sectionConfig.navTarget : null;
+    function applySectionState(sectionConfig) {
+        if (!sectionConfig) {
+            return;
+        }
 
-                // Update nav highlighting (based on nav target)
-                if (navTarget && navTarget !== currentSection) {
-                    currentSection = navTarget;
+        const navTarget = sectionConfig.navTarget;
 
-                    navLinks.forEach(link => {
-                        const linkSection = link.getAttribute('data-section');
-                        if (linkSection === navTarget) {
-                            link.classList.add('active');
-                        } else {
-                            link.classList.remove('active');
-                        }
-                    });
+        if (navTarget && navTarget !== currentSection) {
+            currentSection = navTarget;
+
+            navLinks.forEach(link => {
+                const linkSection = link.getAttribute('data-section');
+                link.classList.toggle('active', linkSection === navTarget);
+            });
+        }
+
+        if (sectionConfig.id !== currentBlobSection) {
+            currentBlobSection = sectionConfig.id;
+            window.dispatchEvent(new CustomEvent('sectionChanged', {
+                detail: {
+                    section: sectionConfig.id,
+                    progressSection: sectionConfig.progressTarget || sectionConfig.id,
+                    color: sectionConfig.blobColor || null
                 }
+            }));
+        }
+    }
 
-                // Notify animations.js of section change (using actual section ID)
-                if (sectionId !== currentBlobSection) {
-                    currentBlobSection = sectionId;
-                    window.dispatchEvent(new CustomEvent('sectionChanged', {
-                        detail: {
-                            section: sectionId,
-                            progressSection: sectionConfig && sectionConfig.progressTarget ? sectionConfig.progressTarget : sectionId,
-                            color: sectionConfig && sectionConfig.blobColor ? sectionConfig.blobColor : null
-                        }
-                    }));
-                }
+    function getViewportMidpoint() {
+        if (scrollContainer) {
+            return scrollContainer.scrollTop + (scrollContainer.clientHeight / 2);
+        }
+
+        return window.scrollY + (window.innerHeight / 2);
+    }
+
+    function updateActiveSection() {
+        if (!sectionElements.length) {
+            return;
+        }
+
+        const viewportMidpoint = getViewportMidpoint();
+        let nearestSection = sectionElements[0];
+        let nearestDistance = Infinity;
+
+        sectionElements.forEach(section => {
+            const sectionMidpoint = section.element.offsetTop + (section.element.offsetHeight / 2);
+            const distance = Math.abs(sectionMidpoint - viewportMidpoint);
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestSection = section;
             }
         });
-    }, observerOptions);
 
-    // Observe all sections
-    sectionRegistry.forEach(sectionConfig => {
-        const section = document.getElementById(sectionConfig.id);
-        if (section) {
-            observer.observe(section);
+        applySectionState(nearestSection.config);
+    }
+
+    let ticking = false;
+
+    function requestSectionUpdate() {
+        if (ticking) {
+            return;
         }
-    });
+
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            updateActiveSection();
+        });
+    }
+
+    const scrollTarget = scrollContainer || window;
+    scrollTarget.addEventListener('scroll', requestSectionUpdate, { passive: true });
+    window.addEventListener('resize', requestSectionUpdate);
+
+    requestSectionUpdate();
 }
 
 // Load and populate projects

@@ -222,16 +222,16 @@
     }
 
     .featured-project-content {
-        min-height: 0;
-        align-items: stretch;
-        justify-content: flex-start;
-        max-width: 100%;
+        min-height: calc((var(--vh, 1vh) * 100) - var(--nav-height) - var(--bottom-chrome-height));
+        align-items: center;
+        justify-content: center;
+        max-width: 32rem;
     }
 
     .featured-project-toggle {
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        text-align: left;
+        text-align: center;
         padding: 1rem 0;
         cursor: pointer;
     }
@@ -250,7 +250,7 @@
     }
 
     .featured-project-body {
-        align-items: flex-start;
+        align-items: center;
         padding-bottom: 0.75rem;
     }
 
@@ -260,7 +260,7 @@
     }
 
     .featured-project .project-actions {
-        justify-content: flex-start;
+        justify-content: center;
     }
 
     .snap-section:not(#hero) .section-title,
