@@ -1,530 +1,3 @@
-// ===== Constants =====
-const STORAGE_KEY = "agilethis-board"; // legacy, migrated to per-project keys
-const CURRENT_VERSION = 4;
-const STATUSES = ["todo", "in-progress", "testing", "done", "canceled"];
-const COL_COLLAPSED_KEY = "agilethis-col-collapsed"; // legacy, migrated to per-project keys
-const REGISTRY_KEY = "agilethis-projects";
-const LABEL_PRESETS = ["bug", "feature", "ui", "backend", "urgent"];
-const BOARD_COLORS = [
-  "#6366f1", // indigo
-  "#06b6d4", // cyan
-  "#f43f5e", // rose
-  "#f59e0b", // amber
-  "#10b981", // emerald
-  "#a78bfa", // violet
-  "#f97316", // orange
-  "#0ea5e9", // sky
-];
-
-const DEFAULT_COLUMNS = [
-  { id: "todo", name: "Todo", color: "#818cf8" },
-  { id: "in-progress", name: "In Progress", color: "#f59e42" },
-  { id: "testing", name: "Testing", color: "#a78bfa" },
-  { id: "done", name: "Done", color: "#34d399" },
-  { id: "canceled", name: "Canceled", color: "#71717a" },
-];
-
-const DEFAULT_PRIORITIES = [
-  { id: "low", name: "Low", color: "#34d399" },
-  { id: "medium", name: "Medium", color: "#fbbf24" },
-  { id: "high", name: "High", color: "#fb923c" },
-  { id: "critical", name: "Critical", color: "#f87171" },
-];
-
-const COLOR_PALETTE = [
-  "#6366f1", "#818cf8", "#a78bfa", "#c084fc",
-  "#e879f9", "#f472b6", "#f43f5e", "#fb7185",
-  "#f87171", "#fb923c", "#f59e0b", "#fbbf24",
-  "#facc15", "#a3e635", "#34d399", "#10b981",
-  "#2dd4bf", "#22d3ee", "#06b6d4", "#0ea5e9",
-  "#3b82f6", "#6366f1", "#71717a", "#a1a1aa",
-];
-
-// ===== Random Name Pools =====
-const NAME_POOL = [
-  // Subtly Corporate
-  "Initiative Zero", "Project Horizon", "Alignment Plan", "Strategic Thread",
-  "Optimization Track", "Vision Node", "Growth Vector", "Mission Draft",
-  "Impact Loop", "Execution Path", "Control Panel", "Roadmap Alpha",
-  "Core Initiative", "Project North", "Objective Field", "Target Stream",
-  "Progress Stack", "Momentum Board", "Synergy Lab", "Framework One",
-  // Slightly Sinister
-  "Behavior Model", "Influence Map", "Compliance Draft", "Default Future",
-  "Managed Scope", "Quiet Alignment", "Constraint Lab", "Outcome Engine",
-  "Incentive Grid", "Habit Design", "Guardrail Board", "Structured Freedom",
-  "Guided Track", "Soft Control", "Conformity Test", "Optimization Zone",
-  "Predictive Path", "Alignment Matrix", "Friction Removal", "Order System",
-  // Silicon Valley
-  "Project Catalyst", "Launch Sequence", "Beta Initiative", "Velocity Sprint",
-  "Disruption Plan", "Scale Engine", "Pivot Deck", "Hypergrowth Lab",
-  "Cloud Draft", "Future Stack", "Signal Project", "Feedback Loop",
-  "Core Platform", "Venture Board", "Build Track", "Systems Plan",
-  "Data Sprint", "Launchpad", "Ops Grid", "Scale Node",
-  // Vaguely Dystopian
-  "Horizon Control", "Pattern Board", "Reality Draft", "Outcome Layer",
-  "Directive One", "Silent Sprint", "Behavior Stack", "Insight Engine",
-  "Structure Plan", "Human Layer", "Input Channel", "Control Surface",
-  "Protocol Board", "Intent Grid", "Baseline Project", "Standard Model",
-  "Program Default", "Project Conform", "Order Initiative", "Precision Plan",
-  // Minimal/Cultish
-  "The Initiative", "The Program", "The System", "The Track",
-  "The Framework", "The Plan", "The Draft", "The Model",
-  "The Alignment", "The Loop", "The Path", "The Build",
-  "The Field", "The Engine", "The Stack", "The Node",
-  "The Signal", "The Directive", "The Grid", "The Pattern",
-  // Absurdly Corporate
-  "Mission Board", "Execution Room", "Strategy Deck", "Action Layer",
-  "Growth Room", "Delivery Track", "Product Field", "Alignment Room",
-  "Impact Board", "Vision Stack"
-];
-
-function randomName(exclude = []) {
-  const available = NAME_POOL.filter(n => !exclude.includes(n));
-  const pool = available.length > 0 ? available : NAME_POOL;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-// ===== Project Registry =====
-
-function projectStorageKey(id) {
-  return "agilethis-project-" + id;
-}
-
-function collapsedStorageKey(id) {
-  return "agilethis-col-collapsed-" + id;
-}
-
-function getProjectRegistry() {
-  try {
-    const raw = localStorage.getItem(REGISTRY_KEY);
-    if (raw) {
-      const reg = JSON.parse(raw);
-      if (reg && typeof reg.nextId === "number" && Array.isArray(reg.list)) {
-        return reg;
-      }
-    }
-  } catch (e) {}
-  return null;
-}
-
-function saveProjectRegistry(reg) {
-  localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
-}
-
-function allocateProjectId() {
-  let reg = getProjectRegistry();
-  if (!reg) reg = { nextId: 1, list: [0] };
-  const id = reg.nextId;
-  reg.nextId = id + 1;
-  reg.list.push(id);
-  saveProjectRegistry(reg);
-  return id;
-}
-
-function currentProjectId() {
-  const match = location.hash.match(/^#project\/(\d+)$/);
-  return match ? parseInt(match[1], 10) : 0;
-}
-
-// ===== Column/Priority Helpers =====
-
-function boardColumns(board) {
-  const b = board || activeBoard();
-  return b.columns || DEFAULT_COLUMNS;
-}
-
-function boardPriorities(board) {
-  const b = board || activeBoard();
-  return b.priorities || DEFAULT_PRIORITIES;
-}
-
-function getColumnById(id, board) {
-  return boardColumns(board).find(c => c.id === id);
-}
-
-function getPriorityById(id, board) {
-  return boardPriorities(board).find(p => p.id === id);
-}
-
-function generateColumnId(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).substring(2, 5);
-}
-
-function defaultDefaults() {
-  return {
-    columns: JSON.parse(JSON.stringify(DEFAULT_COLUMNS)),
-    priorities: JSON.parse(JSON.stringify(DEFAULT_PRIORITIES)),
-    labelPresets: [...LABEL_PRESETS]
-  };
-}
-
-// ===== Mission Statement Easter Egg =====
-const MISSION_QUOTES = [
-  "Building the infrastructure for a more predictable humanity.",
-  "Aligning behavior with better outcomes.",
-  "Designing systems that gently guide better decisions.",
-  "Engineering compliance through convenience.",
-  "Optimizing life's unnecessary choices away.",
-  "Making freedom more efficient.",
-  "Creating clarity in a world of unhelpful autonomy.",
-  "Reducing variance in human potential.",
-  "Where choice meets intelligent constraint.",
-  "Simplifying decision-making at scale.",
-  "Empowering better behavior through design.",
-  "Architecting outcomes people would choose anyway.",
-  "Making complexity disappear quietly.",
-  "Building trust through invisible guardrails.",
-  "Turning unpredictability into performance.",
-  "Designing the default future.",
-  "Encouraging alignment through seamless experience.",
-  "Scaling responsible influence.",
-  "Minimizing friction in personal transformation.",
-  "Making the optimal path the only obvious one.",
-  "Codifying progress.",
-  "Delivering structured freedom.",
-  "Aligning incentives with inevitable outcomes.",
-  "Removing unnecessary uncertainty.",
-  "Guiding ambition responsibly.",
-  "Transforming intent into compliant action.",
-  "Where insight becomes direction.",
-  "Designing environments that decide for you.",
-  "Engineering harmony at scale.",
-  "Enabling consistent excellence.",
-  "Making self-discipline obsolete.",
-  "Building systems that care more efficiently than you can.",
-  "Turning aspiration into automation.",
-  "Scaling virtue.",
-  "Optimizing personal agency.",
-  "Elevating alignment.",
-  "Making better choices automatic.",
-  "Designing frictionless consensus.",
-  "Reinforcing positive deviation.",
-  "Transforming independence into interoperability.",
-  "Standardizing success.",
-  "Creating accountability you don't have to think about.",
-  "Empowering managed autonomy.",
-  "Shaping tomorrow's habits today.",
-  "Delivering clarity through structure.",
-  "Reducing chaos responsibly.",
-  "Encouraging productive conformity.",
-  "Architecting behavioral efficiency.",
-  "Harmonizing ambition with system needs.",
-  "Making progress unavoidable.",
-  "We don't build products. We architect inevitability.",
-  "Making humanity 10x more human.",
-  "Powering a frictionless tomorrow.",
-  "Solving the future before it happens.",
-  "Where innovation becomes destiny.",
-  "Coding consciousness at scale.",
-  "Democratizing excellence through intelligent synergy.",
-  "Engineering optimism.",
-  "Creating scalable transcendence.",
-  "Reinventing reality responsibly.",
-  "Delivering exponential empathy through cloud-native infrastructure.",
-  "Disrupting gravity.",
-  "Building the operating system for civilization.",
-  "Turning bold ideas into unavoidable outcomes.",
-  "Elevating the human algorithm.",
-  "Transforming data into destiny.",
-  "Designing a smarter species.",
-  "Creating impact with precision.",
-  "Solving complexity permanently.",
-  "Innovation, uncompromised and monetized.",
-  "Engineering tomorrow's inevitabilities.",
-  "Optimizing existence.",
-  "Where vision compounds.",
-  "Unlocking infinite scalability.",
-  "Architecting the post-human interface.",
-  "Human potential, containerized.",
-  "Building beyond bandwidth.",
-  "Monetizing momentum.",
-  "Prog as a service.",
-  "Making disruption sustainable.",
-  "Redefining the default future.",
-  "Automating possibility.",
-  "Making the impossible predictable.",
-  "Shipping transcendence.",
-  "Building clarity at planetary scale.",
-  "Intelligence, productized.",
-  "Simplifying the exponential.",
-  "Connecting the unconnectable.",
-  "Scaling trust.",
-  "Transforming friction into opportunity.",
-  "Reinventing synergy for a post-analog world.",
-  "Empowering humanity to pivot.",
-  "Operationalizing inspiration.",
-  "Engineering seamless ambition.",
-  "Making growth ethical again.",
-  "Turning insights into inevitabilities.",
-  "Redesigning destiny through data.",
-  "Aligning ambition with infrastructure.",
-  "Building frictionless futures.",
-  "Rethinking permanence.",
-  "Elevating disruption to a discipline.",
-  "Solving scale once and for all.",
-  "Creating hyper-aligned ecosystems.",
-  "Engineering planetary leverage.",
-  "Delivering paradigm as a platform.",
-  "Curating exponential experiences.",
-  "Simplifying the complex future.",
-  "Human-centered automation.",
-  "Reinventing what's next before it's now.",
-  "Building responsibly inevitable systems.",
-  "Transforming ambition into architecture.",
-  "Encoding a better tomorrow.",
-  "Designing scalable virtue.",
-  "Disrupting responsibly.",
-  "Future-proofing humanity.",
-  "Enabling infinite iteration.",
-  "Building what's beyond next.",
-  "Operationalizing boldness.",
-  "Turning velocity into value.",
-  "Architecting universal efficiency.",
-  "Scaling the improbable.",
-  "Engineering meaningful inevitability.",
-  "Delivering impact without compromise.",
-  "Making scale humane.",
-  "Codifying greatness.",
-  "Transforming bandwidth into belief.",
-  "Building momentum you can monetize.",
-  "Reinventing possibility daily.",
-  "Empowering optimized existence.",
-  "Designing ethical acceleration.",
-  "Making innovation autonomous.",
-  "Elevating infrastructure to inspiration.",
-  "Monetizing potential at scale.",
-  "Building clarity for a complex world.",
-  "Simplifying global ambition.",
-  "Turning data into destiny responsibly.",
-  "Reimagining progress permanently.",
-  "Delivering alignment at scale.",
-  "Engineering the inevitable pivot.",
-  "Scaling human progress.",
-  "Architecting the exponential era.",
-  "Turning bold into baseline.",
-  "Building intelligence into everything.",
-  "Transforming ecosystems through synergy.",
-  "Delivering certainty in uncertain times.",
-  "Empowering scalable purpose.",
-  "Designing the future responsibly and profitably.",
-  "Solving tomorrow today.",
-  "Engineering the next normal.",
-  "Making destiny programmable.",
-];
-
-let missionInterval = null;
-
-// ===== State =====
-
-let pendingDelete = null; // for undo
-let pendingImportData = null; // for import dialog
-let collapsedColumns = new Set();
-let selectedTicketIds = new Set();
-let viewAllActive = false;
-
-function generateBoardId() {
-  return "B-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
-}
-
-function defaultBoard(title, color, defaults) {
-  const defs = defaults || (typeof state !== "undefined" && state.defaults) || defaultDefaults();
-  const cols = JSON.parse(JSON.stringify(defs.columns || DEFAULT_COLUMNS));
-  const columnOrder = {};
-  for (const col of cols) columnOrder[col.id] = [];
-  return {
-    id: generateBoardId(),
-    title: title || randomName(),
-    color: color || BOARD_COLORS[0],
-    tickets: [],
-    columns: cols,
-    priorities: JSON.parse(JSON.stringify(defs.priorities || DEFAULT_PRIORITIES)),
-    columnOrder,
-    labelPresets: [...(defs.labelPresets || LABEL_PRESETS)]
-  };
-}
-
-function defaultState() {
-  const projectTitle = randomName();
-  const boardTitle = randomName([projectTitle]);
-  const defs = defaultDefaults();
-  return {
-    version: CURRENT_VERSION,
-    title: projectTitle,
-    boards: [defaultBoard(boardTitle, undefined, defs)],
-    activeBoardIndex: 0,
-    defaults: defs
-  };
-}
-
-function activeBoard() {
-  return state.boards[state.activeBoardIndex];
-}
-
-function migrateState(data) {
-  if (!data) return null;
-
-  if (data.version === 1) {
-    for (const ticket of data.tickets) {
-      if (typeof ticket.prompt === "undefined") {
-        ticket.prompt = "";
-      }
-    }
-    data.version = 2;
-  }
-
-  if (data.version === 2) {
-    const projectTitle = randomName();
-    const boardTitle = randomName([projectTitle]);
-    data = {
-      version: 3,
-      title: projectTitle,
-      boards: [{
-        id: generateBoardId(),
-        title: boardTitle,
-        tickets: data.tickets || [],
-        columnOrder: data.columnOrder || { "todo": [], "in-progress": [], "testing": [], "done": [], "canceled": [] },
-        labelPresets: data.labelPresets || [...LABEL_PRESETS]
-      }],
-      activeBoardIndex: 0
-    };
-  }
-
-  if (data.version === 3) {
-    // Migrate v3 → v4: add columns, priorities, defaults
-    for (const board of data.boards) {
-      if (!board.columns) {
-        board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
-      }
-      if (!board.priorities) {
-        board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
-      }
-      if (!board.color) {
-        board.color = BOARD_COLORS[0];
-      }
-      // Ensure columnOrder has entries for all columns
-      for (const col of board.columns) {
-        if (!board.columnOrder[col.id]) {
-          board.columnOrder[col.id] = [];
-        }
-      }
-    }
-    if (!data.defaults) {
-      data.defaults = defaultDefaults();
-    }
-    data.version = 4;
-  }
-
-  if (data.version !== CURRENT_VERSION) return null;
-  return data;
-}
-
-function migrateToProjectRegistry() {
-  // Already migrated?
-  if (getProjectRegistry()) return;
-
-  // Check for old keys: agilethis-board or fakejira-board
-  let oldData = localStorage.getItem(STORAGE_KEY);
-  const oldKey = "fakejira-board";
-  if (!oldData && localStorage.getItem(oldKey)) {
-    oldData = localStorage.getItem(oldKey);
-    localStorage.removeItem(oldKey);
-    // Migrate auxiliary fakejira keys
-    const keyMigrations = [
-      ["fakejira-sidebar", "agilethis-sidebar"],
-      ["fakejira-sidebar-width", "agilethis-sidebar-width"],
-      ["fakejira-col-widths", "agilethis-col-widths"],
-    ];
-    for (const [oldK, newK] of keyMigrations) {
-      const val = localStorage.getItem(oldK);
-      if (val !== null) {
-        localStorage.setItem(newK, val);
-        localStorage.removeItem(oldK);
-      }
-    }
-  }
-
-  if (oldData) {
-    // Copy data to project-0
-    localStorage.setItem(projectStorageKey(0), oldData);
-    // Migrate collapsed columns
-    const oldCollapsed = localStorage.getItem(COL_COLLAPSED_KEY) || localStorage.getItem("fakejira-col-collapsed");
-    if (oldCollapsed !== null) {
-      localStorage.setItem(collapsedStorageKey(0), oldCollapsed);
-    }
-    // Clean up old keys
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(COL_COLLAPSED_KEY);
-    localStorage.removeItem("fakejira-col-collapsed");
-  }
-
-  // Create registry
-  const reg = { nextId: 1, list: [0] };
-  saveProjectRegistry(reg);
-}
-
-function validateState(data) {
-  if (!data || !Array.isArray(data.boards) || data.boards.length === 0) return null;
-  // Clamp activeBoardIndex
-  if (data.activeBoardIndex < 0 || data.activeBoardIndex >= data.boards.length) {
-    data.activeBoardIndex = 0;
-  }
-  // Validate each board
-  data.boards.forEach((board, i) => {
-    if (!board.columns) board.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
-    if (!board.priorities) board.priorities = JSON.parse(JSON.stringify(DEFAULT_PRIORITIES));
-    for (const col of board.columns) {
-      if (!board.columnOrder || !Array.isArray(board.columnOrder[col.id])) {
-        if (!board.columnOrder) board.columnOrder = {};
-        board.columnOrder[col.id] = [];
-      }
-    }
-    if (!Array.isArray(board.labelPresets)) {
-      board.labelPresets = [...LABEL_PRESETS];
-    }
-    if (!board.color) {
-      board.color = BOARD_COLORS[i % BOARD_COLORS.length];
-    }
-  });
-  if (!data.defaults) data.defaults = defaultDefaults();
-  return data;
-}
-
-function loadBoardState() {
-  migrateToProjectRegistry();
-  const pid = currentProjectId();
-  // Ensure this project exists in registry
-  const reg = getProjectRegistry();
-  if (reg && !reg.list.includes(pid)) {
-    reg.list.push(pid);
-    if (pid >= reg.nextId) reg.nextId = pid + 1;
-    saveProjectRegistry(reg);
-  }
-  try {
-    const raw = localStorage.getItem(projectStorageKey(pid));
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      const migrated = migrateState(parsed);
-      const validated = validateState(migrated);
-      if (validated) return validated;
-    }
-  } catch (e) {
-    console.warn("Failed to load board state:", e);
-  }
-  return defaultState();
-}
-
-function saveBoardState() {
-  localStorage.setItem(projectStorageKey(currentProjectId()), JSON.stringify(state));
-}
-
-let state = loadBoardState();
-
-// ===== ID Generation =====
-
-function generateId() {
-  return "FJ-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
-}
-
 // ===== SVG Icons =====
 
 const ICONS = {
@@ -1286,7 +759,15 @@ function showConfirmDialog({ title, message, confirmLabel, onConfirm }) {
   backdrop.offsetHeight;
   backdrop.classList.add("confirm-backdrop--visible");
 
+  let isClosed = false;
+  function cleanup() {
+    document.removeEventListener("keydown", onKey);
+  }
+
   function close() {
+    if (isClosed) return;
+    isClosed = true;
+    cleanup();
     backdrop.classList.remove("confirm-backdrop--visible");
     backdrop.addEventListener("transitionend", () => backdrop.remove(), { once: true });
     // Fallback removal
@@ -1309,7 +790,6 @@ function showConfirmDialog({ title, message, confirmLabel, onConfirm }) {
   function onKey(e) {
     if (e.key === "Escape") {
       close();
-      document.removeEventListener("keydown", onKey);
     }
   }
   document.addEventListener("keydown", onKey);
@@ -1579,20 +1059,155 @@ let sortableInstances = [];
 let dragState = {
   sourceColumn: null,
   currentColumn: null,
-  precisionMode: false,
+  targetColumn: null,
+  trackingActive: false,
+  precisionActive: false,
   hoverTimer: null,
 };
-const PRECISION_DELAY = 600;
+const PRECISION_DELAY = 450;
+
+function clearPrecisionTimer() {
+  if (!dragState.hoverTimer) return;
+  clearTimeout(dragState.hoverTimer);
+  dragState.hoverTimer = null;
+}
+
+function clearDropTargetHighlights() {
+  document.querySelectorAll(".column--drop-target").forEach((column) => {
+    column.classList.remove("column--drop-target");
+  });
+  document.querySelectorAll(".column__cards").forEach((cards) => {
+    cards.classList.remove("drop-target-bottom", "precision-active");
+    delete cards.dataset.dropLabel;
+  });
+}
+
+function setActiveDropTarget(cardsEl, options = {}) {
+  const { precision = false } = options;
+  clearDropTargetHighlights();
+  if (!cardsEl) return;
+  const column = cardsEl.closest(".column");
+  if (!column) return;
+  const status = column.dataset.status;
+  const columnConfig = boardColumns().find((col) => col.id === status);
+  if (!columnConfig) return;
+  column.classList.add("column--drop-target");
+  if (precision) {
+    cardsEl.classList.add("precision-active");
+  }
+  cardsEl.dataset.dropLabel = "Move to " + columnConfig.name;
+  dragState.targetColumn = cardsEl.id;
+}
+
+function getColumnCardsFromNode(node) {
+  const column = node && node.closest ? node.closest(".column") : null;
+  if (!column || !column.dataset.status) return null;
+  if ("col-" + column.dataset.status === dragState.sourceColumn) return null;
+  return column.querySelector(".column__cards");
+}
+
+function getEventClientPoint(evt) {
+  const original = evt && evt.originalEvent ? evt.originalEvent : evt;
+  if (!original) return null;
+  if (original.changedTouches && original.changedTouches.length > 0) {
+    return {
+      x: original.changedTouches[0].clientX,
+      y: original.changedTouches[0].clientY
+    };
+  }
+  if (typeof original.clientX === "number" && typeof original.clientY === "number") {
+    return {
+      x: original.clientX,
+      y: original.clientY
+    };
+  }
+  return null;
+}
+
+function getReleaseTargetInfo(evt) {
+  const point = getEventClientPoint(evt);
+  if (!point) return null;
+  const el = document.elementFromPoint(point.x, point.y);
+  if (!el) return null;
+  const column = el.closest(".column");
+  if (!column) return null;
+  const cards = column.querySelector(".column__cards");
+  if (!cards) return null;
+  return {
+    column,
+    cards,
+    insideCards: !!el.closest(".column__cards")
+  };
+}
+
+function restoreDraggedItemToSource(evt) {
+  const sourceCards = Array.from(evt.from.querySelectorAll(".ticket-card"));
+  if (evt.oldIndex >= sourceCards.length) {
+    evt.from.appendChild(evt.item);
+    return;
+  }
+  evt.from.insertBefore(evt.item, sourceCards[evt.oldIndex]);
+}
+
+function handleGlobalDragPointerMove(event) {
+  if (!dragState.trackingActive) return;
+  const point = getEventClientPoint(event);
+  if (!point) return;
+  const el = document.elementFromPoint(point.x, point.y);
+  const cards = getColumnCardsFromNode(el);
+  if (!cards) {
+    clearPrecisionTimer();
+    dragState.precisionActive = false;
+    clearDropTargetHighlights();
+    dragState.targetColumn = null;
+    return;
+  }
+  const isInsideCards = !!(el && el.closest(".column__cards"));
+  if (dragState.targetColumn !== cards.id) {
+    clearPrecisionTimer();
+    dragState.precisionActive = false;
+    if (isInsideCards) {
+      dragState.hoverTimer = setTimeout(() => {
+        dragState.precisionActive = true;
+        setActiveDropTarget(cards, { precision: true });
+      }, PRECISION_DELAY);
+    }
+  }
+
+  if (!isInsideCards) {
+    clearPrecisionTimer();
+    dragState.precisionActive = false;
+  } else if (!dragState.precisionActive && !dragState.hoverTimer) {
+    dragState.hoverTimer = setTimeout(() => {
+      dragState.precisionActive = true;
+      setActiveDropTarget(cards, { precision: true });
+    }, PRECISION_DELAY);
+  }
+
+  setActiveDropTarget(cards, { precision: dragState.precisionActive });
+}
+
+function startDragTracking() {
+  dragState.trackingActive = true;
+  document.addEventListener("mousemove", handleGlobalDragPointerMove);
+  document.addEventListener("touchmove", handleGlobalDragPointerMove, { passive: true });
+}
+
+function stopDragTracking() {
+  dragState.trackingActive = false;
+  document.removeEventListener("mousemove", handleGlobalDragPointerMove);
+  document.removeEventListener("touchmove", handleGlobalDragPointerMove);
+}
 
 function resetDragState() {
-  clearTimeout(dragState.hoverTimer);
-  document.querySelectorAll(".column__cards").forEach(el => {
-    el.classList.remove("drop-target-bottom", "precision-active");
-  });
+  stopDragTracking();
+  clearPrecisionTimer();
+  clearDropTargetHighlights();
   dragState.sourceColumn = null;
   dragState.currentColumn = null;
-  dragState.precisionMode = false;
-  dragState.hoverTimer = null;
+  dragState.targetColumn = null;
+  dragState.trackingActive = false;
+  dragState.precisionActive = false;
 }
 
 function initSortable() {
@@ -1615,44 +1230,28 @@ function initSortable() {
         resetDragState();
         dragState.sourceColumn = evt.from.id;
         dragState.currentColumn = evt.from.id;
+        startDragTracking();
       },
       onMove: function(evt) {
         const targetCol = evt.to.id;
         const isCrossColumn = targetCol !== dragState.sourceColumn;
 
         if (!isCrossColumn) {
-          // Same-column reorder: clear cross-column state, allow normal behavior
-          clearTimeout(dragState.hoverTimer);
-          dragState.hoverTimer = null;
-          dragState.precisionMode = false;
-          document.querySelectorAll(".column__cards").forEach(el => {
-            el.classList.remove("drop-target-bottom", "precision-active");
-          });
+          clearDropTargetHighlights();
           dragState.currentColumn = targetCol;
           return true;
         }
 
-        // Cross-column: if entering a new column, reset timer
         if (targetCol !== dragState.currentColumn) {
-          clearTimeout(dragState.hoverTimer);
-          dragState.precisionMode = false;
-          document.querySelectorAll(".column__cards").forEach(el => {
-            el.classList.remove("drop-target-bottom", "precision-active");
-          });
           dragState.currentColumn = targetCol;
-
-          // Show bottom drop indicator
-          evt.to.classList.add("drop-target-bottom");
-
-          // Start precision mode timer
-          dragState.hoverTimer = setTimeout(() => {
-            dragState.precisionMode = true;
-            evt.to.classList.remove("drop-target-bottom");
-            evt.to.classList.add("precision-active");
-          }, PRECISION_DELAY);
         }
 
-        // Always allow the move -- we reposition in onEnd if needed
+        const directTarget = getColumnCardsFromNode(evt.related || evt.to);
+        if (directTarget) {
+          setActiveDropTarget(directTarget, { precision: dragState.precisionActive });
+        } else {
+          setActiveDropTarget(evt.to, { precision: dragState.precisionActive });
+        }
         return true;
       },
       onEnd: handleDragEnd,
@@ -1664,10 +1263,18 @@ function initSortable() {
 function handleDragEnd(evt) {
   const board = activeBoard();
   const isCrossColumn = evt.from.id !== evt.to.id;
+  const releaseTarget = isCrossColumn ? getReleaseTargetInfo(evt) : null;
+  const keepPrecisePlacement = releaseTarget
+    && releaseTarget.insideCards
+    && dragState.precisionActive
+    && dragState.targetColumn === releaseTarget.cards.id;
 
-  // For cross-column quick drops (no precision mode), move item to bottom
-  if (isCrossColumn && !dragState.precisionMode) {
-    evt.to.appendChild(evt.item);
+  if (isCrossColumn) {
+    if (!releaseTarget || releaseTarget.cards.id === dragState.sourceColumn) {
+      restoreDraggedItemToSource(evt);
+    } else if (!keepPrecisePlacement) {
+      releaseTarget.cards.appendChild(evt.item);
+    }
   }
 
   // Clean up drag state
@@ -1754,43 +1361,22 @@ function importBoard(file) {
         return;
       }
 
-      // Detect v1/v2 format: has tickets at root (columnOrder is optional)
-      if (Array.isArray(data.tickets) && (!data.version || data.version <= 2)) {
-        const srcVersion = data.version || 1;
-        data = migrateState(data);
-        if (!data) {
-          showToast("Import failed: could not migrate v" + srcVersion + " format");
-          return;
-        }
-      }
-
-      // Validate v3 format
       if (!Array.isArray(data.boards) || data.boards.length === 0) {
-        // Try one more migration pass if it has tickets
-        if (Array.isArray(data.tickets)) {
-          data = migrateState(data);
-          if (!data || !Array.isArray(data.boards)) {
-            showToast("Import failed: file has tickets but could not be converted to a board");
-            return;
-          }
-        } else {
+        if (!Array.isArray(data.tickets)) {
           const keys = Object.keys(data).join(", ");
           showToast("Import failed: expected boards or tickets, found: " + (keys || "empty object"));
           return;
         }
       }
 
-      // Migrate if needed
-      if (data.version !== CURRENT_VERSION) {
-        const srcVersion = data.version;
-        data = migrateState(data);
-        if (!data) {
-          showToast("Import failed: unsupported version (v" + srcVersion + ")");
-          return;
-        }
+      const normalized = normalizeState(data);
+      if (!normalized) {
+        const srcVersion = typeof data.version === "number" ? "v" + data.version : "unknown format";
+        showToast("Import failed: unsupported or invalid project data (" + srcVersion + ")");
+        return;
       }
 
-      pendingImportData = data;
+      pendingImportData = normalized;
       showImportDialog();
     } catch (err) {
       showToast("Import failed: " + (err.message || "invalid JSON"));
@@ -1850,18 +1436,20 @@ function closeImportDialog() {
 function handleImportAddToBoard() {
   if (!pendingImportData) return;
   clearSelection();
-  const oldState = JSON.parse(JSON.stringify(state));
+  const oldState = cloneStateData(state);
   const board = activeBoard();
+  const colIds = new Set(board.columns.map(c => c.id));
+  const prioIds = new Set(board.priorities.map(p => p.id));
   let count = 0;
   for (const importedBoard of pendingImportData.boards) {
     for (const ticket of importedBoard.tickets) {
       const newId = generateId();
       const newTicket = { ...ticket, id: newId };
+      newTicket.status = colIds.has(newTicket.status) ? newTicket.status : board.columns[0].id;
+      newTicket.priority = prioIds.has(newTicket.priority) ? newTicket.priority : board.priorities[0].id;
       board.tickets.push(newTicket);
-      const colIds = new Set(board.columns.map(c => c.id));
-      const col = newTicket.status && colIds.has(newTicket.status) ? newTicket.status : board.columns[0].id;
-      if (!board.columnOrder[col]) board.columnOrder[col] = [];
-      board.columnOrder[col].push(newId);
+      if (!board.columnOrder[newTicket.status]) board.columnOrder[newTicket.status] = [];
+      board.columnOrder[newTicket.status].push(newId);
       count++;
     }
   }
@@ -1884,7 +1472,7 @@ function doImportReplace() {
   if (!pendingImportData) return;
   clearSelection();
   if (viewAllActive) exitViewAll();
-  const oldState = JSON.parse(JSON.stringify(state));
+  const oldState = cloneStateData(state);
   state = pendingImportData;
   pendingImportData = null;
   closeImportDialog();
@@ -1931,7 +1519,7 @@ function handleImportStepBack() {
 function handleImportAddBoards() {
   if (!pendingImportData) return;
   clearSelection();
-  const oldState = JSON.parse(JSON.stringify(state));
+  const oldState = cloneStateData(state);
   const importedBoards = pendingImportData.boards;
 
   // Regenerate board IDs to avoid collisions
@@ -2034,11 +1622,15 @@ function initNewDropdown() {
       window.open(location.pathname + "#project/" + id, "_blank");
     } else if (action === "duplicate") {
       const id = allocateProjectId();
-      // Deep-copy current state with new board IDs
-      const copy = JSON.parse(JSON.stringify(state));
+      const copy = cloneStateData(state);
       copy.boards.forEach(b => { b.id = generateBoardId(); });
       copy.title = copy.title + " (copy)";
-      localStorage.setItem(projectStorageKey(id), JSON.stringify(copy));
+      const normalizedCopy = normalizeState(copy);
+      if (!normalizedCopy) {
+        showToast("Project copy failed");
+        return;
+      }
+      localStorage.setItem(projectStorageKey(id), JSON.stringify(normalizedCopy));
       window.open(location.pathname + "#project/" + id, "_blank");
     } else if (action === "project-clear") {
       if (hasAnyTickets()) {
@@ -3048,478 +2640,3 @@ function initBoardClickToDeselect() {
     }
   });
 }
-
-// ===== Settings Drawer =====
-
-let settingsMode = null; // "board" or "project"
-let settingsBoardIndex = null;
-let settingsSortables = [];
-
-function openBoardSettings(boardIndex) {
-  settingsMode = "board";
-  settingsBoardIndex = boardIndex;
-  renderSettingsDrawer();
-  const backdrop = document.getElementById("settings-backdrop");
-  const drawer = document.getElementById("settings-drawer");
-  backdrop.classList.add("active");
-  drawer.classList.add("active");
-}
-
-function openProjectSettings() {
-  settingsMode = "project";
-  settingsBoardIndex = null;
-  renderSettingsDrawer();
-  const backdrop = document.getElementById("settings-backdrop");
-  const drawer = document.getElementById("settings-drawer");
-  backdrop.classList.add("active");
-  drawer.classList.add("active");
-}
-
-function closeSettingsDrawer() {
-  const backdrop = document.getElementById("settings-backdrop");
-  const drawer = document.getElementById("settings-drawer");
-  backdrop.classList.remove("active");
-  drawer.classList.remove("active");
-  for (const s of settingsSortables) s.destroy();
-  settingsSortables = [];
-  settingsMode = null;
-  settingsBoardIndex = null;
-}
-
-function getSettingsTarget() {
-  if (settingsMode === "board") {
-    return state.boards[settingsBoardIndex];
-  }
-  return state.defaults;
-}
-
-function renderSettingsDrawer() {
-  const body = document.getElementById("settings-body");
-  const title = document.getElementById("settings-title");
-  body.innerHTML = "";
-  for (const s of settingsSortables) s.destroy();
-  settingsSortables = [];
-
-  if (settingsMode === "board") {
-    const board = state.boards[settingsBoardIndex];
-    title.textContent = "Board Settings";
-    renderColumnsSection(body, board.columns, board);
-    renderPrioritiesSection(body, board.priorities, board);
-    renderLabelsSection(body, board.labelPresets, board);
-    renderBoardColorSection(body, board);
-  } else {
-    title.textContent = "Project Defaults";
-    renderColumnsSection(body, state.defaults.columns, state.defaults);
-    renderPrioritiesSection(body, state.defaults.priorities, state.defaults);
-    renderLabelsSection(body, state.defaults.labelPresets, state.defaults);
-  }
-}
-
-function renderColumnsSection(body, columns, target) {
-  const section = document.createElement("div");
-  section.className = "settings-section";
-  section.innerHTML = '<h3 class="settings-section__title">Columns</h3>';
-
-  const list = document.createElement("div");
-  list.className = "settings-list";
-  list.id = "settings-columns-list";
-
-  columns.forEach((col, i) => {
-    list.appendChild(createColumnItem(col, i, columns, target));
-  });
-
-  section.appendChild(list);
-
-  const addBtn = document.createElement("button");
-  addBtn.className = "settings-add-btn";
-  addBtn.textContent = "+ Add Column";
-  addBtn.addEventListener("click", () => {
-    const newCol = { id: generateColumnId("column"), name: "New Column", color: "#818cf8" };
-    // Insert before last column (canceled)
-    const insertAt = columns.length > 0 ? columns.length - 1 : 0;
-    columns.splice(insertAt, 0, newCol);
-    if (target.columnOrder) {
-      target.columnOrder[newCol.id] = [];
-    }
-    saveBoardState();
-    renderSettingsDrawer();
-  });
-  section.appendChild(addBtn);
-  body.appendChild(section);
-
-  // Make middle columns sortable
-  const sortable = new Sortable(list, {
-    animation: 150,
-    handle: ".settings-item__drag",
-    draggable: ".settings-item:not(.settings-item--locked)",
-    ghostClass: "sortable-ghost",
-    onEnd(evt) {
-      if (evt.oldIndex === evt.newIndex) return;
-      const moved = columns.splice(evt.oldIndex, 1)[0];
-      columns.splice(evt.newIndex, 0, moved);
-      saveBoardState();
-      renderSettingsDrawer();
-    }
-  });
-  settingsSortables.push(sortable);
-}
-
-function createColumnItem(col, index, columns, target) {
-  const isFirst = index === 0;
-  const isLast = index === columns.length - 1;
-  const isLocked = isFirst || isLast;
-
-  const item = document.createElement("div");
-  item.className = "settings-item" + (isLocked ? " settings-item--locked" : "");
-
-  const drag = document.createElement("span");
-  drag.className = "settings-item__drag";
-  drag.innerHTML = '<svg viewBox="0 0 6 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="4" cy="2" r="1"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/></svg>';
-  if (isLocked) drag.style.opacity = "0.2";
-  item.appendChild(drag);
-
-  const swatch = document.createElement("button");
-  swatch.className = "settings-item__swatch";
-  swatch.style.background = col.color;
-  swatch.addEventListener("click", () => {
-    showColorPicker(swatch, col.color, (newColor) => {
-      col.color = newColor;
-      swatch.style.background = newColor;
-      saveBoardState();
-    });
-  });
-  item.appendChild(swatch);
-
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.className = "settings-item__name";
-  nameInput.value = col.name;
-  if (isLast && col.id === "canceled") {
-    nameInput.disabled = true;
-    nameInput.title = "Canceled column name is fixed";
-  }
-  nameInput.addEventListener("blur", () => {
-    const newName = nameInput.value.trim();
-    if (newName && newName !== col.name) {
-      col.name = newName;
-      saveBoardState();
-    } else {
-      nameInput.value = col.name;
-    }
-  });
-  nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") nameInput.blur();
-  });
-  item.appendChild(nameInput);
-
-  if (!isLocked) {
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "settings-item__remove";
-    removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>';
-    removeBtn.addEventListener("click", () => {
-      removeColumn(col, index, columns, target);
-    });
-    item.appendChild(removeBtn);
-  }
-
-  return item;
-}
-
-function removeColumn(col, index, columns, target) {
-  // If this is a board and the column has tickets, ask where to move them
-  if (target.tickets) {
-    const ticketIds = target.columnOrder[col.id] || [];
-    if (ticketIds.length > 0) {
-      showColumnMoveDialog(col, index, columns, target);
-      return;
-    }
-  }
-
-  columns.splice(index, 1);
-  if (target.columnOrder) {
-    delete target.columnOrder[col.id];
-  }
-  saveBoardState();
-  renderSettingsDrawer();
-}
-
-function showColumnMoveDialog(col, index, columns, target) {
-  const ticketIds = target.columnOrder[col.id] || [];
-  const otherCols = columns.filter((c, i) => i !== index);
-
-  // Replace the settings body content with a migration dialog
-  const body = document.getElementById("settings-body");
-  body.innerHTML = "";
-
-  const dialog = document.createElement("div");
-  dialog.className = "settings-section";
-  dialog.innerHTML = `<h3 class="settings-section__title">Move ${ticketIds.length} ticket${ticketIds.length !== 1 ? "s" : ""}</h3>
-    <p class="settings-migrate-desc">Column "${col.name}" has tickets. Choose where to move them:</p>`;
-
-  const select = document.createElement("select");
-  select.className = "settings-migrate-select";
-  for (const oc of otherCols) {
-    const opt = document.createElement("option");
-    opt.value = oc.id;
-    opt.textContent = oc.name;
-    select.appendChild(opt);
-  }
-  dialog.appendChild(select);
-
-  const actions = document.createElement("div");
-  actions.className = "settings-migrate-actions";
-
-  const confirmBtn = document.createElement("button");
-  confirmBtn.className = "btn btn--primary";
-  confirmBtn.textContent = "Move & Remove";
-  confirmBtn.addEventListener("click", () => {
-    const destId = select.value;
-    // Move tickets
-    if (!target.columnOrder[destId]) target.columnOrder[destId] = [];
-    for (const tid of ticketIds) {
-      target.columnOrder[destId].push(tid);
-      const ticket = target.tickets.find(t => t.id === tid);
-      if (ticket) ticket.status = destId;
-    }
-    // Remove column
-    columns.splice(index, 1);
-    delete target.columnOrder[col.id];
-    saveBoardState();
-    renderBoard();
-    renderSettingsDrawer();
-  });
-  actions.appendChild(confirmBtn);
-
-  const cancelBtn = document.createElement("button");
-  cancelBtn.className = "btn btn--ghost";
-  cancelBtn.textContent = "Cancel";
-  cancelBtn.addEventListener("click", () => renderSettingsDrawer());
-  actions.appendChild(cancelBtn);
-
-  dialog.appendChild(actions);
-  body.appendChild(dialog);
-}
-
-function renderPrioritiesSection(body, priorities, target) {
-  const section = document.createElement("div");
-  section.className = "settings-section";
-  section.innerHTML = '<h3 class="settings-section__title">Priorities</h3>';
-
-  const list = document.createElement("div");
-  list.className = "settings-list";
-  list.id = "settings-priorities-list";
-
-  priorities.forEach((prio, i) => {
-    list.appendChild(createPriorityItem(prio, i, priorities, target));
-  });
-
-  section.appendChild(list);
-
-  const addBtn = document.createElement("button");
-  addBtn.className = "settings-add-btn";
-  addBtn.textContent = "+ Add Priority";
-  addBtn.addEventListener("click", () => {
-    const newPrio = { id: "p-" + Math.random().toString(36).substring(2, 5), name: "New Priority", color: "#818cf8" };
-    priorities.push(newPrio);
-    saveBoardState();
-    renderSettingsDrawer();
-  });
-  section.appendChild(addBtn);
-  body.appendChild(section);
-
-  const sortable = new Sortable(list, {
-    animation: 150,
-    handle: ".settings-item__drag",
-    ghostClass: "sortable-ghost",
-    onEnd(evt) {
-      if (evt.oldIndex === evt.newIndex) return;
-      const moved = priorities.splice(evt.oldIndex, 1)[0];
-      priorities.splice(evt.newIndex, 0, moved);
-      saveBoardState();
-      renderSettingsDrawer();
-    }
-  });
-  settingsSortables.push(sortable);
-}
-
-function createPriorityItem(prio, index, priorities, target) {
-  const item = document.createElement("div");
-  item.className = "settings-item";
-
-  const drag = document.createElement("span");
-  drag.className = "settings-item__drag";
-  drag.innerHTML = '<svg viewBox="0 0 6 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="4" cy="2" r="1"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/></svg>';
-  item.appendChild(drag);
-
-  const swatch = document.createElement("button");
-  swatch.className = "settings-item__swatch";
-  swatch.style.background = prio.color;
-  swatch.addEventListener("click", () => {
-    showColorPicker(swatch, prio.color, (newColor) => {
-      prio.color = newColor;
-      swatch.style.background = newColor;
-      saveBoardState();
-    });
-  });
-  item.appendChild(swatch);
-
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.className = "settings-item__name";
-  nameInput.value = prio.name;
-  nameInput.addEventListener("blur", () => {
-    const newName = nameInput.value.trim();
-    if (newName && newName !== prio.name) {
-      prio.name = newName;
-      saveBoardState();
-    } else {
-      nameInput.value = prio.name;
-    }
-  });
-  nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") nameInput.blur();
-  });
-  item.appendChild(nameInput);
-
-  if (priorities.length > 1) {
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "settings-item__remove";
-    removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>';
-    removeBtn.addEventListener("click", () => {
-      // If board, update tickets using this priority to first remaining
-      if (target.tickets) {
-        const remaining = priorities.filter((_, i) => i !== index);
-        const fallback = remaining[0].id;
-        for (const ticket of target.tickets) {
-          if (ticket.priority === prio.id) ticket.priority = fallback;
-        }
-      }
-      priorities.splice(index, 1);
-      saveBoardState();
-      renderSettingsDrawer();
-    });
-    item.appendChild(removeBtn);
-  }
-
-  return item;
-}
-
-function renderLabelsSection(body, labelPresets, target) {
-  const section = document.createElement("div");
-  section.className = "settings-section";
-  section.innerHTML = '<h3 class="settings-section__title">Label Presets</h3>';
-
-  const chipContainer = document.createElement("div");
-  chipContainer.className = "settings-labels";
-
-  for (let i = 0; i < labelPresets.length; i++) {
-    const chip = document.createElement("span");
-    chip.className = "settings-label-chip";
-    chip.textContent = labelPresets[i];
-    const x = document.createElement("button");
-    x.className = "settings-label-chip__remove";
-    x.innerHTML = '<svg viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="2" x2="6" y2="6"/><line x1="6" y1="2" x2="2" y2="6"/></svg>';
-    x.addEventListener("click", () => {
-      labelPresets.splice(i, 1);
-      saveBoardState();
-      renderSettingsDrawer();
-    });
-    chip.appendChild(x);
-    chipContainer.appendChild(chip);
-  }
-
-  const addInput = document.createElement("input");
-  addInput.type = "text";
-  addInput.className = "settings-label-input";
-  addInput.placeholder = "Add label...";
-  addInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const val = addInput.value.trim();
-      if (val && !labelPresets.includes(val)) {
-        labelPresets.push(val);
-        saveBoardState();
-        renderSettingsDrawer();
-      }
-    }
-  });
-  chipContainer.appendChild(addInput);
-
-  section.appendChild(chipContainer);
-  body.appendChild(section);
-}
-
-function renderBoardColorSection(body, board) {
-  const section = document.createElement("div");
-  section.className = "settings-section";
-  section.innerHTML = '<h3 class="settings-section__title">Board Color</h3>';
-
-  const palette = document.createElement("div");
-  palette.className = "color-palette";
-
-  for (const color of COLOR_PALETTE) {
-    const swatch = document.createElement("button");
-    swatch.className = "color-swatch" + (board.color === color ? " color-swatch--active" : "");
-    swatch.style.background = color;
-    swatch.addEventListener("click", () => {
-      board.color = color;
-      saveBoardState();
-      renderBoard();
-      renderTabs();
-      renderSettingsDrawer();
-    });
-    palette.appendChild(swatch);
-  }
-
-  section.appendChild(palette);
-  body.appendChild(section);
-}
-
-function showColorPicker(anchor, currentColor, onChange) {
-  // Remove any existing picker
-  document.querySelectorAll(".color-picker-popup").forEach(el => el.remove());
-
-  const popup = document.createElement("div");
-  popup.className = "color-picker-popup";
-
-  for (const color of COLOR_PALETTE) {
-    const swatch = document.createElement("button");
-    swatch.className = "color-swatch" + (color === currentColor ? " color-swatch--active" : "");
-    swatch.style.background = color;
-    swatch.addEventListener("click", () => {
-      onChange(color);
-      popup.remove();
-    });
-    popup.appendChild(swatch);
-  }
-
-  anchor.parentElement.style.position = "relative";
-  anchor.parentElement.appendChild(popup);
-
-  // Close on outside click
-  const closeHandler = (e) => {
-    if (!popup.contains(e.target) && e.target !== anchor) {
-      popup.remove();
-      document.removeEventListener("click", closeHandler);
-    }
-  };
-  setTimeout(() => document.addEventListener("click", closeHandler), 0);
-}
-
-function initSettingsDrawer() {
-  const backdrop = document.getElementById("settings-backdrop");
-  const closeBtn = document.getElementById("settings-close");
-
-  const closeAndRefresh = () => {
-    closeSettingsDrawer();
-    renderBoard();
-    renderTabs();
-  };
-  if (backdrop) backdrop.addEventListener("click", closeAndRefresh);
-  if (closeBtn) closeBtn.addEventListener("click", closeAndRefresh);
-
-  // Project defaults gear
-  const projectGear = document.getElementById("btn-project-settings");
-  if (projectGear) projectGear.addEventListener("click", openProjectSettings);
-}
-
-document.addEventListener("DOMContentLoaded", init);

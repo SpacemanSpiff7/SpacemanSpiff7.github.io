@@ -671,16 +671,30 @@ body.sidebar-collapsed .board {
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 96px);
+  height: calc(100vh - 96px);
   box-shadow:
     inset 1px 1px 0 0 rgba(255, 255, 255, 0.04),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.025),
     inset 1px 0 0 0 rgba(255, 255, 255, 0.02),
     inset -1px -1px 0 0 rgba(255, 255, 255, 0.008),
     inset 0 0 30px -8px rgba(255, 255, 255, 0.015);
+  position: relative;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 .column[data-status="canceled"] {
   box-shadow: none;
+}
+.column--drop-target {
+  border-color: rgba(99, 102, 241, 0.45);
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface-0));
+  box-shadow:
+    inset 0 0 0 1px rgba(99, 102, 241, 0.22),
+    0 0 0 1px rgba(99, 102, 241, 0.1),
+    0 18px 36px rgba(10, 10, 16, 0.28);
 }
 
 .column__header {
@@ -735,6 +749,7 @@ body.sidebar-collapsed .board {
   overflow-x: hidden;
   padding: 2px 8px 8px;
   min-height: 60px;
+  position: relative;
 }
 
 /* ===== Column Resize Handle ===== */
@@ -814,12 +829,6 @@ body.col-resizing * {
 .ticket-card:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--accent), var(--shadow-sm);
-}
-
-/* Prompt accent border */
-.ticket-card--has-prompt {
-  border-left: 2px solid var(--accent);
-  padding-left: 12px;
 }
 
 /* Highlight flash for newly created cards */
@@ -1532,39 +1541,43 @@ body.col-resizing * {
   box-shadow: var(--shadow-lg);
 }
 
-/* Bottom drop indicator for quick cross-column drops */
-.column__cards.drop-target-bottom {
-  position: relative;
-}
-.column__cards.drop-target-bottom::after {
-  content: "";
-  display: block;
-  height: 3px;
-  margin: 4px 8px 8px;
-  border-radius: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5), 0 0 24px rgba(99, 102, 241, 0.25);
-  animation: drop-indicator-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes drop-indicator-pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-/* Precision mode activation */
-.column__cards.precision-active {
-  animation: precision-flash 400ms var(--ease-out);
-}
-
-@keyframes precision-flash {
-  0% { box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.4); }
-  100% { box-shadow: inset 0 0 0 1px transparent; }
+/* Cross-column drag prompt */
+.column--drop-target .column__cards::before {
+  content: attr(data-drop-label);
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(99, 102, 241, 0.45);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--accent-hover);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 24px rgba(99, 102, 241, 0.12);
+  animation: drop-zone-pulse 1.1s ease-in-out infinite;
 }
 
-.precision-active .sortable-ghost {
-  opacity: 0.4;
-  border-width: 2px;
+.column__cards.precision-active::before {
+  content: "Insert here";
+  top: 12px;
+  bottom: 12px;
+  min-height: auto;
+  background: rgba(99, 102, 241, 0.05);
+  border-style: solid;
+}
+
+@keyframes drop-zone-pulse {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.01); }
 }
 
 /* ===== Import Dialog ===== */

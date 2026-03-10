@@ -12,8 +12,22 @@ Lightweight browser-based task board with dark theme (Linear/Vercel aesthetic). 
 ## File Structure
 - `index.html` - HTML structure (header, board tabs, columns, modals, import dialog, inline SVG icons)
 - `style.css` - All styles (dark theme, design tokens, layout, cards, tabs, modal, import dialog, responsive, animations)
-- `app.js` - All JavaScript (state, rendering, board CRUD, drag-drop, export/import, copy-to-clipboard)
+- `state.js` - State model, migrations, normalization, storage keys, default data, ID helpers
+- `app.js` - Main app behavior (rendering, board/ticket CRUD, drag-drop, import/export UI flows, keyboard, toasts)
+- `settings.js` - Settings drawer UI for columns, priorities, labels, and board color editing
 - `guide.html` - Quick start guide (static, imports style.css for component styling)
+
+## Script Load Order
+`index.html` loads browser scripts in this order:
+1. `SortableJS` from CDN
+2. `state.js`
+3. `app.js`
+4. `settings.js`
+
+This order matters because:
+- `state.js` defines global constants, helpers, and the initial `state`
+- `app.js` depends on those globals and defines `init()`
+- `settings.js` depends on both and attaches the `DOMContentLoaded` listener that calls `init()`
 
 ## Portfolio Integration
 - This app is linked from the root portfolio via `data/projects.json` using `fakejira/index.html`
@@ -124,7 +138,8 @@ State object stored in localStorage under key `agilethis-project-<N>`:
 - **v2 -> v3**: Wraps existing `tickets`, `columnOrder`, `labelPresets` into a single board inside the project envelope. Assigns random names from themed pools
 - **v3 -> v4**: Adds `columns`, `priorities`, `color` to each board, adds `defaults` to state
 - **Storage migration**: Old `agilethis-board`/`fakejira-board` keys migrated to per-project `agilethis-project-0` on first load
-- Migration runs automatically on load and import
+- Normalization runs automatically on load, import, and project duplication
+- Import/load/duplication all use the same migrate -> validate -> normalize pipeline
 - v1, v2, and v3 board files are accepted and migrated seamlessly
 
 ### Import/Export
@@ -133,6 +148,7 @@ State object stored in localStorage under key `agilethis-project-<N>`:
 - Import dialog offers three options: "Add to Active Board", "Add as New Board", "New Project"
 - Both import modes support undo via toast
 - Board IDs are regenerated on "Add Boards" to avoid collisions
+- "Add to Active Board" remaps imported status/priority IDs to the active board when needed
 
 ## UI Components
 

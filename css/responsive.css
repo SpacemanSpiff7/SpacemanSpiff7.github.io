@@ -215,7 +215,50 @@
     }
 
     .featured-project.snap-section {
-        padding: 0 1.5rem;
+        padding: 1rem 1.5rem;
+        min-height: auto;
+    }
+
+    .featured-project-content {
+        min-height: 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        max-width: 100%;
+    }
+
+    .featured-project-toggle {
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+        padding: 1rem 0;
+        cursor: pointer;
+    }
+
+    .featured-project-caret {
+        display: inline-flex;
+        transition: transform 0.2s ease;
+    }
+
+    .featured-project.is-collapsed .featured-project-caret {
+        transform: rotate(0deg);
+    }
+
+    .featured-project:not(.is-collapsed) .featured-project-caret {
+        transform: rotate(45deg);
+    }
+
+    .featured-project-body {
+        align-items: flex-start;
+        padding-bottom: 0.75rem;
+    }
+
+    .featured-project p {
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .featured-project .project-actions {
+        justify-content: flex-start;
     }
 
     .snap-section:not(#hero) .section-title,

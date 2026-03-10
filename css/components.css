@@ -895,12 +895,42 @@
     min-height: calc((var(--vh, 1vh) * 100) - var(--nav-height) - var(--bottom-chrome-height));
 }
 
-.featured-project h2 {
+.featured-project-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    cursor: default;
+}
+
+.featured-project-heading {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.featured-project-title {
     font-family: 'Silkscreen', 'Courier New', monospace;
     font-size: 1.8rem;
     font-weight: 600;
     color: white;
-    margin-bottom: 1rem;
+}
+
+.featured-project-caret {
+    display: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.featured-project-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .featured-project p {
@@ -910,6 +940,10 @@
     max-width: 500px;
     margin-bottom: 1.5rem;
     line-height: 1.6;
+}
+
+.featured-project-body[hidden] {
+    display: none;
 }
 
 /* Project action buttons */

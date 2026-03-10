@@ -24,6 +24,7 @@ const BASE_SECTION_CONFIG = [
 ];
 
 const FEATURED_BLOB_PALETTE = ['#7A0A45', '#005A5E', '#6B2820', '#3E2C5A', '#0E4D92', '#6B3F00'];
+const MOBILE_FEATURED_MEDIA_QUERY = '(max-width: 768px)';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Skip if this is a standalone page
@@ -50,6 +51,61 @@ document.addEventListener('componentLoaded', function(e) {
         }, 50);
     }
 });
+
+function isMobileFeaturedLayout() {
+    return window.matchMedia(MOBILE_FEATURED_MEDIA_QUERY).matches;
+}
+
+function setFeaturedSectionExpandedState(section, expanded) {
+    const toggle = section.querySelector('.featured-project-toggle');
+    const body = section.querySelector('.featured-project-body');
+
+    if (!toggle || !body) {
+        return;
+    }
+
+    section.classList.toggle('is-collapsed', !expanded);
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    body.hidden = !expanded;
+}
+
+function syncFeaturedSectionCollapseState() {
+    const mobileLayout = isMobileFeaturedLayout();
+    const featuredSections = document.querySelectorAll('.featured-project');
+
+    featuredSections.forEach((section, index) => {
+        const shouldExpand = !mobileLayout || index === 0;
+        setFeaturedSectionExpandedState(section, shouldExpand);
+    });
+}
+
+function initFeaturedSectionCollapse() {
+    syncFeaturedSectionCollapseState();
+
+    document.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.featured-project-toggle');
+        if (!toggle || !isMobileFeaturedLayout()) {
+            return;
+        }
+
+        const section = toggle.closest('.featured-project');
+        if (!section) {
+            return;
+        }
+
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        setFeaturedSectionExpandedState(section, !isExpanded);
+    });
+
+    const mediaQuery = window.matchMedia(MOBILE_FEATURED_MEDIA_QUERY);
+    const handleViewportChange = () => syncFeaturedSectionCollapseState();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleViewportChange);
+    } else if (typeof mediaQuery.addListener === 'function') {
+        mediaQuery.addListener(handleViewportChange);
+    }
+}
 
 function loadComponent(containerId, componentPath) {
     const container = document.getElementById(containerId);
@@ -288,6 +344,7 @@ async function loadProjects() {
         // Dynamically create and populate featured sections
         featuredSections.forEach((sectionConfig) => {
             const { project } = sectionConfig;
+            const bodyId = `${sectionConfig.id}-body`;
             // Create new section element
             const section = document.createElement('section');
             section.id = sectionConfig.id;
@@ -300,10 +357,17 @@ async function loadProjects() {
             // Populate with project content
             section.innerHTML = `
                 <div class="featured-project-content">
-                    <h2>${project.title}</h2>
-                    <p>${project.shortDescription}</p>
-                    <div class="project-actions">
-                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                    <h2 class="featured-project-heading">
+                        <button class="featured-project-toggle" type="button" aria-expanded="true" aria-controls="${bodyId}">
+                            <span class="featured-project-title">${project.title}</span>
+                            <span class="featured-project-caret" aria-hidden="true">+</span>
+                        </button>
+                    </h2>
+                    <div class="featured-project-body" id="${bodyId}">
+                        <p>${project.shortDescription}</p>
+                        <div class="project-actions">
+                            ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                        </div>
                     </div>
                 </div>
             `;
@@ -342,6 +406,7 @@ async function loadProjects() {
         HOMEPAGE_STATE.sectionRegistry = sectionRegistry;
         HOMEPAGE_STATE.projectsReady = true;
 
+        initFeaturedSectionCollapse();
         initProgressIndicator(sectionRegistry);
         maybeInitScrollHighlighting();
 
