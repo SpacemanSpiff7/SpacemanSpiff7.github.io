@@ -333,6 +333,12 @@
     <p>
       Export your project as a JSON file from the header. When importing, you have three options: add tickets to the active board, add as a new board in the current project, or create an entirely new project.
     </p>
+    <p>
+      The importer is happiest with one of two shapes: a bare JSON array of tickets for quick AI-generated backlogs, or a full project object that matches the app's export format. For AI workflows, target one of those two shapes exactly.
+    </p>
+    <p>
+      Older exported files are still migrated forward on import for backward compatibility, but newly generated AI files should target the current formats above instead of older schemas.
+    </p>
 
     <!-- Multi-Project -->
     <h2>Multi-Project</h2>
@@ -345,6 +351,28 @@
     <p>
       Copy one of the prompts below and paste it into any LLM (ChatGPT, Claude, etc.) along with a description of your project. Save the JSON output as a <code style="color: var(--accent); font-size: 0.8125rem;">.json</code> file and import it using the Import button.
     </p>
+    <p>
+      For best results, enable JSON mode / structured output if your model supports it. If it does not, these prompts still work because they define the exact output shape, valid enum values, and a concrete example to imitate.
+    </p>
+    <details>
+      <summary>File format audit: what the importer actually accepts</summary>
+      <ul>
+        <li><code>Simple format</code>: a bare JSON array of ticket objects.</li>
+        <li><code>Full format</code>: a project object with <code>title</code>, <code>boards</code>, <code>activeBoardIndex</code>, and <code>defaults</code>. Exported files also include <code>version</code>, and the importer accepts that too.</li>
+        <li><code>Backward compatibility</code>: legacy versioned exports from versions <code>1</code>, <code>2</code>, and <code>3</code> are migrated to version <code>4</code> during import.</li>
+        <li><code>Not supported</code>: an object like <code>{ "tickets": [...] }</code> unless it is an older versioned export.</li>
+        <li><code>Default workflow columns</code>: <code>todo</code>, <code>in-progress</code>, <code>testing</code>, <code>done</code>, <code>canceled</code>. <code>todo</code> is the default first column and <code>canceled</code> is the default last column.</li>
+        <li><code>Simple format minimum</code>: the file must be a JSON array, and the first item must be an object with a <code>title</code> so import can start.</li>
+        <li><code>Simple format recommended fields</code>: every ticket should include <code>title</code>, <code>description</code>, <code>priority</code>, <code>status</code>, and <code>labels</code>.</li>
+        <li><code>Full format board fields</code>: each board should include <code>id</code>, <code>title</code>, <code>color</code>, <code>tickets</code>, <code>columns</code>, <code>priorities</code>, <code>columnOrder</code>, and <code>labelPresets</code>.</li>
+        <li><code>Full format ticket fields</code>: each ticket should include <code>id</code>, <code>title</code>, <code>description</code>, <code>status</code>, <code>priority</code>, <code>labels</code>, <code>createdAt</code>, and <code>updatedAt</code>. <code>prompt</code> is optional on import and defaults to an empty string, but include it whenever you want implementation-ready tickets.</li>
+        <li>Every ticket should include a real <code>title</code>. Missing or empty titles are imported as <code>Untitled Ticket</code>.</li>
+        <li><code>status</code> must match a board column <code>id</code>. Invalid statuses are remapped to the board's first column during normalization or add-to-board import.</li>
+        <li><code>priority</code> must match a board priority <code>id</code>. Invalid priorities fall back to the board's first priority.</li>
+        <li><code>columnOrder</code> should include every column id. Tickets missing from <code>columnOrder</code> are auto-added to the correct column based on <code>status</code>.</li>
+        <li>Missing ids, duplicate ids inside the same board, invalid timestamps, and missing prompts are auto-repaired on import, but you should still generate them correctly for the cleanest results.</li>
+      </ul>
+    </details>
 
     <div class="guide__tabs" role="tablist">
       <button class="guide__tab guide__tab--active" role="tab" data-tab="simple" aria-selected="true">Simple</button>
@@ -354,7 +382,7 @@
     <!-- Simple format -->
     <div class="guide__tab-panel guide__tab-panel--active" id="tab-simple">
       <p style="margin-top: 16px;">
-        Generates a flat array of tickets with just the essentials. Good for quick brainstorming.
+        Generates a bare ticket array. This is the easiest format for AI tools to produce reliably, and the importer accepts it directly.
       </p>
       <div class="guide__prompt-block">
         <div class="guide__prompt-header">
@@ -366,41 +394,68 @@
             Copy
           </button>
         </div>
-        <pre id="prompt-simple">Generate a JSON array of task tickets for my project. Return ONLY valid JSON, no commentary.
+        <pre id="prompt-simple">You are generating an Agile This import file.
 
-Each ticket object must have these fields:
-- "title": string (concise task title)
-- "description": string (1-2 sentence details, or "" if self-explanatory)
+Return exactly one JSON array and nothing else.
+- No markdown fences
+- No commentary
+- No comments
+- No trailing commas
+
+First, infer the project's main workstreams and likely implementation steps from the brief. Then produce a concrete backlog of non-overlapping tickets.
+
+Output contract:
+- Return 8-20 ticket objects.
+- Each object must use exactly these keys:
+  "title", "description", "priority", "status", "labels"
+- "title": short, specific task title written as actionable work
+- "description": 1-3 sentences with scope, constraints, or acceptance criteria; use "" only when the title is already fully clear
 - "priority": one of "low", "medium", "high", "critical"
-- "status": one of "todo", "in-progress", "testing", "done"
-- "labels": array of short tag strings (e.g. ["bug", "ui", "backend", "feature", "urgent"])
+- "status": one of the default column ids: "todo", "in-progress", "testing", "done", "canceled"
+- "labels": array of 1-3 short lowercase strings
+
+Quality rules:
+- Prefer concrete engineering tasks over vague epics.
+- Break large features into multiple tickets.
+- Include setup, testing, documentation, polish, and deployment work when relevant.
+- Default most new work to "todo" unless the brief clearly says something is already underway, in testing, done, or canceled.
+- Treat "todo" as the normal starting column and "canceled" as a rare edge case.
+- Do not invent any extra keys.
 
 Example output:
 [
   {
-    "title": "Set up project scaffolding",
-    "description": "Initialize repo with folder structure, linter, and base config.",
+    "title": "Set up app shell and routing",
+    "description": "Create the initial project structure, install the router, and add placeholder routes for the main product areas.",
     "priority": "high",
     "status": "todo",
-    "labels": ["feature"]
+    "labels": ["frontend", "setup"]
   },
   {
-    "title": "Fix login redirect loop",
-    "description": "",
-    "priority": "critical",
+    "title": "Implement email and password sign-in",
+    "description": "Build the login form, call the auth endpoint, persist the session, and show useful validation errors for failed sign-in attempts.",
+    "priority": "high",
     "status": "todo",
-    "labels": ["bug", "backend"]
+    "labels": ["auth", "frontend"]
+  },
+  {
+    "title": "Write smoke tests for the checkout flow",
+    "description": "Cover add-to-cart, checkout form submission, and order confirmation so regressions are caught before release.",
+    "priority": "medium",
+    "status": "testing",
+    "labels": ["qa", "checkout"]
   }
 ]
 
-My project: [DESCRIBE YOUR PROJECT HERE]</pre>
+Project brief:
+[DESCRIBE YOUR PROJECT HERE]</pre>
       </div>
     </div>
 
     <!-- Full format -->
     <div class="guide__tab-panel" id="tab-full">
       <p style="margin-top: 16px;">
-        Generates a complete project file with named boards, custom columns, priorities, and AI prompts on each ticket. Import this as a new project.
+        Generates a full project file. Use this when you want boards, defaults, prompts, timestamps, and direct import as a new project.
       </p>
       <div class="guide__prompt-block">
         <div class="guide__prompt-header">
@@ -412,17 +467,121 @@ My project: [DESCRIBE YOUR PROJECT HERE]</pre>
             Copy
           </button>
         </div>
-        <pre id="prompt-full">Generate a full project file for a task board. Return ONLY valid JSON, no commentary.
+        <pre id="prompt-full">You are generating a complete Agile This project import file.
 
-Use this exact schema:
+Return exactly one JSON object and nothing else.
+- No markdown fences
+- No commentary
+- No comments
+- No trailing commas
+
+Before writing JSON, infer the best project structure from the brief:
+- Use 1-3 boards when separate workstreams or milestones make sense; otherwise use 1 board.
+- Prefer realistic implementation tickets over vague themes.
+- Include a ticket "prompt" whenever the brief calls for implementation-ready tickets, coding-assistant instructions, or execution detail. When you include it, write it as if giving work to a coding assistant: include the deliverable, important constraints, and what "done" looks like.
+
+Required top-level shape:
 {
-  "version": 4,
   "title": "Project Name",
+  "boards": [ ... ],
+  "activeBoardIndex": 0,
+  "defaults": {
+    "columns": [ ... ],
+    "priorities": [ ... ],
+    "labelPresets": [ ... ]
+  }
+}
+
+Required board shape:
+- "id": string starting with "B-"
+- "title": string
+- "color": hex color string
+- "tickets": array of ticket objects
+- "columns": array of column objects, each with "id", "name", "color"
+- "priorities": array of priority objects, each with "id", "name", "color"
+- "columnOrder": object whose keys are every column id and whose values are arrays of ticket ids
+- "labelPresets": array of short strings
+- Unless the brief strongly suggests a custom workflow, use the default columns "todo", "in-progress", "testing", "done", "canceled".
+- In the default workflow, keep "todo" first and "canceled" last.
+
+Required ticket shape:
+- "id": string starting with "FJ-"
+- "title": string
+- "description": string
+- "status": must exactly match one of that board's column ids
+- "priority": must exactly match one of that board's priority ids
+- "labels": array of strings
+- "createdAt": ISO 8601 timestamp
+- "updatedAt": ISO 8601 timestamp
+- "prompt": optional string; include it when the brief asks for execution-ready or AI-implementable tasks
+
+Ticket shape example:
+{
+  "id": "FJ-XXXXX",
+  "title": "Short task title",
+  "description": "1-3 sentence task description",
+  "prompt": "Implementation-ready instructions for an AI coding assistant",
+  "status": "todo",
+  "priority": "high",
+  "labels": ["frontend", "auth"],
+  "createdAt": "2026-03-08T10:00:00.000Z",
+  "updatedAt": "2026-03-08T10:00:00.000Z"
+}
+
+Hard rules:
+- Include every required top-level key.
+- Include every required board key.
+- Include every required ticket key.
+- If you include "prompt" for one ticket, include it consistently for all tickets in that board.
+- Make all IDs unique.
+- Put every ticket id in exactly one matching columnOrder array based on its status.
+- Keep defaults realistic for future boards. It is fine for a board to use the same columns/priorities as defaults.
+- Unless the brief strongly suggests a custom workflow, use the default columns and default priorities.
+- Do not add extra keys.
+
+Example output:
+{
+  "title": "Acme Storefront Rebuild",
   "boards": [
     {
-      "id": "B-XXXXX",
-      "title": "Board Name",
+      "id": "B-WEB01",
+      "title": "Web App",
       "color": "#6366f1",
+      "tickets": [
+        {
+          "id": "FJ-AUTH1",
+          "title": "Implement email and password authentication",
+          "description": "Add signup, login, logout, and session persistence for the storefront app. Show clear validation errors and prevent authenticated users from seeing auth pages.",
+          "prompt": "Implement email/password authentication for the storefront. Add signup, login, and logout flows, persist the session across refreshes, protect authenticated routes, and show clear inline validation and error states. Include the minimal tests needed to verify the happy path and common failure cases.",
+          "status": "todo",
+          "priority": "high",
+          "labels": ["auth", "frontend"],
+          "createdAt": "2026-03-08T10:00:00.000Z",
+          "updatedAt": "2026-03-08T10:00:00.000Z"
+        },
+        {
+          "id": "FJ-CART1",
+          "title": "Build persistent shopping cart state",
+          "description": "Allow users to add, remove, and update cart items, and keep the cart intact across page refreshes.",
+          "prompt": "Build cart state management for the storefront. Support add, remove, and quantity updates, persist the cart locally across refreshes, and expose totals and line-item counts to the header and checkout screen. Add coverage for core cart mutations.",
+          "status": "in-progress",
+          "priority": "high",
+          "labels": ["cart", "frontend"],
+          "createdAt": "2026-03-08T11:00:00.000Z",
+          "updatedAt": "2026-03-08T13:15:00.000Z"
+        },
+        {
+          "id": "FJ-API1",
+          "title": "Add structured API error responses",
+          "description": "Standardize backend errors so the client receives stable error codes and user-safe messages.",
+          "prompt": "Add centralized API error handling. Return consistent JSON error envelopes with stable error codes, appropriate HTTP status codes, and user-safe messages. Do not leak stack traces in production, and log enough detail server-side for debugging.",
+          "status": "testing",
+          "priority": "medium",
+          "labels": ["backend", "api"],
+          "createdAt": "2026-03-08T09:30:00.000Z",
+          "updatedAt": "2026-03-08T14:00:00.000Z"
+        }
+      ],
       "columns": [
         { "id": "todo", "name": "Todo", "color": "#818cf8" },
         { "id": "in-progress", "name": "In Progress", "color": "#f59e42" },
@@ -436,43 +595,14 @@ Use this exact schema:
         { "id": "high", "name": "High", "color": "#fb923c" },
         { "id": "critical", "name": "Critical", "color": "#f87171" }
       ],
-      "tickets": [
-        {
-          "id": "FJ-K8M2X",
-          "title": "Add user authentication",
-          "description": "Implement JWT-based auth with login, signup, and token refresh endpoints.",
-          "prompt": "Implement JWT authentication using bcrypt for password hashing. Create POST /auth/login and POST /auth/signup endpoints. Store refresh tokens in httpOnly cookies. Add middleware to verify tokens on protected routes.",
-          "status": "todo",
-          "priority": "high",
-          "labels": ["feature", "backend"],
-          "createdAt": "2026-03-08T10:00:00.000Z",
-          "updatedAt": "2026-03-08T10:00:00.000Z"
-        },
-        {
-          "id": "FJ-R3P7Q",
-          "title": "Design landing page",
-          "description": "Create responsive hero section with CTA and feature highlights.",
-          "prompt": "Build a responsive landing page with a hero section, 3 feature cards, and a CTA button. Use CSS grid for layout. Add smooth scroll to sections. Mobile-first with breakpoints at 768px and 1024px.",
-          "status": "in-progress",
-          "priority": "medium",
-          "labels": ["feature", "ui"],
-          "createdAt": "2026-03-08T10:00:00.000Z",
-          "updatedAt": "2026-03-08T11:30:00.000Z"
-        },
-        {
-          "id": "FJ-W5N1D",
-          "title": "Fix broken API error handling",
-          "description": "500 errors return raw stack traces instead of user-friendly messages.",
-          "prompt": "Add global error handling middleware that catches all unhandled errors. Return structured JSON error responses with appropriate HTTP status codes. Never expose stack traces in production. Log full error details server-side.",
-          "status": "todo",
-          "priority": "critical",
-          "labels": ["bug", "backend"],
-          "createdAt": "2026-03-08T09:00:00.000Z",
-          "updatedAt": "2026-03-08T09:00:00.000Z"
-        }
-      ],
-      "columnOrder": { "todo": ["FJ-K8M2X", "FJ-W5N1D"], "in-progress": ["FJ-R3P7Q"], "testing": [], "done": [], "canceled": [] },
-      "labelPresets": ["bug", "feature", "ui", "backend", "urgent"]
+      "columnOrder": {
+        "todo": ["FJ-AUTH1"],
+        "in-progress": ["FJ-CART1"],
+        "testing": ["FJ-API1"],
+        "done": [],
+        "canceled": []
+      },
+      "labelPresets": ["auth", "frontend", "backend", "api", "cart", "qa"]
     }
   ],
   "activeBoardIndex": 0,
@@ -490,23 +620,12 @@ Use this exact schema:
       { "id": "high", "name": "High", "color": "#fb923c" },
       { "id": "critical", "name": "Critical", "color": "#f87171" }
     ],
-    "labelPresets": ["bug", "feature", "ui", "backend", "urgent"]
+    "labelPresets": ["auth", "frontend", "backend", "api", "cart", "qa"]
   }
 }
 
-Rules:
-- Generate unique IDs: board IDs use "B-" prefix, ticket IDs use "FJ-" prefix (e.g. "FJ-A1B2C")
-- Each ticket has: id, title, description, prompt, status, priority, labels, createdAt, updatedAt
-- "prompt" is an AI instruction for implementing that ticket (write it as if instructing a coding assistant)
-- "status" must match a column id (e.g. "todo", "in-progress")
-- "priority" must match a priority id (e.g. "low", "medium", "high", "critical")
-- "labels" is an array of strings
-- "createdAt" and "updatedAt" are ISO 8601 timestamps
-- Put each ticket ID in the correct columnOrder array based on its status
-- You may create multiple boards to organize work (e.g. "Frontend", "Backend", "DevOps")
-- You may customize column names, colors, and label presets to fit the project
-
-My project: [DESCRIBE YOUR PROJECT HERE]</pre>
+Project brief:
+[DESCRIBE YOUR PROJECT HERE]</pre>
       </div>
     </div>
   </div>

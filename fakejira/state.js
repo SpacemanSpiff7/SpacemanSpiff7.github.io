@@ -361,6 +361,10 @@ function activeBoard() {
 function migrateState(data) {
   if (!data) return null;
 
+  if (typeof data.version === "undefined" && Array.isArray(data.boards) && data.boards.length > 0) {
+    data.version = CURRENT_VERSION;
+  }
+
   if (data.version === 1) {
     for (const ticket of data.tickets) {
       if (typeof ticket.prompt === "undefined") {
@@ -613,6 +617,10 @@ function normalizeState(data) {
     normalizeBoardTickets(normalizedBoard);
     return normalizedBoard;
   });
+
+  validated.title = typeof validated.title === "string" && validated.title.trim()
+    ? validated.title.trim()
+    : randomName(validated.boards.map((board) => board.title).filter(Boolean));
 
   if (validated.activeBoardIndex < 0 || validated.activeBoardIndex >= validated.boards.length) {
     validated.activeBoardIndex = 0;
