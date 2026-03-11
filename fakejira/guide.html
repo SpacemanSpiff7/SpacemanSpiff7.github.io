@@ -363,10 +363,12 @@
         <li><code>Not supported</code>: an object like <code>{ "tickets": [...] }</code> unless it is an older versioned export.</li>
         <li><code>Default workflow columns</code>: <code>todo</code>, <code>in-progress</code>, <code>testing</code>, <code>done</code>, <code>canceled</code>. <code>todo</code> is the default first column and <code>canceled</code> is the default last column.</li>
         <li><code>Simple format minimum</code>: the file must be a JSON array, and the first item must be an object with a <code>title</code> so import can start.</li>
-        <li><code>Simple format recommended fields</code>: every ticket should include <code>title</code>, <code>description</code>, <code>priority</code>, <code>status</code>, and <code>labels</code>.</li>
-        <li><code>Full format board fields</code>: each board should include <code>id</code>, <code>title</code>, <code>color</code>, <code>tickets</code>, <code>columns</code>, <code>priorities</code>, <code>columnOrder</code>, and <code>labelPresets</code>.</li>
-        <li><code>Full format ticket fields</code>: each ticket should include <code>id</code>, <code>title</code>, <code>description</code>, <code>status</code>, <code>priority</code>, <code>labels</code>, <code>createdAt</code>, and <code>updatedAt</code>. <code>prompt</code> is optional on import and defaults to an empty string, but include it whenever you want implementation-ready tickets.</li>
+        <li><code>Simple format recommended fields</code>: every ticket should include <code>title</code>, <code>description</code>, <code>priority</code>, <code>status</code>, <code>labels</code>, and optionally <code>prompt</code>.</li>
+        <li><code>Full format board fields</code>: each board should ideally include <code>id</code>, <code>title</code>, <code>color</code>, <code>tickets</code>, <code>columns</code>, <code>priorities</code>, <code>columnOrder</code>, and <code>labelPresets</code>. Missing ids are auto-generated.</li>
+        <li><code>Full format ticket fields</code>: each ticket should ideally include <code>id</code>, <code>title</code>, <code>description</code>, <code>status</code>, <code>priority</code>, <code>labels</code>, <code>createdAt</code>, and <code>updatedAt</code>. <code>prompt</code> is optional on import and defaults to an empty string, but include it whenever you want implementation-ready tickets.</li>
         <li>Every ticket should include a real <code>title</code>. Missing or empty titles are imported as <code>Untitled Ticket</code>.</li>
+        <li><code>Ticket ids</code>: any non-empty string works. The app generates ids with an <code>FJ-</code> prefix, but that prefix is a convention, not an import requirement.</li>
+        <li><code>Board ids</code>: any non-empty string works. The app generates ids with a <code>B-</code> prefix, but that prefix is also just a convention.</li>
         <li><code>status</code> must match a board column <code>id</code>. Invalid statuses are remapped to the board's first column during normalization or add-to-board import.</li>
         <li><code>priority</code> must match a board priority <code>id</code>. Invalid priorities fall back to the board's first priority.</li>
         <li><code>columnOrder</code> should include every column id. Tickets missing from <code>columnOrder</code> are auto-added to the correct column based on <code>status</code>.</li>
@@ -407,12 +409,13 @@ First, infer the project's main workstreams and likely implementation steps from
 Output contract:
 - Return 8-20 ticket objects.
 - Each object must use exactly these keys:
-  "title", "description", "priority", "status", "labels"
+  "title", "description", "priority", "status", "labels", "prompt"
 - "title": short, specific task title written as actionable work
 - "description": 1-3 sentences with scope, constraints, or acceptance criteria; use "" only when the title is already fully clear
 - "priority": one of "low", "medium", "high", "critical"
 - "status": one of the default column ids: "todo", "in-progress", "testing", "done", "canceled"
 - "labels": array of 1-3 short lowercase strings
+- "prompt": optional implementation prompt string; use "" when you do not have enough detail or when the brief does not call for execution-ready tickets
 
 Quality rules:
 - Prefer concrete engineering tasks over vague epics.
@@ -420,6 +423,7 @@ Quality rules:
 - Include setup, testing, documentation, polish, and deployment work when relevant.
 - Default most new work to "todo" unless the brief clearly says something is already underway, in testing, done, or canceled.
 - Treat "todo" as the normal starting column and "canceled" as a rare edge case.
+- If the brief suggests coding or execution help, fill in "prompt" with clear implementation instructions for each ticket.
 - Do not invent any extra keys.
 
 Example output:
@@ -429,21 +433,24 @@ Example output:
     "description": "Create the initial project structure, install the router, and add placeholder routes for the main product areas.",
     "priority": "high",
     "status": "todo",
-    "labels": ["frontend", "setup"]
+    "labels": ["frontend", "setup"],
+    "prompt": "Set up the initial app shell and routing structure. Create the base route layout, add placeholder screens for each major product area, and keep the routing setup easy to extend as new sections are added."
   },
   {
     "title": "Implement email and password sign-in",
     "description": "Build the login form, call the auth endpoint, persist the session, and show useful validation errors for failed sign-in attempts.",
     "priority": "high",
     "status": "todo",
-    "labels": ["auth", "frontend"]
+    "labels": ["auth", "frontend"],
+    "prompt": "Implement the email/password sign-in flow. Build the form, submit credentials to the auth endpoint, persist the authenticated session, handle loading and error states, and show clear validation feedback for failed sign-in attempts."
   },
   {
     "title": "Write smoke tests for the checkout flow",
     "description": "Cover add-to-cart, checkout form submission, and order confirmation so regressions are caught before release.",
     "priority": "medium",
     "status": "testing",
-    "labels": ["qa", "checkout"]
+    "labels": ["qa", "checkout"],
+    "prompt": ""
   }
 ]
 
@@ -493,7 +500,7 @@ Required top-level shape:
 }
 
 Required board shape:
-- "id": string starting with "B-"
+- "id": unique non-empty string
 - "title": string
 - "color": hex color string
 - "tickets": array of ticket objects
@@ -505,7 +512,7 @@ Required board shape:
 - In the default workflow, keep "todo" first and "canceled" last.
 
 Required ticket shape:
-- "id": string starting with "FJ-"
+- "id": unique non-empty string
 - "title": string
 - "description": string
 - "status": must exactly match one of that board's column ids
@@ -517,7 +524,7 @@ Required ticket shape:
 
 Ticket shape example:
 {
-  "id": "FJ-XXXXX",
+  "id": "TASK-1",
   "title": "Short task title",
   "description": "1-3 sentence task description",
   "prompt": "Implementation-ready instructions for an AI coding assistant",
@@ -549,7 +556,7 @@ Example output:
       "color": "#6366f1",
       "tickets": [
         {
-          "id": "FJ-AUTH1",
+          "id": "AUTH-1",
           "title": "Implement email and password authentication",
           "description": "Add signup, login, logout, and session persistence for the storefront app. Show clear validation errors and prevent authenticated users from seeing auth pages.",
           "prompt": "Implement email/password authentication for the storefront. Add signup, login, and logout flows, persist the session across refreshes, protect authenticated routes, and show clear inline validation and error states. Include the minimal tests needed to verify the happy path and common failure cases.",
@@ -560,7 +567,7 @@ Example output:
           "updatedAt": "2026-03-08T10:00:00.000Z"
         },
         {
-          "id": "FJ-CART1",
+          "id": "CART-1",
           "title": "Build persistent shopping cart state",
           "description": "Allow users to add, remove, and update cart items, and keep the cart intact across page refreshes.",
           "prompt": "Build cart state management for the storefront. Support add, remove, and quantity updates, persist the cart locally across refreshes, and expose totals and line-item counts to the header and checkout screen. Add coverage for core cart mutations.",
@@ -571,7 +578,7 @@ Example output:
           "updatedAt": "2026-03-08T13:15:00.000Z"
         },
         {
-          "id": "FJ-API1",
+          "id": "API-1",
           "title": "Add structured API error responses",
           "description": "Standardize backend errors so the client receives stable error codes and user-safe messages.",
           "prompt": "Add centralized API error handling. Return consistent JSON error envelopes with stable error codes, appropriate HTTP status codes, and user-safe messages. Do not leak stack traces in production, and log enough detail server-side for debugging.",
@@ -596,9 +603,9 @@ Example output:
         { "id": "critical", "name": "Critical", "color": "#f87171" }
       ],
       "columnOrder": {
-        "todo": ["FJ-AUTH1"],
-        "in-progress": ["FJ-CART1"],
-        "testing": ["FJ-API1"],
+        "todo": ["AUTH-1"],
+        "in-progress": ["CART-1"],
+        "testing": ["API-1"],
         "done": [],
         "canceled": []
       },
