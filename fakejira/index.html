@@ -3,6 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function () {
+      const THEME_KEY = "agilethis-theme";
+      let theme = "dark";
+      try {
+        if (localStorage.getItem(THEME_KEY) === "light") {
+          theme = "light";
+        }
+      } catch (e) {}
+      document.documentElement.dataset.theme = theme;
+    }());
+  </script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
   <script>
@@ -64,6 +76,20 @@
       <button id="btn-import" class="btn btn--ghost">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/></svg>
         Import
+      </button>
+      <button id="btn-theme-toggle" class="btn btn--ghost btn--theme" aria-label="Switch to light mode" aria-pressed="false" title="Switch to light mode">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 1.75v1.5"/>
+          <path d="M8 12.75v1.5"/>
+          <path d="M3.05 3.05l1.06 1.06"/>
+          <path d="M11.89 11.89l1.06 1.06"/>
+          <path d="M1.75 8h1.5"/>
+          <path d="M12.75 8h1.5"/>
+          <path d="M3.05 12.95l1.06-1.06"/>
+          <path d="M11.89 4.11l1.06-1.06"/>
+          <circle cx="8" cy="8" r="2.75"/>
+        </svg>
+        <span id="theme-toggle-label">Light</span>
       </button>
       <input type="file" id="file-import" accept=".json" hidden>
       <a href="guide.html" target="_blank" rel="noopener" class="btn btn--ghost" id="btn-guide"

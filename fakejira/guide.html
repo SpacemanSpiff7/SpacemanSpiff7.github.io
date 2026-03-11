@@ -3,6 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function () {
+      const THEME_KEY = "agilethis-theme";
+      let theme = "dark";
+      try {
+        if (localStorage.getItem(THEME_KEY) === "light") {
+          theme = "light";
+        }
+      } catch (e) {}
+      document.documentElement.dataset.theme = theme;
+    }());
+  </script>
   <title>Agile This - Quick Start Guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,6 +22,21 @@
   <link rel="stylesheet" href="style.css">
   <style>
     body { overflow-y: auto; }
+    .guide__topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .guide__topbar-copy {
+      flex: 1;
+      min-width: 0;
+    }
+    .guide__theme-toggle {
+      flex-shrink: 0;
+    }
     .guide { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; }
 .guide h1 {
       font-family: 'Silkscreen', cursive; font-size: 1.5rem;
@@ -183,10 +210,28 @@
 <body class="sidebar-collapsed">
   <div class="noise"></div>
   <div class="guide">
-    <h1>Quick Start Guide</h1>
-    <p class="guide__intro">
-      Agile This is a lightweight task board that runs entirely in your browser. No account needed -- your data stays in localStorage.
-    </p>
+    <div class="guide__topbar">
+      <div class="guide__topbar-copy">
+        <h1>Quick Start Guide</h1>
+        <p class="guide__intro">
+          Agile This is a lightweight task board that runs entirely in your browser. No account needed -- your data stays in localStorage.
+        </p>
+      </div>
+      <button id="guide-theme-toggle" class="btn btn--ghost btn--theme guide__theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Switch to light mode">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 1.75v1.5"/>
+          <path d="M8 12.75v1.5"/>
+          <path d="M3.05 3.05l1.06 1.06"/>
+          <path d="M11.89 11.89l1.06 1.06"/>
+          <path d="M1.75 8h1.5"/>
+          <path d="M12.75 8h1.5"/>
+          <path d="M3.05 12.95l1.06-1.06"/>
+          <path d="M11.89 4.11l1.06-1.06"/>
+          <circle cx="8" cy="8" r="2.75"/>
+        </svg>
+        <span id="guide-theme-toggle-label">Light</span>
+      </button>
+    </div>
 
     <!-- Board Basics -->
     <h2>Board Basics</h2>
@@ -638,6 +683,45 @@ Project brief:
   </div>
 
   <script>
+    const THEME_KEY = 'agilethis-theme';
+
+    function syncGuideThemeButton(theme) {
+      const button = document.getElementById('guide-theme-toggle');
+      const label = document.getElementById('guide-theme-toggle-label');
+      if (!button || !label) return;
+      const isLight = theme === 'light';
+      const action = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+      button.setAttribute('aria-pressed', String(isLight));
+      button.setAttribute('aria-label', action);
+      button.title = action;
+      label.textContent = isLight ? 'Dark' : 'Light';
+    }
+
+    function applyGuideTheme(theme) {
+      const nextTheme = theme === 'light' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      try {
+        localStorage.setItem(THEME_KEY, nextTheme);
+      } catch (e) {}
+      syncGuideThemeButton(nextTheme);
+    }
+
+    syncGuideThemeButton(document.documentElement.dataset.theme || 'dark');
+
+    const guideThemeToggle = document.getElementById('guide-theme-toggle');
+    if (guideThemeToggle) {
+      guideThemeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+        applyGuideTheme(currentTheme === 'light' ? 'dark' : 'light');
+      });
+    }
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === THEME_KEY) {
+        applyGuideTheme(event.newValue === 'light' ? 'light' : 'dark');
+      }
+    });
+
     // Tab switching
     document.querySelectorAll('.guide__tab').forEach(tab => {
       tab.addEventListener('click', () => {

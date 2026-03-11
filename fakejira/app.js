@@ -1937,7 +1937,57 @@ function showRandomQuote(el) {
 
 // ===== Sidebar =====
 
+const THEME_KEY = "agilethis-theme";
 const SIDEBAR_KEY = "agilethis-sidebar";
+
+function getStoredTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
+  } catch (e) {
+    return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  }
+}
+
+function syncThemeToggle(theme) {
+  const button = document.getElementById("btn-theme-toggle");
+  const label = document.getElementById("theme-toggle-label");
+  if (!button || !label) return;
+
+  const isLight = theme === "light";
+  const action = isLight ? "Switch to dark mode" : "Switch to light mode";
+  button.setAttribute("aria-pressed", String(isLight));
+  button.setAttribute("aria-label", action);
+  button.title = action;
+  label.textContent = isLight ? "Dark" : "Light";
+}
+
+function applyTheme(theme) {
+  const nextTheme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = nextTheme;
+  try {
+    localStorage.setItem(THEME_KEY, nextTheme);
+  } catch (e) {}
+  syncThemeToggle(nextTheme);
+}
+
+function toggleTheme() {
+  applyTheme(getStoredTheme() === "light" ? "dark" : "light");
+}
+
+function initTheme() {
+  applyTheme(getStoredTheme());
+
+  const button = document.getElementById("btn-theme-toggle");
+  if (button) {
+    button.addEventListener("click", toggleTheme);
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === THEME_KEY) {
+      applyTheme(event.newValue === "light" ? "light" : "dark");
+    }
+  });
+}
 
 function initSidebar() {
   const saved = localStorage.getItem(SIDEBAR_KEY);
@@ -2162,6 +2212,7 @@ function init() {
     history.replaceState(null, "", "#project/" + currentProjectId());
   }
 
+  initTheme();
   loadCollapsedColumns(); // must run before first renderBoard
   initEvents();
   initCopyButton();
