@@ -303,6 +303,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
 }
 
 .header__title {
@@ -313,6 +314,8 @@ body {
   letter-spacing: 0.02em;
   cursor: pointer;
   text-shadow: var(--title-shadow);
+  position: relative;
+  z-index: 2;
 }
 
 /* Mission statement banner (easter egg) */
@@ -354,6 +357,57 @@ body {
   color: var(--accent-hover);
   border-radius: var(--radius-xs);
   border: 1px solid var(--accent-border);
+  user-select: none;
+  cursor: default;
+}
+
+/* LED ticker drawer (desktop easter egg) */
+.led-ticker-drawer {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 36px;
+  max-width: 0;
+  overflow: hidden;
+  z-index: 1;
+  transition: max-width 500ms var(--ease-out);
+  pointer-events: none;
+  margin-left: 12px;
+}
+.led-ticker-drawer--open {
+  max-width: var(--board-width, 600px);
+  pointer-events: auto;
+}
+.led-ticker-board {
+  background: #0a0a0a;
+  border: 2px solid #2a2a31;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  box-shadow: inset -4px 0 8px rgba(0,0,0,0.6), 4px 0 8px rgba(0,0,0,0.4);
+}
+.led-ticker-text {
+  font-family: 'Doto', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  white-space: nowrap;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.8),
+    0 0 16px rgba(255,255,255,0.4),
+    0 0 32px rgba(255,255,255,0.2);
+  transition: transform 2400ms linear;
+}
+.led-ticker-text--flash {
+  filter: brightness(1.8);
+  text-shadow:
+    0 0 8px rgba(255,255,255,1),
+    0 0 20px rgba(255,255,255,0.7),
+    0 0 40px rgba(255,255,255,0.4);
 }
 
 .header__actions {
@@ -1841,6 +1895,13 @@ body.sidebar-collapsed .sidebar__view-all {
   }
 }
 
+/* Desktop: hide old banner, show LED ticker */
+@media (min-width: 641px) {
+  .mission-banner {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   /* ---- Header compaction ---- */
   .header {
@@ -1852,6 +1913,9 @@ body.sidebar-collapsed .sidebar__view-all {
     display: none;
   }
   .mission-banner {
+    display: none;
+  }
+  .led-ticker-drawer {
     display: none;
   }
   .header__actions {
@@ -1960,6 +2024,13 @@ body.sidebar-collapsed .sidebar__view-all {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .led-ticker-drawer {
+    transition: none;
+  }
+  .led-ticker-text {
+    transition: none;
+    transform: translateX(0) !important;
   }
 }
 
@@ -2425,6 +2496,52 @@ input[type="checkbox"]:indeterminate + .tick-box svg {
 .settings-drawer.active {
   transform: translateX(0);
 }
+
+/* Board settings: slide from left, adjacent to sidebar */
+.settings-drawer--board {
+  right: auto;
+  left: 0;
+  border-left: none;
+  border-right: 1px solid var(--border);
+  transform: translateX(calc(-100% - 1px));
+}
+body.sidebar-collapsed .settings-drawer--board {
+  /* no override needed — left:0 with sidebar width handled by translateX */
+}
+.settings-drawer--board.active {
+  transform: translateX(var(--sidebar-width, 220px));
+}
+body.sidebar-collapsed .settings-drawer--board.active {
+  transform: translateX(56px);
+}
+
+/* Board tab dimming when board settings are open */
+.board-tab--settings-dimmed {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.board-tab--settings-active {
+  opacity: 1;
+}
+
+/* Raise sidebar above backdrop and board settings drawer */
+.sidebar--settings-raised {
+  z-index: 215;
+}
+/* Cover header area above sidebar so drawer slides underneath */
+.sidebar--settings-raised::before {
+  content: "";
+  position: absolute;
+  top: -56px;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--glass-header);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
 .settings-drawer__header {
   display: flex;
   align-items: center;
@@ -2730,5 +2847,9 @@ input[type="checkbox"]:indeterminate + .tick-box svg {
 @media (max-width: 640px) {
   .settings-drawer {
     width: 100vw;
+  }
+  .settings-drawer--board {
+    left: 0;
+    border-right: none;
   }
 }

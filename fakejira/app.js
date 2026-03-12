@@ -380,7 +380,13 @@ function renderTabs() {
     gearBtn.setAttribute("aria-label", "Board settings");
     gearBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      openBoardSettings(index);
+      if (settingsMode === "board" && settingsBoardIndex === index) {
+        closeSettingsDrawer();
+        renderBoard();
+        renderTabs();
+      } else {
+        openBoardSettings(index);
+      }
     });
     tab.appendChild(gearBtn);
 
@@ -1372,17 +1378,55 @@ function importBoard(file) {
       const normalized = normalizeState(data);
       if (!normalized) {
         const srcVersion = typeof data.version === "number" ? "v" + data.version : "unknown format";
-        showToast("Import failed: unsupported or invalid project data (" + srcVersion + ")");
+        const versionHint = typeof data.version === "number" && data.version > CURRENT_VERSION
+          ? ". This build may be cached or out of date."
+          : "";
+        showToast("Import failed: unsupported or invalid project data (" + srcVersion + ")" + versionHint);
         return;
       }
 
       pendingImportData = normalized;
       showImportDialog();
     } catch (err) {
-      showToast("Import failed: " + (err.message || "invalid JSON"));
+      const message = err && err.name === "SyntaxError"
+        ? "invalid JSON"
+        : describeImportError(err);
+      showToast("Import failed: " + message);
     }
   };
   reader.readAsText(file);
+}
+
+function describeImportError(err) {
+  if (!err) return "unknown error";
+  if (err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED") {
+    return "browser storage is full";
+  }
+  if (err.name === "SecurityError") {
+    return "browser storage is unavailable in this browser context";
+  }
+  return err.message || "unknown error";
+}
+
+function rollbackImportState(oldState) {
+  state = oldState;
+  try {
+    saveBoardState();
+  } catch (rollbackErr) {
+    console.error("Failed to roll back import state:", rollbackErr);
+  }
+  try {
+    renderBoard();
+    renderTabs();
+    updateProjectTitleUI();
+  } catch (renderErr) {
+    console.error("Failed to re-render after import rollback:", renderErr);
+  }
+}
+
+function showImportActionError(action, err) {
+  console.error("Import failed while " + action + ":", err);
+  showToast("Import failed while " + action + ": " + describeImportError(err));
 }
 
 function hasAnyTickets() {
@@ -1441,22 +1485,30 @@ function handleImportAddToBoard() {
   const colIds = new Set(board.columns.map(c => c.id));
   const prioIds = new Set(board.priorities.map(p => p.id));
   let count = 0;
-  for (const importedBoard of pendingImportData.boards) {
-    for (const ticket of importedBoard.tickets) {
-      const newId = generateId();
-      const newTicket = { ...ticket, id: newId };
-      newTicket.status = colIds.has(newTicket.status) ? newTicket.status : board.columns[0].id;
-      newTicket.priority = prioIds.has(newTicket.priority) ? newTicket.priority : board.priorities[0].id;
-      board.tickets.push(newTicket);
-      if (!board.columnOrder[newTicket.status]) board.columnOrder[newTicket.status] = [];
-      board.columnOrder[newTicket.status].push(newId);
-      count++;
+  try {
+    for (const importedBoard of pendingImportData.boards) {
+      for (const ticket of importedBoard.tickets) {
+        const newId = generateId();
+        const newTicket = { ...ticket, id: newId };
+        newTicket.status = colIds.has(newTicket.status) ? newTicket.status : board.columns[0].id;
+        newTicket.priority = prioIds.has(newTicket.priority) ? newTicket.priority : board.priorities[0].id;
+        board.tickets.push(newTicket);
+        if (!board.columnOrder[newTicket.status]) board.columnOrder[newTicket.status] = [];
+        board.columnOrder[newTicket.status].push(newId);
+        count++;
+      }
     }
+
+    saveBoardState();
+    renderBoard();
+    renderTabs();
+    closeImportDialog();
+  } catch (err) {
+    rollbackImportState(oldState);
+    showImportActionError("adding imported tickets", err);
+    return;
   }
-  pendingImportData = null;
-  closeImportDialog();
-  saveBoardState();
-  renderBoard();
+
   showToast(count + " ticket" + (count !== 1 ? "s" : "") + " added", {
     undo: () => {
       state = oldState;
@@ -1473,13 +1525,19 @@ function doImportReplace() {
   clearSelection();
   if (viewAllActive) exitViewAll();
   const oldState = cloneStateData(state);
-  state = pendingImportData;
-  pendingImportData = null;
-  closeImportDialog();
-  saveBoardState();
-  renderBoard();
-  renderTabs();
-  updateProjectTitleUI();
+  try {
+    state = pendingImportData;
+    saveBoardState();
+    renderBoard();
+    renderTabs();
+    updateProjectTitleUI();
+    closeImportDialog();
+  } catch (err) {
+    rollbackImportState(oldState);
+    showImportActionError("replacing the current project", err);
+    return;
+  }
+
   showToast("Project replaced", {
     undo: () => {
       state = oldState;
@@ -1524,20 +1582,27 @@ function handleImportAddBoards() {
 
   // Regenerate board IDs to avoid collisions
   const existingTitles = state.boards.map(b => b.title).concat(state.title);
-  for (const board of importedBoards) {
-    board.id = generateBoardId();
-    // Avoid duplicate titles within the project
-    if (existingTitles.includes(board.title)) {
-      board.title = randomName(existingTitles);
+  try {
+    for (const board of importedBoards) {
+      board.id = generateBoardId();
+      // Avoid duplicate titles within the project
+      if (existingTitles.includes(board.title)) {
+        board.title = randomName(existingTitles);
+      }
+      existingTitles.push(board.title);
+      state.boards.push(board);
     }
-    existingTitles.push(board.title);
-    state.boards.push(board);
+
+    saveBoardState();
+    renderTabs();
+    renderBoard();
+    closeImportDialog();
+  } catch (err) {
+    rollbackImportState(oldState);
+    showImportActionError("adding imported boards", err);
+    return;
   }
 
-  pendingImportData = null;
-  closeImportDialog();
-  saveBoardState();
-  renderTabs();
   showToast(importedBoards.length + " board" + (importedBoards.length > 1 ? "s" : "") + " added", {
     undo: () => {
       state = oldState;
@@ -1908,10 +1973,19 @@ function initEvents() {
 
 function initMissionBanner() {
   const title = document.querySelector(".header__title");
+
+  if (window.innerWidth > 640) {
+    initLedTicker(title);
+  } else {
+    initMobileBanner(title);
+  }
+}
+
+function initMobileBanner(titleEl) {
   const banner = document.getElementById("mission-banner");
   const quoteEl = document.getElementById("mission-quote");
 
-  title.addEventListener("click", () => {
+  titleEl.addEventListener("click", () => {
     const isActive = banner.classList.toggle("mission-banner--active");
 
     if (isActive) {
@@ -1933,6 +2007,165 @@ function initMissionBanner() {
 function showRandomQuote(el) {
   el.textContent = MISSION_QUOTES[Math.floor(Math.random() * MISSION_QUOTES.length)];
   el.style.opacity = "1";
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initLedTicker(titleEl) {
+  // Build DOM -- append to titleEl so left:100% positions right of title
+  const drawer = document.createElement("div");
+  drawer.className = "led-ticker-drawer";
+  const board = document.createElement("div");
+  board.className = "led-ticker-board";
+  const text = document.createElement("span");
+  text.className = "led-ticker-text";
+  board.appendChild(text);
+  drawer.appendChild(board);
+  titleEl.appendChild(drawer);
+
+  // Measure widest quote to size the board
+  const measure = document.createElement("span");
+  measure.className = "led-ticker-text";
+  measure.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;";
+  board.appendChild(measure);
+  let maxWidth = 0;
+  for (const q of MISSION_QUOTES) {
+    measure.textContent = q;
+    const w = measure.offsetWidth;
+    if (w > maxWidth) maxWidth = w;
+  }
+  measure.remove();
+
+  // Size to widest quote + padding, but don't overlap header action buttons
+  const naturalWidth = maxWidth + 140;
+  function calcBoardWidth() {
+    const actions = document.querySelector(".header__actions");
+    const titleRect = titleEl.getBoundingClientRect();
+    const actionsLeft = actions ? actions.getBoundingClientRect().left : titleRect.right + naturalWidth;
+    const available = actionsLeft - titleRect.right - 36;
+    return Math.max(100, Math.min(naturalWidth, available));
+  }
+  let boardWidth = calcBoardWidth();
+  board.style.width = boardWidth + "px";
+  drawer.style.setProperty("--board-width", boardWidth + "px");
+
+  window.addEventListener("resize", () => {
+    boardWidth = calcBoardWidth();
+    board.style.width = boardWidth + "px";
+    drawer.style.setProperty("--board-width", boardWidth + "px");
+  });
+
+  // State
+  let isOpen = false;
+  let transitioning = false;
+  let shuffledQuotes = [];
+  let quoteIndex = 0;
+  let timeoutIds = [];
+
+  function clearAllTimeouts() {
+    timeoutIds.forEach(id => clearTimeout(id));
+    timeoutIds = [];
+  }
+
+  function schedule(fn, delay) {
+    const id = setTimeout(fn, delay);
+    timeoutIds.push(id);
+    return id;
+  }
+
+  function showQuote() {
+    if (!isOpen) return;
+    const quote = shuffledQuotes[quoteIndex];
+    text.textContent = quote;
+
+    requestAnimationFrame(() => {
+      const textWidth = text.offsetWidth;
+      const centeredX = (boardWidth - textWidth) / 2;
+
+      // Start off-screen right
+      text.style.transition = "none";
+      text.style.transform = "translateX(" + boardWidth + "px)";
+
+      // Force reflow
+      text.offsetHeight;
+
+      // Scroll to center
+      text.style.transition = "transform 2400ms linear";
+      text.style.transform = "translateX(" + centeredX + "px)";
+
+      // Pause at center, then flash, then exit left
+      schedule(() => {
+        if (!isOpen) return;
+        text.classList.add("led-ticker-text--flash");
+        schedule(() => {
+          text.classList.remove("led-ticker-text--flash");
+
+          schedule(() => {
+            if (!isOpen) return;
+            text.style.transition = "transform 2400ms linear";
+            text.style.transform = "translateX(" + (-textWidth - 20) + "px)";
+
+            schedule(() => {
+              if (!isOpen) return;
+              quoteIndex++;
+              if (quoteIndex >= shuffledQuotes.length) {
+                shuffledQuotes = shuffleArray(MISSION_QUOTES);
+                quoteIndex = 0;
+              }
+              showQuote();
+            }, 2500);
+          }, 150);
+        }, 150);
+      }, 3900);
+    });
+  }
+
+  // Visibility change: pause/resume
+  document.addEventListener("visibilitychange", () => {
+    if (!isOpen) return;
+    if (document.hidden) {
+      clearAllTimeouts();
+    } else {
+      schedule(() => showQuote(), 300);
+    }
+  });
+
+  titleEl.addEventListener("click", () => {
+    if (transitioning) return;
+
+    if (!isOpen) {
+      isOpen = true;
+      transitioning = true;
+      drawer.classList.add("led-ticker-drawer--open");
+
+      shuffledQuotes = shuffleArray(MISSION_QUOTES);
+      quoteIndex = 0;
+
+      schedule(() => {
+        transitioning = false;
+        showQuote();
+      }, 500);
+    } else {
+      isOpen = false;
+      transitioning = true;
+      clearAllTimeouts();
+      drawer.classList.remove("led-ticker-drawer--open");
+
+      schedule(() => {
+        transitioning = false;
+        text.style.transition = "none";
+        text.style.transform = "translateX(100%)";
+        text.textContent = "";
+      }, 500);
+    }
+  });
 }
 
 // ===== Sidebar =====

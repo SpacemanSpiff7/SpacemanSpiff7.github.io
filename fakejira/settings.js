@@ -10,8 +10,17 @@ function openBoardSettings(boardIndex) {
   renderSettingsDrawer();
   const backdrop = document.getElementById("settings-backdrop");
   const drawer = document.getElementById("settings-drawer");
+  // Kill transition, snap to left-side start position
+  drawer.style.transition = "none";
+  drawer.classList.add("settings-drawer--board");
+  drawer.offsetHeight; // force reflow
+  // Restore transition, then animate in
+  drawer.style.transition = "";
   backdrop.classList.add("active");
   drawer.classList.add("active");
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) sidebar.classList.add("sidebar--settings-raised");
+  dimBoardTabs(boardIndex);
 }
 
 function openProjectSettings() {
@@ -20,6 +29,7 @@ function openProjectSettings() {
   renderSettingsDrawer();
   const backdrop = document.getElementById("settings-backdrop");
   const drawer = document.getElementById("settings-drawer");
+  drawer.classList.remove("settings-drawer--board");
   backdrop.classList.add("active");
   drawer.classList.add("active");
 }
@@ -27,12 +37,50 @@ function openProjectSettings() {
 function closeSettingsDrawer() {
   const backdrop = document.getElementById("settings-backdrop");
   const drawer = document.getElementById("settings-drawer");
+  const wasBoard = drawer.classList.contains("settings-drawer--board");
   backdrop.classList.remove("active");
   drawer.classList.remove("active");
+  const sidebar = document.getElementById("sidebar");
+  // Keep --board class and sidebar raised during close animation
+  if (wasBoard) {
+    drawer.addEventListener("transitionend", function handler() {
+      drawer.removeEventListener("transitionend", handler);
+      drawer.style.transition = "none";
+      drawer.classList.remove("settings-drawer--board");
+      drawer.offsetHeight;
+      drawer.style.transition = "";
+      if (sidebar) sidebar.classList.remove("sidebar--settings-raised");
+    });
+  } else {
+    if (sidebar) sidebar.classList.remove("sidebar--settings-raised");
+    const header = document.querySelector(".header");
+    if (header) header.classList.remove("header--settings-raised");
+  }
+  clearBoardTabDimming();
   for (const sortable of settingsSortables) sortable.destroy();
   settingsSortables = [];
   settingsMode = null;
   settingsBoardIndex = null;
+}
+
+function dimBoardTabs(activeBoardIndex) {
+  const tabs = document.querySelectorAll("#board-tabs .board-tab:not(.board-tab--add)");
+  tabs.forEach((tab, i) => {
+    if (i === activeBoardIndex) {
+      tab.classList.add("board-tab--settings-active");
+      tab.classList.remove("board-tab--settings-dimmed");
+    } else {
+      tab.classList.add("board-tab--settings-dimmed");
+      tab.classList.remove("board-tab--settings-active");
+    }
+  });
+}
+
+function clearBoardTabDimming() {
+  const tabs = document.querySelectorAll("#board-tabs .board-tab");
+  tabs.forEach(tab => {
+    tab.classList.remove("board-tab--settings-dimmed", "board-tab--settings-active");
+  });
 }
 
 function renderSettingsDrawer() {
