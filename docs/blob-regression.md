@@ -61,3 +61,28 @@ Confirm it reports:
 - `scrollVelocity`
 - `rotation`
 - persisted settings
+
+## Shape Presets
+
+1. Scroll to the CurlBro featured section and confirm the blob morphs into a dumbbell shape.
+2. Scroll away from CurlBro and confirm the blob morphs back to a sphere.
+3. Confirm the morph transition is smooth (not instant).
+4. Confirm the dumbbell rotates on scroll (scroll-velocity rotation).
+5. In the control panel, confirm noise/morph sliders are greyed out on the dumbbell section.
+6. Confirm shared sliders (size, perspective, brightness, line width, glow, stars) still work on the dumbbell.
+7. Confirm rainbow easter egg works on the dumbbell section.
+8. On mobile (40x40 grid), confirm the dumbbell renders correctly.
+
+## Shape Transition Console Test
+
+```js
+// Force a shape transition
+window.dispatchEvent(new CustomEvent('sectionChanged', {
+  detail: { section: 'test', shapeId: 'curlbroDumbbell' }
+}));
+// Verify dumbbell renders, then:
+window.dispatchEvent(new CustomEvent('sectionChanged', {
+  detail: { section: 'test', shapeId: 'defaultBlob' }
+}));
+// Verify smooth morph back to sphere
+```

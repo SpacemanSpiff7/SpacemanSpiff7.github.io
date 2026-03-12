@@ -182,6 +182,12 @@ const CONFIG = {
     displayColor: '#5A0080',     // Color currently being rendered
     colorTransitionSpeed: 0.05,  // Lerp factor per frame (0-1)
 
+    // Shape transition
+    currentPreset: null,         // Set in initBlobSystem from BLOB_SHAPES
+    targetPreset: null,          // Preset we're transitioning TO
+    shapeTransitionProgress: 1,  // 0 = fully current, 1 = transition complete
+    shapeTransitionSpeed: 0.05,  // Lerp factor per frame (matches color speed)
+
     // Starfield
     starCount: 250,
 
@@ -727,7 +733,20 @@ function renderBlob(currentTime) {
     const gridRes = getCurrentGridResolution();
     const currentRadius = CONFIG.baseRadius;
 
-    // Update vertices with noise-based morphing
+    // Advance shape transition
+    if (CONFIG.shapeTransitionProgress < 1 && CONFIG.targetPreset) {
+        CONFIG.shapeTransitionProgress = Math.min(1, CONFIG.shapeTransitionProgress + CONFIG.shapeTransitionSpeed);
+        if (CONFIG.shapeTransitionProgress >= 1) {
+            CONFIG.currentPreset = CONFIG.targetPreset;
+            CONFIG.targetPreset = null;
+        }
+    }
+
+    const activePreset = CONFIG.currentPreset;
+    const blendTarget = CONFIG.targetPreset;
+    const blendProgress = CONFIG.shapeTransitionProgress;
+
+    // Update vertices with shape-aware position computation
     vertices.forEach(vertex => {
         const noiseValue = simplex.noise3D(
             Math.cos(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
@@ -735,11 +754,47 @@ function renderBlob(currentTime) {
             Math.cos(vertex.theta) + time * CONFIG.noiseFrequency * 100
         );
 
-        const radius = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+        // Compute position for current preset
+        let cx, cy, cz;
+        if (activePreset && activePreset.getPosition) {
+            const pos = activePreset.getPosition(vertex.theta, vertex.phi, time, CONFIG);
+            cx = pos.x; cy = pos.y; cz = pos.z;
+        } else if (activePreset && activePreset.mode === 'customSurface') {
+            const r = activePreset.getRadius(vertex.theta, vertex.phi, time, CONFIG);
+            cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+            cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+            cz = r * Math.cos(vertex.theta);
+        } else {
+            const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+            cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+            cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+            cz = r * Math.cos(vertex.theta);
+        }
 
-        let x = radius * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-        let y = radius * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-        let z = radius * Math.cos(vertex.theta);
+        // Blend with target preset if transitioning
+        let x, y, z;
+        if (blendTarget && blendProgress < 1) {
+            let tx, ty, tz;
+            if (blendTarget.getPosition) {
+                const pos = blendTarget.getPosition(vertex.theta, vertex.phi, time, CONFIG);
+                tx = pos.x; ty = pos.y; tz = pos.z;
+            } else if (blendTarget.mode === 'customSurface') {
+                const r = blendTarget.getRadius(vertex.theta, vertex.phi, time, CONFIG);
+                tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                tz = r * Math.cos(vertex.theta);
+            } else {
+                const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+                tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                tz = r * Math.cos(vertex.theta);
+            }
+            x = cx + (tx - cx) * blendProgress;
+            y = cy + (ty - cy) * blendProgress;
+            z = cz + (tz - cz) * blendProgress;
+        } else {
+            x = cx; y = cy; z = cz;
+        }
 
         let rotated = rotateX(x, y, z, rotation.x);
         rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
@@ -1005,7 +1060,42 @@ function animate(currentTime) {
 // ==========================================
 // INITIALIZATION
 // ==========================================
+/**
+ * Enable/disable control panel sliders based on the active shape preset.
+ * @param {string[]} applicableControls - Element IDs of controls that remain enabled
+ */
+function gateControlPanel(applicableControls) {
+    const allControlIds = [
+        'base-radius', 'noise-amplitude', 'noise-frequency',
+        'morph-speed', 'perspective', 'brightness', 'line-width',
+        'glow-intensity', 'hue-slider', 'star-count', 'star-twinkle',
+        'star-size', 'star-brightness'
+    ];
+    const enabledSet = new Set(applicableControls);
+
+    allControlIds.forEach(id => {
+        const controlItem = document.getElementById(id)?.closest('.control-item');
+        if (!controlItem) return;
+
+        if (enabledSet.has(id)) {
+            controlItem.classList.remove('control-disabled');
+            controlItem.style.pointerEvents = '';
+            controlItem.removeAttribute('title');
+        } else {
+            controlItem.classList.add('control-disabled');
+            controlItem.style.pointerEvents = 'none';
+            controlItem.setAttribute('title', 'Not available for this shape');
+        }
+    });
+}
+
 function initBlobSystem() {
+    // Initialize shape preset from BLOB_SHAPES registry
+    const shapes = window.BLOB_SHAPES;
+    if (shapes && shapes.defaultBlob) {
+        CONFIG.currentPreset = shapes.defaultBlob;
+    }
+
     initStarfield();
     initBlobMesh();
     setupScrollListener();
@@ -1019,6 +1109,19 @@ window.addEventListener('sectionChanged', (event) => {
     CONFIG.currentSection = event.detail.section;
     if (CONFIG.hueOverride === null && !CONFIG.rainbowMode) {
         CONFIG.targetColor = getSectionColor(CONFIG.currentSection, event.detail.color);
+    }
+
+    // Shape transition
+    const shapeId = event.detail.shapeId || 'defaultBlob';
+    const shapes = window.BLOB_SHAPES;
+    if (shapes && shapes[shapeId]) {
+        const newPreset = shapes[shapeId];
+        const current = CONFIG.targetPreset || CONFIG.currentPreset;
+        if (!current || current.id !== newPreset.id) {
+            CONFIG.targetPreset = newPreset;
+            CONFIG.shapeTransitionProgress = 0;
+            gateControlPanel(newPreset.applicableControls);
+        }
     }
 });
 

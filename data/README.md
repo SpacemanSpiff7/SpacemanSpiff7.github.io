@@ -1,209 +1,143 @@
-# Project Management Guide
+# Project & Homepage Configuration Guide
 
-This guide explains how to easily add, remove, or modify projects on your portfolio site.
-
-## Quick Start
-
-All project data is managed through the `projects.json` file in this directory. Simply edit this file to update your portfolio.
+This guide explains how to manage projects and homepage layout through `projects.json`.
 
 ## File Structure
 
 ```
 data/
-├── projects.json  # Main project configuration used by the homepage
+├── projects.json  # Main project + homepage configuration
 └── README.md      # This guide
 ```
 
-**Important**: `projects.json` is the only live source of truth here.
+**Important**: `projects.json` is the single source of truth for both projects and homepage layout.
 
-## How to Add a New Project
-
-### 1. Add the Project Object
-
-Add a new object to the `projects` array in `projects.json`:
+## Top-Level Structure
 
 ```json
 {
-  "id": "my-new-project",
-  "title": "My New Project",
-  "shortDescription": "Short card copy used on the homepage",
-  "description": "Longer inventory description for future reuse",
-  "category": "Category Tag",
-  "image": "https://example.com/image.jpg",
-  "tags": ["Category Tag"],
-  "actions": [
-    {
-      "text": "Open",
-      "url": "tools/my-project.html",
-      "type": "primary"
-    }
-  ]
+  "homepage": { ... },     // Homepage section registry (new)
+  "featured": [...],       // Deprecated (kept for reference, not used at runtime)
+  "featuredConfig": {...},  // Deprecated (kept for reference, not used at runtime)
+  "projects": [...]         // Canonical project inventory
 }
 ```
 
-### 2. Feature It on the Snap Homepage (Optional)
+## Homepage Configuration
 
-If the project should appear as a full-screen featured section between the hero and about sections, add its `id` to the top-level `featured` array:
+The `homepage` object controls all non-hero sections on the homepage, navigation groups, and blob shape assignments.
+
+### Schema
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `groupOrder` | `string[]` | Ordered array of nav group IDs |
+| `groupsById` | `object` | Group definitions keyed by ID |
+| `sectionOrder` | `string[]` | Ordered array of section IDs (determines scroll order) |
+| `sectionsById` | `object` | Section definitions keyed by ID |
+
+### Group Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | `string` | Nav link text |
+| `hasSubnav` | `boolean` | Show subnav dropdown with child sections |
+
+### Section Fields
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `type` | required | `hero`, `projectFeature`, `text`, `linkList` |
+| `groupId` | required | Nav group this section belongs to |
+| `showDot` | `true` | Show in progress indicator |
+| `showInSubnav` | `false` | Show as subnav item under parent group |
+| `navSubLabel` | -- | Subnav label (falls back to project title or section title) |
+| `shapeId` | `"defaultBlob"` | Blob shape preset from `window.BLOB_SHAPES` |
+| `blobColor` | -- | Override blob color (falls back to project blobColor, then palette) |
+| `projectId` | -- | For `projectFeature`: references project in `projects` array |
+| `title` | -- | For `text`/`linkList`: section heading |
+| `body` | -- | For `text`/`linkList`: paragraph text |
+| `linkSetId` | -- | For `text`/`linkList`: key into code-owned `LINK_SETS` map in `js/main.js` |
+
+### Adding a New Section
+
+To add a new "Skills" section with its own nav link:
+
+1. Add `"skills"` to `groupOrder` at the desired position
+2. Add `"skills": { "label": "Skills" }` to `groupsById`
+3. Add `"skills"` to `sectionOrder` at the desired position
+4. Add section definition to `sectionsById`:
 
 ```json
-{
-  "featured": ["curlbro", "agile-this", "traffic-therapy", "my-new-project"]
+"skills": {
+  "type": "text",
+  "groupId": "skills",
+  "title": "Skills",
+  "body": "Your skills description here."
 }
 ```
 
-## Field Definitions
+A new nav link appears automatically. No JS changes needed.
 
-- `id`: Unique identifier (lowercase, hyphens for spaces)
+### Adding a New Featured Project
+
+1. Add the project to the `projects` array
+2. Add a section entry to `sectionOrder` (within the featured group)
+3. Add a section definition to `sectionsById`:
+
+```json
+"featured-my-project": {
+  "type": "projectFeature",
+  "groupId": "featured",
+  "projectId": "my-project",
+  "showInSubnav": true,
+  "shapeId": "defaultBlob"
+}
+```
+
+## Projects Array
+
+The `projects` array is the canonical inventory of all projects.
+
+### Required Fields
+
+- `id`: Unique identifier (lowercase, hyphens)
 - `title`: Project name
-- `shortDescription`: Card copy currently rendered on featured sections and in the workbench grid
-- `description`: Longer description kept as inventory content
-- `category`: Inventory metadata
-- `image`: Inventory metadata
-- `tags`: Array of technology/category tags
+- `shortDescription`: Card copy for featured sections and workbench grid
 - `actions`: Array of action buttons
-- `blobColor`: Optional featured-section blob color override
-- `hidden: true`: Keep the project in the registry but hide it from the workbench grid
 
-### Top-Level Fields
+### Optional Fields
 
-- `featured`: Ordered array of project IDs used to build full-screen featured sections
-- `featuredConfig`: Reserved config object; keep unless you are updating the renderer too
-- `projects`: Canonical array of project objects
-
-### Featured Section Behavior
-
-- Featured sections are generated from the `featured` array in order
-- The homepage nav highlighting, progress dots, and blob section events all use the same shared section registry built in `js/main.js`
-- If a featured project does not define `blobColor`, the homepage assigns one automatically from the featured palette
+- `description`: Longer description (inventory metadata)
+- `blobColor`: Blob color override for featured sections
+- `category`: Category tag
+- `image`: Image URL
+- `tags`: Array of tags
+- `hidden: true`: Hide from workbench grid (can still be featured)
 
 ### Action Button Types
 
-- `type: "primary"`: Blue gradient button for main action
-- `type: "secondary"`: Transparent button for secondary actions
-- `external: true`: Allowed but currently not required by the homepage renderer
+- `type: "primary"`: Main action button
+- `type: "secondary"`: Secondary action button
 
 ## How to Remove a Project
 
-Remove the project object from `projects`. If it is also in `featured`, remove its ID there too.
+Remove the project from `projects`. If it has a featured section, also remove the section from `sectionOrder` and `sectionsById`.
 
-## How to Reorder Projects
+## How to Reorder
 
-Projects appear in two independent orders:
-
-- `featured` controls the order of full-screen featured sections
-- `projects` controls the workbench grid order
-
-## Examples
-
-### Internal Project (same domain)
-```json
-{
-  "id": "shopping-research",
-  "title": "Shopping Research Generator",
-  "shortDescription": "AI-powered prompt generator",
-  "description": "Longer inventory description",
-  "category": "AI Tools",
-  "image": "assets/images/shopping-tool.jpg",
-  "tags": ["AI Tools"],
-  "actions": [
-    {
-      "text": "Open",
-      "url": "tools/shopping-research.html",
-      "type": "primary"
-    }
-  ]
-}
-```
-
-### External Project (different domain)
-```json
-{
-  "id": "stock-widget",
-  "title": "Stock Analytics Widget",
-  "shortDescription": "Financial analysis tool",
-  "description": "Longer inventory description",
-  "category": "Financial", 
-  "image": "https://example.com/stock-image.jpg",
-  "tags": ["Financial"],
-  "actions": [
-    {
-      "text": "Open",
-      "url": "https://external-site.com/tool",
-      "type": "primary",
-      "external": true
-    }
-  ]
-}
-```
-
-### Project with Multiple Actions
-```json
-{
-  "id": "complex-project",
-  "title": "Complex Project",
-  "description": "A project with multiple links",
-  "tags": ["React", "Node.js", "API"],
-  "actions": [
-    {
-      "text": "Live Demo",
-      "url": "https://demo.example.com",
-      "type": "primary", 
-      "external": true
-    },
-    {
-      "text": "View Code",
-      "url": "https://github.com/user/repo",
-      "type": "secondary",
-      "external": true
-    },
-    {
-      "text": "Documentation", 
-      "url": "docs.html",
-      "type": "secondary"
-    }
-  ]
-}
-```
-
-## Best Practices
-
-1. **Image Optimization**: Use images around 400x300px for best performance
-2. **Consistent Naming**: Use consistent tag names across projects
-3. **Short Description Length**: Keep `shortDescription` compact, because it is used in full-screen snap sections
-4. **Relative URLs**: Relative action URLs resolve from the repo root, not from `data/`
-5. **Hidden Projects**: Prefer `hidden: true` over deletion if you want to keep old work in the registry
-6. **Testing**: Test your changes locally before pushing to production
+- `sectionOrder` controls the scroll order of homepage sections
+- `groupOrder` controls the nav link order
+- `projects` array order controls the workbench grid order
 
 ## Homepage Safety Checks
 
-Changes in `projects.json` can affect the homepage snap flow. Before pushing:
+Before pushing changes:
 
-1. Confirm every featured ID exists in `projects`
-2. Confirm every relative action URL exists on disk
-3. Load the homepage and click every featured CTA
-4. Scroll through the snap sections on desktop and mobile widths
-5. Confirm the `glowy-blob-ball` CTA still reaches `#blob-showcase`
-6. On mobile, confirm featured project copy is visually centered in the viewport
-
-## Validation
-
-The system will gracefully handle missing fields, but for best results:
-- Always include required fields (`id`, `title`, `shortDescription`, `actions`)
-- Ensure image URLs are accessible
-- Test all links before adding them
-- Use valid JSON syntax (check with a JSON validator if unsure)
-
-## Troubleshooting
-
-If projects aren't loading:
-1. Check browser console for errors
-2. Validate JSON syntax at [jsonlint.com](https://jsonlint.com)
-3. Ensure the `data/projects.json` file is accessible
-4. Check that image URLs are working
-
-## Making Changes Live
-
-After editing `projects.json`:
-1. Commit and push your changes to the repository
-2. GitHub Pages will automatically deploy the updates
-3. Changes should be visible within a few minutes
+1. Validate JSON syntax
+2. Confirm every `projectId` in `sectionsById` exists in `projects`
+3. Confirm every relative action URL exists on disk
+4. Load the homepage and click every featured CTA
+5. Scroll through all snap sections on desktop and mobile
+6. Confirm the `glowy-blob-ball` CTA still reaches `#blob-showcase`
+7. On mobile, confirm featured project content is visually centered

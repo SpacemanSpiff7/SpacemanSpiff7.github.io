@@ -31,10 +31,10 @@ git push origin master
 
 ### Cache Busting
 JavaScript files use version query strings for cache busting.
-When modifying `js/animations.js` or `js/main.js`:
+When modifying `js/animations.js`, `js/main.js`, or `js/blob-shapes.js`:
 1. Make your code changes
 2. Increment the version number in index.html (e.g., `?v=4` → `?v=5`)
-3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only)
+3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only), `blob-shapes.js` has 1 (script tag only)
 4. Commit and push together
 
 This ensures users get fresh JavaScript immediately after deployment.
@@ -44,30 +44,35 @@ This ensures users get fresh JavaScript immediately after deployment.
 ### Current Design
 - **Scroll-snap single page** with animated backgrounds
 - **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js) with HiDPI scaling and quadratic curve wireframe
-- **Dynamic content**: Projects loaded from data/projects.json
-- **Control panel**: 13-slider control panel with 3 collapsible sections (Shape, Style, Stars), hue override, and rainbow easter egg
+- **Dynamic content**: All non-hero sections driven by `homepage` registry in `data/projects.json`
+- **Shape presets**: Per-section wireframe shapes via `js/blob-shapes.js` (dumbbell for CurlBro, default blob for others)
+- **Grouped nav**: Nav links generated from `homepage.groupOrder` with hover-to-expand subnav (desktop) / accordion subnav (mobile)
+- **Control panel**: 13-slider control panel with 3 collapsible sections (Shape, Style, Stars), hue override, rainbow easter egg, and per-shape control gating
 - **Modular CSS**: Split into tokens, base, components, and responsive files
 
 ### Key Files
 | File | Purpose |
 |------|---------|
-| `index.html` | Main page with all sections inline |
+| `index.html` | Main page with hero section inline, all other sections rendered dynamically |
 | `css/tokens.css` | CSS custom properties (design system tokens) |
 | `css/base.css` | Reset, typography, containers, buttons, cards |
-| `css/components.css` | Nav, hero, sections, scroll-snap, control panel |
-| `css/responsive.css` | Media queries, reduced motion, print styles |
+| `css/components.css` | Nav, hero, sections, scroll-snap, control panel, subnav dropdown |
+| `css/responsive.css` | Media queries, reduced motion, print styles, mobile subnav accordion |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
-| `js/main.js` | Navigation, project loading, progress indicator |
-| `js/animations.js` | Starfield, 3D blob rendering, and 13-slider control panel (Shape/Style/Stars sections, rainbow easter egg) |
-| `components/nav.html` | Navigation bar (only component loaded dynamically) |
-| `data/projects.json` | Single source of truth for projects |
+| `js/blob-shapes.js` | Shape preset registry (`window.BLOB_SHAPES`) with `defaultBlob` and `curlbroDumbbell` |
+| `js/main.js` | Config reader, section renderers, `LINK_SETS`, grouped nav builder, progress indicator |
+| `js/animations.js` | Starfield, 3D blob rendering, shape transitions, control panel + gating |
+| `components/nav.html` | Navigation shell (logo + hamburger + empty container; links built by JS) |
+| `data/projects.json` | Single source of truth for projects and homepage layout (`homepage` registry) |
 
 ### Section Structure
-1. **Hero** - Name + title
-2. **Featured 1-4** - Featured projects (populated from JSON)
-3. **About** - Bio section
-4. **Contact** - Contact information
-5. **Projects Grid** - All projects displayed in grid
+All non-hero sections are defined in `data/projects.json` under `homepage.sectionOrder`:
+1. **Hero** - Name + title (static HTML)
+2. **Featured 1-4** - Featured projects (type: `projectFeature`, rendered from JSON)
+3. **About** - Bio section (type: `text`, rendered from JSON)
+4. **Contact** - Contact info (type: `linkList`, rendered from JSON)
+5. **Projects Grid** - Workbench (hardcoded terminal section)
+6. **Blob Showcase** - Endcap (hardcoded terminal section)
 
 ### Typography
 
@@ -81,9 +86,11 @@ This ensures users get fresh JavaScript immediately after deployment.
 ### Data-Driven Configuration
 
 **Single Source of Truth**: `data/projects.json`
-- Controls featured tools on home page
-- Powers projects grid with metadata
-- **When adding projects**: Update projects.json, not CLAUDE.md (see `data/README.md`)
+- `homepage` registry controls all non-hero homepage sections, nav groups, and blob shape assignments
+- `projects` array powers the workbench grid and is referenced by featured section configs
+- **When adding projects/sections**: Update projects.json, not CLAUDE.md (see `data/README.md`)
+- Contact link markup lives in `LINK_SETS` in `js/main.js` (code-owned, not in JSON)
+- Shape presets live in `js/blob-shapes.js` as geometry functions (not in JSON)
 
 ### Homepage Stability Contract
 
@@ -92,7 +99,8 @@ Treat the homepage scroll system as an interaction contract, not cosmetic CSS.
 - **The snap container is `.scroll-container`**. Do not move scrolling back to `body`/`html` without updating observers, nav clicks, progress dots, and mobile viewport logic together.
 - **Snap sections are explicit**. `#hero`, dynamic featured sections, `#about`, `#contact`, and `#blob-showcase` use `.snap-section`. `#projects-grid` is intentionally the free-scroll workbench section inside the same flow.
 - **Viewport math is centralized**. `js/main.js` sets `--vh`; `css/tokens.css` owns `--nav-height`, `--bottom-chrome-height`, and `--snap-bottom-offset`. Do not re-hardcode those values elsewhere.
-- **Section identity matters**. `js/main.js` now builds a shared section registry that drives featured sections, scroll highlighting, progress dots, and blob section events together. Keep those concerns unified.
+- **Section identity matters**. `js/main.js` now builds a shared section registry from `homepage.sectionsById` that drives section rendering, grouped nav, scroll highlighting, progress dots, blob color/shape transitions together. Keep those concerns unified.
+- **Nav is config-driven**. `components/nav.html` is a shell. `js/main.js` populates nav links from `homepage.groupOrder` + `homepage.groupsById`. Sections with `showInSubnav: true` become subnav items. Do not hardcode nav links in `components/nav.html`.
 - **Keep one scroll owner**. Avoid mixing CSS smooth scrolling, `scrollIntoView()`, touch handlers, and custom scroll math unless there is a clear reason.
 
 ### Section Layout Contract
@@ -120,25 +128,29 @@ When changing homepage layout, navigation, or project ordering, verify all of th
 5. Blob color transitions still change at the intended sections.
 6. `#projects-grid` still allows free scrolling and does not trap the user in a snap loop.
 7. The `glowy-blob-ball` CTA still reaches `#blob-showcase`.
-8. Run the blob-specific checks in `docs/blob-regression.md` when changing `js/animations.js`.
+8. Shape presets morph correctly when scrolling between sections (e.g. sphere to dumbbell on CurlBro).
+9. Control panel sliders gate correctly per shape (noise/morph disabled on custom shapes).
+10. Run the blob-specific checks in `docs/blob-regression.md` when changing `js/animations.js` or `js/blob-shapes.js`.
 
 ### Projects Data Contract
 
 `data/projects.json` is the homepage content registry. Preserve this shape:
 
-- Top-level keys: `featured`, `featuredConfig`, `projects`
-- `featured` is an ordered array of project IDs
+- Top-level keys: `homepage`, `featured` (deprecated), `featuredConfig` (deprecated), `projects`
+- `homepage` contains `groupOrder`, `groupsById`, `sectionOrder`, `sectionsById` (see `data/README.md` for full schema)
 - `projects` is the canonical array of project objects
 - Each project should have `id`, `title`, `shortDescription`, and `actions`
 - `hidden: true` removes a project from the workbench grid but does not prevent it from being featured
 - Relative action URLs must resolve from the repository root, because `js/main.js` renders them directly into `index.html`
+- `featured` and `featuredConfig` top-level keys remain in the file but are not read at runtime
 
 Current reality:
 
 - There are **11** projects in `data/projects.json`
-- There are **4** featured projects
-- Several metadata fields (`featuredConfig`, `image`, `category`, `tags`, `description`) are only partially used by the current homepage renderer. Do not assume they are dead.
-- Featured projects can optionally define `blobColor`; if omitted, `js/main.js` assigns a color from the featured palette by featured order
+- There are **4** featured projects (defined in `homepage.sectionOrder` as `projectFeature` sections)
+- Several metadata fields (`image`, `category`, `tags`, `description`) are only partially used by the current homepage renderer. Do not assume they are dead.
+- Featured sections can define `blobColor` in `sectionsById` or inherit from the project's `blobColor`; if both are absent, `js/main.js` assigns a color from the featured palette
+- Each section can specify a `shapeId` referencing a preset in `window.BLOB_SHAPES`
 
 ## Important Implementation Notes
 
@@ -151,6 +163,21 @@ Current reality:
 ### Rainbow Easter Egg
 
 The blob control panel hue slider has a rainbow easter egg: hold the slider at max (360) for ~2 seconds to activate rainbow mode. This is intentional — the blob cycles through hues rapidly with a pulsing glow, and the panel caret glows rainbow. It is session-only (not persisted to localStorage). Do not remove it.
+
+### Shape Preset System
+
+`js/blob-shapes.js` defines `window.BLOB_SHAPES` — a registry of wireframe shape presets. Each section in the homepage config can specify a `shapeId` that controls the blob's geometry.
+
+- **`defaultBlob`**: Standard noise-based morphing sphere (uses existing pipeline, all 13 controls enabled)
+- **`curlbroDumbbell`**: Dumbbell shape via piecewise-linear radial profile (deterministic, no noise/morph controls)
+
+Shape morphing blends radius outputs from two presets per frame at ~0.05 lerp/frame, matching the color transition speed. Custom shapes use scroll-velocity rotation only (no noise).
+
+When adding new shapes, add a preset to `BLOB_SHAPES` with `id`, `mode`, `getRadius()`, and `applicableControls`. Then reference the preset ID in a section's `shapeId` field in `projects.json`.
+
+### LINK_SETS (Code-Owned Markup)
+
+Contact and about link markup is defined in `LINK_SETS` in `js/main.js`, not in JSON. This keeps SVG icons and link attributes code-owned. Section configs reference link sets via `linkSetId` (e.g., `"aboutLinks"`, `"contactLinks"`).
 
 ### CSS Architecture
 
@@ -224,8 +251,9 @@ One live tool in this repo integrates with Google services:
 │   ├── responsive.css      # Media queries, reduced motion, print styles
 │   └── style.css           # Import wrapper (for tools compatibility)
 ├── js/
-│   ├── main.js             # Navigation, project loading, progress indicator
-│   └── animations.js       # Starfield and 3D blob rendering
+│   ├── blob-shapes.js      # Shape preset registry (window.BLOB_SHAPES)
+│   ├── main.js             # Config reader, section renderers, grouped nav, progress
+│   └── animations.js       # Starfield, 3D blob rendering, shape transitions
 ├── components/
 │   └── nav.html            # Navigation bar (only component)
 ├── tools/                  # Standalone HTML tools and guide page
