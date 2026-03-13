@@ -90,6 +90,7 @@
     position: relative;
     letter-spacing: 0.5px;
     display: block;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .nav-link:hover,
@@ -158,6 +159,7 @@
     display: block;
     transition: all var(--transition-normal);
     white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .nav-subnav-link:hover,
@@ -1146,20 +1148,19 @@
 }
 
 /* ==========================================
-   BLOB SHOWCASE - Hidden section at end
+   BLOB SHOWCASE - 3D Shape Carousel
    ========================================== */
 
 #blob-showcase {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
     background: transparent;
     position: relative;
+    /* Height set dynamically by JS carousel system */
+    min-height: calc(var(--vh, 1vh) * 100);
+    scroll-snap-align: start;
 }
 
 .field-notes-link {
-    position: absolute;
+    position: fixed;
     bottom: 2rem;
     right: 2rem;
     font-family: 'IBM Plex Mono', monospace;
@@ -1167,11 +1168,51 @@
     color: rgba(255, 255, 255, 0.08);
     text-decoration: none;
     letter-spacing: 0.05em;
-    transition: color 0.3s ease;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.field-notes-link.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .field-notes-link:hover {
     color: rgba(255, 255, 255, 0.35);
+}
+
+.back-to-top-btn {
+    position: fixed;
+    top: calc(var(--nav-height, 60px) + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Silkscreen', 'Courier New', monospace;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.15);
+    transition: opacity 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.back-to-top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.back-to-top-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.25);
 }
 
 /* ==========================================
@@ -1620,6 +1661,42 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 /* Disabled control items (shape-gated) */
+/* Shape selector dropdown */
+#shape-select {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0 28px 0 10px;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.6)'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+#shape-select:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+#shape-select:focus {
+    border-color: rgba(100, 200, 255, 0.5);
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.3);
+}
+
+#shape-select option {
+    background: #1a1a2e;
+    color: white;
+}
+
 .control-disabled {
     opacity: 0.3;
     pointer-events: none;

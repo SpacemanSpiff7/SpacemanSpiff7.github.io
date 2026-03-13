@@ -52,7 +52,7 @@ The `homepage` object controls all non-hero sections on the homepage, navigation
 | `showDot` | `true` | Show in progress indicator |
 | `showInSubnav` | `false` | Show as subnav item under parent group |
 | `navSubLabel` | -- | Subnav label (falls back to project title or section title) |
-| `shapeId` | `"defaultBlob"` | Blob shape preset from `window.BLOB_SHAPES` |
+| `shapeId` | `"defaultBlob"` | Blob shape preset from `window.BLOB_SHAPES`. Also used by carousel in `js/animations.js` |
 | `blobColor` | -- | Override blob color (falls back to project blobColor, then palette) |
 | `projectId` | -- | For `projectFeature`: references project in `projects` array |
 | `title` | -- | For `text`/`linkList`: section heading |
@@ -141,3 +141,4 @@ Before pushing changes:
 5. Scroll through all snap sections on desktop and mobile
 6. Confirm the `glowy-blob-ball` CTA still reaches `#blob-showcase`
 7. On mobile, confirm featured project content is visually centered
+8. If changing `shapeId` values, verify shapes appear correctly in both featured sections and the blob carousel

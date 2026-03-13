@@ -86,3 +86,30 @@ window.dispatchEvent(new CustomEvent('sectionChanged', {
 }));
 // Verify smooth morph back to sphere
 ```
+
+## 3D Shape Carousel
+
+1. Scroll past the workbench grid into `#blob-showcase` and confirm the carousel activates.
+2. Continue scrolling and confirm each shape appears centered, rotates 360 degrees, then slides left as the next slides in from the right.
+3. Confirm the horizontal slide transition is smooth (eased) and takes a visible fraction of the scroll.
+4. Confirm the last shape (`defaultBlob`) spins indefinitely as you keep scrolling — it should NOT reset/jump or show multiple blobs.
+5. Scroll back up through the carousel and confirm shapes reverse correctly (slide right, previous shape enters from left).
+6. Scroll fully back above the carousel and confirm the blob restores to the correct shape and color for the visible section.
+7. Click the "Top" button and confirm it scrolls to the hero and the blob returns to its default state (not stuck on a carousel shape like palmTree).
+8. On mobile, confirm carousel shapes are proportionally sized (not oversized).
+9. Confirm drag-rotation works on all sections (click and drag the blob anywhere on the page).
+10. Confirm drag-rotation is disabled inside the carousel zone (scrolling should work, not drag).
+11. Confirm the progress indicator shows a dot for the blob showcase section.
+12. Confirm the "Top" button appears whenever scrolled past the hero and disappears at the top.
+
+## Carousel Sequence Verification
+
+The default carousel sequence is: curlbroDumbbell, goofDog, elephant, gallopingHorse, racecar, palmTree, gummyBear, hotAirBalloon, airplane, defaultBlob.
+
+Scroll through the full carousel and confirm each shape renders correctly (no missing meshes, no visual glitches at transitions).
+
+## Known Carousel Pitfalls
+
+- `recalcCarouselLayout()` triggers resize events because it sets `showcase.style.height`. A re-entrancy guard prevents infinite recursion — do not remove it.
+- Carousel layout depends on `showcase.offsetTop`, which is wrong until main.js renders dynamic sections. The layout is recalculated after section rendering via `window.recalcCarouselLayout()`.
+- On carousel exit, both the shape AND the main.js section cache must be reset. The `carouselExited` event handles this. Without it, the blob can get stuck on a carousel shape.

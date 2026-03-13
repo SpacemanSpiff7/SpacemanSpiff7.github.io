@@ -39,7 +39,7 @@
     <link rel="preload" href="css/base.css" as="style">
     <link rel="preload" href="css/components.css" as="style">
     <link rel="preload" href="css/responsive.css" as="style">
-    <link rel="preload" href="js/main.js?v=9" as="script">
+    <link rel="preload" href="js/main.js?v=11" as="script">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
 
     <!-- Fonts -->
@@ -107,11 +107,13 @@
         </section>
 
         <!-- Blob showcase - snap section but not in nav/progress -->
-        <section id="blob-showcase" class="snap-section">
-            <!-- Minimal content - let the blob animation shine -->
+        <section id="blob-showcase">
             <a href="tools/guide.html" class="field-notes-link" aria-label="Explorer's field guide">field notes</a>
         </section>
     </main>
+
+    <!-- Back to top - visible when scrolled past hero -->
+    <button id="back-to-top" class="back-to-top-btn" aria-label="Back to top">Top &#8593;</button>
 
     <!-- Progress Indicator -->
     <nav class="progress-indicator" aria-label="Page progress"></nav>
@@ -130,6 +132,11 @@
                 </div>
                 <div class="controls-section-body">
                     <div class="controls-grid">
+                        <div class="control-item">
+                            <label for="shape-select">Preset</label>
+                            <select id="shape-select"></select>
+                            <span class="control-value" id="shape-select-value"></span>
+                        </div>
                         <div class="control-item">
                             <label for="base-radius">Size</label>
                             <input type="range" id="base-radius" min="30" max="500" step="10" value="200">
@@ -268,8 +275,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/blob-shapes.js?v=3"></script>
-    <script src="js/animations.js?v=6"></script>
-    <script src="js/main.js?v=9"></script>
+    <script src="js/blob-shapes.js?v=34"></script>
+    <script src="js/animations.js?v=13"></script>
+    <script src="js/main.js?v=11"></script>
 </body>
 </html>

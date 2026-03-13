@@ -231,8 +231,8 @@ function buildSectionRegistry(homepage, projectsMap) {
         id: 'blob-showcase',
         label: 'Blob Showcase',
         navTarget: 'projects-grid',
-        progressTarget: 'projects-grid',
-        includeInProgress: false,
+        progressTarget: 'blob-showcase',
+        includeInProgress: true,
         blobColor: null,
         shapeId: 'defaultBlob',
         groupId: 'workbench',
@@ -413,6 +413,9 @@ function setupNavigation() {
             const section = document.getElementById(targetSection);
 
             if (section) {
+                if (targetSection === 'hero') {
+                    window.dispatchEvent(new CustomEvent('scrollToTop'));
+                }
                 section.scrollIntoView({ behavior: 'smooth' });
 
                 // Update active state
@@ -429,6 +432,7 @@ function setupNavigation() {
             e.preventDefault();
             const heroSection = document.getElementById('hero');
             if (heroSection) {
+                window.dispatchEvent(new CustomEvent('scrollToTop'));
                 heroSection.scrollIntoView({ behavior: 'smooth' });
 
                 // Update active state to home
@@ -514,12 +518,16 @@ function buildGroupedNav(homepage, sectionRegistry) {
 
             li.appendChild(subnavUl);
 
-            // Desktop: hover to expand
+            // Desktop only: hover to expand (touch devices use click toggle)
             li.addEventListener('mouseenter', () => {
-                li.classList.add('subnav-open');
+                if (!window.matchMedia(MOBILE_FEATURED_MEDIA_QUERY).matches) {
+                    li.classList.add('subnav-open');
+                }
             });
             li.addEventListener('mouseleave', () => {
-                li.classList.remove('subnav-open');
+                if (!window.matchMedia(MOBILE_FEATURED_MEDIA_QUERY).matches) {
+                    li.classList.remove('subnav-open');
+                }
             });
 
             // Mobile: click group label always toggles accordion, never scrolls
@@ -594,7 +602,7 @@ function maybeInitScrollHighlighting() {
 function setupScrollHighlighting(navLinks, sectionRegistry) {
     const scrollContainer = document.querySelector('.scroll-container');
     let currentSection = 'hero';
-    let currentBlobSection = 'hero';
+    let currentBlobSection = '';
     let currentGroupId = 'home';
     const sectionElements = sectionRegistry
         .map(sectionConfig => ({
@@ -658,7 +666,10 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
         let nearestDistance = Infinity;
 
         sectionElements.forEach(section => {
-            const sectionMidpoint = section.element.offsetTop + (section.element.offsetHeight / 2);
+            // For very tall sections (carousel), use top edge + 1vh as the
+            // anchor point so it only activates when viewport is actually there
+            const effectiveHeight = Math.min(section.element.offsetHeight, window.innerHeight);
+            const sectionMidpoint = section.element.offsetTop + (effectiveHeight / 2);
             const distance = Math.abs(sectionMidpoint - viewportMidpoint);
 
             if (distance < nearestDistance) {
@@ -687,6 +698,12 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
     const scrollTarget = scrollContainer || window;
     scrollTarget.addEventListener('scroll', requestSectionUpdate, { passive: true });
     window.addEventListener('resize', requestSectionUpdate);
+
+    // When carousel exits, reset cached section so we re-dispatch sectionChanged
+    window.addEventListener('carouselExited', () => {
+        currentBlobSection = '';
+        requestSectionUpdate();
+    });
 
     requestSectionUpdate();
 }
@@ -788,12 +805,18 @@ async function loadProjects() {
         HOMEPAGE_STATE.homepage = homepage;
         HOMEPAGE_STATE.projectsReady = true;
 
+
         // Build grouped nav (deferred until nav shell is also ready)
         maybeInitGroupedNav();
 
         initFeaturedSectionCollapse();
         initProgressIndicator(sectionRegistry);
         maybeInitScrollHighlighting();
+
+        // Recalculate carousel layout now that dynamic sections are in the DOM
+        if (typeof window.recalcCarouselLayout === 'function') {
+            window.recalcCarouselLayout();
+        }
 
     } catch (error) {
         console.error('Error loading projects:', error);
@@ -824,7 +847,12 @@ function initProgressIndicator(sectionRegistry) {
         dot.setAttribute('aria-label', section.label);
         dot.addEventListener('click', () => {
             const el = document.getElementById(section.id);
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            if (el) {
+                if (section.id === 'hero') {
+                    window.dispatchEvent(new CustomEvent('scrollToTop'));
+                }
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
         });
         container.appendChild(dot);
     });

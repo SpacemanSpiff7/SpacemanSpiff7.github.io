@@ -5,3 +5,4 @@ node_modules/
 **/.wrangler/
 dist/
 build/
+scripts/preview-output/

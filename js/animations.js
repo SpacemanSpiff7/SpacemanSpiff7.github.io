@@ -188,12 +188,45 @@ const CONFIG = {
     shapeTransitionProgress: 1,  // 0 = fully current, 1 = transition complete
     shapeTransitionSpeed: 0.05,  // Lerp factor per frame (matches color speed)
 
+    // Arbitrary mesh rendering
+    renderMode: 'sphereGrid',         // 'sphereGrid' | 'arbitraryMesh'
+    meshTransitionState: 'idle',      // 'idle' | 'shrinking' | 'expanding'
+    meshTransitionProgress: 0,        // 0..1 progress through shrink or expand phase
+    meshTransitionScale: 1,           // computed from progress via easing
+    activeMesh: null,                 // cached {vertices, edges, projected} for current mesh
+    _pendingMeshPreset: null,         // preset waiting to be swapped in at scale=0
+
     // Starfield
     starCount: 250,
+
+    carouselXOffset: 0,         // X pixel shift during carousel transitions
 
     // Performance
     targetFPS: 60,
     targetFPSMobile: 30,
+};
+
+// ==========================================
+// CAROUSEL CONFIG
+// ==========================================
+const CAROUSEL_CONFIG = {
+    sequence: [
+        'curlbroDumbbell', 'goofDog', 'elephant',
+        'gallopingHorse', 'racecar', 'palmTree', 'gummyBear',
+        'hotAirBalloon', 'airplane', 'defaultBlob'
+    ],
+    scrollPerShape: 3,          // viewport-heights per 360° rotation
+    transitionZone: 0.12,       // fraction of scrollPerShape for slide transition (entry + exit)
+    slideOffsetMax: 0.5,        // max X offset as fraction of viewport width
+    unlimitedExtraScroll: 20,   // extra vh after last shape for unlimited spin
+    active: false,
+    currentIndex: -1,
+    progress: 0,                // 0-1 within current shape
+    _resolvedSequence: [],
+    _lastRenderedIndex: -1,
+    _showcaseTop: 0,
+    _sectionHeight: 0,
+    _scrollPerShapePx: 0,
 };
 
 function getSectionColor(sectionId, explicitColor) {
@@ -214,7 +247,8 @@ function serializeBlobSettings() {
         starCount: CONFIG.starCount,
         starTwinkleSpeed: CONFIG.starTwinkleSpeed,
         starMaxRadius: CONFIG.starMaxRadius,
-        starBrightness: CONFIG.starBrightness
+        starBrightness: CONFIG.starBrightness,
+        shapeOverride: null
     };
 }
 
@@ -601,6 +635,17 @@ function handleViewportModeChange() {
     viewportMode = nextMode;
     buildBlobVertices();
     syncBlobSizeToViewportMode(previousMode, nextMode);
+
+    // Invalidate cached meshes so they rebuild at new density
+    if (window.BLOB_SHAPES) {
+        Object.values(window.BLOB_SHAPES).forEach(shape => {
+            if (shape._cachedMesh !== undefined) shape._cachedMesh = null;
+        });
+    }
+    // Rebuild active mesh if currently showing one
+    if (CONFIG.renderMode === 'arbitraryMesh' && CONFIG.currentPreset && CONFIG.currentPreset.buildMesh) {
+        CONFIG.activeMesh = CONFIG.currentPreset.buildMesh();
+    }
 }
 
 function initBlobMesh() {
@@ -619,11 +664,51 @@ function initBlobMesh() {
         blobCanvas.style.height = h + 'px';
         blobCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         handleViewportModeChange();
+        recalcCarouselLayout();
     }
     resizeBlob();
     window.addEventListener('resize', resizeBlob);
 
     buildBlobVertices();
+}
+
+// ==========================================
+// CLICK-DRAG ROTATION (all sections)
+// ==========================================
+let isDragging = false;
+let dragLastX = 0, dragLastY = 0;
+
+function initDragRotation() {
+    const scrollContainer = document.querySelector('.scroll-container');
+    if (!scrollContainer) return;
+
+    scrollContainer.addEventListener('pointerdown', (e) => {
+        if (CAROUSEL_CONFIG.active) return;
+        // Don't interfere with links, buttons, inputs, nav, or control panel
+        if (e.target.closest('a, button, input, select, nav, .blob-controls, .nav-container')) return;
+        isDragging = true;
+        dragLastX = e.clientX;
+        dragLastY = e.clientY;
+        scrollContainer.style.cursor = 'grabbing';
+    });
+
+    scrollContainer.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragLastX;
+        const dy = e.clientY - dragLastY;
+        rotation.y += dx * 0.005;
+        rotation.x += dy * 0.005;
+        dragLastX = e.clientX;
+        dragLastY = e.clientY;
+    });
+
+    const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        scrollContainer.style.cursor = '';
+    };
+    scrollContainer.addEventListener('pointerup', endDrag);
+    scrollContainer.addEventListener('pointercancel', endDrag);
 }
 
 // ==========================================
@@ -663,7 +748,7 @@ function project3D(x, y, z) {
     const perspective = CONFIG.perspective;
     const scale = perspective / (perspective + z);
     return {
-        x: (blobCanvas.width / dpr) / 2 + x * scale,
+        x: (blobCanvas.width / dpr) / 2 + CONFIG.carouselXOffset + x * scale,
         y: (blobCanvas.height / dpr) / 2 + y * scale,
         scale,
     };
@@ -678,12 +763,42 @@ window.__blobDebug = createBlobDebug();
 
 function setupScrollListener() {
     const scrollContainer = document.querySelector('.scroll-container');
+
+    // Back-to-top button: visible whenever not at the top
+    const backToTop = document.getElementById('back-to-top');
+    if (backToTop) {
+        backToTop.addEventListener('click', () => {
+            const sc = document.querySelector('.scroll-container');
+            if (!sc) return;
+            window.dispatchEvent(new CustomEvent('scrollToTop'));
+            sc.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // Suppress intermediate shape transitions during smooth scroll to top.
+    // Any code can dispatch 'scrollToTop' before scrolling to hero.
+    window.addEventListener('scrollToTop', () => {
+        CONFIG._scrollingToTop = true;
+        const defaultPreset = window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob;
+        if (defaultPreset) triggerMeshTransition(defaultPreset);
+    });
+
+    function updateBackToTop(scrollY) {
+        if (!backToTop) return;
+        backToTop.classList.toggle('visible', scrollY > window.innerHeight * 0.5);
+        // Clear scroll-to-top suppression once we've arrived
+        if (CONFIG._scrollingToTop && scrollY < window.innerHeight * 0.5) {
+            CONFIG._scrollingToTop = false;
+        }
+    }
+
     if (!scrollContainer) {
         // Fallback to window scroll
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
             scrollVelocity = (currentScrollY - lastScrollY) * 0.008;
             lastScrollY = currentScrollY;
+            updateBackToTop(currentScrollY);
         }, { passive: true });
         return;
     }
@@ -692,7 +807,49 @@ function setupScrollListener() {
         const currentScrollY = scrollContainer.scrollTop;
         scrollVelocity = (currentScrollY - lastScrollY) * 0.008;
         lastScrollY = currentScrollY;
+        updateCarouselState(currentScrollY);
+        updateBackToTop(currentScrollY);
     }, { passive: true });
+}
+
+// ==========================================
+// MESH TRANSITION HELPERS
+// ==========================================
+function meshEaseInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
+function getPresetRenderMode(preset) {
+    return (preset && preset.mode === 'arbitraryMesh') ? 'arbitraryMesh' : 'sphereGrid';
+}
+
+function triggerMeshTransition(newPreset) {
+    CONFIG._pendingMeshPreset = newPreset;
+    CONFIG.meshTransitionState = 'shrinking';
+    CONFIG.meshTransitionProgress = 0;
+}
+
+function completeMeshSwap() {
+    const pending = CONFIG._pendingMeshPreset;
+    CONFIG._pendingMeshPreset = null;
+    CONFIG.currentPreset = pending;
+    CONFIG.targetPreset = null;
+    CONFIG.shapeTransitionProgress = 1;
+    CONFIG.renderMode = getPresetRenderMode(pending);
+    if (CONFIG.renderMode === 'arbitraryMesh' && pending.buildMesh) {
+        CONFIG.activeMesh = pending.buildMesh();
+    } else {
+        CONFIG.activeMesh = null;
+    }
+    // Apply preset's preferred base radius, or restore viewport default
+    const targetRadius = pending.defaultBaseRadius || getDefaultBaseRadius();
+    CONFIG.baseRadius = targetRadius;
+    const slider = document.getElementById('base-radius');
+    const valEl = document.getElementById('base-radius-value');
+    if (slider) slider.value = targetRadius;
+    if (valEl) valEl.textContent = targetRadius + 'px';
+    CONFIG.meshTransitionState = 'expanding';
+    CONFIG.meshTransitionProgress = 0;
 }
 
 // ==========================================
@@ -722,19 +879,97 @@ function renderBlob(currentTime) {
     // Clear canvas
     blobCtx.clearRect(0, 0, blobCanvas.width / dpr, blobCanvas.height / dpr);
 
-    // Update rotation based on scroll velocity
-    rotation.y += scrollVelocity;
-    scrollVelocity *= 0.95;  // Decay when not scrolling
+    // Update rotation based on scroll velocity or carousel position
+    if (CAROUSEL_CONFIG.active) {
+        // Position-locked: rotation directly tied to scroll progress
+        rotation.y = CAROUSEL_CONFIG.progress * Math.PI * 2;
+        scrollVelocity = 0;
+    } else {
+        rotation.y += scrollVelocity;
+        scrollVelocity *= 0.95;  // Decay when not scrolling
+    }
 
     // Subtle idle rotation on X and Z
     rotation.x += 0.0002;
     rotation.z += 0.0001;
 
+    // Carousel: update X offset and swap shapes
+    if (CAROUSEL_CONFIG.active) {
+        const vw = window.innerWidth;
+        const tz = CAROUSEL_CONFIG.transitionZone;
+        const progress = CAROUSEL_CONFIG.progress;
+
+        if (progress < tz && CAROUSEL_CONFIG.currentIndex > 0) {
+            // Sliding in from right (entry zone)
+            const entryT = progress / tz;
+            const eased = meshEaseInOut(entryT);
+            CONFIG.carouselXOffset = (1 - eased) * CAROUSEL_CONFIG.slideOffsetMax * vw;
+        } else if (progress > (1 - tz) && CAROUSEL_CONFIG.currentIndex < CAROUSEL_CONFIG._resolvedSequence.length - 1) {
+            // Sliding out to left (exit zone)
+            const exitT = (progress - (1 - tz)) / tz;
+            const eased = meshEaseInOut(exitT);
+            CONFIG.carouselXOffset = -eased * CAROUSEL_CONFIG.slideOffsetMax * vw;
+        } else {
+            CONFIG.carouselXOffset = 0;
+        }
+
+        // Instant shape swap when carousel index changes
+        if (CAROUSEL_CONFIG.currentIndex !== CAROUSEL_CONFIG._lastRenderedIndex && CAROUSEL_CONFIG.currentIndex >= 0) {
+            const shapeId = CAROUSEL_CONFIG._resolvedSequence[CAROUSEL_CONFIG.currentIndex];
+            const preset = window.BLOB_SHAPES[shapeId];
+            if (preset) {
+                CONFIG.currentPreset = preset;
+                CONFIG.targetPreset = null;
+                CONFIG.shapeTransitionProgress = 1;
+                CONFIG.renderMode = getPresetRenderMode(preset);
+                CONFIG.activeMesh = (CONFIG.renderMode === 'arbitraryMesh' && preset.buildMesh)
+                    ? preset.buildMesh() : null;
+                CONFIG.meshTransitionScale = 1;
+                CONFIG.meshTransitionState = 'idle';
+                // Scale radius for mobile — shapes define desktop radius (420),
+                // so scale proportionally to the viewport default
+                const desktopDefault = DESKTOP_DEFAULT_BASE_RADIUS;
+                const shapeRadius = preset.defaultBaseRadius || desktopDefault;
+                const viewportDefault = getDefaultBaseRadius();
+                CONFIG.baseRadius = isMobileViewport()
+                    ? Math.round(shapeRadius * (viewportDefault / desktopDefault))
+                    : shapeRadius;
+                // Set carousel-specific color
+                CONFIG.targetColor = CONFIG.sectionColors['blob-showcase'];
+                // Sync shape dropdown
+                const shapeDropdown = document.getElementById('shape-select');
+                if (shapeDropdown) shapeDropdown.value = shapeId;
+            }
+            CAROUSEL_CONFIG._lastRenderedIndex = CAROUSEL_CONFIG.currentIndex;
+        }
+    } else {
+        CONFIG.carouselXOffset = 0;
+    }
+
     const gridRes = getCurrentGridResolution();
     const currentRadius = CONFIG.baseRadius;
 
-    // Advance shape transition
-    if (CONFIG.shapeTransitionProgress < 1 && CONFIG.targetPreset) {
+    // Mesh transition state machine (shrink/expand)
+    if (CONFIG.meshTransitionState === 'shrinking') {
+        CONFIG.meshTransitionProgress = Math.min(1, CONFIG.meshTransitionProgress + CONFIG.shapeTransitionSpeed);
+        CONFIG.meshTransitionScale = 1 - meshEaseInOut(CONFIG.meshTransitionProgress);
+        if (CONFIG.meshTransitionProgress >= 1) {
+            completeMeshSwap();
+        }
+    } else if (CONFIG.meshTransitionState === 'expanding') {
+        CONFIG.meshTransitionProgress = Math.min(1, CONFIG.meshTransitionProgress + CONFIG.shapeTransitionSpeed);
+        CONFIG.meshTransitionScale = meshEaseInOut(CONFIG.meshTransitionProgress);
+        if (CONFIG.meshTransitionProgress >= 1) {
+            CONFIG.meshTransitionState = 'idle';
+            CONFIG.meshTransitionScale = 1;
+            CONFIG.meshTransitionProgress = 0;
+        }
+    }
+
+    const mScale = CONFIG.meshTransitionScale;
+
+    // Advance sphere-grid shape transition (only when in sphereGrid mode)
+    if (CONFIG.renderMode === 'sphereGrid' && CONFIG.shapeTransitionProgress < 1 && CONFIG.targetPreset) {
         CONFIG.shapeTransitionProgress = Math.min(1, CONFIG.shapeTransitionProgress + CONFIG.shapeTransitionSpeed);
         if (CONFIG.shapeTransitionProgress >= 1) {
             CONFIG.currentPreset = CONFIG.targetPreset;
@@ -746,82 +981,122 @@ function renderBlob(currentTime) {
     const blendTarget = CONFIG.targetPreset;
     const blendProgress = CONFIG.shapeTransitionProgress;
 
-    // Update vertices with shape-aware position computation
-    vertices.forEach(vertex => {
-        const noiseValue = simplex.noise3D(
-            Math.cos(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
-            Math.sin(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
-            Math.cos(vertex.theta) + time * CONFIG.noiseFrequency * 100
-        );
-
-        // Compute position for current preset
-        let cx, cy, cz;
-        if (activePreset && activePreset.getPosition) {
-            const pos = activePreset.getPosition(vertex.theta, vertex.phi, time, CONFIG);
-            cx = pos.x; cy = pos.y; cz = pos.z;
-        } else if (activePreset && activePreset.mode === 'customSurface') {
-            const r = activePreset.getRadius(vertex.theta, vertex.phi, time, CONFIG);
-            cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-            cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-            cz = r * Math.cos(vertex.theta);
-        } else {
-            const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
-            cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-            cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-            cz = r * Math.cos(vertex.theta);
-        }
-
-        // Blend with target preset if transitioning
-        let x, y, z;
-        if (blendTarget && blendProgress < 1) {
-            let tx, ty, tz;
-            if (blendTarget.getPosition) {
-                const pos = blendTarget.getPosition(vertex.theta, vertex.phi, time, CONFIG);
-                tx = pos.x; ty = pos.y; tz = pos.z;
-            } else if (blendTarget.mode === 'customSurface') {
-                const r = blendTarget.getRadius(vertex.theta, vertex.phi, time, CONFIG);
-                tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                tz = r * Math.cos(vertex.theta);
-            } else {
-                const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
-                tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                tz = r * Math.cos(vertex.theta);
-            }
-            x = cx + (tx - cx) * blendProgress;
-            y = cy + (ty - cy) * blendProgress;
-            z = cz + (tz - cz) * blendProgress;
-        } else {
-            x = cx; y = cy; z = cz;
-        }
-
-        let rotated = rotateX(x, y, z, rotation.x);
-        rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
-        rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
-
-        vertex.x = rotated.x;
-        vertex.y = rotated.y;
-        vertex.z = rotated.z;
-
-        vertex.projected = project3D(rotated.x, rotated.y, rotated.z);
-    });
-
-    // Light direction
+    // Light direction (shared between both render modes)
     const lightDir = { x: 0.5, y: -0.5, z: 1 };
     const lightMag = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
     const lightNorm = { x: lightDir.x / lightMag, y: lightDir.y / lightMag, z: lightDir.z / lightMag };
 
-    // Calculate normals and lighting
-    vertices.forEach(vertex => {
-        const mag = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
-        vertex.normal = {
-            x: vertex.x / mag,
-            y: vertex.y / mag,
-            z: vertex.z / mag,
-        };
-        vertex.lighting = Math.max(0, vertex.normal.x * lightNorm.x + vertex.normal.y * lightNorm.y + vertex.normal.z * lightNorm.z);
-    });
+    // --- Arbitrary mesh vertex computation ---
+    let meshProjected = null;
+    if (CONFIG.renderMode === 'arbitraryMesh' && CONFIG.activeMesh) {
+        const mesh = CONFIG.activeMesh;
+        meshProjected = new Array(mesh.vertices.length);
+        for (let i = 0; i < mesh.vertices.length; i++) {
+            const v = mesh.vertices[i];
+            let x = v.x * currentRadius * mScale;
+            let y = v.y * currentRadius * mScale;
+            let z = v.z * currentRadius * mScale;
+
+            let rotated = rotateX(x, y, z, rotation.x);
+            rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
+            rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
+
+            const proj = project3D(rotated.x, rotated.y, rotated.z);
+            const mag = Math.sqrt(rotated.x ** 2 + rotated.y ** 2 + rotated.z ** 2);
+            const nx = mag > 0 ? rotated.x / mag : 0;
+            const ny = mag > 0 ? rotated.y / mag : 0;
+            const nz = mag > 0 ? rotated.z / mag : 0;
+            const lighting = Math.max(0, nx * lightNorm.x + ny * lightNorm.y + nz * lightNorm.z);
+            const depthFade = currentRadius > 0 ? (rotated.z / (currentRadius * mScale || 1) + 1) / 2 : 0.5;
+
+            meshProjected[i] = {
+                x: proj.x,
+                y: proj.y,
+                z: rotated.z,
+                lighting,
+                depthFade
+            };
+        }
+    }
+
+    // --- Sphere grid vertex computation ---
+    if (CONFIG.renderMode === 'sphereGrid') {
+        vertices.forEach(vertex => {
+            const noiseValue = simplex.noise3D(
+                Math.cos(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
+                Math.sin(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
+                Math.cos(vertex.theta) + time * CONFIG.noiseFrequency * 100
+            );
+
+            // Compute position for current preset
+            let cx, cy, cz;
+            if (activePreset && activePreset.getPosition) {
+                const pos = activePreset.getPosition(vertex.theta, vertex.phi, time, CONFIG);
+                cx = pos.x; cy = pos.y; cz = pos.z;
+            } else if (activePreset && activePreset.mode === 'customSurface') {
+                const r = activePreset.getRadius(vertex.theta, vertex.phi, time, CONFIG);
+                cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                cz = r * Math.cos(vertex.theta);
+            } else {
+                const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+                cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                cz = r * Math.cos(vertex.theta);
+            }
+
+            // Blend with target preset if transitioning
+            let x, y, z;
+            if (blendTarget && blendProgress < 1) {
+                let tx, ty, tz;
+                if (blendTarget.getPosition) {
+                    const pos = blendTarget.getPosition(vertex.theta, vertex.phi, time, CONFIG);
+                    tx = pos.x; ty = pos.y; tz = pos.z;
+                } else if (blendTarget.mode === 'customSurface') {
+                    const r = blendTarget.getRadius(vertex.theta, vertex.phi, time, CONFIG);
+                    tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                    ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                    tz = r * Math.cos(vertex.theta);
+                } else {
+                    const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
+                    tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
+                    ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
+                    tz = r * Math.cos(vertex.theta);
+                }
+                x = cx + (tx - cx) * blendProgress;
+                y = cy + (ty - cy) * blendProgress;
+                z = cz + (tz - cz) * blendProgress;
+            } else {
+                x = cx; y = cy; z = cz;
+            }
+
+            // Apply mesh transition scale for shrink/expand
+            x *= mScale;
+            y *= mScale;
+            z *= mScale;
+
+            let rotated = rotateX(x, y, z, rotation.x);
+            rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
+            rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
+
+            vertex.x = rotated.x;
+            vertex.y = rotated.y;
+            vertex.z = rotated.z;
+
+            vertex.projected = project3D(rotated.x, rotated.y, rotated.z);
+        });
+
+        // Calculate normals and lighting for sphere grid
+        vertices.forEach(vertex => {
+            const mag = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
+            vertex.normal = {
+                x: mag > 0 ? vertex.x / mag : 0,
+                y: mag > 0 ? vertex.y / mag : 0,
+                z: mag > 0 ? vertex.z / mag : 0,
+            };
+            vertex.lighting = Math.max(0, vertex.normal.x * lightNorm.x + vertex.normal.y * lightNorm.y + vertex.normal.z * lightNorm.z);
+        });
+    }
 
     // Color logic: rainbow > hue override > section color
     let blobColor;
@@ -838,9 +1113,9 @@ function renderBlob(currentTime) {
     }
 
     // Draw 3D shading glow behind wireframe
-    const centerX = (blobCanvas.width / dpr) / 2;
+    const centerX = (blobCanvas.width / dpr) / 2 + CONFIG.carouselXOffset;
     const centerY = (blobCanvas.height / dpr) / 2;
-    const glowRadius = currentRadius * 1.5;
+    const glowRadius = currentRadius * 1.5 * mScale;
 
     if (isRainbow) {
         // Multi-colored rotating glow blobs — neon party sign look
@@ -893,6 +1168,67 @@ function renderBlob(currentTime) {
     // Draw wireframe
     blobCtx.lineJoin = 'round';
     blobCtx.lineCap = 'round';
+
+    // --- Arbitrary mesh wireframe (batched for performance) ---
+    if (CONFIG.renderMode === 'arbitraryMesh' && meshProjected) {
+        const mesh = CONFIG.activeMesh;
+
+        if (isRainbow) {
+            // Batch edges into 16 hue groups for glow + crisp passes
+            const hueBuckets = new Array(16).fill(null).map(() => []);
+            for (let e = 0; e < mesh.edges.length; e++) {
+                hueBuckets[Math.floor(e / mesh.edges.length * 16) % 16].push(e);
+            }
+
+            function drawMeshRainbow(lineWidthMult, opacityVal) {
+                blobCtx.lineWidth = CONFIG.lineWidth * lineWidthMult;
+                for (let b = 0; b < 16; b++) {
+                    if (hueBuckets[b].length === 0) continue;
+                    const hue = (b / 16 * 360 + time * 200) % 360;
+                    const pulse = (Math.sin(time * 10 + b * 0.5) + 1) / 2;
+                    const l = 0.45 + pulse * 0.25;
+                    const color = hslToRgb(hue / 360, 1, l);
+                    blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityVal})`;
+                    blobCtx.beginPath();
+                    for (const e of hueBuckets[b]) {
+                        const [i, j] = mesh.edges[e];
+                        blobCtx.moveTo(meshProjected[i].x, meshProjected[i].y);
+                        blobCtx.lineTo(meshProjected[j].x, meshProjected[j].y);
+                    }
+                    blobCtx.stroke();
+                }
+            }
+            drawMeshRainbow(5, 0.25);
+            drawMeshRainbow(1.5, 0.95);
+        } else {
+            // Batch edges into 8 opacity levels
+            blobCtx.lineWidth = CONFIG.lineWidth;
+            const NUM_BUCKETS = 8;
+            const opBuckets = new Array(NUM_BUCKETS).fill(null).map(() => []);
+            for (let e = 0; e < mesh.edges.length; e++) {
+                const [i, j] = mesh.edges[e];
+                const a = meshProjected[i];
+                const b = meshProjected[j];
+                const opacity = Math.min(1, 0.15 + (a.lighting + b.lighting) * 0.35 + (a.depthFade + b.depthFade) * 0.2);
+                opBuckets[Math.min(NUM_BUCKETS - 1, Math.floor(opacity * NUM_BUCKETS))].push(e);
+            }
+            for (let b = 0; b < NUM_BUCKETS; b++) {
+                if (opBuckets[b].length === 0) continue;
+                const opacity = (b + 0.5) / NUM_BUCKETS;
+                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+                blobCtx.beginPath();
+                for (const e of opBuckets[b]) {
+                    const [i, j] = mesh.edges[e];
+                    blobCtx.moveTo(meshProjected[i].x, meshProjected[i].y);
+                    blobCtx.lineTo(meshProjected[j].x, meshProjected[j].y);
+                }
+                blobCtx.stroke();
+            }
+        }
+    }
+
+    // --- Sphere grid wireframe ---
+    if (CONFIG.renderMode === 'sphereGrid') {
 
     if (isRainbow) {
         // Per-line rainbow: each lat/lon line gets its own hue, two-pass for neon glow
@@ -1046,6 +1382,8 @@ function renderBlob(currentTime) {
         }
     }
 
+    } // end sphere grid wireframe conditional
+
     requestAnimationFrame(renderBlob);
 }
 
@@ -1089,6 +1427,104 @@ function gateControlPanel(applicableControls) {
     });
 }
 
+// ==========================================
+// CAROUSEL SYSTEM
+// ==========================================
+function initCarousel() {
+    const shapes = window.BLOB_SHAPES;
+    if (!shapes) return;
+
+    // Filter sequence to only existing shapes
+    CAROUSEL_CONFIG._resolvedSequence = CAROUSEL_CONFIG.sequence.filter(id => shapes[id]);
+    if (CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
+
+    // Pre-build all meshes to avoid jank
+    CAROUSEL_CONFIG._resolvedSequence.forEach(id => {
+        const preset = shapes[id];
+        if (preset.buildMesh && !preset._cachedMesh) {
+            preset._cachedMesh = preset.buildMesh();
+        }
+    });
+
+    // Defer layout calculation — main.js inserts dynamic sections after DOMContentLoaded,
+    // so showcase.offsetTop is wrong until those sections are in the DOM.
+    // Use a short delay + recalc on first scroll to ensure correctness.
+    CAROUSEL_CONFIG._layoutReady = false;
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            recalcCarouselLayout();
+        });
+    });
+}
+
+// recalcCarouselLayout is global (no module scope) — callable from main.js directly
+
+function updateCarouselState(scrollTop) {
+    if (!CAROUSEL_CONFIG._layoutReady || CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
+
+    const localScroll = scrollTop - CAROUSEL_CONFIG._showcaseTop;
+    const wasActive = CAROUSEL_CONFIG.active;
+
+    if (localScroll < 0 || CAROUSEL_CONFIG._sectionHeight === 0) {
+        CAROUSEL_CONFIG.active = false;
+        if (wasActive) {
+            // Exiting carousel - restore default blob and reset state
+            CONFIG.carouselXOffset = 0;
+            CAROUSEL_CONFIG._lastRenderedIndex = -1;
+            CAROUSEL_CONFIG.currentIndex = -1;
+
+            // Restore default blob shape immediately
+            const defaultPreset = window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob;
+            if (defaultPreset) {
+                triggerMeshTransition(defaultPreset);
+            }
+
+            // Force main.js to re-dispatch sectionChanged on next scroll frame
+            // by resetting its cached section via a custom event
+            window.dispatchEvent(new CustomEvent('carouselExited'));
+        }
+        return;
+    }
+
+    CAROUSEL_CONFIG.active = true;
+    const seq = CAROUSEL_CONFIG._resolvedSequence;
+    const scrollPerShapePx = CAROUSEL_CONFIG._scrollPerShapePx;
+    const rawIndex = localScroll / scrollPerShapePx;
+
+    if (rawIndex >= seq.length) {
+        // Unlimited blob zone - continuous spin (no wrapping)
+        CAROUSEL_CONFIG.currentIndex = seq.length - 1;
+        CAROUSEL_CONFIG.progress = rawIndex - (seq.length - 1);
+    } else {
+        CAROUSEL_CONFIG.currentIndex = Math.max(0, Math.floor(rawIndex));
+        CAROUSEL_CONFIG.progress = rawIndex - CAROUSEL_CONFIG.currentIndex;
+    }
+
+    // Field-notes visibility (only in carousel zone)
+    const fnLink = document.querySelector('.field-notes-link');
+    if (fnLink) fnLink.classList.toggle('visible', CAROUSEL_CONFIG.active);
+}
+
+let _recalcingCarousel = false;
+function recalcCarouselLayout() {
+    if (_recalcingCarousel) return;
+    const showcase = document.getElementById('blob-showcase');
+    if (!showcase || CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
+
+    _recalcingCarousel = true;
+    const vh = window.innerHeight;
+    const seq = CAROUSEL_CONFIG._resolvedSequence;
+    const totalVH = seq.length * CAROUSEL_CONFIG.scrollPerShape + CAROUSEL_CONFIG.unlimitedExtraScroll;
+    CAROUSEL_CONFIG._sectionHeight = totalVH * vh;
+    showcase.style.height = CAROUSEL_CONFIG._sectionHeight + 'px';
+
+    // offsetTop must be read AFTER setting height, since it can shift layout
+    CAROUSEL_CONFIG._showcaseTop = showcase.offsetTop;
+    CAROUSEL_CONFIG._scrollPerShapePx = CAROUSEL_CONFIG.scrollPerShape * vh;
+    CAROUSEL_CONFIG._layoutReady = true;
+    _recalcingCarousel = false;
+}
+
 function initBlobSystem() {
     // Initialize shape preset from BLOB_SHAPES registry
     const shapes = window.BLOB_SHAPES;
@@ -1098,7 +1534,9 @@ function initBlobSystem() {
 
     initStarfield();
     initBlobMesh();
+    initDragRotation();
     setupScrollListener();
+    initCarousel();
 
     requestAnimationFrame(animate);
     requestAnimationFrame(renderBlob);
@@ -1106,21 +1544,30 @@ function initBlobSystem() {
 
 // Listen for section changes from script.js
 window.addEventListener('sectionChanged', (event) => {
+    if (CAROUSEL_CONFIG.active) return;
     CONFIG.currentSection = event.detail.section;
     if (CONFIG.hueOverride === null && !CONFIG.rainbowMode) {
         CONFIG.targetColor = getSectionColor(CONFIG.currentSection, event.detail.color);
     }
 
-    // Shape transition
-    const shapeId = event.detail.shapeId || 'defaultBlob';
-    const shapes = window.BLOB_SHAPES;
-    if (shapes && shapes[shapeId]) {
-        const newPreset = shapes[shapeId];
-        const current = CONFIG.targetPreset || CONFIG.currentPreset;
-        if (!current || current.id !== newPreset.id) {
-            CONFIG.targetPreset = newPreset;
-            CONFIG.shapeTransitionProgress = 0;
-            gateControlPanel(newPreset.applicableControls);
+    // Shape transition (skip while scrolling to top)
+    if (!CONFIG._scrollingToTop) {
+        const shapeId = event.detail.shapeId || 'defaultBlob';
+        const shapes = window.BLOB_SHAPES;
+        if (shapes && shapes[shapeId]) {
+            const newPreset = shapes[shapeId];
+            const current = CONFIG._pendingMeshPreset || CONFIG.targetPreset || CONFIG.currentPreset;
+            if (!current || current.id !== newPreset.id) {
+                const currentMode = getPresetRenderMode(CONFIG.currentPreset);
+                const newMode = getPresetRenderMode(newPreset);
+                if (currentMode !== newMode || newMode === 'arbitraryMesh') {
+                    triggerMeshTransition(newPreset);
+                } else {
+                    CONFIG.targetPreset = newPreset;
+                    CONFIG.shapeTransitionProgress = 0;
+                }
+                gateControlPanel(newPreset.applicableControls);
+            }
         }
     }
 });
@@ -1244,6 +1691,44 @@ function initControlPanel() {
             });
         }
     });
+
+    // --- Shape selector dropdown ---
+    const shapeSelect = document.getElementById('shape-select');
+    if (shapeSelect && window.BLOB_SHAPES) {
+        // Populate options from BLOB_SHAPES registry
+        Object.keys(window.BLOB_SHAPES).forEach(key => {
+            const shape = window.BLOB_SHAPES[key];
+            const opt = document.createElement('option');
+            opt.value = shape.id;
+            opt.textContent = shape.label || shape.id;
+            shapeSelect.appendChild(opt);
+        });
+
+        // Set initial value to current preset
+        const activeId = (CONFIG.targetPreset || CONFIG.currentPreset)?.id || 'defaultBlob';
+        shapeSelect.value = activeId;
+
+        shapeSelect.addEventListener('change', (e) => {
+            const shapeId = e.target.value;
+            if (!window.BLOB_SHAPES || !window.BLOB_SHAPES[shapeId]) return;
+
+            // Always scroll to the shape's position in the carousel
+            const carouselIdx = CAROUSEL_CONFIG._resolvedSequence.indexOf(shapeId);
+            if (carouselIdx >= 0 && CAROUSEL_CONFIG._layoutReady) {
+                const scrollTarget = CAROUSEL_CONFIG._showcaseTop +
+                    (carouselIdx * CAROUSEL_CONFIG._scrollPerShapePx) +
+                    (CAROUSEL_CONFIG._scrollPerShapePx * 0.5);
+                const sc = document.querySelector('.scroll-container');
+                if (sc) sc.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+            }
+        });
+
+        // Sync dropdown with section-driven shape changes
+        window.addEventListener('sectionChanged', () => {
+            const currentId = (CONFIG.targetPreset || CONFIG.currentPreset)?.id || 'defaultBlob';
+            shapeSelect.value = currentId;
+        });
+    }
 
     // --- Hue slider + rainbow cloud easter egg ---
     const hueSlider = sliders.hueSlider;
@@ -1412,6 +1897,7 @@ function initControlPanel() {
             if (s.starCount === undefined && s.starMaxRadius === undefined) {
                 regenerateStars(CONFIG.starCount);
             }
+            // Legacy: ignore persisted shapeOverride (shape is now section-driven)
         } catch (e) {
             console.error('Failed to load settings:', e);
         }
@@ -1433,6 +1919,20 @@ function initControlPanel() {
             setSliderUIValue(def, readControlValue(def));
         });
         CONFIG.hueOverride = null;
+
+        // Reset shape to section-driven
+        CONFIG.renderMode = 'sphereGrid';
+        CONFIG.activeMesh = null;
+        CONFIG.meshTransitionState = 'idle';
+        CONFIG.meshTransitionScale = 1;
+        CONFIG.meshTransitionProgress = 0;
+        CONFIG._pendingMeshPreset = null;
+        if (window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob) {
+            CONFIG.targetPreset = window.BLOB_SHAPES.defaultBlob;
+            CONFIG.shapeTransitionProgress = 0;
+            gateControlPanel(window.BLOB_SHAPES.defaultBlob.applicableControls);
+        }
+        if (shapeSelect) shapeSelect.value = 'defaultBlob';
 
         // Re-sync section color
         CONFIG.targetColor = getSectionColor(CONFIG.currentSection);

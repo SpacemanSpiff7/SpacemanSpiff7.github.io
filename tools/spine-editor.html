@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spine Editor - Tube Mesh Shape Builder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'IBM Plex Mono', monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Left panel: Editor canvas */
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+        .editor-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #111;
+            border-bottom: 1px solid #333;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .editor-toolbar button {
+            background: #1a1a2e;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .editor-toolbar button:hover { background: #252545; color: #fff; }
+        .editor-toolbar button.active { background: #2a2a5a; color: #7af; border-color: #7af; }
+        .editor-toolbar label { font-size: 12px; color: #888; }
+        .editor-toolbar input[type="range"] { width: 80px; vertical-align: middle; }
+        .editor-toolbar select {
+            background: #1a1a2e;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 4px;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        .editor-toolbar .sep { width: 1px; height: 20px; background: #333; }
+
+        .canvas-wrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        #editor-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            cursor: crosshair;
+        }
+
+        /* Right panel: Controls + Preview + Export */
+        .side-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            background: #0d0d14;
+        }
+        .side-section {
+            border-bottom: 1px solid #333;
+            padding: 10px 12px;
+        }
+        .side-section h3 {
+            font-size: 12px;
+            color: #7af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Segment list */
+        .segment-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .segment-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .segment-item:hover { background: #1a1a2e; }
+        .segment-item.active { background: #2a2a5a; }
+        .segment-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #555;
+        }
+        .segment-item .name { flex: 1; }
+        .segment-item .pts { color: #666; font-size: 11px; }
+        .segment-item .del {
+            color: #f55;
+            cursor: pointer;
+            padding: 0 4px;
+            font-size: 14px;
+        }
+        .segment-item .del:hover { color: #f88; }
+
+        /* Radius controls */
+        .radius-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .radius-controls label { font-size: 11px; color: #888; }
+        .radius-controls input[type="range"] { width: 100px; }
+        .radius-controls .val { font-size: 11px; color: #aaa; width: 36px; }
+
+        /* Preview canvas */
+        #preview-canvas {
+            width: 100%;
+            height: 250px;
+            background: #050508;
+            border-radius: 4px;
+        }
+
+        /* Export */
+        .export-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .export-area textarea {
+            flex: 1;
+            background: #0a0a12;
+            color: #8f8;
+            border: 1px solid #333;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 8px;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
+        }
+        .export-area button {
+            margin-top: 6px;
+            background: #1a4a2e;
+            color: #8f8;
+            border: 1px solid #2a6a3e;
+            padding: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        /* Reference image overlay */
+        .ref-image-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Info bar */
+        .info-bar {
+            padding: 4px 12px;
+            background: #111;
+            border-top: 1px solid #333;
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            gap: 16px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="editor-panel">
+        <div class="editor-toolbar">
+            <button id="btn-new-seg" class="active">+ Segment</button>
+            <button id="btn-move">Move Point</button>
+            <button id="btn-delete-pt">Delete Point</button>
+            <div class="sep"></div>
+            <label>Grid:
+                <select id="grid-size">
+                    <option value="0.01">Fine (0.01)</option>
+                    <option value="0.02" selected>Medium (0.02)</option>
+                    <option value="0.05">Coarse (0.05)</option>
+                    <option value="0">Off</option>
+                </select>
+            </label>
+            <div class="sep"></div>
+            <label>Zoom: <input type="range" id="zoom-slider" min="200" max="1200" value="600"> <span id="zoom-val">600</span></label>
+            <div class="sep"></div>
+            <button id="btn-ref-img">Load Reference Image</button>
+            <label>Opacity: <input type="range" id="ref-opacity" min="0" max="100" value="30"> <span id="ref-opacity-val">30%</span></label>
+            <div class="sep"></div>
+            <button id="btn-undo">Undo</button>
+            <button id="btn-clear">Clear All</button>
+        </div>
+        <div class="canvas-wrap" id="canvas-wrap">
+            <img class="ref-image-overlay" id="ref-image" />
+            <canvas id="editor-canvas"></canvas>
+        </div>
+        <div class="info-bar">
+            <span id="info-coords">x: 0.00, y: 0.00</span>
+            <span id="info-mode">Mode: Add Points</span>
+            <span id="info-snap">Snap: 0.02</span>
+        </div>
+    </div>
+    <div class="side-panel">
+        <div class="side-section">
+            <h3>Segments</h3>
+            <div class="segment-list" id="segment-list"></div>
+            <div class="radius-controls">
+                <label>Start R:</label>
+                <input type="range" id="radius-start" min="0.005" max="0.15" step="0.005" value="0.04">
+                <span class="val" id="radius-start-val">0.040</span>
+                <label>End R:</label>
+                <input type="range" id="radius-end" min="0.005" max="0.15" step="0.005" value="0.04">
+                <span class="val" id="radius-end-val">0.040</span>
+                <label>Bulge:</label>
+                <input type="range" id="radius-bulge" min="0" max="2" step="0.1" value="1.0">
+                <span class="val" id="radius-bulge-val">1.0</span>
+            </div>
+        </div>
+        <div class="side-section">
+            <h3>3D Preview</h3>
+            <canvas id="preview-canvas"></canvas>
+        </div>
+        <div class="side-section export-area">
+            <h3>Export (blob-shapes.js)</h3>
+            <textarea id="export-text" readonly></textarea>
+            <button id="btn-copy">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <input type="file" id="ref-file-input" accept="image/*" style="display:none">
+
+    <script>
+    // ============================================
+    // SPINE EDITOR - Visual tool for authoring
+    // tube mesh segments for blob-shapes.js
+    // ============================================
+
+    const SEGMENT_COLORS = [
+        '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
+        '#ff6bcb', '#cb6bff', '#6bffff', '#ff9f43',
+        '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5'
+    ];
+
+    // --- State ---
+    const state = {
+        segments: [],       // [{name, points: [{x,y}], radiusStart, radiusEnd, bulge}]
+        activeSegIdx: -1,
+        mode: 'add',        // 'add' | 'move' | 'delete'
+        gridSnap: 0.02,
+        zoom: 600,          // pixels per unit
+        panX: 0,            // pan offset in pixels
+        panY: 0,
+        dragging: null,     // {segIdx, ptIdx} when moving a point
+        panning: false,
+        panStart: null,
+        undoStack: [],
+        refImage: null,
+        refOpacity: 0.3,
+        previewRotY: 0,
+        previewRotX: 0.3,
+    };
+
+    // --- DOM refs ---
+    const editorCanvas = document.getElementById('editor-canvas');
+    const editorCtx = editorCanvas.getContext('2d');
+    const previewCanvas = document.getElementById('preview-canvas');
+    const previewCtx = previewCanvas.getContext('2d');
+    const canvasWrap = document.getElementById('canvas-wrap');
+    const segmentList = document.getElementById('segment-list');
+    const exportText = document.getElementById('export-text');
+    const refImage = document.getElementById('ref-image');
+
+    // --- Coordinate transforms ---
+    function worldToScreen(wx, wy) {
+        const cx = editorCanvas.width / 2 + state.panX;
+        const cy = editorCanvas.height / 2 + state.panY;
+        return { x: cx + wx * state.zoom, y: cy - wy * state.zoom }; // y-up in world
+    }
+
+    function screenToWorld(sx, sy) {
+        const cx = editorCanvas.width / 2 + state.panX;
+        const cy = editorCanvas.height / 2 + state.panY;
+        let wx = (sx - cx) / state.zoom;
+        let wy = -(sy - cy) / state.zoom;
+        if (state.gridSnap > 0) {
+            wx = Math.round(wx / state.gridSnap) * state.gridSnap;
+            wy = Math.round(wy / state.gridSnap) * state.gridSnap;
+        }
+        return { x: parseFloat(wx.toFixed(4)), y: parseFloat(wy.toFixed(4)) };
+    }
+
+    // --- Undo ---
+    function pushUndo() {
+        state.undoStack.push(JSON.stringify(state.segments));
+        if (state.undoStack.length > 50) state.undoStack.shift();
+    }
+    function undo() {
+        if (state.undoStack.length === 0) return;
+        state.segments = JSON.parse(state.undoStack.pop());
+        if (state.activeSegIdx >= state.segments.length) {
+            state.activeSegIdx = state.segments.length - 1;
+        }
+        updateAll();
+    }
+
+    // --- Segment management ---
+    function addSegment() {
+        pushUndo();
+        const idx = state.segments.length;
+        state.segments.push({
+            name: 'segment_' + idx,
+            points: [],
+            radiusStart: 0.04,
+            radiusEnd: 0.04,
+            bulge: 1.0
+        });
+        state.activeSegIdx = idx;
+        updateAll();
+    }
+
+    function deleteSegment(idx) {
+        pushUndo();
+        state.segments.splice(idx, 1);
+        if (state.activeSegIdx >= state.segments.length) {
+            state.activeSegIdx = state.segments.length - 1;
+        }
+        updateAll();
+    }
+
+    function selectSegment(idx) {
+        state.activeSegIdx = idx;
+        updateRadiusSliders();
+        updateSegmentListUI();
+        drawEditor();
+    }
+
+    // --- Editor drawing ---
+    function drawEditor() {
+        const W = editorCanvas.width;
+        const H = editorCanvas.height;
+        editorCtx.clearRect(0, 0, W, H);
+
+        // Draw reference image
+        if (state.refImage) {
+            const img = refImage;
+            const cx = W / 2 + state.panX;
+            const cy = H / 2 + state.panY;
+            // Scale image to fit roughly in the workspace
+            const scale = Math.min(state.zoom * 0.8 / img.naturalWidth, state.zoom * 0.8 / img.naturalHeight) * 2;
+            const iw = img.naturalWidth * scale;
+            const ih = img.naturalHeight * scale;
+            editorCtx.globalAlpha = state.refOpacity;
+            editorCtx.drawImage(img, cx - iw/2, cy - ih/2, iw, ih);
+            editorCtx.globalAlpha = 1;
+        }
+
+        // Draw grid
+        if (state.gridSnap > 0) {
+            editorCtx.strokeStyle = '#1a1a2a';
+            editorCtx.lineWidth = 0.5;
+            const step = state.gridSnap * state.zoom;
+            const cx = W / 2 + state.panX;
+            const cy = H / 2 + state.panY;
+
+            // Vertical lines
+            const startX = cx % step;
+            for (let x = startX; x < W; x += step) {
+                editorCtx.beginPath();
+                editorCtx.moveTo(x, 0);
+                editorCtx.lineTo(x, H);
+                editorCtx.stroke();
+            }
+            // Horizontal lines
+            const startY = cy % step;
+            for (let y = startY; y < H; y += step) {
+                editorCtx.beginPath();
+                editorCtx.moveTo(0, y);
+                editorCtx.lineTo(W, y);
+                editorCtx.stroke();
+            }
+
+            // Axis lines
+            editorCtx.strokeStyle = '#333';
+            editorCtx.lineWidth = 1;
+            // X axis
+            editorCtx.beginPath();
+            editorCtx.moveTo(0, cy);
+            editorCtx.lineTo(W, cy);
+            editorCtx.stroke();
+            // Y axis
+            editorCtx.beginPath();
+            editorCtx.moveTo(cx, 0);
+            editorCtx.lineTo(cx, H);
+            editorCtx.stroke();
+        }
+
+        // Draw each segment
+        state.segments.forEach((seg, si) => {
+            const color = SEGMENT_COLORS[si % SEGMENT_COLORS.length];
+            const isActive = si === state.activeSegIdx;
+
+            if (seg.points.length < 2) {
+                // Just draw dots
+                seg.points.forEach((pt, pi) => {
+                    const s = worldToScreen(pt.x, pt.y);
+                    editorCtx.fillStyle = color;
+                    editorCtx.beginPath();
+                    editorCtx.arc(s.x, s.y, isActive ? 6 : 4, 0, Math.PI * 2);
+                    editorCtx.fill();
+                    if (isActive) {
+                        editorCtx.strokeStyle = '#fff';
+                        editorCtx.lineWidth = 1;
+                        editorCtx.stroke();
+                    }
+                });
+                return;
+            }
+
+            // Draw spine line
+            editorCtx.strokeStyle = color;
+            editorCtx.lineWidth = isActive ? 2 : 1;
+            editorCtx.globalAlpha = isActive ? 1 : 0.5;
+            editorCtx.beginPath();
+            const s0 = worldToScreen(seg.points[0].x, seg.points[0].y);
+            editorCtx.moveTo(s0.x, s0.y);
+            for (let i = 1; i < seg.points.length; i++) {
+                const s = worldToScreen(seg.points[i].x, seg.points[i].y);
+                editorCtx.lineTo(s.x, s.y);
+            }
+            editorCtx.stroke();
+
+            // Draw tube radius outline (2D preview)
+            if (isActive) {
+                editorCtx.strokeStyle = color;
+                editorCtx.lineWidth = 0.5;
+                editorCtx.globalAlpha = 0.3;
+                drawTubeOutline2D(seg);
+            }
+            editorCtx.globalAlpha = 1;
+
+            // Draw points
+            seg.points.forEach((pt, pi) => {
+                const s = worldToScreen(pt.x, pt.y);
+                editorCtx.fillStyle = color;
+                editorCtx.beginPath();
+                editorCtx.arc(s.x, s.y, isActive ? 6 : 4, 0, Math.PI * 2);
+                editorCtx.fill();
+                if (isActive) {
+                    editorCtx.strokeStyle = '#fff';
+                    editorCtx.lineWidth = 1;
+                    editorCtx.stroke();
+                    // Point index
+                    editorCtx.fillStyle = '#fff';
+                    editorCtx.font = '10px IBM Plex Mono';
+                    editorCtx.fillText(pi.toString(), s.x + 8, s.y - 4);
+                }
+            });
+        });
+    }
+
+    function drawTubeOutline2D(seg) {
+        if (seg.points.length < 2) return;
+        const pts = seg.points;
+        const n = 50; // subdivisions
+        const topPts = [];
+        const botPts = [];
+
+        for (let i = 0; i <= n; i++) {
+            const t = i / n;
+            // Interpolate along the polyline
+            const totalLen = pts.length - 1;
+            const segF = t * totalLen;
+            const segIdx = Math.min(Math.floor(segF), totalLen - 1);
+            const segT = segF - segIdx;
+
+            const px = pts[segIdx].x + (pts[segIdx + 1].x - pts[segIdx].x) * segT;
+            const py = pts[segIdx].y + (pts[segIdx + 1].y - pts[segIdx].y) * segT;
+
+            // Tangent
+            const dt = 0.01;
+            const tA = Math.max(0, t - dt);
+            const tB = Math.min(1, t + dt);
+            const fA = tA * totalLen, fB = tB * totalLen;
+            const iA = Math.min(Math.floor(fA), totalLen - 1);
+            const iB = Math.min(Math.floor(fB), totalLen - 1);
+            const pAx = pts[iA].x + (pts[iA + 1].x - pts[iA].x) * (fA - iA);
+            const pAy = pts[iA].y + (pts[iA + 1].y - pts[iA].y) * (fA - iA);
+            const pBx = pts[iB].x + (pts[iB + 1].x - pts[iB].x) * (fB - iB);
+            const pBy = pts[iB].y + (pts[iB + 1].y - pts[iB].y) * (fB - iB);
+            const dx = pBx - pAx, dy = pBy - pAy;
+            const len = Math.sqrt(dx * dx + dy * dy) || 1;
+            const nx = -dy / len, ny = dx / len;
+
+            // Radius
+            const r = getRadius(seg, t);
+
+            topPts.push(worldToScreen(px + nx * r, py + ny * r));
+            botPts.push(worldToScreen(px - nx * r, py - ny * r));
+        }
+
+        editorCtx.beginPath();
+        editorCtx.moveTo(topPts[0].x, topPts[0].y);
+        for (let i = 1; i < topPts.length; i++) {
+            editorCtx.lineTo(topPts[i].x, topPts[i].y);
+        }
+        editorCtx.stroke();
+
+        editorCtx.beginPath();
+        editorCtx.moveTo(botPts[0].x, botPts[0].y);
+        for (let i = 1; i < botPts.length; i++) {
+            editorCtx.lineTo(botPts[i].x, botPts[i].y);
+        }
+        editorCtx.stroke();
+    }
+
+    function getRadius(seg, t) {
+        const rStart = seg.radiusStart;
+        const rEnd = seg.radiusEnd;
+        const bulge = seg.bulge;
+        const base = rStart + (rEnd - rStart) * t;
+        const bulgeAmount = Math.sin(t * Math.PI);
+        return base * (1 + (bulge - 1) * bulgeAmount);
+    }
+
+    // --- 3D Preview ---
+    function drawPreview() {
+        const W = previewCanvas.width;
+        const H = previewCanvas.height;
+        previewCtx.clearRect(0, 0, W, H);
+        previewCtx.fillStyle = '#050508';
+        previewCtx.fillRect(0, 0, W, H);
+
+        // Slow auto-rotate
+        state.previewRotY += 0.008;
+
+        // Build all meshes
+        const allVerts = [];
+        const allEdges = [];
+        let vertOffset = 0;
+
+        state.segments.forEach((seg) => {
+            if (seg.points.length < 2) return;
+            const mesh = buildMeshFromSegment(seg);
+            mesh.vertices.forEach(v => allVerts.push(v));
+            mesh.edges.forEach(e => allEdges.push([e[0] + vertOffset, e[1] + vertOffset]));
+            vertOffset += mesh.vertices.length;
+        });
+
+        if (allVerts.length === 0) {
+            previewCtx.fillStyle = '#333';
+            previewCtx.font = '13px IBM Plex Mono';
+            previewCtx.textAlign = 'center';
+            previewCtx.fillText('Add segments with 2+ points', W/2, H/2);
+            requestAnimationFrame(drawPreview);
+            return;
+        }
+
+        // Rotate and project
+        const cosY = Math.cos(state.previewRotY);
+        const sinY = Math.sin(state.previewRotY);
+        const cosX = Math.cos(state.previewRotX);
+        const sinX = Math.sin(state.previewRotX);
+        const scale = Math.min(W, H) * 0.9;
+        const perspective = 3;
+
+        const projected = allVerts.map(v => {
+            // Apply rotations
+            let x = v.x * cosY + v.z * sinY;
+            let z = -v.x * sinY + v.z * cosY;
+            let y = v.y * cosX - z * sinX;
+            let z2 = v.y * sinX + z * cosX;
+
+            const d = perspective / (perspective + z2);
+            return {
+                x: W/2 + x * scale * d,
+                y: H/2 + y * scale * d,
+                z: z2,
+                d: d
+            };
+        });
+
+        // Draw edges sorted by depth
+        const edgeDepths = allEdges.map(([i, j]) => ({
+            i, j,
+            depth: (projected[i].z + projected[j].z) / 2
+        }));
+        edgeDepths.sort((a, b) => a.depth - b.depth);
+
+        edgeDepths.forEach(({ i, j, depth }) => {
+            const a = projected[i];
+            const b = projected[j];
+            const brightness = 0.3 + 0.7 * Math.max(0, Math.min(1, (depth + 0.5)));
+            const alpha = 0.15 + brightness * 0.5;
+            previewCtx.strokeStyle = `rgba(100, 180, 255, ${alpha.toFixed(2)})`;
+            previewCtx.lineWidth = 0.8;
+            previewCtx.beginPath();
+            previewCtx.moveTo(a.x, a.y);
+            previewCtx.lineTo(b.x, b.y);
+            previewCtx.stroke();
+        });
+
+        requestAnimationFrame(drawPreview);
+    }
+
+    function buildMeshFromSegment(seg) {
+        const spine = seg.points.map(p => [p.x, p.y, 0]);
+        const rStart = seg.radiusStart;
+        const rEnd = seg.radiusEnd;
+        const bulge = seg.bulge;
+
+        const pathDef = {
+            spine: spine,
+            radiusFn: function(t) {
+                const base = rStart + (rEnd - rStart) * t;
+                const bulgeAmount = Math.sin(t * Math.PI);
+                return base * (1 + (bulge - 1) * bulgeAmount);
+            }
+        };
+
+        // Use the same buildTubeMesh logic
+        const axial = 40;
+        const radial = 10;
+        return localBuildTubeMesh(pathDef, axial, radial);
+    }
+
+    // Local copy of buildTubeMesh for preview
+    function localBuildTubeMesh(pathDef, axialSegments, radialDivisions) {
+        const { spine, radiusFn } = pathDef;
+        const totalLen = spine.length - 1;
+        const vertices = [];
+        const edges = [];
+
+        for (let i = 0; i <= axialSegments; i++) {
+            const t = i / axialSegments;
+            const segF = t * totalLen;
+            const segIdx = Math.min(Math.floor(segF), totalLen - 1);
+            const segT = segF - segIdx;
+            const p = [
+                spine[segIdx][0] + (spine[segIdx + 1][0] - spine[segIdx][0]) * segT,
+                spine[segIdx][1] + (spine[segIdx + 1][1] - spine[segIdx][1]) * segT,
+                spine[segIdx][2] + (spine[segIdx + 1][2] - spine[segIdx][2]) * segT
+            ];
+
+            const dt = 0.002;
+            const tA = Math.max(0, t - dt) * totalLen;
+            const tB = Math.min(1, t + dt) * totalLen;
+            const idxA = Math.min(Math.floor(tA), totalLen - 1);
+            const idxB = Math.min(Math.floor(tB), totalLen - 1);
+            const pA = [
+                spine[idxA][0] + (spine[idxA + 1][0] - spine[idxA][0]) * (tA - idxA),
+                spine[idxA][1] + (spine[idxA + 1][1] - spine[idxA][1]) * (tA - idxA),
+                spine[idxA][2] + (spine[idxA + 1][2] - spine[idxA][2]) * (tA - idxA)
+            ];
+            const pB = [
+                spine[idxB][0] + (spine[idxB + 1][0] - spine[idxB][0]) * (tB - idxB),
+                spine[idxB][1] + (spine[idxB + 1][1] - spine[idxB][1]) * (tB - idxB),
+                spine[idxB][2] + (spine[idxB + 1][2] - spine[idxB][2]) * (tB - idxB)
+            ];
+            const tangRaw = [pB[0] - pA[0], pB[1] - pA[1], pB[2] - pA[2]];
+            const tangLen = Math.sqrt(tangRaw[0]**2 + tangRaw[1]**2 + tangRaw[2]**2) || 1;
+            const tang = [tangRaw[0]/tangLen, tangRaw[1]/tangLen, tangRaw[2]/tangLen];
+
+            const nx = -tang[1], ny = tang[0];
+            const bz = 1;
+            const tubeR = radiusFn(t);
+            const ringStart = vertices.length;
+
+            for (let j = 0; j < radialDivisions; j++) {
+                const angle = (j / radialDivisions) * Math.PI * 2;
+                const cosA = Math.cos(angle);
+                const sinA = Math.sin(angle);
+                vertices.push({
+                    x: p[0] + tubeR * (cosA * nx),
+                    y: -(p[1] + tubeR * (cosA * ny)),
+                    z: p[2] + tubeR * (sinA * bz)
+                });
+
+                const nextJ = (j + 1) % radialDivisions;
+                edges.push([ringStart + j, ringStart + nextJ]);
+
+                if (i > 0) {
+                    const prevRingStart = ringStart - radialDivisions;
+                    edges.push([prevRingStart + j, ringStart + j]);
+                }
+            }
+        }
+
+        return { vertices, edges };
+    }
+
+    // --- Export ---
+    function updateExport() {
+        const segs = state.segments.filter(s => s.points.length >= 2);
+        if (segs.length === 0) {
+            exportText.value = '// Add segments with 2+ points to generate code';
+            return;
+        }
+
+        let code = 'segments: [\n';
+        segs.forEach((seg, i) => {
+            const spineStr = seg.points.map(p => `[${p.x.toFixed(2)},${p.y.toFixed(2)},0]`).join(',');
+
+            // Generate radiusFn
+            let rfn;
+            if (Math.abs(seg.radiusStart - seg.radiusEnd) < 0.001 && Math.abs(seg.bulge - 1.0) < 0.01) {
+                rfn = `function(t) { return ${seg.radiusStart.toFixed(3)}; }`;
+            } else if (Math.abs(seg.bulge - 1.0) < 0.01) {
+                rfn = `function(t) { return ${seg.radiusStart.toFixed(3)} + t * ${(seg.radiusEnd - seg.radiusStart).toFixed(3)}; }`;
+            } else {
+                rfn = `function(t) { var b = ${seg.radiusStart.toFixed(3)} + t * ${(seg.radiusEnd - seg.radiusStart).toFixed(3)}; return b * (1 + ${(seg.bulge - 1).toFixed(1)} * Math.sin(t * Math.PI)); }`;
+            }
+
+            code += `    // ${i + 1}. ${seg.name}\n`;
+            code += `    { spine: [${spineStr}], radiusFn: ${rfn} }`;
+            if (i < segs.length - 1) code += ',';
+            code += '\n';
+        });
+        code += ']';
+
+        exportText.value = code;
+    }
+
+    // --- Event handlers ---
+    function handleCanvasClick(e) {
+        const rect = editorCanvas.getBoundingClientRect();
+        const sx = (e.clientX - rect.left) * (editorCanvas.width / rect.width);
+        const sy = (e.clientY - rect.top) * (editorCanvas.height / rect.height);
+        const world = screenToWorld(sx, sy);
+
+        if (state.mode === 'add') {
+            if (state.activeSegIdx < 0 || state.activeSegIdx >= state.segments.length) {
+                addSegment();
+            }
+            pushUndo();
+            state.segments[state.activeSegIdx].points.push(world);
+            updateAll();
+        } else if (state.mode === 'delete') {
+            const hit = findNearestPoint(sx, sy, 15);
+            if (hit) {
+                pushUndo();
+                state.segments[hit.segIdx].points.splice(hit.ptIdx, 1);
+                updateAll();
+            }
+        }
+    }
+
+    function handleCanvasMouseDown(e) {
+        const rect = editorCanvas.getBoundingClientRect();
+        const sx = (e.clientX - rect.left) * (editorCanvas.width / rect.width);
+        const sy = (e.clientY - rect.top) * (editorCanvas.height / rect.height);
+
+        if (e.button === 1 || (e.button === 0 && e.altKey)) {
+            // Middle button or alt+click: pan
+            state.panning = true;
+            state.panStart = { x: e.clientX - state.panX, y: e.clientY - state.panY };
+            e.preventDefault();
+            return;
+        }
+
+        if (state.mode === 'move') {
+            const hit = findNearestPoint(sx, sy, 15);
+            if (hit) {
+                pushUndo();
+                state.dragging = hit;
+                state.activeSegIdx = hit.segIdx;
+                updateSegmentListUI();
+            }
+        }
+    }
+
+    function handleCanvasMouseMove(e) {
+        const rect = editorCanvas.getBoundingClientRect();
+        const sx = (e.clientX - rect.left) * (editorCanvas.width / rect.width);
+        const sy = (e.clientY - rect.top) * (editorCanvas.height / rect.height);
+        const world = screenToWorld(sx, sy);
+
+        document.getElementById('info-coords').textContent = `x: ${world.x.toFixed(2)}, y: ${world.y.toFixed(2)}`;
+
+        if (state.panning && state.panStart) {
+            state.panX = e.clientX - state.panStart.x;
+            state.panY = e.clientY - state.panStart.y;
+            drawEditor();
+            return;
+        }
+
+        if (state.dragging) {
+            const seg = state.segments[state.dragging.segIdx];
+            seg.points[state.dragging.ptIdx] = world;
+            drawEditor();
+            updateExport();
+        }
+    }
+
+    function handleCanvasMouseUp() {
+        if (state.dragging) {
+            state.dragging = null;
+            updateAll();
+        }
+        state.panning = false;
+        state.panStart = null;
+    }
+
+    function findNearestPoint(sx, sy, threshold) {
+        let best = null;
+        let bestDist = threshold * threshold;
+        state.segments.forEach((seg, si) => {
+            seg.points.forEach((pt, pi) => {
+                const s = worldToScreen(pt.x, pt.y);
+                const dx = sx - s.x, dy = sy - s.y;
+                const d2 = dx * dx + dy * dy;
+                if (d2 < bestDist) {
+                    bestDist = d2;
+                    best = { segIdx: si, ptIdx: pi };
+                }
+            });
+        });
+        return best;
+    }
+
+    function handleWheel(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -50 : 50;
+        state.zoom = Math.max(100, Math.min(2000, state.zoom + delta));
+        document.getElementById('zoom-slider').value = state.zoom;
+        document.getElementById('zoom-val').textContent = state.zoom;
+        drawEditor();
+    }
+
+    // --- UI updates ---
+    function updateAll() {
+        updateSegmentListUI();
+        updateRadiusSliders();
+        drawEditor();
+        updateExport();
+    }
+
+    function updateSegmentListUI() {
+        segmentList.innerHTML = '';
+        state.segments.forEach((seg, i) => {
+            const div = document.createElement('div');
+            div.className = 'segment-item' + (i === state.activeSegIdx ? ' active' : '');
+            div.innerHTML = `
+                <span class="segment-color" style="background:${SEGMENT_COLORS[i % SEGMENT_COLORS.length]}"></span>
+                <span class="name" contenteditable="true">${seg.name}</span>
+                <span class="pts">${seg.points.length} pts</span>
+                <span class="del" title="Delete segment">x</span>
+            `;
+            div.querySelector('.name').addEventListener('blur', (e) => {
+                seg.name = e.target.textContent.trim() || 'segment_' + i;
+            });
+            div.querySelector('.del').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteSegment(i);
+            });
+            div.addEventListener('click', () => selectSegment(i));
+            segmentList.appendChild(div);
+        });
+    }
+
+    function updateRadiusSliders() {
+        const seg = state.segments[state.activeSegIdx];
+        if (!seg) return;
+        document.getElementById('radius-start').value = seg.radiusStart;
+        document.getElementById('radius-start-val').textContent = seg.radiusStart.toFixed(3);
+        document.getElementById('radius-end').value = seg.radiusEnd;
+        document.getElementById('radius-end-val').textContent = seg.radiusEnd.toFixed(3);
+        document.getElementById('radius-bulge').value = seg.bulge;
+        document.getElementById('radius-bulge-val').textContent = seg.bulge.toFixed(1);
+    }
+
+    // --- Resize ---
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const wrap = canvasWrap;
+        editorCanvas.width = wrap.clientWidth * dpr;
+        editorCanvas.height = wrap.clientHeight * dpr;
+        editorCanvas.style.width = wrap.clientWidth + 'px';
+        editorCanvas.style.height = wrap.clientHeight + 'px';
+
+        const pWrap = previewCanvas.parentElement;
+        previewCanvas.width = pWrap.clientWidth * dpr;
+        previewCanvas.height = 250 * dpr;
+        previewCanvas.style.width = pWrap.clientWidth + 'px';
+        previewCanvas.style.height = '250px';
+
+        drawEditor();
+    }
+
+    // --- Init ---
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Canvas events
+        editorCanvas.addEventListener('click', handleCanvasClick);
+        editorCanvas.addEventListener('mousedown', handleCanvasMouseDown);
+        editorCanvas.addEventListener('mousemove', handleCanvasMouseMove);
+        editorCanvas.addEventListener('mouseup', handleCanvasMouseUp);
+        editorCanvas.addEventListener('wheel', handleWheel, { passive: false });
+
+        // Toolbar buttons
+        document.getElementById('btn-new-seg').addEventListener('click', () => {
+            addSegment();
+            setMode('add');
+        });
+        document.getElementById('btn-move').addEventListener('click', () => setMode('move'));
+        document.getElementById('btn-delete-pt').addEventListener('click', () => setMode('delete'));
+        document.getElementById('btn-undo').addEventListener('click', undo);
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            pushUndo();
+            state.segments = [];
+            state.activeSegIdx = -1;
+            updateAll();
+        });
+
+        // Grid size
+        document.getElementById('grid-size').addEventListener('change', (e) => {
+            state.gridSnap = parseFloat(e.target.value);
+            document.getElementById('info-snap').textContent = state.gridSnap > 0 ? `Snap: ${state.gridSnap}` : 'Snap: Off';
+            drawEditor();
+        });
+
+        // Zoom slider
+        document.getElementById('zoom-slider').addEventListener('input', (e) => {
+            state.zoom = parseInt(e.target.value);
+            document.getElementById('zoom-val').textContent = state.zoom;
+            drawEditor();
+        });
+
+        // Radius sliders
+        document.getElementById('radius-start').addEventListener('input', (e) => {
+            const seg = state.segments[state.activeSegIdx];
+            if (seg) { seg.radiusStart = parseFloat(e.target.value); }
+            document.getElementById('radius-start-val').textContent = parseFloat(e.target.value).toFixed(3);
+            drawEditor();
+            updateExport();
+        });
+        document.getElementById('radius-end').addEventListener('input', (e) => {
+            const seg = state.segments[state.activeSegIdx];
+            if (seg) { seg.radiusEnd = parseFloat(e.target.value); }
+            document.getElementById('radius-end-val').textContent = parseFloat(e.target.value).toFixed(3);
+            drawEditor();
+            updateExport();
+        });
+        document.getElementById('radius-bulge').addEventListener('input', (e) => {
+            const seg = state.segments[state.activeSegIdx];
+            if (seg) { seg.bulge = parseFloat(e.target.value); }
+            document.getElementById('radius-bulge-val').textContent = parseFloat(e.target.value).toFixed(1);
+            drawEditor();
+            updateExport();
+        });
+
+        // Reference image
+        document.getElementById('btn-ref-img').addEventListener('click', () => {
+            document.getElementById('ref-file-input').click();
+        });
+        document.getElementById('ref-file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                refImage.src = url;
+                refImage.onload = () => {
+                    state.refImage = true;
+                    drawEditor();
+                };
+            }
+        });
+        document.getElementById('ref-opacity').addEventListener('input', (e) => {
+            state.refOpacity = parseInt(e.target.value) / 100;
+            document.getElementById('ref-opacity-val').textContent = e.target.value + '%';
+            drawEditor();
+        });
+
+        // Copy button
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            exportText.select();
+            navigator.clipboard.writeText(exportText.value);
+        });
+
+        // Start with one segment
+        addSegment();
+
+        // Start preview animation
+        drawPreview();
+    }
+
+    function setMode(mode) {
+        state.mode = mode;
+        document.querySelectorAll('.editor-toolbar button').forEach(b => b.classList.remove('active'));
+        const modeMap = { 'add': 'btn-new-seg', 'move': 'btn-move', 'delete': 'btn-delete-pt' };
+        document.getElementById(modeMap[mode])?.classList.add('active');
+
+        const modeLabels = { 'add': 'Add Points', 'move': 'Move Points', 'delete': 'Delete Points' };
+        document.getElementById('info-mode').textContent = 'Mode: ' + modeLabels[mode];
+
+        editorCanvas.style.cursor = mode === 'add' ? 'crosshair' : mode === 'move' ? 'grab' : 'pointer';
+    }
+
+    init();
+    </script>
+</body>
+</html>

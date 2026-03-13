@@ -36,14 +36,15 @@
         "groupId": "featured",
         "projectId": "agile-this",
         "showInSubnav": true,
-        "shapeId": "defaultBlob"
+        "shapeId": "palmTree",
+        "blobColor": "#39FF14"
       },
       "featured-traffic-therapy": {
         "type": "projectFeature",
         "groupId": "featured",
         "projectId": "traffic-therapy",
         "showInSubnav": true,
-        "shapeId": "defaultBlob"
+        "shapeId": "gummyBear"
       },
       "featured-glowy-blob-ball": {
         "type": "projectFeature",
@@ -262,8 +263,8 @@
     {
       "id": "glowy-blob-ball",
       "title": "Glowy Blob Ball",
-      "shortDescription": "Glowy. Blob. Ball.",
-      "description": "Glowy. Blob. Ball.",
+      "shortDescription": "Glowy. Blob. Ball. And other assorted 3D things.",
+      "description": "Glowy. Blob. Ball. And other assorted 3D things.",
       "blobColor": "#3E2C5A",
       "category": "Background",
       "tags": ["Background"],
