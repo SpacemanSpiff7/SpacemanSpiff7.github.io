@@ -133,6 +133,19 @@
     return types;
   }
 
+  // --- Year-round detection (hide from default browse, show on search) ---
+  // True when ALL entries span 12 months AND none have peak months.
+  // Items with peak data (even peak=all-12) stay visible.
+  function isYearRound(slug) {
+    var seasons = state.seasonsBySlug[slug];
+    if (!seasons || !seasons.length) return false;
+    for (var i = 0; i < seasons.length; i++) {
+      if (seasons[i].seasonMonths.length < 12) return false;
+      if (seasons[i].peakMonths.length > 0) return false;
+    }
+    return true;
+  }
+
   // --- Filtering ---
   function filterProduce() {
     var items = [];
@@ -140,6 +153,9 @@
 
     state.data.produce.forEach(function (p) {
       if (!state.seasonsBySlug[p.slug]) return;
+
+      // Hide year-round items with no peak differentiation unless searching
+      if (!state.searchQuery && isYearRound(p.slug)) return;
 
       if (state.searchQuery) {
         if (p.name.toLowerCase().indexOf(state.searchQuery.toLowerCase()) === -1) return;

@@ -133,6 +133,16 @@ The center `width: 105px` is tightly constrained to fit inside the inner ring (r
 
 ---
 
+## Year-Round Item Filtering
+
+Items where ALL season entries span all 12 months AND have no peak differentiation (no peak months, or peak = all 12 months) are hidden from the default browse view. They appear when searched. This keeps cultivated mushrooms (shiitake, cremini, portobello, oyster), year-round imports (banana, plantain, coconut, ginger), and similar "always available" items from cluttering the seasonal view.
+
+Items with peak month subsets (e.g., pineapple with peak [3-7], rosemary with season=[1-12] but peak=[1-12]) remain visible because they still have seasonal quality variation worth highlighting.
+
+The check is in `isYearRound()` in `app.js`. It returns true only when every season entry for an item has `seasonMonths.length === 12` AND zero peak months. Items with any peak data (even peak covering all months, like cultivated mushrooms) remain visible.
+
+---
+
 ## Integration with Parent Site
 
 The seasonal produce app is integrated into the parent site (`SpacemanSpiff7.github.io`) via `data/projects.json`:
