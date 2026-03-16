@@ -1,0 +1,131 @@
+body {
+  background: #224443;
+  container-type: inline-size;
+  margin: 0;
+}
+ul {
+  --stem-w: 1.5cqi;
+  aspect-ratio: 45 / 64;
+  clip-path: inset(0% 0% 0% 0% round 2rem);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  list-style-type: none;
+  margin: 2.5cqi auto;
+  max-inline-size: 800px;
+  padding: 0;
+  width: 95cqi;
+}
+li {
+  background: var(--b, #0000);
+  grid-area: var(--a);
+  z-index: var(--z, 0);
+}
+
+.bright-gold {
+  --b: #F29A0D;
+  --a: 8 / 7 / 13 / 9;
+}
+.bright-orange {
+  --b: #CF6600;	
+  clip-path: polygon(0 100%, 100% 25%, 100% 0, 0 0);
+  --a: 8 / 5 / 11 / 7;
+}
+.cream {
+  --b: #F0C67C;
+  --a: 5 / 1 / 13 / 5;
+}
+.dark-gold {
+  --b: #D98106;
+  --a: 1 / 7 / 8 / 9;
+}
+.dark-teal {
+  --b: #152928;
+  clip-path: polygon(0 0, 0 100%, 100% 0, 0 0);
+  --a: 1 / 5 / 7 / 9;
+}
+.deep-red {
+  --b: #8D2A0D;
+  clip-path: shape(from 0% 0%,
+    arc to 50% 50% of 50% 50% ccw,
+    arc to 100% 100% of 50% 50% cw, 
+    line to 0% 100%, close);
+  --a: 11 / 1 / 13 / 3;
+  --z: 1;
+}
+.deep-rust {
+  --b: #AE3E09;
+  --a: 3 / 5 / 9 / 7;
+}
+.gold-green {
+  --b: linear-gradient(90deg, #DFA54C 50%, #376c3f 0 50%);
+  clip-path: shape(from 0% 50%, 
+    arc to 50% 25% of 50% 50% cw,
+    arc to 100% 0% of 50% 50% ccw,
+    line to 100% 100%,
+    line to 0% 100%,
+    close);
+  --a: 9 / 1 / 13 / 5;
+}
+.gold-orange {
+  --b: #F0980F;
+  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+  --a: 11 / 3 / 13 / 5;
+}
+.green-star {
+  --b: #1D3C35;
+  --a: 6 / 7 / 8 / 9;
+  border-radius: 50%;
+  corner-shape: scoop;
+}
+.leaf-left {
+  --b: #2A5130;
+  clip-path: shape(from 0% 50%, 
+    arc to 100% 50% of 100% 250% ccw,
+    arc to 0% 50% of 100% 250% ccw,
+    close);
+  --a: 8 / 1 / 9 / 3;
+  rotate: 25deg;
+  translate: 5px 0;
+}
+.leaf-main {
+  --b: linear-gradient(90deg, #2A5130 50%,  #14311F 0 50%);
+  clip-path: shape(from 50% 0%, 
+    arc to 50% 100% of 100% 75% ccw,
+    arc to 50% 0% of 100% 75% ccw,
+    close);
+  --a: 5 / 2 / 8 / 4;
+  --z: 2;
+}
+.leaf-right {
+  --b: #2A5130;
+  clip-path: shape(from 0% 50%, 
+    arc to 100% 50% of 100% 250% ccw,
+    arc to 0% 50% of 100% 250% ccw,
+    close);
+  --a: 8 / 3 / 9 / 5;
+  rotate: -25deg;
+  translate: calc(0cqi - (var(--stem-w) / 2)) 0;
+}
+.red-brown {
+  --b: #9F350D;
+  --a: 8 / 5 / 13 / 7;
+}
+.rust {
+  --b: #CB5207;
+  --a: 1 / 1 / 5 / 5;
+}
+.stem {
+  border-left: var(--stem-w) solid #14311F;
+  --a: 7 / 3 / 13 / 4;
+  translate: calc(0cqi - (var(--stem-w) / 2)) 0;
+  --z: 1;
+}
+.sun {
+  --b: #F8A611;
+  border-radius: 50%;
+  --a: 2 / 6 / 4 / 8;
+  scale: 1.5;
+  --z: 1;
+}
+

@@ -1,0 +1,33 @@
+region_slug,region_name,origin_group,country,latitude,longitude
+salinas-valley,Salinas Valley,California,US,36.67,-121.66
+santa-maria-valley,Santa Maria Valley,California,US,34.95,-120.44
+central-valley,Central Valley,California,US,36.75,-119.77
+coachella-valley,Coachella Valley,California,US,33.72,-116.17
+imperial-valley,Imperial Valley,California,US,32.84,-115.57
+ventura-county,Ventura County,California,US,34.36,-119.19
+san-diego-county,San Diego County,California,US,33.13,-117.09
+sacramento-valley,Sacramento Valley,California,US,38.58,-121.49
+north-coast,North Coast (Sonoma/Mendocino),California,US,38.51,-122.81
+central-coast,Central Coast (SLO/Monterey),California,US,35.77,-121.18
+socal-coastal,Southern California Coastal,California,US,33.77,-118.19
+sierra-foothills,Sierra Foothills,California,US,38.90,-120.80
+washington-state,Washington State,Pacific Northwest,US,47.04,-120.74
+oregon,Oregon,Pacific Northwest,US,44.57,-122.07
+florida,Florida,Southeast US,US,27.66,-81.52
+hawaii,Hawaii,Hawaii,US,20.80,-156.32
+baja-california,Baja California,Mexico,MX,30.84,-115.28
+sinaloa,Sinaloa,Mexico,MX,24.81,-107.39
+michoacan,"Michoacán",Mexico,MX,19.57,-101.71
+sonora,Sonora,Mexico,MX,29.07,-110.96
+central-mexico,Central Mexico,Mexico,MX,19.43,-99.13
+chile-central,Central Chile,South America,CL,-33.45,-70.67
+peru-coast,Peru Coast,South America,PE,-12.05,-77.04
+ecuador,Ecuador,South America,EC,-0.18,-78.47
+colombia,Colombia,South America,CO,4.71,-74.07
+brazil,Brazil,South America,BR,-15.79,-47.88
+costa-rica,Costa Rica,Central America,CR,9.93,-84.09
+guatemala,Guatemala,Central America,GT,14.63,-90.51
+new-zealand,New Zealand,Oceania,NZ,-41.29,174.78
+southeast-asia,Southeast Asia,Asia,XX,13.76,100.50
+china,China,Asia,CN,34.26,108.94
+india,India,Asia,IN,20.59,78.96

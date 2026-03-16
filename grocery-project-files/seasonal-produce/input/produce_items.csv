@@ -1,0 +1,329 @@
+canonical_name,canonical_slug,category,culinary_group
+Aji Cristal,aji-cristal,Chile Pepper,Pepper
+Aji Dulce,aji-dulce,Chile Pepper,Pepper
+Aji Limon,aji-limon,Chile Pepper,Pepper
+Aji Rojo,aji-rojo,Chile Pepper,Pepper
+Aji amarillo,aji-amarillo,Chile Pepper,Pepper
+Anaheim Pepper,anaheim-pepper,Chile Pepper,Pepper
+Banana pepper,banana-pepper,Chile Pepper,Pepper
+Bell Pepper,bell-pepper,Chile Pepper,Pepper
+Carolina Reaper,carolina-reaper,Chile Pepper,Pepper
+Cayenne Pepper,cayenne-pepper,Chile Pepper,Pepper
+Chilaca,chilaca,Chile Pepper,Pepper
+Cubanelle,cubanelle,Chile Pepper,Pepper
+Fresno Pepper,fresno-pepper,Chile Pepper,Pepper
+Ghost Pepper,ghost-pepper,Chile Pepper,Pepper
+Habanero,habanero,Chile Pepper,Pepper
+Hatch Chile,hatch-chile,Chile Pepper,Pepper
+Hungarian Wax Pepper,hungarian-wax-pepper,Chile Pepper,Pepper
+Jalapeno,jalapeno,Chile Pepper,Pepper
+Manzano Pepper,manzano-pepper,Chile Pepper,Pepper
+Padron Pepper,padron-pepper,Chile Pepper,Pepper
+Poblano Pepper,poblano-pepper,Chile Pepper,Pepper
+Scotch Bonnet,scotch-bonnet,Chile Pepper,Pepper
+Serrano Pepper,serrano-pepper,Chile Pepper,Pepper
+Shishito Pepper,shishito-pepper,Chile Pepper,Pepper
+Sweet Mini Pepper,sweet-mini-pepper,Chile Pepper,Pepper
+Thai Chile,thai-chile,Chile Pepper,Pepper
+Trinidad Scorpion,trinidad-scorpion,Chile Pepper,Pepper
+Borage,borage,Edible Flower,Floral
+Calendula,calendula,Edible Flower,Floral
+Chamomile,chamomile,Edible Flower,Floral
+Chive Blossom,chive-blossom,Edible Flower,Floral
+Hibiscus,hibiscus,Edible Flower,Floral
+Lavender,lavender,Edible Flower,Floral
+Marigold,marigold,Edible Flower,Floral
+Nasturtium,nasturtium,Edible Flower,Floral
+Orchid flowers,orchid-flowers,Edible Flower,Floral
+Pansy,pansy,Edible Flower,Floral
+Rose Petal,rose-petal,Edible Flower,Floral
+Squash Blossom,squash-blossom,Edible Flower,Floral
+Viola flowers,viola-flowers,Edible Flower,Floral
+Zinnia,zinnia,Edible Flower,Floral
+Blackberry,blackberry,Fruit,Berry
+Blueberry,blueberry,Fruit,Berry
+Boysenberry,boysenberry,Fruit,Berry
+Cape gooseberry,cape-gooseberry,Fruit,Berry
+Cranberry,cranberry,Fruit,Berry
+Currant,currant,Fruit,Berry
+Goldenberry,goldenberry,Fruit,Berry
+Gooseberry,gooseberry,Fruit,Berry
+Grape,grape,Fruit,Berry
+Loganberry,loganberry,Fruit,Berry
+Mulberry,mulberry,Fruit,Berry
+Raspberry,raspberry,Fruit,Berry
+Strawberry,strawberry,Fruit,Berry
+Tayberry,tayberry,Fruit,Berry
+Blood Orange,blood-orange,Fruit,Citrus
+Grapefruit,grapefruit,Fruit,Citrus
+Key lime,key-lime,Fruit,Citrus
+Kumquat,kumquat,Fruit,Citrus
+Lemon,lemon,Fruit,Citrus
+Lime,lime,Fruit,Citrus
+Mandarin,mandarin,Fruit,Citrus
+Mandarinquat,mandarinquat,Fruit,Citrus
+Meyer lemon,meyer-lemon,Fruit,Citrus
+Navel Orange,navel-orange,Fruit,Citrus
+Pink Lemon,pink-lemon,Fruit,Citrus
+Pummelo,pummelo,Fruit,Citrus
+Tangelo,tangelo,Fruit,Citrus
+Tangerine,tangerine,Fruit,Citrus
+Ugli fruit,ugli-fruit,Fruit,Citrus
+Valencia Orange,valencia-orange,Fruit,Citrus
+Cantaloupe,cantaloupe,Fruit,Cucurbit
+Crane Melon,crane-melon,Fruit,Cucurbit
+Honeydew,honeydew,Fruit,Cucurbit
+Watermelon,watermelon,Fruit,Cucurbit
+Apple,apple,Fruit,Pome Fruit
+Asian Pear,asian-pear,Fruit,Pome Fruit
+Loquat,loquat,Fruit,Pome Fruit
+Pear,pear,Fruit,Pome Fruit
+Quince,quince,Fruit,Pome Fruit
+Apricot,apricot,Fruit,Stone Fruit
+Cherry,cherry,Fruit,Stone Fruit
+Nectarine,nectarine,Fruit,Stone Fruit
+Peach,peach,Fruit,Stone Fruit
+Plum,plum,Fruit,Stone Fruit
+Pluot,pluot,Fruit,Stone Fruit
+Avocado,avocado,Fruit,Tropical Fruit
+Banana,banana,Fruit,Tropical Fruit
+Black sapote,black-sapote,Fruit,Tropical Fruit
+Canistel,canistel,Fruit,Tropical Fruit
+Carambola,carambola,Fruit,Tropical Fruit
+Cherimoya,cherimoya,Fruit,Tropical Fruit
+Coconut,coconut,Fruit,Tropical Fruit
+Date,date,Fruit,Tropical Fruit
+Dragon Fruit,dragon-fruit,Fruit,Tropical Fruit
+Durian,durian,Fruit,Tropical Fruit
+Fig,fig,Fruit,Tropical Fruit
+Gold kiwifruit,gold-kiwi,Fruit,Tropical Fruit
+Guava,guava,Fruit,Tropical Fruit
+Jackfruit,jackfruit,Fruit,Tropical Fruit
+Jujube,jujube,Fruit,Tropical Fruit
+Kiwi,kiwi,Fruit,Tropical Fruit
+Longan,longan,Fruit,Tropical Fruit
+Lychee,lychee,Fruit,Tropical Fruit
+Mamey sapote,mamey-sapote,Fruit,Tropical Fruit
+Mango,mango,Fruit,Tropical Fruit
+Mangosteen,mangosteen,Fruit,Tropical Fruit
+Olive,olive,Fruit,Tropical Fruit
+Papaya,papaya,Fruit,Tropical Fruit
+Passion Fruit,passion-fruit,Fruit,Tropical Fruit
+Persimmon,persimmon,Fruit,Tropical Fruit
+Pineapple,pineapple,Fruit,Tropical Fruit
+Pineapple Guava,pineapple-guava,Fruit,Tropical Fruit
+Plantain,plantain,Fruit,Tropical Fruit
+Pomegranate,pomegranate,Fruit,Tropical Fruit
+Prickly Pear,prickly-pear,Fruit,Tropical Fruit
+Rambutan,rambutan,Fruit,Tropical Fruit
+Sapote,sapote,Fruit,Tropical Fruit
+Soursop,soursop,Fruit,Tropical Fruit
+Star fruit,star-fruit,Fruit,Tropical Fruit
+Sugarcane,sugarcane,Fruit,Tropical Fruit
+Tamarillo,tamarillo,Fruit,Tropical Fruit
+Tamarind,tamarind,Fruit,Tropical Fruit
+Tejocote,tejocote,Fruit,Tropical Fruit
+Yellow Pitaya,yellow-pitaya,Fruit,Tropical Fruit
+Galangal,galangal,Herb,Aromatic Root
+Ginger Root,ginger-root,Herb,Aromatic Root
+Turmeric Root,turmeric-root,Herb,Aromatic Root
+Basil,basil,Herb,Culinary Herb
+Bay Leaf,bay-leaf,Herb,Culinary Herb
+Chervil,chervil,Herb,Culinary Herb
+Chive,chive,Herb,Culinary Herb
+Cilantro,cilantro,Herb,Culinary Herb
+Culantro,culantro,Herb,Culinary Herb
+Curry leaves,curry-leaves,Herb,Culinary Herb
+Dill,dill,Herb,Culinary Herb
+Epazote,epazote,Herb,Culinary Herb
+Fennel,fennel,Herb,Culinary Herb
+Garlic Chive,garlic-chive,Herb,Culinary Herb
+Holy Basil,holy-basil,Herb,Culinary Herb
+Lemon Balm,lemon-balm,Herb,Culinary Herb
+Lemon thyme,lemon-thyme,Herb,Culinary Herb
+Lemongrass,lemongrass,Herb,Culinary Herb
+Makrut lime leaves,makrut-lime-leaves,Herb,Culinary Herb
+Marjoram,marjoram,Herb,Culinary Herb
+Mint,mint,Herb,Culinary Herb
+Oregano,oregano,Herb,Culinary Herb
+Papalo,papalo,Herb,Culinary Herb
+Parsley,parsley,Herb,Culinary Herb
+Peppermint,peppermint,Herb,Culinary Herb
+Rosemary,rosemary,Herb,Culinary Herb
+Sage,sage,Herb,Culinary Herb
+Shiso,shiso,Herb,Culinary Herb
+Spearmint,spearmint,Herb,Culinary Herb
+Tarragon,tarragon,Herb,Culinary Herb
+Thai Basil,thai-basil,Herb,Culinary Herb
+Thyme,thyme,Herb,Culinary Herb
+Beech mushrooms,beech-mushroom,Mushroom,Cultivated Fungi
+Black trumpet mushrooms,black-trumpet-mushroom,Mushroom,Cultivated Fungi
+Button Mushroom,button-mushroom,Mushroom,Cultivated Fungi
+Cremini Mushroom,cremini-mushroom,Mushroom,Cultivated Fungi
+Enoki Mushroom,enoki-mushroom,Mushroom,Cultivated Fungi
+Hedgehog mushrooms,hedgehog-mushroom,Mushroom,Cultivated Fungi
+King Oyster Mushroom,king-oyster-mushroom,Mushroom,Cultivated Fungi
+Lion's Mane Mushroom,lions-mane-mushroom,Mushroom,Cultivated Fungi
+Maitake mushrooms,maitake-mushroom,Mushroom,Cultivated Fungi
+Oyster Mushroom,oyster-mushroom,Mushroom,Cultivated Fungi
+Pioppino mushrooms,pioppino-mushroom,Mushroom,Cultivated Fungi
+Portobello Mushroom,portobello-mushroom,Mushroom,Cultivated Fungi
+Shiitake Mushroom,shiitake-mushroom,Mushroom,Cultivated Fungi
+Shimeji mushrooms,shimeji-mushroom,Mushroom,Cultivated Fungi
+Silver Ear Mushroom,silver-ear-mushroom,Mushroom,Cultivated Fungi
+Straw Mushroom,straw-mushroom,Mushroom,Cultivated Fungi
+Trumpet mushrooms,trumpet-mushroom,Mushroom,Cultivated Fungi
+Wood Ear Mushroom,wood-ear-mushroom,Mushroom,Cultivated Fungi
+Black Truffle,black-truffle,Mushroom,Wild Fungi
+Chanterelle Mushroom,chanterelle-mushroom,Mushroom,Wild Fungi
+Chicken of the Woods,chicken-of-the-woods,Mushroom,Wild Fungi
+Lobster Mushroom,lobster-mushroom,Mushroom,Wild Fungi
+Matsutake Mushroom,matsutake-mushroom,Mushroom,Wild Fungi
+Morel Mushroom,morel-mushroom,Mushroom,Wild Fungi
+Porcini Mushroom,porcini-mushroom,Mushroom,Wild Fungi
+Peanut,peanut,Nut,Legume Nut
+Almond,almond,Nut,Tree Nut
+Brazil nuts,brazil-nut,Nut,Tree Nut
+Cashews,cashew,Nut,Tree Nut
+Chestnuts,chestnut,Nut,Tree Nut
+Hazelnut,hazelnut,Nut,Tree Nut
+Macadamia nuts,macadamia-nut,Nut,Tree Nut
+Pecan,pecan,Nut,Tree Nut
+Pine nuts,pine-nut,Nut,Tree Nut
+Pistachio,pistachio,Nut,Tree Nut
+Walnut,walnut,Nut,Tree Nut
+Boiler Onion,boiler-onion,Vegetable,Allium
+Cipolline Onion,cipolline-onion,Vegetable,Allium
+Elephant garlic,elephant-garlic,Vegetable,Allium
+Garlic,garlic,Vegetable,Allium
+Green Onion,green-onion,Vegetable,Allium
+Leek,leek,Vegetable,Allium
+Onion,onion,Vegetable,Allium
+Pearl Onion,pearl-onion,Vegetable,Allium
+Red Onion,red-onion,Vegetable,Allium
+Shallot,shallot,Vegetable,Allium
+Sweet onion,sweet-onion,Vegetable,Allium
+White onion,white-onion,Vegetable,Allium
+Yellow Onion,yellow-onion,Vegetable,Allium
+Bok Choy,bok-choy,Vegetable,Brassica
+Broccoli,broccoli,Vegetable,Brassica
+Broccoli rabe,broccoli-rabe,Vegetable,Brassica
+Broccolini,broccolini,Vegetable,Brassica
+Brussels Sprout,brussels-sprout,Vegetable,Brassica
+Cabbage,cabbage,Vegetable,Brassica
+Cauliflower,cauliflower,Vegetable,Brassica
+Chinese Broccoli,chinese-broccoli,Vegetable,Brassica
+Choy Sum,choy-sum,Vegetable,Brassica
+Kohlrabi,kohlrabi,Vegetable,Brassica
+Napa Cabbage,napa-cabbage,Vegetable,Brassica
+Red cabbage,red-cabbage,Vegetable,Brassica
+Romanesco,romanesco,Vegetable,Brassica
+Savoy cabbage,savoy-cabbage,Vegetable,Brassica
+Tatsoi,tatsoi,Vegetable,Brassica
+Yu choy,yu-choy,Vegetable,Brassica
+Acorn Squash,acorn-squash,Vegetable,Cucurbit
+Bittermelon,bittermelon,Vegetable,Cucurbit
+Bottle gourd,bottle-gourd,Vegetable,Cucurbit
+Butternut squash,butternut-squash,Vegetable,Cucurbit
+Calabaza,calabaza,Vegetable,Cucurbit
+Chayote,chayote,Vegetable,Cucurbit
+Cucumber,cucumber,Vegetable,Cucurbit
+Delicata squash,delicata-squash,Vegetable,Cucurbit
+Kabocha Squash,kabocha-squash,Vegetable,Cucurbit
+Moqua,moqua,Vegetable,Cucurbit
+Opo Squash,opo-squash,Vegetable,Cucurbit
+Pattypan squash,pattypan-squash,Vegetable,Cucurbit
+Pickling Cucumber,pickling-cucumber,Vegetable,Cucurbit
+Pumpkin,pumpkin,Vegetable,Cucurbit
+Ridged luffa,ridged-luffa,Vegetable,Cucurbit
+Sinqua,sinqua,Vegetable,Cucurbit
+Smooth luffa,smooth-luffa,Vegetable,Cucurbit
+Snake Gourd,snake-gourd,Vegetable,Cucurbit
+Spaghetti squash,spaghetti-squash,Vegetable,Cucurbit
+Winter Melon,winter-melon,Vegetable,Cucurbit
+Yellow Squash,yellow-squash,Vegetable,Cucurbit
+Zucchini,zucchini,Vegetable,Cucurbit
+Artichoke,artichoke,Vegetable,Floral Vegetable
+Baby Artichoke,baby-artichoke,Vegetable,Floral Vegetable
+Cherry Tomato,cherry-tomato,Vegetable,Fruiting Vegetable
+Eggplant,eggplant,Vegetable,Fruiting Vegetable
+Green Tomato,green-tomato,Vegetable,Fruiting Vegetable
+Japanese Eggplant,japanese-eggplant,Vegetable,Fruiting Vegetable
+Okra,okra,Vegetable,Fruiting Vegetable
+Thai Eggplant,thai-eggplant,Vegetable,Fruiting Vegetable
+Tomatillo,tomatillo,Vegetable,Fruiting Vegetable
+Tomato,tomato,Vegetable,Fruiting Vegetable
+Baby Corn,baby-corn,Vegetable,Grain
+Sweet Corn,sweet-corn,Vegetable,Grain
+Amaranth Greens,amaranth-greens,Vegetable,Leafy Green
+Arugula,arugula,Vegetable,Leafy Green
+Beet greens,beet-greens,Vegetable,Leafy Green
+Chicory,chicory,Vegetable,Leafy Green
+Chrysanthemum Leaves,chrysanthemum-leaves,Vegetable,Leafy Green
+Collard Greens,collard-greens,Vegetable,Leafy Green
+Dandelion Greens,dandelion-greens,Vegetable,Leafy Green
+Endive,endive,Vegetable,Leafy Green
+Escarole,escarole,Vegetable,Leafy Green
+Frisee,frisee,Vegetable,Leafy Green
+Kale,kale,Vegetable,Leafy Green
+Lettuce,lettuce,Vegetable,Leafy Green
+Mache,mache,Vegetable,Leafy Green
+Mizuna,mizuna,Vegetable,Leafy Green
+Mustard Greens,mustard-greens,Vegetable,Leafy Green
+Pea Shoot,pea-shoot,Vegetable,Leafy Green
+Purslane,purslane,Vegetable,Leafy Green
+Radicchio,radicchio,Vegetable,Leafy Green
+Sorrel,sorrel,Vegetable,Leafy Green
+Spinach,spinach,Vegetable,Leafy Green
+Swiss Chard,swiss-chard,Vegetable,Leafy Green
+Taro leaves,taro-leaves,Vegetable,Leafy Green
+Turnip Greens,turnip-greens,Vegetable,Leafy Green
+Upland cress,upland-cress,Vegetable,Leafy Green
+Water Spinach,water-spinach,Vegetable,Leafy Green
+Watercress,watercress,Vegetable,Leafy Green
+Blackeye Pea,blackeye-pea,Vegetable,Legume
+Chinese Long Bean,chinese-long-bean,Vegetable,Legume
+English peas,english-pea,Vegetable,Legume
+Fava Bean,fava-bean,Vegetable,Legume
+Garbanzo beans,fresh-garbanzo-beans,Vegetable,Legume
+Green Bean,green-bean,Vegetable,Legume
+Hyacinth beans,hyacinth-beans,Vegetable,Legume
+Lima Bean,lima-bean,Vegetable,Legume
+Snap Pea,snap-pea,Vegetable,Legume
+Snow Pea,snow-pea,Vegetable,Legume
+Winged Bean,winged-bean,Vegetable,Legume
+Arrowroot,arrowroot,Vegetable,Root/Tuber
+Beet,beet,Vegetable,Root/Tuber
+Black Radish,black-radish,Vegetable,Root/Tuber
+Burdock Root,burdock-root,Vegetable,Root/Tuber
+Carrot,carrot,Vegetable,Root/Tuber
+Cassava,cassava,Vegetable,Root/Tuber
+Celeriac,celery-root,Vegetable,Root/Tuber
+Chioggia beet,chioggia-beet,Vegetable,Root/Tuber
+Daikon Radish,daikon-radish,Vegetable,Root/Tuber
+Golden beet,golden-beet,Vegetable,Root/Tuber
+Horseradish root,horseradish-root,Vegetable,Root/Tuber
+Jicama,jicama,Vegetable,Root/Tuber
+Lotus Root,lotus-root,Vegetable,Root/Tuber
+Parsnip,parsnip,Vegetable,Root/Tuber
+Potato,potato,Vegetable,Root/Tuber
+Radish,radish,Vegetable,Root/Tuber
+Rutabaga,rutabaga,Vegetable,Root/Tuber
+Salsify,salsify,Vegetable,Root/Tuber
+Sunchoke,sunchoke,Vegetable,Root/Tuber
+Sweet Potato,sweet-potato,Vegetable,Root/Tuber
+Taro,taro,Vegetable,Root/Tuber
+Turnip,turnip,Vegetable,Root/Tuber
+Water Chestnut,water-chestnut,Vegetable,Root/Tuber
+Watermelon Radish,watermelon-radish,Vegetable,Root/Tuber
+Yam,yam,Vegetable,Root/Tuber
+Asparagus,asparagus,Vegetable,Stem/Stalk
+Bamboo Shoot,bamboo-shoot,Vegetable,Stem/Stalk
+Cardoon,cardoon,Vegetable,Stem/Stalk
+Celery,celery,Vegetable,Stem/Stalk
+Chinese Celery,chinese-celery,Vegetable,Stem/Stalk
+Fiddlehead ferns,fiddlehead-ferns,Vegetable,Stem/Stalk
+Hearts of palm,hearts-of-palm,Vegetable,Stem/Stalk
+Nopales,nopales,Vegetable,Stem/Stalk
+Rhubarb,rhubarb,Vegetable,Stem/Stalk
+Sea Bean,sea-bean,Vegetable,Stem/Stalk

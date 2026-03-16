@@ -1,6 +1,7 @@
 /* ============================================
    Seasonal Produce California
    Dark teal + gold editorial
+   Concentric ring navigator with stoumann textures
    ============================================ */
 
 /* --- Design Tokens --- */
@@ -24,19 +25,19 @@
   --ring-border: rgba(240, 198, 124, 0.15);
   --now-line: rgba(248, 166, 17, 0.25);
 
-  /* Category colors */
+  /* Category colors (Stoumann palette) */
   --color-citrus: #F8A611;
   --color-berry: #A83820;
   --color-stone-fruit: #CB5207;
   --color-pome: #F0980F;
   --color-tropical: #CF6600;
-  --color-leafy-green: #3A7050;
-  --color-brassica: #2B5A4A;
+  --color-leafy-green: #4A9068;
+  --color-brassica: #3B7A62;
   --color-root: #AE3E09;
   --color-allium: #9F350D;
   --color-legume: #D98106;
   --color-cucurbit: #F29A0D;
-  --color-stem: rgba(58, 112, 80, 0.6);
+  --color-stem: #6B9F50;
   --color-chile: #A83820;
   --color-herb: #376c3f;
   --color-mushroom: #6B4D3A;
@@ -91,7 +92,60 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Paper grain */
+/* --- Stoumann Background Composition --- */
+.bg-decor {
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cream triangle — top right */
+.bg-cream-tri {
+  top: -10%;
+  right: -5%;
+  width: 50vw;
+  height: 50vh;
+  background: #F0C67C;
+  opacity: 0.04;
+  clip-path: polygon(30% 0%, 100% 0%, 100% 100%);
+}
+
+/* Rust wedge — behind ring area */
+.bg-rust-wedge {
+  top: 5%;
+  left: -8%;
+  width: 45vw;
+  height: 55vh;
+  background: #CB5207;
+  opacity: 0.05;
+  clip-path: polygon(0% 20%, 80% 0%, 60% 100%, 0% 80%);
+  filter: blur(40px);
+}
+
+/* Deep red organic blob — bottom left */
+.bg-deep-red-blob {
+  bottom: -5%;
+  left: -10%;
+  width: 50vw;
+  height: 45vh;
+  background: #8D2A0D;
+  opacity: 0.03;
+  border-radius: 60% 40% 70% 30%;
+  filter: blur(60px);
+}
+
+/* Gold-green gradient stripe — right edge */
+.bg-gold-stripe {
+  top: 30%;
+  right: 0;
+  width: 8vw;
+  height: 40vh;
+  background: linear-gradient(180deg, #F29A0D 0%, #4A9068 100%);
+  opacity: 0.04;
+  filter: blur(30px);
+}
+
+/* Paper grain texture */
 body::after {
   content: '';
   position: fixed;
@@ -129,19 +183,21 @@ h1, h2, h3 {
 }
 
 /* ============================================
-   Ring Navigator
+   Ring Navigator — concentric watchface
+   Container sized to give 3 rings breathing room
    ============================================ */
 .ring-section {
   text-align: center;
   padding: 16px 0 8px;
   position: relative;
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(203, 82, 7, 0.06) 0%, transparent 70%);
 }
 
 .ring-nav-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0;
 }
 
 .ring-arrow {
@@ -158,6 +214,7 @@ h1, h2, h3 {
   justify-content: center;
   transition: all 0.15s;
   flex-shrink: 0;
+  z-index: 2;
 }
 
 .ring-arrow:hover {
@@ -169,24 +226,31 @@ h1, h2, h3 {
   transform: scale(0.92);
 }
 
+/* Ring container: 320px gives room for 3 rings + readable filter labels */
 .ring-container {
   position: relative;
-  width: 220px;
-  height: 220px;
+  width: 320px;
+  height: 320px;
   flex-shrink: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .ring-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
+/* Outer ring group rotates as a unit (Juggins-style CSS transform) */
 .ring-segments-group {
   transform-origin: 150px 150px;
   transition: transform 0.4s var(--ease);
 }
 
+/* --- Outer ring segments (months) --- */
 .ring-segment {
   cursor: pointer;
   transition: fill 0.2s, opacity 0.2s;
@@ -199,25 +263,112 @@ h1, h2, h3 {
 
 .ring-segment-label {
   font-family: var(--font-heading);
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   fill: var(--text-muted);
   pointer-events: none;
   text-anchor: middle;
-  dominant-baseline: central;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   transition: fill 0.3s;
 }
 
 .ring-segment-label.label-active {
   fill: var(--bg-body);
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .ring-segment-label.label-adjacent {
   fill: var(--text-secondary);
 }
 
-/* Ring center */
+/* Middle ring group rotates on click like outer ring */
+.mid-ring-group {
+  transform-origin: 150px 150px;
+  transition: transform 0.4s var(--ease);
+}
+
+/* Inner ring group rotates on click */
+.inner-ring-group {
+  transform-origin: 150px 150px;
+  transition: transform 0.4s var(--ease);
+}
+
+/* --- Middle ring segments (category + source) --- */
+.mid-segment {
+  fill: var(--ring-inactive);
+  cursor: pointer;
+  transition: fill 0.2s;
+  opacity: 0;
+}
+.mid-segment:hover { fill: rgba(248, 166, 17, 0.18); }
+.mid-segment.active {
+  fill: rgba(248, 166, 17, 0.28);
+  stroke: var(--text-accent);
+  stroke-width: 0.5;
+}
+
+.mid-segment-label {
+  font-family: var(--font-body);
+  font-size: 7.5px;
+  font-weight: 600;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.mid-segment-label.label-active { fill: var(--text-accent); }
+
+/* --- Inner ring segments (status filters) --- */
+.inner-segment {
+  fill: var(--ring-inactive);
+  cursor: pointer;
+  transition: fill 0.2s;
+  opacity: 0;
+}
+.inner-segment:hover { fill: rgba(248, 166, 17, 0.18); }
+.inner-segment.active {
+  fill: rgba(248, 166, 17, 0.28);
+  stroke: var(--text-accent);
+  stroke-width: 0.5;
+}
+
+.inner-segment-label {
+  font-family: var(--font-body);
+  font-size: 8px;
+  font-weight: 600;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.inner-segment-label.label-active { fill: var(--text-accent); }
+
+/* --- Stoumann leaf embellishments --- */
+.leaf-embellish {
+  pointer-events: none;
+}
+.leaf-embellish.leaf-main {
+  fill: rgba(42, 81, 48, 0.10);
+}
+.leaf-embellish.leaf-side {
+  fill: rgba(42, 81, 48, 0.08);
+}
+.leaf-embellish.sun-glow {
+  fill: rgba(248, 166, 17, 0.05);
+}
+
+/* Thin brass bezels between rings */
+.ring-bezel {
+  fill: none;
+  stroke: rgba(240, 198, 124, 0.06);
+  stroke-width: 0.5;
+  pointer-events: none;
+}
+
+/* --- Ring center text (inside inner ring, r < 58) --- */
 .ring-center {
   position: absolute;
   top: 50%;
@@ -226,84 +377,54 @@ h1, h2, h3 {
   text-align: center;
   opacity: 0;
   pointer-events: none;
+  /* Constrain to fit inside inner ring */
+  width: 105px;
 }
 
 .ring-month {
   font-family: var(--font-heading);
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text-secondary);
   display: block;
 }
 
-.ring-count {
+.ring-date {
   font-family: var(--font-heading);
-  font-size: 2.4rem;
+  font-size: 1.25rem;
   color: var(--text-accent);
   display: block;
   line-height: 1;
-  margin: 2px 0 1px;
+  margin: 2px 0 3px;
 }
 
-.ring-label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+.ring-stat {
   display: block;
-}
-
-.ring-peak-label {
   font-size: 0.6rem;
-  color: var(--text-muted);
-  display: block;
-  margin-top: 1px;
-}
-
-/* Active month tick mark at 12 o'clock */
-.ring-tick {
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 10px;
-  background: var(--text-accent);
-  border-radius: 1px;
-  opacity: 0.6;
-}
-
-/* ============================================
-   Quick Actions
-   ============================================ */
-.quick-actions {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px var(--space-md);
-  opacity: 0;
-}
-
-.quick-btn {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  padding: 5px 14px;
-  border: 1px solid var(--ring-border);
-  border-radius: var(--radius-pill);
-  background: transparent;
+  line-height: 1.3;
   color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
 }
 
-.quick-btn:hover {
-  border-color: var(--text-accent);
+.ring-stat strong {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--text-accent);
 }
 
-.quick-btn.active {
-  background: var(--text-accent);
-  color: var(--bg-body);
-  border-color: var(--text-accent);
+/* SVG tick mark — proportional day position at outer ring edge */
+.ring-tick-line {
+  stroke: var(--text-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(248, 166, 17, 0.6));
+}
+.ring-tick-dot {
+  fill: var(--text-accent);
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(248, 166, 17, 0.5));
 }
 
 /* ============================================
@@ -327,10 +448,15 @@ h1, h2, h3 {
   gap: 6px;
 }
 
-.search-row { width: 100%; }
+.search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
 .search-input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 8px 12px;
   font-family: var(--font-body);
   font-size: 0.85rem;
@@ -346,65 +472,13 @@ h1, h2, h3 {
 .search-input:focus { border-bottom-color: var(--text-accent); }
 .search-input::placeholder { color: var(--text-muted); }
 
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  align-items: center;
-}
-
-.filter-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.category-filters::after {
-  content: '';
-  width: 1px;
-  height: 16px;
-  background: var(--ring-border);
-  margin: 0 4px;
-}
-
-.chip {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 500;
-  padding: 4px 10px;
-  border: 1px solid var(--ring-border);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.chip:hover {
-  border-color: var(--text-accent);
-  color: var(--text-accent);
-}
-
-.chip.active {
-  border-color: var(--text-accent);
-  color: var(--text-accent);
-  background: rgba(248, 166, 17, 0.1);
-}
-
-/* View toggle — integrated into controls, matching teal theme */
-.controls-bottom-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
 .view-toggle {
   display: flex;
   gap: 0;
   border: 1px solid var(--ring-border);
   border-radius: var(--radius-pill);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .view-btn {
@@ -426,6 +500,25 @@ h1, h2, h3 {
 
 .view-btn:not(:last-child) {
   border-right: 1px solid var(--ring-border);
+}
+
+/* Reset filters button */
+.reset-filters-btn {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--text-accent);
+  background: none;
+  border: 1px solid var(--ring-border);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  cursor: pointer;
+  margin: 4px auto;
+  display: block;
+  transition: all 0.15s;
+}
+.reset-filters-btn:hover {
+  border-color: var(--text-accent);
+  background: rgba(248, 166, 17, 0.08);
 }
 
 /* ============================================
@@ -452,7 +545,10 @@ h1, h2, h3 {
   flex: 0 0 var(--name-col);
   min-width: var(--name-col);
   border-right: 1px solid var(--ring-border);
-  background: var(--bg-body);
+  background: var(--bg-panel);
+  position: sticky;
+  left: 0;
+  z-index: 12;
 }
 
 .timeline-months {
@@ -475,6 +571,7 @@ h1, h2, h3 {
 .timeline-body {
   position: relative;
   min-height: 200px;
+  min-width: calc(var(--name-col) + var(--timeline-width));
 }
 
 .timeline-row {
@@ -499,10 +596,10 @@ h1, h2, h3 {
   height: 54px;
 }
 
-/* Name column — SOLID background so bars don't bleed under */
 .timeline-name {
   flex: 0 0 var(--name-col);
   min-width: var(--name-col);
+  max-width: var(--name-col);
   padding: 0 10px;
   font-size: 0.78rem;
   font-weight: 500;
@@ -513,19 +610,18 @@ h1, h2, h3 {
   border-right: 1px solid rgba(240, 198, 124, 0.08);
   position: sticky;
   left: 0;
-  z-index: 2;
-  background: var(--bg-body);
+  z-index: 3;
+  background: var(--bg-panel);
 }
 
 .timeline-row:hover .timeline-name {
-  background: #24504f;
+  background: var(--bg-panel-hover);
 }
 
 .timeline-row.selected .timeline-name {
-  background: #28504a;
+  background: var(--bg-panel-hover);
 }
 
-/* Bars area */
 .timeline-bars {
   flex: 0 0 var(--timeline-width);
   height: 100%;
@@ -546,7 +642,6 @@ h1, h2, h3 {
   pointer-events: none;
 }
 
-/* Bar track */
 .timeline-bars::after {
   content: '';
   position: absolute;
@@ -558,7 +653,6 @@ h1, h2, h3 {
   pointer-events: none;
 }
 
-/* Season bar */
 .season-bar {
   position: absolute;
   height: var(--bar-height);
@@ -572,15 +666,7 @@ h1, h2, h3 {
 .dual-row .season-bar.bar-import { top: 72%; }
 
 .season-bar.bar-import {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 3px,
-    rgba(240, 198, 124, 0.12) 3px,
-    rgba(240, 198, 124, 0.12) 5px
-  );
-  border: 1px dashed;
-  opacity: 0.6;
+  /* Same visual treatment as local — only the label differs */
 }
 
 .bar-segment {
@@ -590,16 +676,20 @@ h1, h2, h3 {
   border-radius: 2px;
 }
 
-.bar-segment.available { opacity: 0.45; }
-.bar-segment.peak { opacity: 1; }
+.bar-segment.available { opacity: 0.35; }
+.bar-segment.peak {
+  opacity: 1;
+  filter: brightness(1.4) saturate(1.3);
+}
 
 .bar-source-label {
   position: absolute;
   left: 3px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 8px;
-  color: var(--text-muted);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
   letter-spacing: 0.03em;
   pointer-events: none;
   z-index: 1;
@@ -617,7 +707,6 @@ h1, h2, h3 {
 .source-dot.local { background: var(--color-herb); }
 .source-dot.import { background: var(--text-muted); }
 
-/* Now line */
 .now-line {
   position: absolute;
   top: 0; bottom: 0;
@@ -864,6 +953,21 @@ h1, h2, h3 {
   margin-bottom: var(--space-sm);
 }
 
+.detail-minibar-labels {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.detail-minibar-labels span {
+  flex: 1;
+  text-align: center;
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
 .detail-minibar {
   display: flex;
   gap: 1px;
@@ -895,6 +999,53 @@ h1, h2, h3 {
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: var(--space-xs);
+}
+
+/* ============================================
+   Peak Strip — horizontal scrolling hero cards
+   ============================================ */
+.peak-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--space-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--ring-border);
+}
+.peak-strip::-webkit-scrollbar { display: none; }
+
+.peak-strip-label {
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.peak-card {
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--ring-border);
+  border-left: 3px solid var(--card-color, var(--text-accent));
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.peak-card:hover {
+  background: rgba(240, 198, 124, 0.06);
+  border-color: var(--card-color, var(--text-accent));
 }
 
 /* ============================================
@@ -945,11 +1096,13 @@ h1, h2, h3 {
   to { opacity: 1; }
 }
 
+/* Juggins-style staggered reveal — segments fade in, stay visible */
 .site-title.anim-in { animation: fadeSlideIn 0.3s ease forwards; }
 .ring-segment.anim-in { animation: segmentIn 0.2s ease forwards; }
+.mid-segment.anim-in { animation: segmentIn 0.2s ease forwards; }
+.inner-segment.anim-in { animation: segmentIn 0.2s ease forwards; }
 .ring-center.anim-in { animation: scaleIn 0.3s ease forwards; }
 .controls.anim-in { animation: slideUp 0.2s ease forwards; }
-.quick-actions.anim-in { animation: slideUp 0.2s ease forwards; }
 .timeline-row.anim-in { animation: rowFadeIn 0.2s ease forwards; }
 
 /* ============================================
@@ -963,18 +1116,12 @@ h1, h2, h3 {
 
   .site-header { padding: var(--space-md) var(--space-md) 0; }
 
-  .ring-container { width: 200px; height: 200px; }
-  .ring-count { font-size: 2rem; }
-  .ring-arrow { width: 36px; height: 36px; font-size: 1rem; }
+  .ring-container { width: 300px; height: 300px; }
+  .ring-count { font-size: 1.4rem; }
+  .ring-month { font-size: 0.5rem; }
+  .ring-arrow { width: 36px; height: 36px; font-size: 1rem; margin: 0 -6px; }
 
   .controls { padding: var(--space-xs) var(--space-md); }
-
-  .chip { font-size: 0.68rem; padding: 3px 8px; }
-
-  .category-filters::after { display: none; }
-
-  .quick-actions { flex-wrap: wrap; gap: 4px; }
-  .quick-btn { font-size: 0.68rem; padding: 4px 10px; }
 
   .grid-cards { grid-template-columns: 1fr; }
 
@@ -985,17 +1132,17 @@ h1, h2, h3 {
 @media (min-width: 1024px) {
   :root { --name-col: 200px; }
 
-  .ring-container { width: 260px; height: 260px; }
-  .ring-count { font-size: 2.6rem; }
+  .ring-container { width: 380px; height: 380px; }
+  .ring-count { font-size: 1.8rem; }
 
-  .timeline-row:hover .bar-tooltip { display: block; }
+  .season-bar:hover > .bar-tooltip { display: block; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .site-title, .ring-segment, .ring-center, .controls,
-  .quick-actions, .timeline-row { opacity: 1 !important; }
+  .site-title, .ring-segment, .mid-segment, .inner-segment,
+  .ring-center, .controls, .timeline-row { opacity: 1 !important; }
 
-  .ring-segments-group { transition: none !important; }
+  .ring-segments-group, .mid-ring-group, .inner-ring-group { transition: none !important; }
 
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

@@ -11,6 +11,7 @@
     "sectionOrder": [
       "hero",
       "featured-curlbro",
+      "featured-seasonal-produce",
       "featured-agile-this",
       "featured-traffic-therapy",
       "featured-glowy-blob-ball",
@@ -30,6 +31,14 @@
         "showInSubnav": true,
         "shapeId": "curlbroDumbbell",
         "blobColor": "#087E72"
+      },
+      "featured-seasonal-produce": {
+        "type": "projectFeature",
+        "groupId": "featured",
+        "projectId": "seasonal-produce",
+        "showInSubnav": true,
+        "shapeId": "defaultBlob",
+        "blobColor": "#4A9068"
       },
       "featured-agile-this": {
         "type": "projectFeature",
@@ -73,6 +82,7 @@
   },
   "featured": [
     "curlbro",
+    "seasonal-produce",
     "agile-this",
     "traffic-therapy",
     "glowy-blob-ball"
@@ -98,6 +108,23 @@
         {
           "text": "Use App",
           "url": "https://www.curlbro.com",
+          "type": "primary"
+        }
+      ]
+    },
+    {
+      "id": "seasonal-produce",
+      "title": "Seasonal Produce CA",
+      "shortDescription": "What's in season in California right now, where it's from, and when peak flavor hits",
+      "description": "What's in season in California right now, where it's from, and when peak flavor hits",
+      "blobColor": "#4A9068",
+      "category": "Data Visualization",
+      "image": "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Data Visualization", "California"],
+      "actions": [
+        {
+          "text": "Explore",
+          "url": "grocery-project-files/seasonal-produce/web/index.html",
           "type": "primary"
         }
       ]

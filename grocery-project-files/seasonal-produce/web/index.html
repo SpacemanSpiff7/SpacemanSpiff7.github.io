@@ -11,6 +11,12 @@
 </head>
 <body>
 
+  <!-- Stoumann background composition — warm color shapes behind content -->
+  <div class="bg-decor bg-cream-tri" aria-hidden="true"></div>
+  <div class="bg-decor bg-rust-wedge" aria-hidden="true"></div>
+  <div class="bg-decor bg-deep-red-blob" aria-hidden="true"></div>
+  <div class="bg-decor bg-gold-stripe" aria-hidden="true"></div>
+
   <header class="site-header">
     <h1 class="site-title">Seasonal Produce <span>California</span></h1>
   </header>
@@ -19,47 +25,38 @@
     <div class="ring-nav-row">
       <button class="ring-arrow" id="ring-prev" aria-label="Previous month">&#8249;</button>
       <div class="ring-container" id="ring-container">
-        <div class="ring-tick"></div>
         <svg class="ring-svg" viewBox="0 0 300 300" id="ring-svg">
+          <g class="ring-leaf-decor" id="ring-leaf-decor"></g>
           <g class="ring-segments-group" id="ring-group"></g>
+          <g class="mid-ring-group" id="mid-ring-group"></g>
+          <g class="inner-ring-group" id="inner-ring-group"></g>
+          <g id="ring-tick-group"></g>
         </svg>
         <div class="ring-center" id="ring-center">
           <span class="ring-month" id="ring-month"></span>
-          <span class="ring-count" id="ring-count">--</span>
-          <span class="ring-label" id="ring-label">in season</span>
-          <span class="ring-peak-label" id="ring-peak-label"></span>
+          <span class="ring-date" id="ring-date"></span>
+          <span class="ring-stat ring-stat-peak" id="ring-stat-peak"></span>
+          <span class="ring-stat ring-stat-season" id="ring-stat-season"></span>
         </div>
       </div>
       <button class="ring-arrow" id="ring-next" aria-label="Next month">&#8250;</button>
     </div>
   </section>
 
-  <div class="quick-actions" id="quick-actions">
-    <button class="quick-btn active" data-action="all">All</button>
-    <button class="quick-btn" data-action="peak">At Peak</button>
-    <button class="quick-btn" data-action="coming">Coming Soon</button>
-    <button class="quick-btn" data-action="leaving">Leaving Peak</button>
-  </div>
-
   <section class="controls">
     <div class="controls-inner">
       <div class="search-row">
         <input type="text" id="search" class="search-input" placeholder="Search produce..." autocomplete="off" spellcheck="false">
-      </div>
-
-      <div class="filter-row">
-        <div class="filter-group category-filters" id="category-filters"></div>
-        <div class="filter-group source-filters" id="source-filters">
-          <button class="chip" data-source="local">Local</button>
-          <button class="chip" data-source="import">Import</button>
-        </div>
         <div class="view-toggle">
-          <button class="view-btn active" data-view="timeline" id="view-timeline">Timeline</button>
-          <button class="view-btn" data-view="grid" id="view-grid">Grid</button>
+          <button class="view-btn active" id="view-timeline">Timeline</button>
+          <button class="view-btn" id="view-grid">Grid</button>
         </div>
       </div>
+      <button class="reset-filters-btn hidden" id="reset-filters">Clear filters</button>
     </div>
   </section>
+
+  <div class="peak-strip hidden" id="peak-strip"></div>
 
   <main id="main-content">
     <div class="timeline-container" id="timeline-container">

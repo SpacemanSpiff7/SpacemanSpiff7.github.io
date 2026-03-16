@@ -1,12 +1,13 @@
 /* ============================================
    Seasonal Produce California — App
    Dark theme with rotating ring navigator
+   Concentric rings: month / category+source / status
    ============================================ */
 
 (function () {
   'use strict';
 
-  var MONTH_ABBRS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  var MONTH_ABBRS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var MONTH_NAMES = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -14,16 +15,6 @@
   var MONTH_FULL = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  var CATEGORY_CHIPS = [
-    { label: 'Fruit', match: 'Fruit' },
-    { label: 'Vegetable', match: 'Vegetable' },
-    { label: 'Chile', match: 'Chile Pepper' },
-    { label: 'Herb', match: 'Herb' },
-    { label: 'Mushroom', match: 'Mushroom' },
-    { label: 'Nut', match: 'Nut' },
-    { label: 'Flower', match: 'Edible Flower' },
   ];
 
   var GROUP_COLORS = {
@@ -58,9 +49,9 @@
     seasonsBySlug: {},
     selectedMonth: new Date().getMonth() + 1,
     searchQuery: '',
-    categoryFilter: null,
-    sourceFilter: null,
-    quickAction: 'all',
+    activeCategories: new Set(),
+    activeSource: new Set(),
+    activeStatus: new Set(),
     view: 'timeline',
     selectedItem: null,
     showOffSeason: false,
@@ -153,25 +144,27 @@
       if (state.searchQuery) {
         if (p.name.toLowerCase().indexOf(state.searchQuery.toLowerCase()) === -1) return;
       }
-      if (state.categoryFilter) {
-        if (p.category !== state.categoryFilter) return;
+
+      if (state.activeCategories.size > 0) {
+        if (!state.activeCategories.has(p.category)) return;
       }
-      if (state.sourceFilter) {
+
+      if (state.activeSource.size > 0) {
         var types = getSourceTypes(p.slug);
-        if (!types[state.sourceFilter]) return;
+        var sourceMatch = false;
+        state.activeSource.forEach(function (s) { if (types[s]) sourceMatch = true; });
+        if (!sourceMatch) return;
       }
 
       var status = getItemStatus(p.slug, month);
 
-      // Quick action filter
-      if (state.quickAction === 'peak') {
-        if (status !== 'peak') return;
-      } else if (state.quickAction === 'coming') {
-        if (!getItemIsComingSoon(p.slug, month)) return;
-      } else if (state.quickAction === 'leaving') {
-        if (!getItemIsLeavingPeak(p.slug, month)) return;
+      if (state.activeStatus.size > 0 && state.activeStatus.size < 3) {
+        var passes = false;
+        if (state.activeStatus.has('peak') && status === 'peak') passes = true;
+        if (state.activeStatus.has('coming') && getItemIsComingSoon(p.slug, month)) passes = true;
+        if (state.activeStatus.has('leaving') && getItemIsLeavingPeak(p.slug, month)) passes = true;
+        if (!passes) return;
       }
-      // 'all' shows everything
 
       if (state.view === 'grid' && !state.showOffSeason && (status === 'off' || status === 'none')) {
         return;
@@ -186,12 +179,24 @@
   function sortItems(items) {
     var order = { peak: 0, 'in-season': 1, coming: 2, off: 3, none: 4 };
     items.sort(function (a, b) {
-      var oa = order[a.status] || 4;
-      var ob = order[b.status] || 4;
+      var oa = order[a.status] !== undefined ? order[a.status] : 4;
+      var ob = order[b.status] !== undefined ? order[b.status] : 4;
       if (oa !== ob) return oa - ob;
+      // Locality tiebreaker: local items rank higher than import
+      var aLocal = hasLocalSeason(a.produce.slug) ? 0 : 1;
+      var bLocal = hasLocalSeason(b.produce.slug) ? 0 : 1;
+      if (aLocal !== bLocal) return aLocal - bLocal;
       return a.produce.name.localeCompare(b.produce.name);
     });
     return items;
+  }
+
+  function hasLocalSeason(slug) {
+    var seasons = state.seasonsBySlug[slug] || [];
+    for (var i = 0; i < seasons.length; i++) {
+      if (seasons[i].sourceType === 'local') return true;
+    }
+    return false;
   }
 
   // --- Stats ---
@@ -206,19 +211,45 @@
   }
 
   // ============================================
-  // Ring Navigator — rotating watchface
+  // SVG arc helper — used by all three rings
   // ============================================
-
-  // Track cumulative rotation to avoid jarring jumps (always take shortest path)
-  var ringCurrentAngle = 0;
-  var ringBuilt = false;
-  var ringSegments = [];  // cached path elements
-  var ringLabels = [];    // cached text elements
-
   var RING_CX = 150, RING_CY = 150;
-  var RING_OUTER = 140, RING_INNER = 100;
+
+  function arcPath(cx, cy, outerR, innerR, startDeg, endDeg) {
+    var s1 = (startDeg - 90) * Math.PI / 180;
+    var e1 = (endDeg - 90) * Math.PI / 180;
+    return 'M ' + (cx + outerR * Math.cos(s1)) + ' ' + (cy + outerR * Math.sin(s1)) +
+           ' A ' + outerR + ' ' + outerR + ' 0 0 1 ' + (cx + outerR * Math.cos(e1)) + ' ' + (cy + outerR * Math.sin(e1)) +
+           ' L ' + (cx + innerR * Math.cos(e1)) + ' ' + (cy + innerR * Math.sin(e1)) +
+           ' A ' + innerR + ' ' + innerR + ' 0 0 0 ' + (cx + innerR * Math.cos(s1)) + ' ' + (cy + innerR * Math.sin(s1)) + ' Z';
+  }
+
+  function labelPos(cx, cy, outerR, innerR, startDeg, endDeg) {
+    var midRad = ((startDeg + endDeg) / 2 - 90) * Math.PI / 180;
+    var r = (outerR + innerR) / 2;
+    return { x: cx + r * Math.cos(midRad), y: cy + r * Math.sin(midRad) };
+  }
+
+  // Arc path for textPath labels — always clockwise, like text on a spinning record.
+  // Top of circle reads normally, bottom reads upside down. No flipping.
+  function labelArcPath(cx, cy, r, startDeg, endDeg) {
+    var s = (startDeg - 90) * Math.PI / 180;
+    var e = (endDeg - 90) * Math.PI / 180;
+    return 'M ' + (cx + r * Math.cos(s)) + ' ' + (cy + r * Math.sin(s)) +
+           ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r * Math.cos(e)) + ' ' + (cy + r * Math.sin(e));
+  }
+
+  // ============================================
+  // Outer Ring — months (rotates)
+  // ============================================
+  var OUTER_R = 140, OUTER_IR = 108;
   var RING_GAP = 2.5;
   var RING_SEG = 30 - RING_GAP;
+
+  var ringCurrentAngle = 0;
+  var ringBuilt = false;
+  var ringSegments = [];
+  var ringLabels = [];
 
   function buildRing() {
     var group = document.getElementById('ring-group');
@@ -226,135 +257,136 @@
     ringSegments = [];
     ringLabels = [];
 
+    // Ensure defs exists for textPath arcs
+    var defs = document.getElementById('ring-svg').querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      document.getElementById('ring-svg').insertBefore(defs, document.getElementById('ring-svg').firstChild);
+    }
+
+    var labelR = (OUTER_R + OUTER_IR) / 2;
+
     for (var i = 0; i < 12; i++) {
       var month = i + 1;
       var startAngle = i * 30 + RING_GAP / 2;
       var endAngle = startAngle + RING_SEG;
 
-      var sRad = (startAngle - 90) * Math.PI / 180;
-      var eRad = (endAngle - 90) * Math.PI / 180;
-
-      var d = 'M ' + (RING_CX + RING_OUTER * Math.cos(sRad)) + ' ' + (RING_CY + RING_OUTER * Math.sin(sRad)) +
-              ' A ' + RING_OUTER + ' ' + RING_OUTER + ' 0 0 1 ' + (RING_CX + RING_OUTER * Math.cos(eRad)) + ' ' + (RING_CY + RING_OUTER * Math.sin(eRad)) +
-              ' L ' + (RING_CX + RING_INNER * Math.cos(eRad)) + ' ' + (RING_CY + RING_INNER * Math.sin(eRad)) +
-              ' A ' + RING_INNER + ' ' + RING_INNER + ' 0 0 0 ' + (RING_CX + RING_INNER * Math.cos(sRad)) + ' ' + (RING_CY + RING_INNER * Math.sin(sRad)) + ' Z';
-
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', d);
+      path.setAttribute('d', arcPath(RING_CX, RING_CY, OUTER_R, OUTER_IR, startAngle, endAngle));
       path.setAttribute('class', 'ring-segment');
       path.setAttribute('data-month', month);
       path.addEventListener('click', (function (m) {
-        return function () {
-          state.selectedMonth = m;
-          state.quickAction = 'all';
-          render();
-        };
+        return function () { state.selectedMonth = m; render(); };
       })(month));
       group.appendChild(path);
       ringSegments.push(path);
 
-      // Label
-      var midRad = ((startAngle + endAngle) / 2 - 90) * Math.PI / 180;
-      var labelR = (RING_OUTER + RING_INNER) / 2;
-      var lx = RING_CX + labelR * Math.cos(midRad);
-      var ly = RING_CY + labelR * Math.sin(midRad);
+      // Curved label via textPath
+      var arcId = 'month-arc-' + i;
+      var arcEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arcEl.setAttribute('d', labelArcPath(RING_CX, RING_CY, labelR, startAngle, endAngle));
+      arcEl.setAttribute('id', arcId);
+      defs.appendChild(arcEl);
 
       var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', lx);
-      text.setAttribute('y', ly);
       text.setAttribute('class', 'ring-segment-label');
-      text.textContent = MONTH_ABBRS[i];
+      text.setAttribute('dy', '0.35em');
+      var tp = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
+      tp.setAttribute('href', '#' + arcId);
+      tp.setAttribute('startOffset', '50%');
+      tp.textContent = MONTH_ABBRS[i];
+      text.appendChild(tp);
       group.appendChild(text);
-      ringLabels.push({ el: text, cx: lx, cy: ly });
+      ringLabels.push(text);
     }
 
-    // Set initial rotation without transition
-    ringCurrentAngle = -(state.selectedMonth - 1) * 30;
+    ringCurrentAngle = -(state.selectedMonth - 1) * 30 - 15;
     group.style.transition = 'none';
     group.style.transform = 'rotate(' + ringCurrentAngle + 'deg)';
-    // Force reflow then re-enable transition
-    group.offsetHeight;
+    group.offsetHeight; // force reflow
     group.style.transition = '';
-
     ringBuilt = true;
   }
 
   function updateRing() {
     var group = document.getElementById('ring-group');
 
-    // Calculate target angle — take shortest path
-    var targetBase = -(state.selectedMonth - 1) * 30;
-    // Normalize difference to find shortest rotation
+    // Shortest-path rotation (Juggins-style CSS transform on whole group)
+    var targetBase = -(state.selectedMonth - 1) * 30 - 15;
     var diff = targetBase - ringCurrentAngle;
-    // Bring diff into -180..180 range
     diff = ((diff % 360) + 540) % 360 - 180;
     ringCurrentAngle = ringCurrentAngle + diff;
-
-    // Apply CSS transform (transition handles animation)
     group.style.transform = 'rotate(' + ringCurrentAngle + 'deg)';
 
-    // Update segment fills and label styles
-    var counterRot = -ringCurrentAngle;
+    // Update fills using classList.toggle — NEVER setAttribute('class')
     for (var i = 0; i < 12; i++) {
       var month = i + 1;
       var d = Math.abs(month - state.selectedMonth);
       if (d > 6) d = 12 - d;
 
-      var fill, cls = 'ring-segment';
-      if (month === state.selectedMonth) {
-        fill = 'var(--ring-active)';
-        cls += ' active';
-      } else if (d === 1) {
-        fill = 'var(--ring-adjacent)';
-      } else {
-        fill = 'var(--ring-inactive)';
-      }
+      var fill;
+      if (month === state.selectedMonth) { fill = 'var(--ring-active)'; }
+      else if (d === 1) { fill = 'var(--ring-adjacent)'; }
+      else { fill = 'var(--ring-inactive)'; }
 
       ringSegments[i].setAttribute('fill', fill);
-      ringSegments[i].setAttribute('class', cls);
+      ringSegments[i].classList.toggle('active', month === state.selectedMonth);
 
-      // Counter-rotate labels so text stays upright
-      var lbl = ringLabels[i];
-      lbl.el.setAttribute('transform', 'rotate(' + counterRot + ' ' + lbl.cx + ' ' + lbl.cy + ')');
-      var lClass = 'ring-segment-label';
-      if (month === state.selectedMonth) lClass += ' label-active';
-      else if (d === 1) lClass += ' label-adjacent';
-      lbl.el.setAttribute('class', lClass);
+      // Labels use textPath — no counter-rotation needed
+      ringLabels[i].classList.toggle('label-active', month === state.selectedMonth);
+      ringLabels[i].classList.toggle('label-adjacent', d === 1 && month !== state.selectedMonth);
     }
 
-    // Update ring center
+    // Update ring center text
     var stats = computeStats(state.selectedMonth);
     var monthEl = document.getElementById('ring-month');
-    var countEl = document.getElementById('ring-count');
-    var labelEl = document.getElementById('ring-label');
-    var peakEl = document.getElementById('ring-peak-label');
+    var dateEl = document.getElementById('ring-date');
+    var peakStatEl = document.getElementById('ring-stat-peak');
+    var seasonStatEl = document.getElementById('ring-stat-season');
 
     monthEl.textContent = MONTH_FULL[state.selectedMonth - 1].toUpperCase();
 
-    if (state.quickAction === 'peak') {
-      countEl.textContent = stats.atPeak;
-      labelEl.textContent = 'at peak';
-      peakEl.textContent = stats.inSeason + ' total in season';
-    } else if (state.quickAction === 'coming') {
-      var comingCount = 0;
-      state.data.produce.forEach(function (p) {
-        if (state.seasonsBySlug[p.slug] && getItemIsComingSoon(p.slug, state.selectedMonth)) comingCount++;
-      });
-      countEl.textContent = comingCount;
-      labelEl.textContent = 'coming soon';
-      peakEl.textContent = stats.inSeason + ' in season now';
-    } else if (state.quickAction === 'leaving') {
-      var leavingCount = 0;
-      state.data.produce.forEach(function (p) {
-        if (state.seasonsBySlug[p.slug] && getItemIsLeavingPeak(p.slug, state.selectedMonth)) leavingCount++;
-      });
-      countEl.textContent = leavingCount;
-      labelEl.textContent = 'leaving peak';
-      peakEl.textContent = 'get them now';
-    } else {
-      countEl.textContent = stats.inSeason;
-      labelEl.textContent = 'in season';
-      peakEl.textContent = stats.atPeak + ' at peak';
+    var now = new Date();
+    var isCurrentMonth = (state.selectedMonth === now.getMonth() + 1);
+    dateEl.textContent = isCurrentMonth
+      ? MONTH_NAMES[state.selectedMonth - 1] + ' ' + now.getDate()
+      : MONTH_FULL[state.selectedMonth - 1];
+
+    peakStatEl.innerHTML = '<strong>' + stats.atPeak + '</strong> in peak';
+    seasonStatEl.innerHTML = '<strong>' + stats.inSeason + '</strong> in season';
+
+    // Proportional tick mark — SVG line at outer ring edge
+    // With centering fix, the month segment CENTER is at 12 o'clock.
+    // The segment spans from -15 to +15 deg relative to 12 o'clock (ignoring gap).
+    // dayFraction 0..1 maps across the full 30-deg slot.
+    // tickAngle = (dayFraction - 0.5) * 30 puts day 1 at left edge, last day at right edge.
+    var tickGroup = document.getElementById('ring-tick-group');
+    if (tickGroup) {
+      tickGroup.innerHTML = '';
+      var now = new Date();
+      var tickDay = now.getDate();
+      var tickDaysInMonth = new Date(now.getFullYear(), state.selectedMonth, 0).getDate();
+      var dayFraction = (tickDay - 0.5) / tickDaysInMonth; // 0..1
+      var tickAngle = (dayFraction - 0.5) * 30; // deg from 12 o'clock, centered
+      var tickRadians = (tickAngle - 90) * Math.PI / 180;
+      var innerTick = OUTER_R + 1;  // starts just outside outer ring
+      var outerTick = OUTER_R + 10; // extends outward
+
+      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', RING_CX + innerTick * Math.cos(tickRadians));
+      line.setAttribute('y1', RING_CY + innerTick * Math.sin(tickRadians));
+      line.setAttribute('x2', RING_CX + outerTick * Math.cos(tickRadians));
+      line.setAttribute('y2', RING_CY + outerTick * Math.sin(tickRadians));
+      line.setAttribute('class', 'ring-tick-line');
+      tickGroup.appendChild(line);
+
+      var tipR = outerTick + 2;
+      var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', RING_CX + tipR * Math.cos(tickRadians));
+      dot.setAttribute('cy', RING_CY + tipR * Math.sin(tickRadians));
+      dot.setAttribute('r', '2.5');
+      dot.setAttribute('class', 'ring-tick-dot');
+      tickGroup.appendChild(dot);
     }
   }
 
@@ -363,20 +395,274 @@
     updateRing();
   }
 
-  // --- Render: Category Chips ---
-  function renderCategoryChips() {
-    var container = document.getElementById('category-filters');
-    container.innerHTML = '';
-    CATEGORY_CHIPS.forEach(function (chip) {
-      var btn = document.createElement('button');
-      btn.className = 'chip' + (state.categoryFilter === chip.match ? ' active' : '');
-      btn.textContent = chip.label;
-      btn.addEventListener('click', function () {
-        state.categoryFilter = state.categoryFilter === chip.match ? null : chip.match;
-        render();
-      });
-      container.appendChild(btn);
+  // ============================================
+  // Middle Ring — category + source (rotate-to-top on click)
+  // ============================================
+  var MID_OUTER = 98, MID_INNER = 80;
+  var MID_SEG_DEG = 38, MID_GAP = 2;
+  var MID_ITEMS = [
+    { label: 'Fruit', type: 'category', match: 'Fruit' },
+    { label: 'Veg', type: 'category', match: 'Vegetable' },
+    { label: 'Chile', type: 'category', match: 'Chile Pepper' },
+    { label: 'Herb', type: 'category', match: 'Herb' },
+    { label: 'Mush', type: 'category', match: 'Mushroom' },
+    { label: 'Nut', type: 'category', match: 'Nut' },
+    { label: 'Flwr', type: 'category', match: 'Edible Flower' },
+    { label: 'Local', type: 'source', match: 'local' },
+    { label: 'Imp', type: 'source', match: 'import' },
+  ];
+  var midSegments = [];
+  var midLabels = []; // each entry: { el, arcId }
+  var midCurrentAngle = 0;
+  var midLastClicked = 0; // index of last-clicked segment
+
+  function buildMiddleRing() {
+    var group = document.getElementById('mid-ring-group');
+    group.innerHTML = '';
+    midSegments = [];
+    midLabels = [];
+
+    // Defs for textPath arcs
+    var defs = document.getElementById('ring-svg').querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      document.getElementById('ring-svg').insertBefore(defs, document.getElementById('ring-svg').firstChild);
+    }
+
+    var labelR = (MID_OUTER + MID_INNER) / 2;
+
+    for (var i = 0; i < MID_ITEMS.length; i++) {
+      var startAngle = i * (MID_SEG_DEG + MID_GAP) + MID_GAP / 2;
+      var endAngle = startAngle + MID_SEG_DEG;
+
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', arcPath(RING_CX, RING_CY, MID_OUTER, MID_INNER, startAngle, endAngle));
+      path.setAttribute('class', 'mid-segment');
+      path.addEventListener('click', (function (idx, item) {
+        return function () {
+          midLastClicked = idx;
+          var set = item.type === 'category' ? state.activeCategories : state.activeSource;
+          if (set.has(item.match)) { set.delete(item.match); }
+          else { set.add(item.match); }
+          render();
+        };
+      })(i, MID_ITEMS[i]));
+      group.appendChild(path);
+      midSegments.push(path);
+
+      // Curved label via textPath
+      var arcId = 'mid-arc-' + i;
+      var arcEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arcEl.setAttribute('d', labelArcPath(RING_CX, RING_CY, labelR, startAngle, endAngle));
+      arcEl.setAttribute('id', arcId);
+      defs.appendChild(arcEl);
+
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('class', 'mid-segment-label');
+      text.setAttribute('dy', '0.35em');
+      var tp = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
+      tp.setAttribute('href', '#' + arcId);
+      tp.setAttribute('startOffset', '50%');
+      tp.textContent = MID_ITEMS[i].label;
+      text.appendChild(tp);
+      group.appendChild(text);
+      midLabels.push(text);
+    }
+  }
+
+  function updateMiddleRing() {
+    var group = document.getElementById('mid-ring-group');
+    // Rotate so last-clicked segment center is at 12 o'clock
+    var segCenter = midLastClicked * (MID_SEG_DEG + MID_GAP) + MID_GAP / 2 + MID_SEG_DEG / 2;
+    var targetBase = -segCenter;
+    var diff = targetBase - midCurrentAngle;
+    diff = ((diff % 360) + 540) % 360 - 180;
+    midCurrentAngle = midCurrentAngle + diff;
+    group.style.transform = 'rotate(' + midCurrentAngle + 'deg)';
+
+    for (var i = 0; i < MID_ITEMS.length; i++) {
+      var set = MID_ITEMS[i].type === 'category' ? state.activeCategories : state.activeSource;
+      var isActive = set.has(MID_ITEMS[i].match);
+      midSegments[i].classList.toggle('active', isActive);
+      midLabels[i].classList.toggle('label-active', isActive);
+    }
+  }
+
+  // ============================================
+  // Inner Ring — status filters (static, multi-select)
+  // ============================================
+  var INNER_OUTER = 72, INNER_INNER = 58;
+  var INNER_SEG_DEG = 85, INNER_GAP = 5;
+  var INNER_ITEMS = [
+    { label: 'Peak', id: 'peak' },
+    { label: 'Coming', id: 'coming' },
+    { label: 'Leaving', id: 'leaving' },
+    { label: 'All', id: 'all' },
+  ];
+  var innerSegments = [];
+  var innerLabels = [];
+  var innerCurrentAngle = 0;
+  var innerLastClicked = 0;
+
+  function buildInnerRing() {
+    var group = document.getElementById('inner-ring-group');
+    group.innerHTML = '';
+    innerSegments = [];
+    innerLabels = [];
+
+    var defs = document.getElementById('ring-svg').querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      document.getElementById('ring-svg').insertBefore(defs, document.getElementById('ring-svg').firstChild);
+    }
+
+    var labelR = (INNER_OUTER + INNER_INNER) / 2;
+
+    for (var i = 0; i < INNER_ITEMS.length; i++) {
+      var startAngle = i * (INNER_SEG_DEG + INNER_GAP) + INNER_GAP / 2;
+      var endAngle = startAngle + INNER_SEG_DEG;
+
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', arcPath(RING_CX, RING_CY, INNER_OUTER, INNER_INNER, startAngle, endAngle));
+      path.setAttribute('class', 'inner-segment');
+      path.setAttribute('data-status', INNER_ITEMS[i].id);
+      path.addEventListener('click', (function (idx, item) {
+        return function () {
+          innerLastClicked = idx;
+          if (item.id === 'all') {
+            state.activeStatus.clear();
+          } else {
+            if (state.activeStatus.has(item.id)) { state.activeStatus.delete(item.id); }
+            else { state.activeStatus.add(item.id); }
+            if (state.activeStatus.size === 3) { state.activeStatus.clear(); innerLastClicked = 3; }
+          }
+          render();
+        };
+      })(i, INNER_ITEMS[i]));
+      group.appendChild(path);
+      innerSegments.push(path);
+
+      // Curved label via textPath
+      var arcId = 'inner-arc-' + i;
+      var arcEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arcEl.setAttribute('d', labelArcPath(RING_CX, RING_CY, labelR, startAngle, endAngle));
+      arcEl.setAttribute('id', arcId);
+      defs.appendChild(arcEl);
+
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('class', 'inner-segment-label');
+      text.setAttribute('dy', '0.35em');
+      var tp = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
+      tp.setAttribute('href', '#' + arcId);
+      tp.setAttribute('startOffset', '50%');
+      tp.textContent = INNER_ITEMS[i].label;
+      text.appendChild(tp);
+      group.appendChild(text);
+      innerLabels.push(text);
+    }
+  }
+
+  function updateInnerRing() {
+    var group = document.getElementById('inner-ring-group');
+    // Rotate so last-clicked segment center is at 12 o'clock
+    var segCenter = innerLastClicked * (INNER_SEG_DEG + INNER_GAP) + INNER_GAP / 2 + INNER_SEG_DEG / 2;
+    var targetBase = -segCenter;
+    var diff = targetBase - innerCurrentAngle;
+    diff = ((diff % 360) + 540) % 360 - 180;
+    innerCurrentAngle = innerCurrentAngle + diff;
+    group.style.transform = 'rotate(' + innerCurrentAngle + 'deg)';
+
+    for (var i = 0; i < INNER_ITEMS.length; i++) {
+      var isActive;
+      if (INNER_ITEMS[i].id === 'all') {
+        isActive = state.activeStatus.size === 0;
+      } else {
+        isActive = state.activeStatus.has(INNER_ITEMS[i].id);
+      }
+      innerSegments[i].classList.toggle('active', isActive);
+      innerLabels[i].classList.toggle('label-active', isActive);
+    }
+  }
+
+  // ============================================
+  // Stoumann-inspired leaf embellishments
+  // Translates CSS shape() arcs to SVG paths
+  // ============================================
+  function buildLeafDecor() {
+    var group = document.getElementById('ring-leaf-decor');
+    group.innerHTML = '';
+
+    // Stoumann .leaf-main: almond shape — two opposing elliptical arcs
+    // shape(from 50% 0%, arc to 50% 100% of 100% 75% ccw, arc to 50% 0% of 100% 75% ccw)
+    // In SVG: a vertical almond centered on 150,150, ~260px tall
+    var leafMain = 'M 150 30 C 80 90 80 210 150 270 C 220 210 220 90 150 30 Z';
+
+    var l1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    l1.setAttribute('d', leafMain);
+    l1.setAttribute('class', 'leaf-embellish leaf-main');
+    l1.setAttribute('transform', 'rotate(22 150 150)');
+    group.appendChild(l1);
+
+    var l2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    l2.setAttribute('d', leafMain);
+    l2.setAttribute('class', 'leaf-embellish leaf-main');
+    l2.setAttribute('transform', 'rotate(-22 150 150)');
+    group.appendChild(l2);
+
+    // Stoumann .leaf-left / .leaf-right: smaller horizontal leaves
+    // shape(from 0% 50%, arc to 100% 50% of 100% 250% ccw, arc to 0% 50% of 100% 250% ccw)
+    var leafSmall = 'M 120 150 C 135 130 165 130 180 150 C 165 170 135 170 120 150 Z';
+
+    var l3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    l3.setAttribute('d', leafSmall);
+    l3.setAttribute('class', 'leaf-embellish leaf-side');
+    l3.setAttribute('transform', 'rotate(50 150 150) translate(0 -80)');
+    group.appendChild(l3);
+
+    var l4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    l4.setAttribute('d', leafSmall);
+    l4.setAttribute('class', 'leaf-embellish leaf-side');
+    l4.setAttribute('transform', 'rotate(-50 150 150) translate(0 -80)');
+    group.appendChild(l4);
+
+    // Stoumann .sun: gold circle accent
+    var sun = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    sun.setAttribute('cx', '150');
+    sun.setAttribute('cy', '150');
+    sun.setAttribute('r', '56');
+    sun.setAttribute('class', 'leaf-embellish sun-glow');
+    group.appendChild(sun);
+
+    // Thin ring dividers (like brass bezels on a watchface)
+    [OUTER_IR, MID_OUTER, MID_INNER, INNER_OUTER, INNER_INNER].forEach(function (r) {
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '150');
+      circle.setAttribute('cy', '150');
+      circle.setAttribute('r', r);
+      circle.setAttribute('class', 'ring-bezel');
+      group.appendChild(circle);
     });
+  }
+
+  // ============================================
+  // Reset Filters
+  // ============================================
+  function bindResetFilters() {
+    document.getElementById('reset-filters').addEventListener('click', function () {
+      state.activeCategories.clear();
+      state.activeSource.clear();
+      state.activeStatus.clear();
+      midLastClicked = 0;
+      innerLastClicked = 3; // rotate "All" to top
+      render();
+    });
+  }
+
+  function updateResetButton() {
+    var hasFilters = state.activeCategories.size > 0 ||
+                     state.activeSource.size > 0 ||
+                     (state.activeStatus.size > 0 && state.activeStatus.size < 3);
+    document.getElementById('reset-filters').classList.toggle('hidden', !hasFilters);
   }
 
   // --- Now line position ---
@@ -449,12 +735,7 @@
 
       var nameCell = document.createElement('div');
       nameCell.className = 'timeline-name';
-
-      if (!isDual && seasons.length > 0) {
-        var dot = document.createElement('span');
-        dot.className = 'source-dot ' + seasons[0].sourceType;
-        nameCell.appendChild(dot);
-      }
+      nameCell.style.borderLeft = '3px solid ' + color;
 
       nameCell.appendChild(document.createTextNode(item.produce.name));
       nameCell.title = item.produce.name;
@@ -501,12 +782,20 @@
       bar.style.left = ((seg.start - 1) / 12 * 100) + '%';
       bar.style.width = (seg.months.length / 12 * 100) + '%';
 
-      if (sourceType === 'import') bar.style.borderColor = color;
-
       if (isDual) {
         var lbl = document.createElement('span');
         lbl.className = 'bar-source-label';
-        lbl.textContent = sourceType === 'local' ? 'CA' : 'Import';
+        if (sourceType === 'local') {
+          lbl.textContent = 'CA';
+        } else {
+          // Show origin region abbreviation for imports
+          var importRegions = [];
+          seasons.forEach(function (s) {
+            var r = state.regionBySlug[s.regionSlug];
+            if (r && importRegions.indexOf(r.originGroup) === -1) importRegions.push(r.originGroup);
+          });
+          lbl.textContent = importRegions.length ? importRegions[0] : 'Import';
+        }
         bar.appendChild(lbl);
       }
 
@@ -521,7 +810,16 @@
 
       var tt = document.createElement('div');
       tt.className = 'bar-tooltip';
-      tt.textContent = sourceType === 'import' ? 'Imported' : 'Local CA';
+      if (sourceType === 'local') {
+        tt.textContent = 'Local CA';
+      } else {
+        var ttRegions = [];
+        seasons.forEach(function (s) {
+          var r = state.regionBySlug[s.regionSlug];
+          if (r && ttRegions.indexOf(r.name) === -1) ttRegions.push(r.name);
+        });
+        tt.textContent = ttRegions.length ? ttRegions.join(', ') : 'Imported';
+      }
       bar.appendChild(tt);
 
       container.appendChild(bar);
@@ -690,6 +988,9 @@
       html += '<div class="detail-season-header"><span class="detail-region-name">' + escHtml(rn) + '</span>';
       html += '<span class="detail-source-badge ' + s.sourceType + '">' + s.sourceType + '</span></div>';
       html += '<div class="detail-season-months">Season: ' + monthRangeText(sArr) + ' &middot; Peak: ' + (pArr.length ? monthRangeText(pArr) : 'no clear peak') + '</div>';
+      html += '<div class="detail-minibar-labels">';
+      'JFMAMJJASOND'.split('').forEach(function (l) { html += '<span>' + l + '</span>'; });
+      html += '</div>';
       html += '<div class="detail-minibar">';
       for (var m = 1; m <= 12; m++) {
         var cls = 'minibar-cell', style = '';
@@ -710,46 +1011,31 @@
   function monthRangeText(months) {
     if (!months.length) return '';
     if (months.length === 12) return 'Year-round';
-    return MONTH_NAMES[months[0] - 1] + ' \u2013 ' + MONTH_NAMES[months[months.length - 1] - 1];
+    // Detect wrap-around: if sorted months have a gap > 1, the range wraps.
+    // e.g. [1, 10, 11, 12] has a gap between 1 and 10 — actual range is Oct–Jan.
+    var sorted = months.slice().sort(function (a, b) { return a - b; });
+    // Find the largest gap between consecutive months
+    var maxGap = 0, gapAfter = 0;
+    for (var i = 0; i < sorted.length - 1; i++) {
+      var gap = sorted[i + 1] - sorted[i];
+      if (gap > maxGap) { maxGap = gap; gapAfter = i; }
+    }
+    // Also check wrap gap (Dec -> Jan)
+    var wrapGap = 12 - sorted[sorted.length - 1] + sorted[0];
+    if (wrapGap >= maxGap) {
+      // No wrap — contiguous range, first to last
+      return MONTH_NAMES[sorted[0] - 1] + ' \u2013 ' + MONTH_NAMES[sorted[sorted.length - 1] - 1];
+    }
+    // Wrapped range — starts after the gap, ends before it
+    var start = sorted[gapAfter + 1];
+    var end = sorted[gapAfter];
+    return MONTH_NAMES[start - 1] + ' \u2013 ' + MONTH_NAMES[end - 1];
   }
 
   function escHtml(str) {
     var d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
-  }
-
-  // --- Quick Actions ---
-  function bindQuickActions() {
-    document.querySelectorAll('#quick-actions .quick-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        state.quickAction = btn.getAttribute('data-action');
-        render();
-      });
-    });
-  }
-
-  function updateQuickActions() {
-    document.querySelectorAll('#quick-actions .quick-btn').forEach(function (btn) {
-      btn.classList.toggle('active', state.quickAction === btn.getAttribute('data-action'));
-    });
-  }
-
-  // --- Source filter chips ---
-  function bindSourceFilters() {
-    document.querySelectorAll('#source-filters .chip').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var source = btn.getAttribute('data-source');
-        state.sourceFilter = state.sourceFilter === source ? null : source;
-        render();
-      });
-    });
-  }
-
-  function updateSourceChips() {
-    document.querySelectorAll('#source-filters .chip').forEach(function (btn) {
-      btn.classList.toggle('active', state.sourceFilter === btn.getAttribute('data-source'));
-    });
   }
 
   // --- View toggle ---
@@ -796,7 +1082,9 @@
     });
   }
 
-  // --- Load Animation ---
+  // (drag removed — all rings use click-to-rotate-to-top)
+
+  // --- Load Animation (Juggins-style staggered reveal) ---
   var animTimers = [];
   var animDone = false;
 
@@ -805,29 +1093,43 @@
       document.querySelector('.site-title').classList.add('anim-in');
     }, 0));
 
+    // Outer ring — clockwise stagger
     var segments = document.querySelectorAll('.ring-segment');
     segments.forEach(function (seg, i) {
       animTimers.push(setTimeout(function () { seg.classList.add('anim-in'); }, 80 + i * 25));
     });
 
+    // Middle ring — stagger after outer
+    var midSegs = document.querySelectorAll('.mid-segment');
+    midSegs.forEach(function (seg, i) {
+      animTimers.push(setTimeout(function () { seg.classList.add('anim-in'); }, 420 + i * 20));
+    });
+
+    // Inner ring — stagger after middle
+    var innerSegs = document.querySelectorAll('.inner-segment');
+    innerSegs.forEach(function (seg, i) {
+      animTimers.push(setTimeout(function () { seg.classList.add('anim-in'); }, 620 + i * 20));
+    });
+
+    // Center text
     animTimers.push(setTimeout(function () {
       document.querySelector('.ring-center').classList.add('anim-in');
-    }, 420));
+    }, 740));
 
+    // Controls bar
     animTimers.push(setTimeout(function () {
       var c = document.querySelector('.controls');
-      var q = document.querySelector('.quick-actions');
       if (c) c.classList.add('anim-in');
-      if (q) q.classList.add('anim-in');
-    }, 560));
+    }, 840));
 
+    // Timeline rows
     animTimers.push(setTimeout(function () {
       document.querySelectorAll('.timeline-row').forEach(function (row, i) {
         row.style.animationDelay = (i * 12) + 'ms';
         row.classList.add('anim-in');
       });
       animDone = true;
-    }, 700));
+    }, 960));
   }
 
   function skipAnimation() {
@@ -835,17 +1137,69 @@
     animTimers.forEach(clearTimeout);
     animTimers = [];
     animDone = true;
-    document.querySelectorAll('.site-title, .ring-segment, .ring-center, .controls, .quick-actions, .timeline-row')
+    document.querySelectorAll('.site-title, .ring-segment, .ring-center, .controls, .mid-segment, .inner-segment, .timeline-row')
       .forEach(function (el) { el.classList.add('anim-in'); el.style.animationDelay = '0ms'; });
+  }
+
+  // --- Peak Strip ---
+  function renderPeakStrip() {
+    var container = document.getElementById('peak-strip');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Only show when status filter is "All" (empty set) or includes "peak"
+    var sz = state.activeStatus.size;
+    if (sz > 0 && !state.activeStatus.has('peak')) {
+      container.classList.add('hidden');
+      return;
+    }
+
+    var month = state.selectedMonth;
+    var peakItems = [];
+    state.data.produce.forEach(function (p) {
+      if (getItemStatus(p.slug, month) === 'peak') {
+        peakItems.push(p);
+      }
+    });
+
+    // Sort by name, take up to 12 for the strip
+    peakItems.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    var items = peakItems.slice(0, 12);
+
+    if (!items.length) {
+      container.classList.add('hidden');
+      return;
+    }
+    container.classList.remove('hidden');
+
+    var label = document.createElement('span');
+    label.className = 'peak-strip-label';
+    label.textContent = 'Peak now';
+    container.appendChild(label);
+
+    items.forEach(function (p) {
+      var card = document.createElement('button');
+      card.className = 'peak-card';
+      var color = getColor(p);
+      card.style.borderColor = color;
+      card.style.setProperty('--card-color', color);
+      card.textContent = p.name;
+      card.addEventListener('click', function () {
+        state.selectedItem = state.selectedItem === p.slug ? null : p.slug;
+        render();
+      });
+      container.appendChild(card);
+    });
   }
 
   // --- Main Render ---
   function render() {
     renderRing();
-    renderCategoryChips();
-    updateSourceChips();
-    updateQuickActions();
+    updateMiddleRing();
+    updateInnerRing();
+    updateResetButton();
     updateViewToggle();
+    renderPeakStrip();
 
     if (state.view === 'timeline') {
       document.getElementById('timeline-container').classList.remove('hidden');
@@ -869,10 +1223,12 @@
   // --- Init ---
   function init() {
     loadData().then(function () {
+      buildMiddleRing();
+      buildInnerRing();
+      buildLeafDecor();
       bindSearch();
-      bindSourceFilters();
       bindViewToggle();
-      bindQuickActions();
+      bindResetFilters();
       bindRingArrows();
       bindDetailClose();
       render();

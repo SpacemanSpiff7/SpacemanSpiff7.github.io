@@ -6,3 +6,11 @@ node_modules/
 dist/
 build/
 scripts/preview-output/
+**/__pycache__/
+**/*.pyc
+
+# Seasonal produce: compiled.json is a build artifact (web/data.json is the deployed copy)
+grocery-project-files/seasonal-produce/data/compiled.json
+# Original seed files duplicated in input/ and data/
+grocery-project-files/produce_items.csv
+grocery-project-files/produce_seasons_seed.json
