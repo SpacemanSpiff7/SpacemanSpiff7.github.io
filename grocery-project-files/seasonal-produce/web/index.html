@@ -16,19 +16,26 @@
   </header>
 
   <section class="ring-section">
-    <div class="ring-container" id="ring-container">
-      <svg class="ring-svg" viewBox="0 0 300 300" id="ring-svg"></svg>
-      <div class="ring-center" id="ring-center">
-        <span class="ring-month" id="ring-month"></span>
-        <span class="ring-count" id="ring-count">--</span>
-        <span class="ring-label">in season</span>
-        <span class="ring-peak-label" id="ring-peak-label"></span>
+    <div class="ring-nav-row">
+      <button class="ring-arrow" id="ring-prev" aria-label="Previous month">&#8249;</button>
+      <div class="ring-container" id="ring-container">
+        <div class="ring-tick"></div>
+        <svg class="ring-svg" viewBox="0 0 300 300" id="ring-svg">
+          <g class="ring-segments-group" id="ring-group"></g>
+        </svg>
+        <div class="ring-center" id="ring-center">
+          <span class="ring-month" id="ring-month"></span>
+          <span class="ring-count" id="ring-count">--</span>
+          <span class="ring-label" id="ring-label">in season</span>
+          <span class="ring-peak-label" id="ring-peak-label"></span>
+        </div>
       </div>
+      <button class="ring-arrow" id="ring-next" aria-label="Next month">&#8250;</button>
     </div>
-    <div class="month-strip" id="month-strip"></div>
   </section>
 
   <div class="quick-actions" id="quick-actions">
+    <button class="quick-btn active" data-action="all">All</button>
     <button class="quick-btn" data-action="peak">At Peak</button>
     <button class="quick-btn" data-action="coming">Coming Soon</button>
     <button class="quick-btn" data-action="leaving">Leaving Peak</button>
@@ -46,10 +53,6 @@
           <button class="chip" data-source="local">Local</button>
           <button class="chip" data-source="import">Import</button>
         </div>
-      </div>
-
-      <div class="stats-row">
-        <span class="stat" id="stats-line"></span>
         <div class="view-toggle">
           <button class="view-btn active" data-view="timeline" id="view-timeline">Timeline</button>
           <button class="view-btn" data-view="grid" id="view-grid">Grid</button>
@@ -73,7 +76,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>Data covers 97 of 332 produce items commonly found in California grocery stores and farmers markets. <a href="compact.html">Compact view</a></p>
+    <p>Data covers 97 of 332 produce items. <a href="compact.html">Compact view</a></p>
   </footer>
 
   <script src="app.js" defer></script>

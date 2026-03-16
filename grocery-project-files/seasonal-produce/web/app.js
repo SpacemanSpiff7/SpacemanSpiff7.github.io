@@ -1,12 +1,11 @@
 /* ============================================
    Seasonal Produce California — App
-   Dark theme with ring navigator
+   Dark theme with rotating ring navigator
    ============================================ */
 
 (function () {
   'use strict';
 
-  // --- Constants ---
   var MONTH_ABBRS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
   var MONTH_NAMES = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -17,7 +16,6 @@
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Category chip labels mapped to CSV category values
   var CATEGORY_CHIPS = [
     { label: 'Fruit', match: 'Fruit' },
     { label: 'Vegetable', match: 'Vegetable' },
@@ -28,7 +26,6 @@
     { label: 'Flower', match: 'Edible Flower' },
   ];
 
-  // Culinary group -> CSS color variable mapping
   var GROUP_COLORS = {
     'Citrus': 'var(--color-citrus)',
     'Berry': 'var(--color-berry)',
@@ -63,7 +60,7 @@
     searchQuery: '',
     categoryFilter: null,
     sourceFilter: null,
-    quickAction: null,
+    quickAction: 'all',
     view: 'timeline',
     selectedItem: null,
     showOffSeason: false,
@@ -79,41 +76,28 @@
         xhr.onload = function () {
           if (xhr.status === 0 || xhr.status === 200) {
             resolve(JSON.parse(xhr.responseText));
-          } else {
-            reject(new Error('Failed to load data'));
-          }
+          } else { reject(new Error('Failed to load data')); }
         };
         xhr.onerror = function () { reject(new Error('Failed to load data')); };
         xhr.send();
       });
     } else {
-      dataPromise = fetch('data.json')
-        .then(function (res) {
-          if (!res.ok) throw new Error('Failed to load data');
-          return res.json();
-        });
+      dataPromise = fetch('data.json').then(function (res) {
+        if (!res.ok) throw new Error('Failed to load data');
+        return res.json();
+      });
     }
     return dataPromise.then(function (data) {
       state.data = data;
-
-      data.produce.forEach(function (p) {
-        state.produceBySlug[p.slug] = p;
-      });
-
-      data.regions.forEach(function (r) {
-        state.regionBySlug[r.slug] = r;
-      });
-
+      data.produce.forEach(function (p) { state.produceBySlug[p.slug] = p; });
+      data.regions.forEach(function (r) { state.regionBySlug[r.slug] = r; });
       data.seasons.forEach(function (s) {
-        if (!state.seasonsBySlug[s.produceSlug]) {
-          state.seasonsBySlug[s.produceSlug] = [];
-        }
+        if (!state.seasonsBySlug[s.produceSlug]) state.seasonsBySlug[s.produceSlug] = [];
         state.seasonsBySlug[s.produceSlug].push(s);
       });
     });
   }
 
-  // --- Color helper ---
   function getColor(item) {
     return GROUP_COLORS[item.culinaryGroup] || 'var(--color-root)';
   }
@@ -121,45 +105,34 @@
   // --- Season Logic ---
   function getItemStatus(slug, month) {
     var seasons = state.seasonsBySlug[slug];
-    if (!seasons || seasons.length === 0) return 'none';
-
-    var isPeak = false;
-    var isSeason = false;
-
+    if (!seasons || !seasons.length) return 'none';
+    var isPeak = false, isSeason = false;
     for (var i = 0; i < seasons.length; i++) {
-      if (seasons[i].peakMonths.indexOf(month) !== -1) {
-        isPeak = true;
-      }
-      if (seasons[i].seasonMonths.indexOf(month) !== -1) {
-        isSeason = true;
-      }
+      if (seasons[i].peakMonths.indexOf(month) !== -1) isPeak = true;
+      if (seasons[i].seasonMonths.indexOf(month) !== -1) isSeason = true;
     }
-
     if (isPeak) return 'peak';
     if (isSeason) return 'in-season';
-
     var next = month === 12 ? 1 : month + 1;
     for (var j = 0; j < seasons.length; j++) {
-      if (seasons[j].seasonMonths.indexOf(next) !== -1) {
-        return 'coming';
-      }
+      if (seasons[j].seasonMonths.indexOf(next) !== -1) return 'coming';
     }
-
     return 'off';
   }
 
   function getItemIsComingSoon(slug, month) {
     var status = getItemStatus(slug, month);
     if (status === 'peak' || status === 'in-season') return false;
-    var next1 = month === 12 ? 1 : month + 1;
-    var next2 = next1 === 12 ? 1 : next1 + 1;
-    return getItemStatus(slug, next1) !== 'off' && getItemStatus(slug, next1) !== 'none' ||
-           getItemStatus(slug, next2) !== 'off' && getItemStatus(slug, next2) !== 'none';
+    var n1 = month === 12 ? 1 : month + 1;
+    var n2 = n1 === 12 ? 1 : n1 + 1;
+    var s1 = getItemStatus(slug, n1);
+    var s2 = getItemStatus(slug, n2);
+    return (s1 !== 'off' && s1 !== 'none') || (s2 !== 'off' && s2 !== 'none');
   }
 
   function getItemIsLeavingPeak(slug, month) {
-    var nextMonth = month === 12 ? 1 : month + 1;
-    return getItemStatus(slug, month) === 'peak' && getItemStatus(slug, nextMonth) !== 'peak';
+    var next = month === 12 ? 1 : month + 1;
+    return getItemStatus(slug, month) === 'peak' && getItemStatus(slug, next) !== 'peak';
   }
 
   function getSourceTypes(slug) {
@@ -177,17 +150,12 @@
     state.data.produce.forEach(function (p) {
       if (!state.seasonsBySlug[p.slug]) return;
 
-      // Search filter
       if (state.searchQuery) {
         if (p.name.toLowerCase().indexOf(state.searchQuery.toLowerCase()) === -1) return;
       }
-
-      // Category filter
       if (state.categoryFilter) {
         if (p.category !== state.categoryFilter) return;
       }
-
-      // Source filter
       if (state.sourceFilter) {
         var types = getSourceTypes(p.slug);
         if (!types[state.sourceFilter]) return;
@@ -203,8 +171,8 @@
       } else if (state.quickAction === 'leaving') {
         if (!getItemIsLeavingPeak(p.slug, month)) return;
       }
+      // 'all' shows everything
 
-      // In grid view, hide off-season unless showing all
       if (state.view === 'grid' && !state.showOffSeason && (status === 'off' || status === 'none')) {
         return;
       }
@@ -217,143 +185,188 @@
 
   function sortItems(items) {
     var order = { peak: 0, 'in-season': 1, coming: 2, off: 3, none: 4 };
-
     items.sort(function (a, b) {
       var oa = order[a.status] || 4;
       var ob = order[b.status] || 4;
       if (oa !== ob) return oa - ob;
       return a.produce.name.localeCompare(b.produce.name);
     });
-
     return items;
   }
 
   // --- Stats ---
   function computeStats(month) {
-    var inSeason = 0;
-    var atPeak = 0;
-
+    var inSeason = 0, atPeak = 0;
     state.data.produce.forEach(function (p) {
       var status = getItemStatus(p.slug, month);
       if (status === 'peak') { atPeak++; inSeason++; }
       else if (status === 'in-season') { inSeason++; }
     });
-
     return { inSeason: inSeason, atPeak: atPeak };
   }
 
-  // --- Render: SVG Ring Navigator ---
-  function renderRing() {
-    var svg = document.getElementById('ring-svg');
-    var viewSize = 300;
-    var cx = viewSize / 2;
-    var cy = viewSize / 2;
-    var outerR = 140;
-    var innerR = 95;
-    var gapDeg = 2;
-    var segDeg = 30 - gapDeg;
+  // ============================================
+  // Ring Navigator — rotating watchface
+  // ============================================
 
-    svg.innerHTML = '';
+  // Track cumulative rotation to avoid jarring jumps (always take shortest path)
+  var ringCurrentAngle = 0;
+  var ringBuilt = false;
+  var ringSegments = [];  // cached path elements
+  var ringLabels = [];    // cached text elements
+
+  var RING_CX = 150, RING_CY = 150;
+  var RING_OUTER = 140, RING_INNER = 100;
+  var RING_GAP = 2.5;
+  var RING_SEG = 30 - RING_GAP;
+
+  function buildRing() {
+    var group = document.getElementById('ring-group');
+    group.innerHTML = '';
+    ringSegments = [];
+    ringLabels = [];
 
     for (var i = 0; i < 12; i++) {
       var month = i + 1;
-      var startAngle = i * 30 + gapDeg / 2;
-      var endAngle = startAngle + segDeg;
+      var startAngle = i * 30 + RING_GAP / 2;
+      var endAngle = startAngle + RING_SEG;
 
-      var startRad = (startAngle - 90) * Math.PI / 180;
-      var endRad = (endAngle - 90) * Math.PI / 180;
+      var sRad = (startAngle - 90) * Math.PI / 180;
+      var eRad = (endAngle - 90) * Math.PI / 180;
 
-      var outerX1 = cx + outerR * Math.cos(startRad);
-      var outerY1 = cy + outerR * Math.sin(startRad);
-      var outerX2 = cx + outerR * Math.cos(endRad);
-      var outerY2 = cy + outerR * Math.sin(endRad);
-      var innerX1 = cx + innerR * Math.cos(endRad);
-      var innerY1 = cy + innerR * Math.sin(endRad);
-      var innerX2 = cx + innerR * Math.cos(startRad);
-      var innerY2 = cy + innerR * Math.sin(startRad);
+      var d = 'M ' + (RING_CX + RING_OUTER * Math.cos(sRad)) + ' ' + (RING_CY + RING_OUTER * Math.sin(sRad)) +
+              ' A ' + RING_OUTER + ' ' + RING_OUTER + ' 0 0 1 ' + (RING_CX + RING_OUTER * Math.cos(eRad)) + ' ' + (RING_CY + RING_OUTER * Math.sin(eRad)) +
+              ' L ' + (RING_CX + RING_INNER * Math.cos(eRad)) + ' ' + (RING_CY + RING_INNER * Math.sin(eRad)) +
+              ' A ' + RING_INNER + ' ' + RING_INNER + ' 0 0 0 ' + (RING_CX + RING_INNER * Math.cos(sRad)) + ' ' + (RING_CY + RING_INNER * Math.sin(sRad)) + ' Z';
 
-      var largeArc = segDeg > 180 ? 1 : 0;
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('class', 'ring-segment');
+      path.setAttribute('data-month', month);
+      path.addEventListener('click', (function (m) {
+        return function () {
+          state.selectedMonth = m;
+          state.quickAction = 'all';
+          render();
+        };
+      })(month));
+      group.appendChild(path);
+      ringSegments.push(path);
 
-      var d = 'M ' + outerX1 + ' ' + outerY1 +
-              ' A ' + outerR + ' ' + outerR + ' 0 ' + largeArc + ' 1 ' + outerX2 + ' ' + outerY2 +
-              ' L ' + innerX1 + ' ' + innerY1 +
-              ' A ' + innerR + ' ' + innerR + ' 0 ' + largeArc + ' 0 ' + innerX2 + ' ' + innerY2 +
-              ' Z';
+      // Label
+      var midRad = ((startAngle + endAngle) / 2 - 90) * Math.PI / 180;
+      var labelR = (RING_OUTER + RING_INNER) / 2;
+      var lx = RING_CX + labelR * Math.cos(midRad);
+      var ly = RING_CY + labelR * Math.sin(midRad);
 
-      // Determine fill color
-      var fill;
-      var diff = Math.abs(month - state.selectedMonth);
-      if (diff > 6) diff = 12 - diff;
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', lx);
+      text.setAttribute('y', ly);
+      text.setAttribute('class', 'ring-segment-label');
+      text.textContent = MONTH_ABBRS[i];
+      group.appendChild(text);
+      ringLabels.push({ el: text, cx: lx, cy: ly });
+    }
+
+    // Set initial rotation without transition
+    ringCurrentAngle = -(state.selectedMonth - 1) * 30;
+    group.style.transition = 'none';
+    group.style.transform = 'rotate(' + ringCurrentAngle + 'deg)';
+    // Force reflow then re-enable transition
+    group.offsetHeight;
+    group.style.transition = '';
+
+    ringBuilt = true;
+  }
+
+  function updateRing() {
+    var group = document.getElementById('ring-group');
+
+    // Calculate target angle — take shortest path
+    var targetBase = -(state.selectedMonth - 1) * 30;
+    // Normalize difference to find shortest rotation
+    var diff = targetBase - ringCurrentAngle;
+    // Bring diff into -180..180 range
+    diff = ((diff % 360) + 540) % 360 - 180;
+    ringCurrentAngle = ringCurrentAngle + diff;
+
+    // Apply CSS transform (transition handles animation)
+    group.style.transform = 'rotate(' + ringCurrentAngle + 'deg)';
+
+    // Update segment fills and label styles
+    var counterRot = -ringCurrentAngle;
+    for (var i = 0; i < 12; i++) {
+      var month = i + 1;
+      var d = Math.abs(month - state.selectedMonth);
+      if (d > 6) d = 12 - d;
+
+      var fill, cls = 'ring-segment';
       if (month === state.selectedMonth) {
         fill = 'var(--ring-active)';
-      } else if (diff === 1) {
+        cls += ' active';
+      } else if (d === 1) {
         fill = 'var(--ring-adjacent)';
       } else {
         fill = 'var(--ring-inactive)';
       }
 
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', d);
-      path.setAttribute('fill', fill);
-      path.setAttribute('class', 'ring-segment' + (month === state.selectedMonth ? ' active' : ''));
-      path.setAttribute('data-month', month);
-      path.addEventListener('click', (function (m) {
-        return function () {
-          state.selectedMonth = m;
-          state.quickAction = null;
-          render();
-        };
-      })(month));
-      svg.appendChild(path);
+      ringSegments[i].setAttribute('fill', fill);
+      ringSegments[i].setAttribute('class', cls);
 
-      // Month label text at midpoint of arc
-      var midAngle = ((startAngle + endAngle) / 2 - 90) * Math.PI / 180;
-      var labelR = (outerR + innerR) / 2;
-      var labelX = cx + labelR * Math.cos(midAngle);
-      var labelY = cy + labelR * Math.sin(midAngle);
-
-      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', labelX);
-      text.setAttribute('y', labelY);
-      text.setAttribute('class', 'ring-segment-label');
-      if (month === state.selectedMonth) {
-        text.setAttribute('fill', 'var(--bg-body)');
-      }
-      text.textContent = MONTH_ABBRS[i];
-      svg.appendChild(text);
+      // Counter-rotate labels so text stays upright
+      var lbl = ringLabels[i];
+      lbl.el.setAttribute('transform', 'rotate(' + counterRot + ' ' + lbl.cx + ' ' + lbl.cy + ')');
+      var lClass = 'ring-segment-label';
+      if (month === state.selectedMonth) lClass += ' label-active';
+      else if (d === 1) lClass += ' label-adjacent';
+      lbl.el.setAttribute('class', lClass);
     }
 
     // Update ring center
     var stats = computeStats(state.selectedMonth);
-    document.getElementById('ring-month').textContent = MONTH_FULL[state.selectedMonth - 1].toUpperCase();
-    document.getElementById('ring-count').textContent = stats.inSeason;
-    document.getElementById('ring-peak-label').textContent = stats.atPeak + ' at peak';
+    var monthEl = document.getElementById('ring-month');
+    var countEl = document.getElementById('ring-count');
+    var labelEl = document.getElementById('ring-label');
+    var peakEl = document.getElementById('ring-peak-label');
+
+    monthEl.textContent = MONTH_FULL[state.selectedMonth - 1].toUpperCase();
+
+    if (state.quickAction === 'peak') {
+      countEl.textContent = stats.atPeak;
+      labelEl.textContent = 'at peak';
+      peakEl.textContent = stats.inSeason + ' total in season';
+    } else if (state.quickAction === 'coming') {
+      var comingCount = 0;
+      state.data.produce.forEach(function (p) {
+        if (state.seasonsBySlug[p.slug] && getItemIsComingSoon(p.slug, state.selectedMonth)) comingCount++;
+      });
+      countEl.textContent = comingCount;
+      labelEl.textContent = 'coming soon';
+      peakEl.textContent = stats.inSeason + ' in season now';
+    } else if (state.quickAction === 'leaving') {
+      var leavingCount = 0;
+      state.data.produce.forEach(function (p) {
+        if (state.seasonsBySlug[p.slug] && getItemIsLeavingPeak(p.slug, state.selectedMonth)) leavingCount++;
+      });
+      countEl.textContent = leavingCount;
+      labelEl.textContent = 'leaving peak';
+      peakEl.textContent = 'get them now';
+    } else {
+      countEl.textContent = stats.inSeason;
+      labelEl.textContent = 'in season';
+      peakEl.textContent = stats.atPeak + ' at peak';
+    }
   }
 
-  // --- Render: Month Strip ---
-  function renderMonthStrip() {
-    var container = document.getElementById('month-strip');
-    container.innerHTML = '';
-
-    MONTH_ABBRS.forEach(function (abbr, i) {
-      var btn = document.createElement('button');
-      btn.className = 'month-strip-btn' + (i + 1 === state.selectedMonth ? ' active' : '');
-      btn.textContent = abbr;
-      btn.setAttribute('aria-label', MONTH_FULL[i]);
-      btn.addEventListener('click', function () {
-        state.selectedMonth = i + 1;
-        state.quickAction = null;
-        render();
-      });
-      container.appendChild(btn);
-    });
+  function renderRing() {
+    if (!ringBuilt) buildRing();
+    updateRing();
   }
 
   // --- Render: Category Chips ---
   function renderCategoryChips() {
     var container = document.getElementById('category-filters');
     container.innerHTML = '';
-
     CATEGORY_CHIPS.forEach(function (chip) {
       var btn = document.createElement('button');
       btn.className = 'chip' + (state.categoryFilter === chip.match ? ' active' : '');
@@ -364,13 +377,6 @@
       });
       container.appendChild(btn);
     });
-  }
-
-  // --- Render: Stats ---
-  function renderStats() {
-    var stats = computeStats(state.selectedMonth);
-    var el = document.getElementById('stats-line');
-    el.innerHTML = '<strong>' + stats.inSeason + '</strong> in season &middot; <strong>' + stats.atPeak + '</strong> at peak in ' + MONTH_FULL[state.selectedMonth - 1];
   }
 
   // --- Now line position ---
@@ -408,16 +414,14 @@
 
     header.appendChild(monthsRow);
 
-    // Body
     body.innerHTML = '';
     var items = sortItems(filterProduce());
 
     if (items.length === 0) {
-      body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No produce matches your filters.</div>';
+      body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No produce matches your filters.</div>';
       return;
     }
 
-    // Now line in body
     var nowLineContainer = document.createElement('div');
     nowLineContainer.style.cssText = 'position: absolute; left: var(--name-col); width: var(--timeline-width); top: 0; bottom: 0; pointer-events: none; z-index: 5;';
     var nowLine = document.createElement('div');
@@ -426,7 +430,7 @@
     nowLineContainer.appendChild(nowLine);
     body.appendChild(nowLineContainer);
 
-    items.forEach(function (item, idx) {
+    items.forEach(function (item) {
       var slug = item.produce.slug;
       var seasons = state.seasonsBySlug[slug] || [];
       var color = getColor(item.produce);
@@ -443,7 +447,6 @@
         render();
       });
 
-      // Name cell with source dot for single-source rows
       var nameCell = document.createElement('div');
       nameCell.className = 'timeline-name';
 
@@ -453,12 +456,10 @@
         nameCell.appendChild(dot);
       }
 
-      var nameText = document.createTextNode(item.produce.name);
-      nameCell.appendChild(nameText);
+      nameCell.appendChild(document.createTextNode(item.produce.name));
       nameCell.title = item.produce.name;
       row.appendChild(nameCell);
 
-      // Bars area
       var barsArea = document.createElement('div');
       barsArea.className = 'timeline-bars';
 
@@ -466,108 +467,89 @@
         renderBars(barsArea, localSeasons, color, 'local', true);
         renderBars(barsArea, importSeasons, color, 'import', true);
       } else {
-        var sourceType = seasons[0] ? seasons[0].sourceType : 'local';
-        renderBars(barsArea, seasons, color, sourceType, false);
+        renderBars(barsArea, seasons, color, seasons[0] ? seasons[0].sourceType : 'local', false);
       }
 
       row.appendChild(barsArea);
       body.appendChild(row);
     });
 
-    // Scroll to center now line
+    // Scroll to now line
     var container = document.getElementById('timeline-container');
     var firstBars = body.querySelector('.timeline-bars');
     var totalBarWidth = firstBars ? firstBars.offsetWidth : 1200;
     var firstName = body.querySelector('.timeline-name');
-    var nameColWidth = firstName ? firstName.offsetWidth : 180;
+    var nameColWidth = firstName ? firstName.offsetWidth : 160;
     var nowPct = getNowPosition(state.selectedMonth) / 100;
     var scrollTarget = nameColWidth + (nowPct * totalBarWidth) - container.clientWidth / 2;
     container.scrollLeft = Math.max(0, scrollTarget);
   }
 
   function renderBars(container, seasons, color, sourceType, isDual) {
-    var allMonths = {};
-    var peakMonths = {};
-
+    var allMonths = {}, peakMonths = {};
     seasons.forEach(function (s) {
       s.seasonMonths.forEach(function (m) { allMonths[m] = true; });
       s.peakMonths.forEach(function (m) { peakMonths[m] = true; });
     });
 
-    var segments = buildSegments(allMonths, peakMonths);
+    var segments = buildSegments(allMonths);
 
     segments.forEach(function (seg) {
       var bar = document.createElement('div');
       bar.className = 'season-bar' + (sourceType === 'import' ? ' bar-import' : ' bar-local');
 
-      var left = ((seg.start - 1) / 12) * 100;
-      var width = (seg.months.length / 12) * 100;
-      bar.style.left = left + '%';
-      bar.style.width = width + '%';
+      bar.style.left = ((seg.start - 1) / 12 * 100) + '%';
+      bar.style.width = (seg.months.length / 12 * 100) + '%';
 
-      if (sourceType === 'import') {
-        bar.style.borderColor = color;
-      }
+      if (sourceType === 'import') bar.style.borderColor = color;
 
-      // Source label for dual bars
       if (isDual) {
-        var srcLabel = document.createElement('span');
-        srcLabel.className = 'bar-source-label';
-        srcLabel.textContent = sourceType === 'local' ? 'CA' : 'Import';
-        bar.appendChild(srcLabel);
+        var lbl = document.createElement('span');
+        lbl.className = 'bar-source-label';
+        lbl.textContent = sourceType === 'local' ? 'CA' : 'Import';
+        bar.appendChild(lbl);
       }
 
       seg.months.forEach(function (m, mi) {
-        var subSeg = document.createElement('div');
-        subSeg.className = 'bar-segment ' + (peakMonths[m] ? 'peak' : 'available');
-        subSeg.style.backgroundColor = color;
-        subSeg.style.left = (mi / seg.months.length * 100) + '%';
-        subSeg.style.width = (1 / seg.months.length * 100) + '%';
-        bar.appendChild(subSeg);
+        var sub = document.createElement('div');
+        sub.className = 'bar-segment ' + (peakMonths[m] ? 'peak' : 'available');
+        sub.style.backgroundColor = color;
+        sub.style.left = (mi / seg.months.length * 100) + '%';
+        sub.style.width = (1 / seg.months.length * 100) + '%';
+        bar.appendChild(sub);
       });
 
-      // Tooltip
-      var tooltip = document.createElement('div');
-      tooltip.className = 'bar-tooltip';
-      tooltip.textContent = sourceType === 'import' ? 'Imported' : 'Local CA';
-      bar.appendChild(tooltip);
+      var tt = document.createElement('div');
+      tt.className = 'bar-tooltip';
+      tt.textContent = sourceType === 'import' ? 'Imported' : 'Local CA';
+      bar.appendChild(tt);
 
       container.appendChild(bar);
     });
   }
 
-  function buildSegments(allMonths, peakMonths) {
+  function buildSegments(allMonths) {
     var months = [];
-    for (var m = 1; m <= 12; m++) {
-      if (allMonths[m]) months.push(m);
-    }
-    if (months.length === 0) return [];
+    for (var m = 1; m <= 12; m++) { if (allMonths[m]) months.push(m); }
+    if (!months.length) return [];
 
-    var segments = [];
-    var current = [months[0]];
-
+    var segs = [], cur = [months[0]];
     for (var i = 1; i < months.length; i++) {
-      if (months[i] === current[current.length - 1] + 1) {
-        current.push(months[i]);
-      } else {
-        segments.push({ start: current[0], months: current });
-        current = [months[i]];
-      }
+      if (months[i] === cur[cur.length - 1] + 1) { cur.push(months[i]); }
+      else { segs.push({ start: cur[0], months: cur }); cur = [months[i]]; }
     }
-    segments.push({ start: current[0], months: current });
-
-    return segments;
+    segs.push({ start: cur[0], months: cur });
+    return segs;
   }
 
-  // --- Render: Grid ---
+  // --- Grid ---
   function renderGrid() {
     var container = document.getElementById('grid-container');
     container.innerHTML = '';
-
     var items = sortItems(filterProduce());
 
-    if (items.length === 0) {
-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No produce matches your filters.</div>';
+    if (!items.length) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No produce matches your filters.</div>';
       return;
     }
 
@@ -581,7 +563,6 @@
     Object.keys(groups).sort().forEach(function (cat) {
       var group = document.createElement('div');
       group.className = 'grid-category-group';
-
       var title = document.createElement('h2');
       title.className = 'grid-category-title';
       title.textContent = cat;
@@ -589,12 +570,7 @@
 
       var cards = document.createElement('div');
       cards.className = 'grid-cards';
-
-      groups[cat].forEach(function (item) {
-        var card = createGridCard(item);
-        cards.appendChild(card);
-      });
-
+      groups[cat].forEach(function (item) { cards.appendChild(createGridCard(item)); });
       group.appendChild(cards);
       container.appendChild(group);
     });
@@ -607,7 +583,6 @@
 
     var card = document.createElement('div');
     card.className = 'grid-card' + (state.selectedItem === slug ? ' selected' : '');
-
     card.addEventListener('click', function () {
       state.selectedItem = state.selectedItem === slug ? null : slug;
       render();
@@ -618,31 +593,23 @@
     name.textContent = item.produce.name;
     card.appendChild(name);
 
-    var groupLabel = document.createElement('div');
-    groupLabel.className = 'grid-card-group';
-    groupLabel.textContent = item.produce.culinaryGroup;
-    card.appendChild(groupLabel);
+    var gl = document.createElement('div');
+    gl.className = 'grid-card-group';
+    gl.textContent = item.produce.culinaryGroup;
+    card.appendChild(gl);
 
     var minibar = document.createElement('div');
     minibar.className = 'grid-card-minibar';
-
-    var allMonths = {};
-    var peakMonths = {};
+    var allM = {}, peakM = {};
     seasons.forEach(function (s) {
-      s.seasonMonths.forEach(function (m) { allMonths[m] = true; });
-      s.peakMonths.forEach(function (m) { peakMonths[m] = true; });
+      s.seasonMonths.forEach(function (m) { allM[m] = true; });
+      s.peakMonths.forEach(function (m) { peakM[m] = true; });
     });
-
     for (var m = 1; m <= 12; m++) {
       var cell = document.createElement('div');
       cell.className = 'minibar-cell';
-      if (peakMonths[m]) {
-        cell.classList.add('peak');
-        cell.style.backgroundColor = color;
-      } else if (allMonths[m]) {
-        cell.classList.add('in-season');
-        cell.style.backgroundColor = color;
-      }
+      if (peakM[m]) { cell.classList.add('peak'); cell.style.backgroundColor = color; }
+      else if (allM[m]) { cell.classList.add('in-season'); cell.style.backgroundColor = color; }
       minibar.appendChild(cell);
     }
     card.appendChild(minibar);
@@ -650,30 +617,27 @@
     var regionNames = [];
     var primarySource = 'local';
     seasons.forEach(function (s) {
-      var region = state.regionBySlug[s.regionSlug];
-      if (region && regionNames.indexOf(region.name) === -1) {
-        regionNames.push(region.name);
-      }
+      var r = state.regionBySlug[s.regionSlug];
+      if (r && regionNames.indexOf(r.name) === -1) regionNames.push(r.name);
       if (s.sourceType === 'import') primarySource = 'import';
     });
-
-    if (regionNames.length > 0) {
-      var regionEl = document.createElement('div');
-      regionEl.className = 'grid-card-region';
-      regionEl.textContent = regionNames.slice(0, 2).join(', ');
-      if (regionNames.length > 2) regionEl.textContent += ' +' + (regionNames.length - 2);
-      card.appendChild(regionEl);
+    if (regionNames.length) {
+      var re = document.createElement('div');
+      re.className = 'grid-card-region';
+      re.textContent = regionNames.slice(0, 2).join(', ');
+      if (regionNames.length > 2) re.textContent += ' +' + (regionNames.length - 2);
+      card.appendChild(re);
     }
 
-    var sourceEl = document.createElement('span');
-    sourceEl.className = 'grid-card-source ' + primarySource;
-    sourceEl.textContent = primarySource;
-    card.appendChild(sourceEl);
+    var se = document.createElement('span');
+    se.className = 'grid-card-source ' + primarySource;
+    se.textContent = primarySource;
+    card.appendChild(se);
 
     return card;
   }
 
-  // --- Render: Detail Panel ---
+  // --- Detail Panel ---
   function renderDetail() {
     var panel = document.getElementById('detail-panel');
     var content = document.getElementById('detail-content');
@@ -687,33 +651,23 @@
     var item = state.produceBySlug[state.selectedItem];
     var seasons = state.seasonsBySlug[state.selectedItem] || [];
     var color = getColor(item);
-
     if (!item) return;
 
     panel.classList.remove('hidden');
     panel.offsetHeight;
     panel.classList.add('visible');
 
-    var html = '';
-    html += '<h2 class="detail-name">' + escHtml(item.name) + '</h2>';
-    html += '<div class="detail-meta">';
-    html += '<span>' + escHtml(item.category) + '</span>';
-    html += '<span>' + escHtml(item.culinaryGroup) + '</span>';
-    html += '</div>';
+    var html = '<h2 class="detail-name">' + escHtml(item.name) + '</h2>';
+    html += '<div class="detail-meta"><span>' + escHtml(item.category) + '</span><span>' + escHtml(item.culinaryGroup) + '</span></div>';
 
-    var notes = '';
-    var storageTip = '';
+    var notes = '', storageTip = '';
     for (var i = 0; i < seasons.length; i++) {
       if (seasons[i].notes && !notes) notes = seasons[i].notes;
       if (seasons[i].storageTip && !storageTip) storageTip = seasons[i].storageTip;
     }
-
-    if (notes) {
-      html += '<p class="detail-notes">"' + escHtml(notes) + '"</p>';
-    }
+    if (notes) html += '<p class="detail-notes">"' + escHtml(notes) + '"</p>';
 
     html += '<div class="detail-seasons">';
-
     var seen = {};
     seasons.forEach(function (s) {
       var key = s.regionSlug + ':' + s.sourceType;
@@ -726,89 +680,64 @@
     });
 
     Object.keys(seen).forEach(function (key) {
-      var entry = seen[key];
-      var s = entry.season;
+      var entry = seen[key], s = entry.season;
       var region = state.regionBySlug[s.regionSlug];
-      var regionName = region ? region.name : s.regionSlug;
-      var seasonArr = Array.from(entry.seasonMonths).sort(function (a, b) { return a - b; });
-      var peakArr = Array.from(entry.peakMonths).sort(function (a, b) { return a - b; });
+      var rn = region ? region.name : s.regionSlug;
+      var sArr = Array.from(entry.seasonMonths).sort(function (a, b) { return a - b; });
+      var pArr = Array.from(entry.peakMonths).sort(function (a, b) { return a - b; });
 
       html += '<div class="detail-season-entry">';
-      html += '<div class="detail-season-header">';
-      html += '<span class="detail-region-name">' + escHtml(regionName) + '</span>';
-      html += '<span class="detail-source-badge ' + s.sourceType + '">' + s.sourceType + '</span>';
-      html += '</div>';
-
-      var seasonText = monthRangeText(seasonArr);
-      var peakText = peakArr.length > 0 ? monthRangeText(peakArr) : 'no clear peak';
-      html += '<div class="detail-season-months">Season: ' + seasonText + ' &middot; Peak: ' + peakText + '</div>';
-
+      html += '<div class="detail-season-header"><span class="detail-region-name">' + escHtml(rn) + '</span>';
+      html += '<span class="detail-source-badge ' + s.sourceType + '">' + s.sourceType + '</span></div>';
+      html += '<div class="detail-season-months">Season: ' + monthRangeText(sArr) + ' &middot; Peak: ' + (pArr.length ? monthRangeText(pArr) : 'no clear peak') + '</div>';
       html += '<div class="detail-minibar">';
       for (var m = 1; m <= 12; m++) {
-        var cls = 'minibar-cell';
-        var style = '';
-        if (entry.peakMonths.has(m)) {
-          cls += ' peak';
-          style = 'background-color:' + color;
-        } else if (entry.seasonMonths.has(m)) {
-          cls += ' in-season';
-          style = 'background-color:' + color;
-        }
+        var cls = 'minibar-cell', style = '';
+        if (entry.peakMonths.has(m)) { cls += ' peak'; style = 'background-color:' + color; }
+        else if (entry.seasonMonths.has(m)) { cls += ' in-season'; style = 'background-color:' + color; }
         html += '<div class="' + cls + '"' + (style ? ' style="' + style + '"' : '') + '></div>';
       }
-      html += '</div>';
-
-      html += '</div>';
+      html += '</div></div>';
     });
-
     html += '</div>';
 
     if (storageTip) {
-      html += '<div class="detail-storage">';
-      html += '<div class="detail-storage-label">Storage</div>';
-      html += escHtml(storageTip);
-      html += '</div>';
+      html += '<div class="detail-storage"><div class="detail-storage-label">Storage</div>' + escHtml(storageTip) + '</div>';
     }
-
     content.innerHTML = html;
   }
 
   function monthRangeText(months) {
-    if (months.length === 0) return '';
+    if (!months.length) return '';
     if (months.length === 12) return 'Year-round';
     return MONTH_NAMES[months[0] - 1] + ' \u2013 ' + MONTH_NAMES[months[months.length - 1] - 1];
   }
 
   function escHtml(str) {
-    var div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
   }
 
   // --- Quick Actions ---
   function bindQuickActions() {
-    var btns = document.querySelectorAll('#quick-actions .quick-btn');
-    btns.forEach(function (btn) {
+    document.querySelectorAll('#quick-actions .quick-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        state.quickAction = state.quickAction === action ? null : action;
+        state.quickAction = btn.getAttribute('data-action');
         render();
       });
     });
   }
 
   function updateQuickActions() {
-    var btns = document.querySelectorAll('#quick-actions .quick-btn');
-    btns.forEach(function (btn) {
-      var action = btn.getAttribute('data-action');
-      btn.classList.toggle('active', state.quickAction === action);
+    document.querySelectorAll('#quick-actions .quick-btn').forEach(function (btn) {
+      btn.classList.toggle('active', state.quickAction === btn.getAttribute('data-action'));
     });
   }
 
   // --- Source filter chips ---
   function bindSourceFilters() {
-    var btns = document.querySelectorAll('#source-filters .chip');
-    btns.forEach(function (btn) {
+    document.querySelectorAll('#source-filters .chip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var source = btn.getAttribute('data-source');
         state.sourceFilter = state.sourceFilter === source ? null : source;
@@ -818,23 +747,15 @@
   }
 
   function updateSourceChips() {
-    var btns = document.querySelectorAll('#source-filters .chip');
-    btns.forEach(function (btn) {
-      var source = btn.getAttribute('data-source');
-      btn.classList.toggle('active', state.sourceFilter === source);
+    document.querySelectorAll('#source-filters .chip').forEach(function (btn) {
+      btn.classList.toggle('active', state.sourceFilter === btn.getAttribute('data-source'));
     });
   }
 
   // --- View toggle ---
   function bindViewToggle() {
-    document.getElementById('view-timeline').addEventListener('click', function () {
-      state.view = 'timeline';
-      render();
-    });
-    document.getElementById('view-grid').addEventListener('click', function () {
-      state.view = 'grid';
-      render();
-    });
+    document.getElementById('view-timeline').addEventListener('click', function () { state.view = 'timeline'; render(); });
+    document.getElementById('view-grid').addEventListener('click', function () { state.view = 'grid'; render(); });
   }
 
   function updateViewToggle() {
@@ -852,6 +773,18 @@
         state.searchQuery = input.value.trim();
         render();
       }, 150);
+    });
+  }
+
+  // --- Ring Arrows ---
+  function bindRingArrows() {
+    document.getElementById('ring-prev').addEventListener('click', function () {
+      state.selectedMonth = state.selectedMonth === 1 ? 12 : state.selectedMonth - 1;
+      render();
+    });
+    document.getElementById('ring-next').addEventListener('click', function () {
+      state.selectedMonth = state.selectedMonth === 12 ? 1 : state.selectedMonth + 1;
+      render();
     });
   }
 
@@ -874,27 +807,27 @@
 
     var segments = document.querySelectorAll('.ring-segment');
     segments.forEach(function (seg, i) {
-      animTimers.push(setTimeout(function () { seg.classList.add('anim-in'); }, 100 + i * 30));
+      animTimers.push(setTimeout(function () { seg.classList.add('anim-in'); }, 80 + i * 25));
     });
 
     animTimers.push(setTimeout(function () {
       document.querySelector('.ring-center').classList.add('anim-in');
-    }, 500));
+    }, 420));
 
     animTimers.push(setTimeout(function () {
-      var controls = document.querySelector('.controls');
-      var quickActions = document.querySelector('.quick-actions');
-      if (controls) controls.classList.add('anim-in');
-      if (quickActions) quickActions.classList.add('anim-in');
-    }, 650));
+      var c = document.querySelector('.controls');
+      var q = document.querySelector('.quick-actions');
+      if (c) c.classList.add('anim-in');
+      if (q) q.classList.add('anim-in');
+    }, 560));
 
     animTimers.push(setTimeout(function () {
       document.querySelectorAll('.timeline-row').forEach(function (row, i) {
-        row.style.animationDelay = (i * 15) + 'ms';
+        row.style.animationDelay = (i * 12) + 'ms';
         row.classList.add('anim-in');
       });
       animDone = true;
-    }, 800));
+    }, 700));
   }
 
   function skipAnimation() {
@@ -903,20 +836,15 @@
     animTimers = [];
     animDone = true;
     document.querySelectorAll('.site-title, .ring-segment, .ring-center, .controls, .quick-actions, .timeline-row')
-      .forEach(function (el) {
-        el.classList.add('anim-in');
-        el.style.animationDelay = '0ms';
-      });
+      .forEach(function (el) { el.classList.add('anim-in'); el.style.animationDelay = '0ms'; });
   }
 
   // --- Main Render ---
   function render() {
     renderRing();
-    renderMonthStrip();
     renderCategoryChips();
     updateSourceChips();
     updateQuickActions();
-    renderStats();
     updateViewToggle();
 
     if (state.view === 'timeline') {
@@ -931,7 +859,6 @@
 
     renderDetail();
 
-    // After first render with data, ensure rows are visible if animation already done
     if (animDone) {
       document.querySelectorAll('.timeline-row:not(.anim-in)').forEach(function (row) {
         row.classList.add('anim-in');
@@ -946,11 +873,11 @@
       bindSourceFilters();
       bindViewToggle();
       bindQuickActions();
+      bindRingArrows();
       bindDetailClose();
       render();
       playLoadAnimation();
 
-      // Skip animation on any interaction
       document.addEventListener('click', skipAnimation, { once: true });
       document.addEventListener('keydown', skipAnimation, { once: true });
     });
