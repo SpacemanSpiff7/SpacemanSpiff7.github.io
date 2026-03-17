@@ -1,0 +1,382 @@
+[
+  {
+    "slug": "elephant-garlic",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [5, 6, 7, 8],
+        "peak": [6, 7],
+        "source": "local",
+        "notes": "Allium ampeloprasum, actually a leek relative despite the name. Planted in fall, harvested when tops yellow in early summer. Milder and sweeter than true garlic with very large cloves. Christopher Ranch in Gilroy is a major commercial source.",
+        "storage": "Store whole unpeeled bulbs in a cool, dark, dry, well-ventilated spot for 3-7 weeks. Refrigerator extends life to about 2 months. Shorter storage life than regular garlic."
+      }
+    ]
+  },
+  {
+    "slug": "horseradish-root",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [3, 4, 5, 10, 11],
+        "peak": [4, 5, 10, 11],
+        "source": "local",
+        "notes": "Virtually all California horseradish and over one-third of the US crop grows in Tulelake, Siskiyou County, in unique volcanic soil. Roots grow for two years before initial harvest; the same root can be harvested for up to 20 years. Harvested twice a year in spring and fall.",
+        "storage": "Wrap unpeeled roots in damp paper towel, store in plastic bag in refrigerator crisper for 3-4 weeks. Once grated, pungency fades quickly; use within 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "bottle-gourd",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Lagenaria siceraria, known as lauki/dudhi in Indian cuisine and opo in Chinese cuisine. Warm-season cucurbit grown by Asian and South Asian small farmers in Fresno County. Harvest young when skin is soft and fingernail can pierce it; overripe fruit hardens into gourd shell.",
+        "storage": "Refrigerate unwashed in a plastic bag for up to 1 week. Once cut, wrap tightly in plastic and use within 3-4 days."
+      },
+      {
+        "region": "baja-california",
+        "season": [1, 2, 3, 4, 5, 11, 12],
+        "peak": [2, 3, 4],
+        "source": "import",
+        "notes": "Mexican imports supplement California production during cooler months. The US is the largest consumer of bottle gourd globally. Available in Indian and Asian grocery stores year-round through import channels.",
+        "storage": "Refrigerate whole for up to 1 week. Inspect imported fruit for firmness and unblemished skin."
+      }
+    ]
+  },
+  {
+    "slug": "opo-squash",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Lagenaria siceraria var., the elongated form of bottle gourd favored in Chinese and Southeast Asian cooking. Grown by Hmong and other Asian farmers in the Fresno area. Flavor is mild and slightly sweet, similar to zucchini but firmer.",
+        "storage": "Refrigerate in a plastic bag for up to 1 week. Once cut, wrap tightly and use within 3-4 days."
+      },
+      {
+        "region": "baja-california",
+        "season": [1, 2, 3, 4, 5, 11, 12],
+        "peak": [2, 3, 4],
+        "source": "import",
+        "notes": "Mexican imports fill the winter gap when California production stops. Asian markets carry opo squash year-round through a combination of local and imported supply.",
+        "storage": "Refrigerate whole for up to 1 week."
+      }
+    ]
+  },
+  {
+    "slug": "burdock-root",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [7, 8, 9, 10],
+        "source": "local",
+        "notes": "Arctium lappa, known as gobo in Japanese cuisine. Takinogawa is the standard cultivar with long straight roots harvested by hand. New-season gobo appears June-July, whiter and more tender. Also grows wild throughout North America.",
+        "storage": "Store whole unwashed roots wrapped in damp paper towel in a plastic bag in the crisper for 2-4 weeks. Once cut, submerge in acidulated water to prevent browning."
+      },
+      {
+        "region": "china",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11],
+        "source": "import",
+        "notes": "Japan and China are the primary commercial producers. Much of the gobo in Japanese and Korean markets in SoCal is imported. Available year-round, with fall being the traditional peak harvest season.",
+        "storage": "Same as local. Imported roots may have been in transit longer; check for firmness."
+      }
+    ]
+  },
+  {
+    "slug": "chrysanthemum-leaves",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Glebionis coronaria, known as shungiku in Japanese and tong ho in Chinese. Cool-season leafy green that bolts quickly above 77F. Best quality Nov-Feb when leaves are most tender and aromatic. Strongly aromatic with a distinctive herbal-floral flavor. A staple for hot pot and shabu-shabu.",
+        "storage": "Highly perishable. Wrap in damp paper towel, place in plastic bag, and refrigerate for 3-5 days maximum. Best used the day of purchase."
+      },
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 3, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Mild coastal Southern California climate allows fall-through-spring production. Grown by small-scale Asian farmers for local Asian markets. Tolerates light frost.",
+        "storage": "Same handling. Use within 3-5 days of purchase."
+      }
+    ]
+  },
+  {
+    "slug": "chinese-celery",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 6, 10, 11, 12],
+        "peak": [3, 4, 5, 10, 11],
+        "source": "local",
+        "notes": "Slender hollow stalks with much more intense flavor than standard celery. Thrives in same cool coastal conditions as regular celery (55-75F). California produces 80% of US celery from Salinas and Santa Maria regions. Both stalks and leaves used in stir-fries, soups, and noodle dishes.",
+        "storage": "Wrap in damp paper towel and store in plastic bag in refrigerator for 1-2 weeks. More perishable than Western celery due to thinner stalks."
+      },
+      {
+        "region": "santa-maria-valley",
+        "season": [1, 2, 3, 4, 5, 6, 10, 11, 12],
+        "peak": [3, 4, 5, 10, 11],
+        "source": "local",
+        "notes": "Secondary cool coastal production region. Same growing conditions as Salinas Valley with cool foggy weather ideal for celery production.",
+        "storage": "Wrap in damp paper towel and refrigerate for 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "water-chestnut",
+    "entries": [
+      {
+        "region": "china",
+        "season": [1, 2, 3, 10, 11, 12],
+        "peak": [1, 11, 12],
+        "source": "import",
+        "notes": "Eleocharis dulcis, an aquatic sedge, not a true nut. Virtually all fresh and canned water chestnuts in US markets are imported from China. Corms harvested when leaf stalks die back in fall. Fresh specimens are vastly superior to canned in sweetness and crunch. No significant US commercial production.",
+        "storage": "Fresh unpeeled corms keep 2-3 weeks in a paper bag in the refrigerator. Do not store in plastic. Once peeled, submerge in water and refrigerate for up to 1 week, changing water daily."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 10, 11, 12],
+        "peak": [1, 11, 12],
+        "source": "import",
+        "notes": "Also imported from Southeast Asian producing countries. Fresh water chestnuts appear seasonally in well-stocked Asian markets during fall-winter-spring.",
+        "storage": "Same as above. Check for firm, unblemished corms without soft spots."
+      }
+    ]
+  },
+  {
+    "slug": "thai-eggplant",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Small round green/white Thai eggplant varieties. Requires long hot growing season with day temps 80-90F. Grown by Hmong and Southeast Asian farmers in Fresno County. 50-80 days from transplant depending on variety.",
+        "storage": "Refrigerate unwashed in a paper bag for up to 1 week. Best used within a few days as skin wrinkles and flesh becomes bitter with age."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Thai and Southeast Asian imports available year-round in well-stocked Asian markets. Supplements local production during winter months.",
+        "storage": "Imported eggplant may have shorter remaining shelf life. Inspect for firmness. Refrigerate and use within 3-5 days."
+      }
+    ]
+  },
+  {
+    "slug": "taro-leaves",
+    "entries": [
+      {
+        "region": "hawaii",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [5, 6, 7, 8, 9, 10],
+        "source": "import",
+        "notes": "Colocasia esculenta leaves, known as lu'au leaves in Hawaiian and dahon ng gabi in Filipino. Hawaii is the primary US producer with over 100 taro varieties. Year-round crop; leaf production peaks around 5 months after planting. Must be thoroughly cooked to neutralize calcium oxalate crystals; never eat raw.",
+        "storage": "Highly perishable. Wrap in damp paper towel and refrigerate in a plastic bag for 2-4 days maximum. Frozen lu'au leaves are a practical alternative, lasting months in the freezer."
+      }
+    ]
+  },
+  {
+    "slug": "amaranth-greens",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Amaranthus spp., known as callaloo in Caribbean cuisine and chaulai in Hindi. Warm-season green that thrives at 77-86F. Begin harvesting tender young leaves at 12 inches tall, about 30-40 days after sowing. Grown by Hmong, Latin American, and Caribbean immigrant farmers in the Central Valley.",
+        "storage": "Highly perishable. Wrap loosely in damp paper towel, place in plastic bag, and refrigerate for 3-5 days."
+      },
+      {
+        "region": "socal-coastal",
+        "season": [4, 5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Mild Southern California climate allows earlier planting in April. Found at Latin American and Asian markets. Multiple species and colors available including green, red, and bicolor varieties.",
+        "storage": "Use within 3-5 days for best quality."
+      }
+    ]
+  },
+  {
+    "slug": "fresh-garbanzo-beans",
+    "entries": [
+      {
+        "region": "sacramento-valley",
+        "season": [4, 5, 6],
+        "peak": [5, 6],
+        "source": "local",
+        "notes": "Cicer arietinum harvested green while pods are still immature and soft. California plants garbanzos Dec-Jan as a winter crop; pods develop mid-April through mid-May. Fresh green garbanzos appear at farmers markets by late April. Califresh is the only year-round grower/shipper of fresh green garbanzos in California.",
+        "storage": "Refrigerate unshelled pods in a paper bag for up to 1 week. Once shelled, use within 2-3 days. Blanch and freeze for up to 6 months."
+      },
+      {
+        "region": "central-valley",
+        "season": [4, 5, 6],
+        "peak": [5, 6],
+        "source": "local",
+        "notes": "Southern San Joaquin Valley production. By mid-June, pods mature and dry into familiar tan dried chickpeas, so the fresh green window is narrow. Marketed to communities with large Hispanic, Indian, and Middle Eastern populations.",
+        "storage": "Refrigerate in pods for up to 1 week; shell just before cooking."
+      }
+    ]
+  },
+  {
+    "slug": "manzano-pepper",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [7, 8, 9, 10],
+        "source": "local",
+        "notes": "Capsicum pubescens, also called chile peron or rocoto. One of few chile species with black seeds. Thick-fleshed, apple-shaped fruit ripens yellow to orange. 12,000-30,000 SHU. Prefers cooler temps (45-60F) and partial shade, making coastal Southern California ideal.",
+        "storage": "Refrigerate in a paper bag for 1-2 weeks. Thick walls keep well. Freeze whole or sliced for 3-6 months."
+      },
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [6, 7, 8, 9, 10],
+        "source": "import",
+        "notes": "Widely grown in highland areas of central Mexico where cooler temperatures suit C. pubescens. Staple in Mexican markets as chile manzano or chile peron. Available year-round in SoCal Mexican markets.",
+        "storage": "Refrigerate in a paper bag for 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "ghost-pepper",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [7, 8, 9, 10],
+        "peak": [8, 9],
+        "source": "local",
+        "notes": "Bhut jolokia, originally from Assam, India. 855,000-1,041,000 SHU. Held the Guinness world record for hottest pepper from 2007 to 2011. Requires 120-150 days from transplant and sustained heat above 75F. Central Valley summer heat is ideal. Wrinkled, pointed pods 2-3 inches long.",
+        "storage": "Refrigerate in a paper bag for 1-2 weeks. Dry well in a dehydrator for long-term storage. Freeze whole for 6+ months. Handle with gloves."
+      },
+      {
+        "region": "india",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10, 11],
+        "source": "import",
+        "notes": "Native to northeast India (Assam, Nagaland, Manipur). India remains the primary source for dried ghost peppers and powders sold in US markets. Fresh imports are rare; most arrive dried or processed.",
+        "storage": "Dried ghost peppers keep 1-2 years in an airtight container away from light."
+      }
+    ]
+  },
+  {
+    "slug": "aji-amarillo",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [8, 9, 10],
+        "source": "local",
+        "notes": "Capsicum baccatum, the essential Peruvian yellow chile. 30,000-50,000 SHU with a distinctive fruity, slightly tropical flavor. Pods ripen from green to deep orange-yellow. Small-scale specialty growers in Southern California supply Peruvian markets.",
+        "storage": "Refrigerate fresh peppers in a paper bag for 1-2 weeks. Freeze whole for 3-6 months."
+      },
+      {
+        "region": "peru-coast",
+        "season": [1, 2, 3, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [7, 8, 9, 10],
+        "source": "import",
+        "notes": "Peru is the primary global source. Paste (aji amarillo paste in jars) and frozen whole peppers imported year-round. The most important chile in Peruvian cuisine, used in ceviche, causa, and aji de gallina.",
+        "storage": "Fresh imported peppers keep 1-2 weeks refrigerated. Aji amarillo paste keeps 2-3 weeks after opening."
+      }
+    ]
+  },
+  {
+    "slug": "hibiscus",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [9, 10, 11],
+        "peak": [10, 11],
+        "source": "local",
+        "notes": "Hibiscus sabdariffa (roselle). The edible part is the fleshy red calyx surrounding the seed pod, not the petal. Small-scale California production in the Central Valley. Photoperiodic plant that flowers as days shorten in fall. Fresh calyces are tart and cranberry-like.",
+        "storage": "Fresh calyces refrigerate for 1-2 weeks. Dry thoroughly in a dehydrator; dried flowers keep 1-2 years in an airtight container."
+      },
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [10, 11, 12],
+        "source": "import",
+        "notes": "Mexico is a major producer of dried hibiscus (flor de jamaica). Dried calyces are available year-round in bulk bins at Mexican markets throughout SoCal -- extremely common and inexpensive. Used primarily for agua de jamaica, also in sauces, candied, and in mole.",
+        "storage": "Dried hibiscus flowers keep 1-2 years stored in a cool, dry place in an airtight container."
+      }
+    ]
+  },
+  {
+    "slug": "peanut",
+    "entries": [
+      {
+        "region": "southeast-us",
+        "season": [9, 10, 11],
+        "peak": [10],
+        "source": "import",
+        "notes": "Technically a legume (Arachis hypogaea). Georgia produces over 50% of US peanuts. Harvested late September through mid-November. Four main types: Runner (most common, peanut butter), Virginia (large, roasted in-shell), Spanish (smaller, higher oil), Valencia (sweet, boiling peanuts). Roasted and processed peanuts available year-round.",
+        "storage": "In-shell raw peanuts keep 1-2 months at room temperature, 4-6 months refrigerated. Green boiling peanuts are highly perishable -- use within 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "cashew",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [2, 3, 4, 5],
+        "source": "import",
+        "notes": "Tropical tree nut (Anacardium occidentale) with no US commercial production. Vietnam supplies about 88% of US cashew imports. Always sold shelled and processed because the shell contains caustic urushiol oil. Raw cashews sold in US stores are actually steam-processed to remove shell toxins.",
+        "storage": "Sealed raw cashews keep 6-12 months in pantry, 1+ year refrigerated. Prone to rancidity from high oil content -- store away from heat and light."
+      }
+    ]
+  },
+  {
+    "slug": "tamarillo",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 9, 10, 11, 12],
+        "peak": [10, 11, 12],
+        "source": "local",
+        "notes": "Solanum betaceum, also called tree tomato. Egg-shaped fruit, red or golden-orange varieties. Can be grown in frost-free coastal Southern California. Small fast-growing tree fruits within 1-2 years from seed. Tart, tomato-like flavor with tropical notes. Skin is bitter and inedible.",
+        "storage": "Firm fruit ripens at room temperature in 3-5 days. Ripe fruit refrigerates for 7-10 days. Pulp freezes well for 3-6 months."
+      },
+      {
+        "region": "colombia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 10, 11, 12],
+        "source": "import",
+        "notes": "Colombia is the world's largest tamarillo producer. Ecuador and New Zealand are also significant exporters. Red and golden varieties available in Latin American markets in SoCal.",
+        "storage": "Imported fruit keeps 1-2 weeks refrigerated. Select firm, unblemished fruit with intact stems."
+      }
+    ]
+  },
+  {
+    "slug": "carambola",
+    "entries": [
+      {
+        "region": "florida",
+        "season": [1, 2, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 8, 9, 12],
+        "source": "import",
+        "notes": "Averrhoa carambola, commonly called star fruit. Florida (Dade, Lee, Broward counties) is the main US producer with two peak periods: August-September and December-February. Sweet cultivars (Arkin, B-10) dominate the US market. Same species as the star-fruit entry; carambola is the botanical/international name.",
+        "storage": "Firm green fruit ripens at room temperature in 2-5 days. Ripe yellow fruit refrigerates for 1-2 weeks."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10, 11],
+        "source": "import",
+        "notes": "Native to Southeast Asia. Taiwan, Thailand, and Malaysia are major exporters. About 59% of US carambola availability comes from imports. Available year-round from tropical sources.",
+        "storage": "Imported fruit keeps 1-2 weeks refrigerated. Select firm, bright yellow fruit with minimal brown edges."
+      }
+    ]
+  }
+]

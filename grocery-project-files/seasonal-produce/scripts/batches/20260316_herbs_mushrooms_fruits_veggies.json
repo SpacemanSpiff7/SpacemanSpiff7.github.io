@@ -1,0 +1,568 @@
+[
+  {
+    "slug": "turmeric-root",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [8, 9, 10, 11, 12],
+        "peak": [10, 11],
+        "source": "local",
+        "notes": "Fresh turmeric rhizomes from small specialty farms in Southern California. Planted in spring, harvested late fall when foliage dies back after 8-10 month growth cycle. Limited but growing commercial production in CA. Deep orange flesh with earthy, peppery, slightly bitter flavor and high curcumin content.",
+        "storage": "Wrap unpeeled rhizomes in a dry paper towel, place in an airtight bag, and refrigerate for up to 2 weeks. For longer storage, cut into 1-inch pieces and freeze for up to 6 months."
+      },
+      {
+        "region": "india",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 12],
+        "source": "import",
+        "notes": "India is the world's largest turmeric producer. Indian harvest runs December through March after monsoon-season planting. Fresh rhizomes imported year-round to supply US markets, with peak availability aligning with Indian winter harvest.",
+        "storage": "Wrap unpeeled rhizomes in a dry paper towel, place in an airtight bag, and refrigerate for up to 2 weeks. Freeze cut pieces for up to 6 months."
+      }
+    ]
+  },
+  {
+    "slug": "curry-leaves",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [4, 5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Curry leaf trees (Murraya koenigii) grow well outdoors in Southern California's USDA zones 9-10 climate. Small specialty growers supply farmers markets and Indian grocery stores. Trees produce flushes of aromatic leaves spring through fall; flavor is most intense in warm summer months.",
+        "storage": "Wrap fresh sprigs in a dry paper towel, place in an airtight container, and refrigerate for up to 2 weeks. Freeze leaves flat on a tray then transfer to a sealed bag for up to 6 months. Dried leaves lose most of their volatile oils."
+      },
+      {
+        "region": "india",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [4, 5, 6, 7, 8, 9],
+        "source": "import",
+        "notes": "India is the primary commercial source of curry leaves worldwide. Fresh leaves are shipped by air but availability can be inconsistent due to import restrictions and short shelf life. Essential in South Indian tempering (tadka) for dals, curries, and chutneys.",
+        "storage": "Wrap fresh sprigs in a dry paper towel, place in an airtight container, and refrigerate for up to 2 weeks. Freeze for longer storage up to 6 months."
+      }
+    ]
+  },
+  {
+    "slug": "galangal",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 10, 11, 12],
+        "source": "import",
+        "notes": "Greater galangal (Alpinia galanga) imported primarily from Thailand, the world's leading exporter. No significant commercial production in California. Sharp, piney, citrusy flavor distinct from ginger, essential in Thai curries (tom kha, tom yum) and Indonesian rendang.",
+        "storage": "Wrap uncut rhizomes in a paper towel, place in a plastic bag, and refrigerate for up to 3 weeks. Galangal is much firmer than ginger and holds well. Slice or grate and freeze for up to 6 months."
+      }
+    ]
+  },
+  {
+    "slug": "makrut-lime-leaves",
+    "entries": [
+      {
+        "region": "san-diego-county",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [5, 6, 7, 8, 9],
+        "source": "local",
+        "notes": "Makrut lime trees (Citrus hystrix) are evergreen and produce harvestable leaves year-round in frost-free SoCal areas. Specialty citrus growers supply fresh leaves to restaurants and Asian markets. Summer leaves are most vibrant and aromatic. The double-lobed leaves have an intense floral-citrus fragrance essential in Thai and Southeast Asian cooking.",
+        "storage": "Store fresh leaves in a sealed plastic bag in the refrigerator for up to 2 weeks. Freeze leaves flat in a single layer then transfer to a freezer bag; frozen leaves retain aroma well for up to 1 year."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Bulk supply comes from Thailand, Indonesia, and the Philippines where trees grow prolifically in tropical conditions. Imported year-round to supplement limited domestic production. Sold fresh or frozen in Asian grocery stores.",
+        "storage": "Store fresh leaves in a sealed plastic bag in the refrigerator for up to 2 weeks. Freeze for long-term storage up to 1 year."
+      }
+    ]
+  },
+  {
+    "slug": "epazote",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "peak": [5, 6, 7, 8, 9],
+        "source": "local",
+        "notes": "Epazote (Dysphania ambrosioides) grows vigorously in Southern California and has naturalized in parts of the region. Small farms grow it for farmers markets. The pungent herb has a complex flavor with notes of mint, citrus, and petroleum -- essential in Mexican black beans, quesadillas, and huitlacoche dishes.",
+        "storage": "Wrap fresh sprigs loosely in a damp paper towel, place in a plastic bag, and refrigerate for up to 1 week. Dry sprigs by hanging upside down in a cool dark place for 1-2 weeks; dried epazote retains flavor reasonably well for 3-6 months."
+      },
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [5, 6, 7, 8, 9],
+        "source": "import",
+        "notes": "Epazote grows wild and is cultivated throughout Mexico, its native range. Mexican-grown epazote supplements domestic supply, particularly in winter months when local SoCal production wanes. Available dried year-round in Mexican grocery stores.",
+        "storage": "Wrap fresh sprigs loosely in a damp paper towel, place in a plastic bag, and refrigerate for up to 1 week. Dried stores well for 3-6 months in an airtight container."
+      }
+    ]
+  },
+  {
+    "slug": "culantro",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Culantro (Eryngium foetidum) is a tropical perennial with long, serrated, spiny leaves -- not to be confused with cilantro. Thrives in warm, shaded conditions in USDA zones 9-11. Very limited commercial production in California. Flavor is much stronger and more pungent than cilantro. Unlike cilantro, it is slow to bolt in heat.",
+        "storage": "Wrap leaves in a damp paper towel and store in a sealed container in the refrigerator for up to 2 weeks. Culantro is sturdier than cilantro and holds up better in storage. Freezes and dries well compared to most fresh herbs."
+      },
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [5, 6, 7, 8, 9, 10],
+        "source": "import",
+        "notes": "Native to Mexico, the Caribbean, and Central America. Imported year-round from tropical growing regions. Also known as recao, shadow beni, or ngo gai depending on the culinary tradition.",
+        "storage": "Wrap leaves in a damp paper towel and store in a sealed container in the refrigerator for up to 2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "garlic-chive",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "peak": [5, 6, 7, 8, 9],
+        "source": "local",
+        "notes": "Garlic chives (Allium tuberosum) are widely grown by Hmong and Southeast Asian small farmers in Fresno County. Flat, strap-like leaves with a mild garlic flavor harvested spring through fall. Also sold as flowering chive stems (with buds) and yellow/blanched chives (grown under cover). A staple in Chinese, Korean, and Japanese cooking.",
+        "storage": "Wrap unwashed chives in a dry paper towel, place in a plastic bag, and refrigerate for up to 1 week. Chop and freeze in sealed bags for up to 3 months. Do not wash before storing as moisture accelerates decay."
+      }
+    ]
+  },
+  {
+    "slug": "holy-basil",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Holy basil (Ocimum tenuiflorum), called krapao in Thai cuisine, is grown by Southeast Asian small farmers in the Central Valley. Distinct from Thai sweet basil -- holy basil has slightly hairy, more rounded leaves with a pronounced clove-peppery aroma and spicy bite. Essential herb in pad krapao (Thai basil stir-fry).",
+        "storage": "Place stems upright in a jar with 1 inch of water, loosely cover with a plastic bag, and refrigerate for up to 1 week. Wilts and blackens quickly; use within a few days of purchase for best flavor."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Thailand and other Southeast Asian countries grow holy basil year-round in tropical conditions. Imported to supply Thai and Asian grocery stores when domestic production is unavailable in winter months.",
+        "storage": "Place stems upright in a jar with 1 inch of water, loosely cover with a plastic bag, and refrigerate for up to 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "shimeji-mushroom",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "local",
+        "notes": "Beech mushrooms (Hypsizygus tessulatus), both brown (bunashimeji) and white varieties. Grown year-round in controlled indoor facilities. Hokto Kinoko operates a major organic mushroom farm in San Marcos, CA. Mild, slightly nutty flavor with a firm, crunchy texture. Always cook before eating; raw shimeji are bitter.",
+        "storage": "Refrigerate in original packaging or a paper bag. Keeps 7-10 days. Do not wash until ready to use; trim cluster base before cooking."
+      }
+    ]
+  },
+  {
+    "slug": "trumpet-mushroom",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "local",
+        "notes": "King trumpet / king oyster (Pleurotus eryngii), the largest species in the oyster mushroom family. Grown year-round indoors by Hokto Kinoko (San Marcos, CA) and other California producers. Thick, meaty stem with mild umami flavor; excellent seared, grilled, or sliced into scallop-shaped rounds. Increasingly mainstream in conventional grocery stores.",
+        "storage": "Refrigerate in a paper bag or loosely wrapped. Keeps 10-14 days, one of the longest shelf lives among fresh mushrooms."
+      }
+    ]
+  },
+  {
+    "slug": "wood-ear-mushroom",
+    "entries": [
+      {
+        "region": "china",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Black wood ear (Auricularia auricula-judae). The vast majority sold in US markets is imported dried from China, where it is the second-most cultivated mushroom after shiitake. Prized for its crunchy, gelatinous texture rather than flavor. Essential in hot and sour soup, mu shu pork, and many Sichuan and Cantonese dishes.",
+        "storage": "Dried: store in a cool, dry place in an airtight container; keeps 1-2 years. Rehydrate in warm water 15-30 minutes before use. Fresh: refrigerate in a paper bag, use within 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "straw-mushroom",
+    "entries": [
+      {
+        "region": "china",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Paddy straw mushroom (Volvariella volvacea), the third-most consumed mushroom worldwide. Almost exclusively sold canned in US Asian markets, imported from China and Thailand. Fresh straw mushrooms are extremely perishable, making fresh export impractical. Mild, silky texture used in Thai curries, Chinese stir-fries, and soups.",
+        "storage": "Canned: store unopened at room temperature up to 2 years; once opened, transfer to a non-metal container and refrigerate, use within 3-4 days."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Thailand, Vietnam, and Cambodia are major producers. Traditionally cultivated on rice straw beds. Imported to the US primarily in canned form due to extreme perishability.",
+        "storage": "Canned: store unopened at room temperature up to 2 years. Once opened, refrigerate and use within 3-4 days."
+      }
+    ]
+  },
+  {
+    "slug": "durian",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [5, 6, 7, 8, 9],
+        "peak": [6, 7],
+        "source": "import",
+        "notes": "Fresh whole durian imported primarily from Thailand (Monthong variety dominates US market). Peak Thai harvest is June-July. Los Angeles is a major port of entry; widely available at Asian supermarkets in the San Gabriel Valley. Frozen durian flesh and whole fruit available year-round separately.",
+        "storage": "Whole uncut: ripen at room temperature 2-3 days until shell gives slightly. Once opened: wrap tightly and refrigerate, consume within 1-2 days. Freezes well for months."
+      }
+    ]
+  },
+  {
+    "slug": "longan",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [7, 8],
+        "source": "import",
+        "notes": "Fresh longan imported primarily from Thailand and Vietnam. Thai peak harvest is June-August. Sweet, floral flesh with musky aroma, similar to lychee but less acidic. Sold in clusters on the branch at Asian markets. The US is the world's top longan importer.",
+        "storage": "Refrigerate unwashed in a perforated bag or open container. Keeps 5-7 days. Shell will darken but fruit inside stays good. Can be frozen in shell for 3-6 months."
+      },
+      {
+        "region": "socal-coastal",
+        "season": [8, 9, 10, 11, 12],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Very small-scale Southern California production. Longan trees fruit over a 3-4 week window sometime from late July to December depending on microclimate. UC ANR (Ventura County Cooperative Extension) documents longan as a viable minor subtropical for SoCal.",
+        "storage": "Refrigerate unwashed in a perforated bag. Keeps 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "mamey-sapote",
+    "entries": [
+      {
+        "region": "florida",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [5, 6, 7, 8],
+        "source": "import",
+        "notes": "Mamey sapote (Pouteria sapota) is grown commercially almost exclusively in South Florida. Different cultivars stagger the harvest, enabling near year-round availability. Cannot be legally imported from any country, making Florida the sole US supply. Rich, creamy salmon-pink flesh with sweet pumpkin-sweet potato flavor. A Latin market staple, essential for batidos (mamey milkshakes) in Cuban-American cuisine.",
+        "storage": "Unripe whole fruit: ripen at room temperature until it yields to gentle thumb pressure, typically 3-7 days. Ripe: refrigerate and consume within 3-4 days. Squeeze lime juice on exposed surfaces to slow oxidation. Freezes well as pulp."
+      }
+    ]
+  },
+  {
+    "slug": "rambutan",
+    "entries": [
+      {
+        "region": "guatemala",
+        "season": [5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10],
+        "source": "import",
+        "notes": "Guatemala is a primary fresh rambutan supplier to the US market, with harvest running May through December. Sweet, translucent flesh similar to lychee. Increasingly mainstream in conventional US grocery stores. Hairy red or yellow shell is distinctive.",
+        "storage": "Refrigerate in a perforated plastic bag or open container. Keeps 5-7 days. Shell spines will darken but fruit inside remains good."
+      },
+      {
+        "region": "central-mexico",
+        "season": [7, 8, 9, 10, 11, 12],
+        "peak": [9, 10],
+        "source": "import",
+        "notes": "Mexico begins rambutan harvest in mid-July from Chiapas and Tabasco states. September-October overlap with Guatemala creates the peak supply window for US markets with the lowest prices.",
+        "storage": "Refrigerate in a perforated bag. Keeps 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "mangosteen",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [5, 6, 7, 8, 9],
+        "peak": [6, 7, 8],
+        "source": "import",
+        "notes": "Fresh mangosteen imported from Thailand, the world's largest producer. Fresh import to the US legalized in 2007; all Southeast Asian imports must be irradiated. Sweet-tart, complex flavor often called the 'queen of fruits.' Available at 99 Ranch, H Mart, and specialty Asian markets during season.",
+        "storage": "Refrigerate immediately. Keeps 5-7 days; shell will harden but segments inside stay good if shell is intact. Check for firmness when buying; rock-hard shells indicate over-mature fruit."
+      },
+      {
+        "region": "central-mexico",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [8, 9, 10],
+        "source": "import",
+        "notes": "Mexico is now the largest exporter of fresh mangosteen to the US (about 59% of imports), surpassing Thailand. Does not require irradiation like Southeast Asian fruit, potentially offering better quality at lower cost.",
+        "storage": "Refrigerate immediately. Keeps 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "soursop",
+    "entries": [
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [6, 7, 8, 9],
+        "source": "import",
+        "notes": "Fresh soursop (Annona muricata), known as guanabana in Latin markets. Mexico is the largest soursop supplier; APHIS authorized fresh imports in October 2024. Tart, creamy white flesh with strawberry-pineapple-citrus flavor. Used for agua fresca, smoothies, ice cream, and juices.",
+        "storage": "Ripen at room temperature until fruit yields to gentle pressure and skin darkens slightly. Ripe fruit: refrigerate and use within 2-3 days (very perishable). Pulp freezes excellently for 6+ months."
+      },
+      {
+        "region": "colombia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Colombia, Peru, Ecuador, and Costa Rica export frozen soursop pulp to the US year-round. Frozen pulp (sold as 'pulpa de guanabana') is the most widely available and consistent form in Latin markets.",
+        "storage": "Frozen pulp: keeps 12+ months frozen. Thaw in refrigerator overnight."
+      }
+    ]
+  },
+  {
+    "slug": "tejocote",
+    "entries": [
+      {
+        "region": "central-mexico",
+        "season": [1, 2, 10, 11, 12],
+        "peak": [11, 12],
+        "source": "import",
+        "notes": "Mexican hawthorn (Crataegus mexicana), the essential fruit for ponche navideno (Christmas punch). Overwhelmingly produced in Puebla state. Import to the US legalized in 2015 after a 6-year USDA review. Almost always cooked: simmered in ponche with guava, sugarcane, cinnamon, and piloncillo. Available at Mexican markets Oct-Feb.",
+        "storage": "Store at room temperature for up to 1 week. Refrigerate for 2-3 weeks. Can be frozen whole for 3+ months."
+      },
+      {
+        "region": "san-diego-county",
+        "season": [1, 10, 11, 12],
+        "peak": [11, 12],
+        "source": "local",
+        "notes": "The first commercial US tejocote orchard was established near San Diego in the 1990s, a collaboration between the USDA and UC Riverside. Very small-scale local production for Mexican-American communities.",
+        "storage": "Room temperature up to 1 week, refrigerate for 2-3 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "sapote",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "peak": [5, 6, 7, 8],
+        "source": "local",
+        "notes": "White sapote (Casimiroa edulis), a fruit tree native to Mexico that thrives in Southern California's coastal climate. Not related to mamey sapote. Creamy, custard-like flesh with flavor notes of banana, peach, and vanilla. Multiple cultivars extend the season. Documented by UC ANR Ventura County Cooperative Extension and California Rare Fruit Growers.",
+        "storage": "Ripen at room temperature until fruit yields to gentle pressure like an avocado, typically 3-5 days. Ripe fruit: refrigerate and eat within 2-3 days (very perishable, bruises easily)."
+      },
+      {
+        "region": "san-diego-county",
+        "season": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "peak": [4, 5, 6, 7],
+        "source": "local",
+        "notes": "San Diego County's warmer microclimate produces earlier-ripening white sapote. Several cultivars originated in the San Diego area. Grown in home gardens and small orchards; occasionally at farmers markets.",
+        "storage": "Same handling as other white sapote. Very fragile when ripe; handle gently."
+      }
+    ]
+  },
+  {
+    "slug": "baby-corn",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Thailand dominates global baby corn exports (about 80% of world trade). Baby corn is any corn variety harvested immature, 2-4 inches long, a couple days after silking. Almost all baby corn in US grocery stores is sold canned or jarred; fresh baby corn is rare. Standard stir-fry and salad ingredient.",
+        "storage": "Canned: store unopened up to 2 years; once opened, transfer to a covered container and refrigerate for 3-4 days. Fresh (rare): refrigerate unwashed in a plastic bag for 2-3 days."
+      }
+    ]
+  },
+  {
+    "slug": "bamboo-shoot",
+    "entries": [
+      {
+        "region": "sacramento-valley",
+        "season": [3, 4, 5, 6],
+        "peak": [4, 5],
+        "source": "local",
+        "notes": "Small-scale California production of fresh bamboo shoots, primarily Phyllostachys dulcis (Sweet Shoot Bamboo), grown in the Sierra foothills east of Sacramento. Shoots emerge in spring when soil warms. Hand-harvested at under one foot for sweetness and tenderness. A seasonal delicacy at California farmers markets.",
+        "storage": "Refrigerate unpeeled fresh shoots wrapped in a damp paper towel inside a plastic bag for up to 1 week. Peel and blanch promptly for best flavor, as bitterness increases with age."
+      },
+      {
+        "region": "china",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "China is the largest exporter of canned bamboo shoots to the US. Available as canned whole, sliced, stripped, or diced in brine. Taiwan and Thailand are also major suppliers. The US imports approximately 30,000 tons of canned bamboo shoots annually from Asia.",
+        "storage": "Canned: store unopened up to 2-3 years. Once opened, transfer to a covered container, submerge in fresh water, and refrigerate for up to 1 week (change water every 1-2 days)."
+      }
+    ]
+  },
+  {
+    "slug": "bittermelon",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Grown commercially in Fresno and Bakersfield by Southeast Asian and specialty farmers. Multiple varieties including Indian type (dark green, pointed ridges) and Chinese type (lighter green, rounded bumps). Matures in 50-70 days after seeding.",
+        "storage": "Refrigerate unwashed in a loosely closed plastic bag in the crisper drawer for up to 1 week. Choose firm, green fruits; yellowing indicates over-ripeness and increased bitterness."
+      },
+      {
+        "region": "sinaloa",
+        "season": [1, 2, 3, 4, 5, 11, 12],
+        "peak": [2, 3, 4],
+        "source": "import",
+        "notes": "Mexico supplies bitter melon to US markets especially during winter and spring when California is out of season. Available at Asian and Latin grocery stores throughout Southern California.",
+        "storage": "Refrigerate unwashed in a loosely closed plastic bag for up to 1 week."
+      }
+    ]
+  },
+  {
+    "slug": "cassava",
+    "entries": [
+      {
+        "region": "costa-rica",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Costa Rica supplies approximately 89% of fresh cassava (yuca) consumed in the United States, producing year-round with a 9-month crop cycle. The dominant variety is wax-coated for shelf stability during export. Must always be cooked before eating due to naturally occurring cyanogenic compounds.",
+        "storage": "Wax-coated whole roots keep 2-4 weeks at cool room temperature or in the refrigerator. Once cut, submerge in water and refrigerate for 2-3 days (change water daily). Peeled and cut cassava freezes well for 6-12 months."
+      },
+      {
+        "region": "brazil",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Brazil is one of the world's largest cassava producers and exports frozen cassava products to the US market. Frozen peeled cassava from Brazil is common in Latin grocery freezer sections.",
+        "storage": "Frozen cassava keeps 6-12 months in the freezer. Thaw in the refrigerator overnight before boiling or frying."
+      }
+    ]
+  },
+  {
+    "slug": "chinese-long-bean",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Warm-season crop grown commercially by Hmong and Southeast Asian farmers in Fresno County and the San Joaquin Valley. Green, pale green, and dark red/purple varieties. Pods best harvested at 12-18 inches for tenderness. Heavy producers throughout the growing season.",
+        "storage": "Refrigerate unwashed in a plastic bag for 3-5 days. Best used within 2-3 days for optimal snap and flavor. Can be blanched and frozen for 3-6 months."
+      },
+      {
+        "region": "sinaloa",
+        "season": [1, 2, 3, 4, 5, 11, 12],
+        "peak": [2, 3, 4],
+        "source": "import",
+        "notes": "Mexico and Caribbean countries supply long beans to US markets during the off-season for California production, especially to meet demand in LA and SF Asian markets.",
+        "storage": "Refrigerate in a plastic bag for 3-5 days. Inspect for limpness or dark spots from shipping."
+      }
+    ]
+  },
+  {
+    "slug": "choy-sum",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 6, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 10, 11, 12],
+        "source": "local",
+        "notes": "Cool-season brassica grown commercially alongside bok choy in the Salinas Valley and by Hmong farmers in the San Joaquin Valley. Rapid 30-45 day crop cycle. Best in cool weather (59-77F); bolts quickly in summer heat. The flowering stems are the prized part, with a mildly sweet, mustard-like flavor.",
+        "storage": "Refrigerate unwashed in a plastic produce bag for up to 7-10 days. Do not wash until ready to cook, as moisture accelerates yellowing."
+      }
+    ]
+  },
+  {
+    "slug": "winter-melon",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [7, 8, 9, 10, 11],
+        "peak": [8, 9, 10],
+        "source": "local",
+        "notes": "Wax gourd (Benincasa hispida, dong gua) grown by Southeast Asian specialty farmers in the Fresno area. Requires 110+ frost-free days. Fruits can weigh 10-40 lbs. The mild, almost neutral flesh is prized in Chinese soups, Indian cuisine (ash gourd/petha), and Southeast Asian dishes.",
+        "storage": "Whole uncut winter melon stores for months in a cool, dry, well-ventilated area (50-60F) -- this exceptional keeping ability is the origin of the name. Once cut, wrap tightly in plastic and refrigerate for 1-2 weeks."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "Imported from Southeast Asia and Mexico to supplement local supply, especially outside the California growing season. Available year-round at large Asian grocery stores.",
+        "storage": "Same as local: whole fruit stores for months in a cool, dry place. Cut pieces refrigerate 1-2 weeks wrapped in plastic."
+      }
+    ]
+  },
+  {
+    "slug": "calabaza",
+    "entries": [
+      {
+        "region": "florida",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11, 12],
+        "source": "import",
+        "notes": "Florida is the primary US domestic source of calabaza (Cucurbita moschata), able to grow it year-round. The 'La Estrella' cultivar dominates commercial production. Deeply tied to Caribbean, Puerto Rican, Cuban, and broader Latin American cuisines. Used in sancocho, sopa de calabaza, stews, and purees.",
+        "storage": "Whole calabaza stores 2-3 months in a cool, dry place like other winter squash. Cut pieces: wrap tightly in plastic and refrigerate for up to 1 week. Often sold pre-cut in Latin markets due to the large size."
+      },
+      {
+        "region": "central-valley",
+        "season": [7, 8, 9, 10, 11],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Limited California production in warm-season months in the Central Valley. Calabaza needs 90-120 frost-free days and is very heat tolerant. Occasionally found at Southern California farmers markets in fall.",
+        "storage": "Whole squash keeps 2-3 months in cool, dry storage. Cut pieces refrigerate up to 1 week wrapped in plastic."
+      },
+      {
+        "region": "sinaloa",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 12],
+        "source": "import",
+        "notes": "Mexico and Central American/Caribbean countries export calabaza to the US, particularly to meet winter demand. Dominican Republic is also a significant source.",
+        "storage": "Whole calabaza stores 2-3 months in a cool, dry place. Cut pieces refrigerate up to 1 week."
+      }
+    ]
+  },
+  {
+    "slug": "lotus-root",
+    "entries": [
+      {
+        "region": "sacramento-valley",
+        "season": [8, 9, 10, 11],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Limited commercial lotus root production in California's Sacramento Delta region, where lotus grows in flooded fields and shallow ponds. Harvest occurs 4-6 months after spring planting. Crisp, starchy rhizome with a mild, slightly sweet flavor and distinctive lace-like cross-section pattern.",
+        "storage": "Refrigerate unpeeled roots wrapped in a damp cloth in a plastic bag for 1-2 weeks. Once cut, submerge slices in water with a splash of vinegar to prevent browning; refrigerate and change water every 2 days."
+      },
+      {
+        "region": "china",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11, 12],
+        "source": "import",
+        "notes": "China is the world's largest producer and exporter of lotus root, shipping fresh and frozen product year-round. Multiple harvest seasons provide continuous supply. Also imported from India. Available fresh, frozen, dried, and pickled at Asian grocery stores.",
+        "storage": "Fresh imported roots: refrigerate wrapped in damp towel in plastic bag for 1-2 weeks. Frozen keeps 6-12 months. Dried slices store in a sealed container for up to 1 year."
+      }
+    ]
+  },
+  {
+    "slug": "yam",
+    "entries": [
+      {
+        "region": "guatemala",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "True yams (Dioscorea spp.) -- NOT the orange-fleshed sweet potatoes commonly mislabeled as 'yams' in US stores. Rough, bark-like brown skin and white or purple starchy flesh. Common varieties include white yam (D. rotundata), yellow yam (D. cayennensis), and yampi (D. trifida). Staple in Caribbean, West African, and Latin American cuisines. Imports peak fall/winter.",
+        "storage": "Store whole unpeeled yams in a cool, dry, dark, well-ventilated place (55-65F) for 2-4 weeks. Do not refrigerate whole yams. Once peeled or cut, submerge in water and refrigerate for 2-3 days."
+      },
+      {
+        "region": "colombia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [],
+        "source": "import",
+        "notes": "West African nations (Nigeria, Ghana) produce over 90% of the world's true yams. Ghana and Nigeria export white yam and water yam to diaspora communities in North America. These tend to be larger tubers sold at African specialty markets.",
+        "storage": "Cool, dry, dark storage for 2-4 weeks unpeeled. West African varieties may have a slightly longer shelf life due to thicker skin."
+      }
+    ]
+  }
+]

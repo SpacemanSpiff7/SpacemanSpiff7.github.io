@@ -1,0 +1,73 @@
+[
+  {
+    "slug": "japanese-sweet-potato",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11],
+        "source": "local",
+        "notes": "Murasaki variety -- purple skin, creamy white flesh that turns golden when cooked. Drier and nuttier than orange types with subtle chestnut-like sweetness. Merced, Stanislaus, and Kern counties are the main CA production areas. Widely available at Trader Joe's and Whole Foods. Also sold as satsumaimo.",
+        "storage": "Store in a cool, dark place (55-60F) -- never refrigerate raw. Properly cured roots (85F/high humidity for 4-7 days after harvest) keep 6-10 months in commercial storage, supplying markets year-round."
+      },
+      {
+        "region": "southeast-us",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 10, 11, 12],
+        "source": "import",
+        "notes": "North Carolina is the top US sweet potato producer (50%+ of national crop). Murasaki is grown alongside Covington and Beauregard. NC-grown roots ship nationwide from climate-controlled storage year-round.",
+        "storage": "Same as CA-grown. Store in a cool, dark place. Do not refrigerate raw."
+      }
+    ]
+  },
+  {
+    "slug": "okinawan-sweet-potato",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [1, 2, 3, 4, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11],
+        "source": "local",
+        "notes": "Sold as Stokes Purple on the mainland (trademarked by A.V. Thomas Produce). Deep purple flesh rich in anthocyanins. Drier than orange types and needs about twice the cooking time. Over 500 acres grown organically in Livingston (Merced County). About 1,000 total acres of purple sweet potatoes in CA. Season runs September through April from stored harvest.",
+        "storage": "Store in a cool, dark place (55-60F). Shorter storage window than orange varieties due to drier flesh -- keeps about 4-6 months cured. Do not refrigerate raw."
+      },
+      {
+        "region": "hawaii",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10, 11],
+        "source": "import",
+        "notes": "The original Okinawan purple sweet potato arrived in Hawaii from Japan during the plantation era. Most popular commercially grown uala in Hawaii. True purple flesh. Tropical year-round growing season allows continuous harvest. Rarely shipped to mainland in volume.",
+        "storage": "Limited mainland distribution. Store same as other sweet potatoes -- cool, dark, dry location."
+      }
+    ]
+  },
+  {
+    "slug": "white-sweet-potato",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10, 11],
+        "source": "local",
+        "notes": "Hannah is the most common white variety in California. O'Henry and Bonita also grown commercially. Tan/light skin, cream-white flesh. Drier and less sweet than orange types with a starchy, chestnut-like texture. Often used as a regular potato substitute.",
+        "storage": "Store in a cool, dark place (55-60F). Properly cured roots keep 4-7 months. Do not refrigerate raw."
+      },
+      {
+        "region": "southeast-us",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [9, 10, 11, 12],
+        "source": "import",
+        "notes": "O'Henry and Bonita also grown in North Carolina. Supplements California supply from climate-controlled storage year-round.",
+        "storage": "Same as CA-grown. Cool, dark, dry location."
+      },
+      {
+        "region": "costa-rica",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 11, 12],
+        "source": "import",
+        "notes": "Boniato/batata -- a related white-fleshed Caribbean sweet potato. Imported from Dominican Republic, Costa Rica, and Cuba. Drier, flakier, less sweet than US white sweet potatoes. Common in Latin markets under names boniato, batata, or camote. About 5,000 acres also grown in South Florida.",
+        "storage": "Boniato has a shorter shelf life than cured US sweet potatoes -- typically 1-2 weeks at room temperature. Best consumed soon after purchase."
+      }
+    ]
+  }
+]
