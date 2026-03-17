@@ -79,6 +79,8 @@
   var originGroupsCache = {};   // slug -> { groupName: true, ... }
   var hasLocalSeasonCache = {}; // slug -> boolean
   var earliestPeakMonthCache = {}; // slug -> number
+  var aliasesBySlug = {};       // slug -> [lowercase alias strings]
+  var aliasReverseMap = {};     // lowercase alias -> [slugs]
 
   // --- Data Loading ---
   function loadData() {
@@ -231,6 +233,17 @@
       originGroupsCache[p.slug] = getOriginGroupsForItem(p.slug);
       hasLocalSeasonCache[p.slug] = hasLocalSeason(p.slug);
       earliestPeakMonthCache[p.slug] = getEarliestPeakMonth(p.slug);
+
+      // Build alias lookup caches
+      var rawAliases = p.a || [];
+      var lower = [];
+      for (var i = 0; i < rawAliases.length; i++) {
+        var al = rawAliases[i].toLowerCase();
+        lower.push(al);
+        if (!aliasReverseMap[al]) aliasReverseMap[al] = [];
+        aliasReverseMap[al].push(p.slug);
+      }
+      aliasesBySlug[p.slug] = lower;
     });
   }
 
@@ -262,9 +275,30 @@
       var hasSeasons = !!state.seasonsBySlug[p.slug];
       var isNoData = !hasSeasons;
 
-      // Search applies to all items
+      // Search applies to all items -- checks name, aliases, category, culinary group
+      var searchMatch = null;
       if (state.searchQuery) {
-        if (p.name.toLowerCase().indexOf(state.searchQuery.toLowerCase()) === -1) return;
+        var q = state.searchQuery.toLowerCase();
+        if (p.name.toLowerCase().indexOf(q) !== -1) {
+          searchMatch = { type: 'name' };
+        } else {
+          // Check aliases
+          var aliases = aliasesBySlug[p.slug] || [];
+          var matchedAlias = null;
+          for (var ai = 0; ai < aliases.length; ai++) {
+            if (aliases[ai].indexOf(q) !== -1) {
+              matchedAlias = (p.a || [])[ai] || aliases[ai];
+              break;
+            }
+          }
+          if (matchedAlias) {
+            searchMatch = { type: 'alias', term: matchedAlias };
+          } else if (p.category.toLowerCase().indexOf(q) !== -1 ||
+                     p.culinaryGroup.toLowerCase().indexOf(q) !== -1) {
+            searchMatch = { type: 'group' };
+          }
+        }
+        if (!searchMatch) return;
       }
 
       // Category filter applies to all items
@@ -321,7 +355,9 @@
       // Year-round hiding: hide year-round items unless searching, or availability filter is year-round
       if (!isNoData && !state.searchQuery && state.availabilityFilter !== 'year-round' && !hasAnyFilter && yearRoundCache[p.slug]) return;
 
-      items.push({ produce: p, status: status });
+      var item = { produce: p, status: status };
+      if (searchMatch) item.searchMatch = searchMatch;
+      items.push(item);
     });
 
     return items;
@@ -952,9 +988,18 @@
     var nameCell = document.createElement('div');
     nameCell.className = 'timeline-name';
     nameCell.style.borderLeft = '3px solid ' + color;
-    nameCell.appendChild(document.createTextNode(item.produce.name));
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = item.produce.name;
+    nameCell.appendChild(nameSpan);
+    var aliasSpan = document.createElement('span');
+    aliasSpan.className = 'timeline-alias-match';
+    if (item.searchMatch && item.searchMatch.type === 'alias') {
+      aliasSpan.textContent = '(' + item.searchMatch.term + ')';
+    }
+    nameCell.appendChild(aliasSpan);
     nameCell.title = item.produce.name;
     row.appendChild(nameCell);
+    row._tlAliasSpan = aliasSpan;
 
     var barsArea = document.createElement('div');
     barsArea.className = 'timeline-bars';
@@ -1008,9 +1053,18 @@
     var nameCell = document.createElement('div');
     nameCell.className = 'timeline-name';
     nameCell.style.borderLeft = '3px solid ' + color;
-    nameCell.appendChild(document.createTextNode(item.produce.name));
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = item.produce.name;
+    nameCell.appendChild(nameSpan);
+    var aliasSpan = document.createElement('span');
+    aliasSpan.className = 'timeline-alias-match';
+    if (item.searchMatch && item.searchMatch.type === 'alias') {
+      aliasSpan.textContent = '(' + item.searchMatch.term + ')';
+    }
+    nameCell.appendChild(aliasSpan);
     nameCell.title = item.produce.name;
     row.appendChild(nameCell);
+    row._tlAliasSpan = aliasSpan;
 
     var barsArea = document.createElement('div');
     barsArea.className = 'timeline-bars no-data-bars';
@@ -1110,8 +1164,12 @@
       var s = item.produce.slug;
       var row = _tlActiveDataRows[s];
       if (row) {
-        // Reuse -- only toggle selected class
+        // Reuse -- toggle selected class + update alias annotation
         row.classList.toggle('selected', state.selectedItem === s);
+        if (row._tlAliasSpan) {
+          row._tlAliasSpan.textContent = (item.searchMatch && item.searchMatch.type === 'alias')
+            ? '(' + item.searchMatch.term + ')' : '';
+        }
       } else {
         // Create new row for this slug
         row = _tlMakeDataRow(item);
@@ -1134,6 +1192,10 @@
         var row = _tlActiveNoDataRows[s];
         if (row) {
           row.classList.toggle('selected', state.selectedItem === s);
+          if (row._tlAliasSpan) {
+            row._tlAliasSpan.textContent = (item.searchMatch && item.searchMatch.type === 'alias')
+              ? '(' + item.searchMatch.term + ')' : '';
+          }
         } else {
           row = _tlMakeNoDataRow(item);
           _tlActiveNoDataRows[s] = row;
@@ -1285,6 +1347,10 @@
 
     var html = '<h2 class="detail-name">' + escHtml(item.name) + '</h2>';
     html += '<div class="detail-meta"><span>' + escHtml(item.category) + '</span><span>' + escHtml(item.culinaryGroup) + '</span></div>';
+    var itemAliases = item.a || [];
+    if (itemAliases.length) {
+      html += '<div class="detail-aliases">Also known as: ' + itemAliases.map(escHtml).join(', ') + '</div>';
+    }
 
     if (!seasons.length) {
       html += '<p class="detail-notes" style="font-style: normal; color: var(--text-muted);">No season data available for this item.</p>';
@@ -1473,56 +1539,6 @@
     animDone = true;
     document.querySelectorAll('.ring-segment, .ring-center, .controls, .mid-segment, .inner-segment, .timeline-row')
       .forEach(function (el) { el.classList.add('anim-in'); el.style.animationDelay = '0ms'; });
-  }
-
-  // --- Peak Strip ---
-  function renderPeakStrip() {
-    var container = document.getElementById('peak-strip');
-    if (!container) return;
-    container.innerHTML = '';
-
-    // Only show when status filter is "All" (empty set) or includes "peak"
-    var sz = state.activeStatus.size;
-    if (sz > 0 && !state.activeStatus.has('peak')) {
-      container.classList.add('hidden');
-      return;
-    }
-
-    var peakItems = [];
-    state.data.produce.forEach(function (p) {
-      if (statusCache[p.slug] === 'peak') {
-        peakItems.push(p);
-      }
-    });
-
-    // Sort by name, take up to 12 for the strip
-    peakItems.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    var items = peakItems.slice(0, 12);
-
-    if (!items.length) {
-      container.classList.add('hidden');
-      return;
-    }
-    container.classList.remove('hidden');
-
-    var label = document.createElement('span');
-    label.className = 'peak-strip-label';
-    label.textContent = 'Peak now';
-    container.appendChild(label);
-
-    items.forEach(function (p) {
-      var card = document.createElement('button');
-      card.className = 'peak-card';
-      var color = getColor(p);
-      card.style.borderColor = color;
-      card.style.setProperty('--card-color', color);
-      card.textContent = p.name;
-      card.addEventListener('click', function () {
-        state.selectedItem = state.selectedItem === p.slug ? null : p.slug;
-        renderSelectionOnly();
-      });
-      container.appendChild(card);
-    });
   }
 
   // --- Filter Accordion ---
@@ -1802,7 +1818,6 @@
     updateInnerRing();
     updateResetButton();
     updateFilterAccordion();
-    renderPeakStrip();
 
     renderTimeline();
 

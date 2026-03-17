@@ -1,0 +1,66 @@
+[
+  {
+    "slug": "potato",
+    "aliases": [
+      "russet potato",
+      "Idaho potato",
+      "Yukon Gold",
+      "red potato",
+      "fingerling potato",
+      "new potato",
+      "spud"
+    ]
+  },
+  {
+    "slug": "orange-sweet-potato",
+    "aliases": [
+      "sweet potato",
+      "yam",
+      "garnet sweet potato",
+      "jewel sweet potato",
+      "beauregard",
+      "camote",
+      "batata doce"
+    ]
+  },
+  {
+    "slug": "japanese-sweet-potato",
+    "aliases": [
+      "satsumaimo",
+      "murasaki sweet potato",
+      "murasaki",
+      "Japanese yam",
+      "purple skin sweet potato"
+    ]
+  },
+  {
+    "slug": "okinawan-sweet-potato",
+    "aliases": [
+      "Stokes Purple",
+      "Hawaiian sweet potato",
+      "purple sweet potato",
+      "uala"
+    ]
+  },
+  {
+    "slug": "white-sweet-potato",
+    "aliases": [
+      "Hannah sweet potato",
+      "O'Henry sweet potato",
+      "boniato",
+      "batata",
+      "camote blanco"
+    ]
+  },
+  {
+    "slug": "yam",
+    "aliases": [
+      "true yam",
+      "name yam",
+      "white yam",
+      "water yam",
+      "yampi",
+      "Dioscorea"
+    ]
+  }
+]

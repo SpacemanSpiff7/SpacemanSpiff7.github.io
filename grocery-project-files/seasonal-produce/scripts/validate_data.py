@@ -29,6 +29,12 @@ def main():
     print(f"Produce items: {len(produce)}")
     print(f"Regions: {len(regions)}")
     print(f"Season entries: {len(seasons)}")
+
+    # Count aliases for summary (full validation happens later)
+    aliases_path = os.path.join(DATA, 'produce_aliases.csv')
+    if os.path.exists(aliases_path):
+        alias_rows = load_csv('produce_aliases.csv')
+        print(f"Aliases: {len(alias_rows)}")
     print()
 
     # Check for duplicate produce slugs
@@ -111,6 +117,36 @@ def main():
             errors.append(f"Line {line}: invalid source_type '{row['source_type']}'")
 
         items_with_seasons.add(slug)
+
+    # Validate aliases (optional file)
+    aliases_path = os.path.join(DATA, 'produce_aliases.csv')
+    alias_count = 0
+    items_with_aliases = set()
+    if os.path.exists(aliases_path):
+        aliases = load_csv('produce_aliases.csv')
+        alias_count = len(aliases)
+        alias_map = {}  # lowercase alias -> list of slugs
+        for i, row in enumerate(aliases):
+            line = i + 2
+            slug = row['canonical_slug']
+            alias = row['alias'].strip()
+
+            if slug not in produce_slugs:
+                errors.append(f"Aliases line {line}: slug '{slug}' not in produce_items.csv")
+
+            if not alias:
+                errors.append(f"Aliases line {line}: empty alias for '{slug}'")
+                continue
+
+            alias_lower = alias.lower()
+            alias_map.setdefault(alias_lower, []).append(slug)
+            items_with_aliases.add(slug)
+
+        # Warn on cross-slug aliases (not an error -- e.g., "yam" maps to both yam and orange-sweet-potato)
+        for alias_lower, slugs in alias_map.items():
+            unique_slugs = list(dict.fromkeys(slugs))
+            if len(unique_slugs) > 1:
+                warnings.append(f"Alias '{alias_lower}' maps to multiple items: {', '.join(unique_slugs)}")
 
     # Coverage report
     items_without = produce_slugs - items_with_seasons

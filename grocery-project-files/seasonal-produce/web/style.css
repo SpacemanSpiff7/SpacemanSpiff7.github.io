@@ -956,6 +956,13 @@ h1, h2, h3 {
   align-items: center;
 }
 
+.timeline-alias-match {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-style: italic;
+}
+
 .timeline-row:hover .timeline-name {
   background: var(--bg-panel-hover);
 }
@@ -1141,6 +1148,13 @@ h1, h2, h3 {
 
 .detail-meta span { margin-right: var(--space-md); }
 
+.detail-aliases {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-lg);
+  font-style: italic;
+}
+
 .detail-seasons { margin-bottom: var(--space-lg); }
 
 .detail-season-entry {
@@ -1243,53 +1257,6 @@ h1, h2, h3 {
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: var(--space-xs);
-}
-
-/* ============================================
-   Peak Strip — horizontal scrolling hero cards
-   ============================================ */
-.peak-strip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px var(--space-lg);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  border-bottom: 1px solid var(--ring-border);
-}
-.peak-strip::-webkit-scrollbar { display: none; }
-
-.peak-strip-label {
-  font-family: var(--font-heading);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.peak-card {
-  flex-shrink: 0;
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  background: transparent;
-  border: 1px solid var(--ring-border);
-  border-left: 3px solid var(--card-color, var(--text-accent));
-  border-radius: var(--radius);
-  padding: 5px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.peak-card:hover {
-  background: rgba(58, 46, 34, 0.06);
-  border-color: var(--card-color, var(--text-accent));
 }
 
 /* ============================================

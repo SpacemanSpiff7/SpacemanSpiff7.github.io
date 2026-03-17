@@ -21,20 +21,44 @@ def load_csv(filename):
         sys.exit(1)
 
 
+def load_aliases():
+    """Load produce_aliases.csv, grouping aliases by slug. Returns {} if file missing."""
+    path = os.path.join(DATA, 'produce_aliases.csv')
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path) as f:
+            rows = list(csv.DictReader(f))
+    except (OSError, csv.Error):
+        return {}
+    aliases = {}
+    for r in rows:
+        slug = r['canonical_slug'].strip()
+        alias = r['alias'].strip()
+        if slug and alias:
+            aliases.setdefault(slug, []).append(alias)
+    return aliases
+
+
 def main():
     errors = []
     produce_rows = load_csv('produce_items.csv')
     region_rows = load_csv('regions.csv')
     season_rows = load_csv('produce_seasons.csv')
+    aliases_by_slug = load_aliases()
 
     produce = []
     for r in produce_rows:
-        produce.append({
+        item = {
             'slug': r['canonical_slug'],
             'name': r['canonical_name'],
             'category': r['category'],
             'culinaryGroup': r['culinary_group'],
-        })
+        }
+        slug_aliases = aliases_by_slug.get(r['canonical_slug'])
+        if slug_aliases:
+            item['a'] = slug_aliases
+        produce.append(item)
 
     regions = []
     for i, r in enumerate(region_rows):

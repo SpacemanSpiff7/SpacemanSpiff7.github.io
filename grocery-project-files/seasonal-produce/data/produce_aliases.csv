@@ -1,0 +1,446 @@
+canonical_slug,alias
+potato,russet potato
+potato,Idaho potato
+potato,Yukon Gold
+potato,red potato
+potato,fingerling potato
+potato,new potato
+potato,spud
+orange-sweet-potato,sweet potato
+orange-sweet-potato,yam
+orange-sweet-potato,garnet sweet potato
+orange-sweet-potato,jewel sweet potato
+orange-sweet-potato,beauregard
+orange-sweet-potato,camote
+orange-sweet-potato,batata doce
+japanese-sweet-potato,satsumaimo
+japanese-sweet-potato,murasaki sweet potato
+japanese-sweet-potato,murasaki
+japanese-sweet-potato,Japanese yam
+japanese-sweet-potato,purple skin sweet potato
+okinawan-sweet-potato,Stokes Purple
+okinawan-sweet-potato,Hawaiian sweet potato
+okinawan-sweet-potato,purple sweet potato
+okinawan-sweet-potato,uala
+white-sweet-potato,Hannah sweet potato
+white-sweet-potato,O'Henry sweet potato
+white-sweet-potato,boniato
+white-sweet-potato,batata
+white-sweet-potato,camote blanco
+yam,true yam
+yam,name yam
+yam,white yam
+yam,water yam
+yam,yampi
+yam,Dioscorea
+cilantro,coriander
+cilantro,coriander leaf
+cilantro,Chinese parsley
+cilantro,Mexican parsley
+culantro,recao
+culantro,sawtooth coriander
+culantro,long coriander
+culantro,ngo gai
+green-onion,scallion
+green-onion,spring onion
+green-onion,Welsh onion
+arugula,rocket
+arugula,rucola
+arugula,roquette
+eggplant,aubergine
+eggplant,brinjal
+eggplant,garden egg
+japanese-eggplant,ichiban eggplant
+japanese-eggplant,nasu
+japanese-eggplant,Asian eggplant
+thai-eggplant,makhuea phuang
+thai-eggplant,pea eggplant
+bell-pepper,sweet pepper
+bell-pepper,capsicum
+bell-pepper,pimiento
+jalapeno,chipotle
+jalapeno,huachinango
+poblano-pepper,ancho chile
+poblano-pepper,ancho pepper
+anaheim-pepper,California chile
+anaheim-pepper,New Mexico chile
+anaheim-pepper,chile verde
+hatch-chile,New Mexico Hatch chile
+hatch-chile,Hatch green chile
+fresno-pepper,red jalapeno
+serrano-pepper,serrano chile
+habanero,habanero chile
+habanero,Scotch bonnet cousin
+scotch-bonnet,bonney pepper
+scotch-bonnet,Caribbean red pepper
+thai-chile,bird's eye chile
+thai-chile,prik kee noo
+thai-chile,Thai bird chile
+ghost-pepper,bhut jolokia
+ghost-pepper,naga pepper
+carolina-reaper,HP22B
+cubanelle,Italian frying pepper
+shishito-pepper,shishito
+banana-pepper,yellow wax pepper
+hungarian-wax-pepper,hot banana pepper
+sweet-mini-pepper,mini sweet pepper
+sweet-mini-pepper,snacking pepper
+sweet-mini-pepper,lunch box pepper
+ginger-root,ginger
+ginger-root,fresh ginger
+turmeric-root,turmeric
+turmeric-root,fresh turmeric
+turmeric-root,haldi
+galangal,Thai ginger
+galangal,blue ginger
+galangal,kha
+lemongrass,citronella grass
+lemongrass,takrai
+makrut-lime-leaves,kaffir lime leaves
+makrut-lime-leaves,makrut lime
+makrut-lime-leaves,bai makrut
+shiso,perilla
+shiso,Japanese basil
+shiso,beefsteak plant
+holy-basil,tulsi
+holy-basil,hot basil
+holy-basil,krapao
+thai-basil,horapha
+thai-basil,Asian basil
+epazote,Mexican tea
+epazote,wormseed
+papalo,papaloquelite
+papalo,Bolivian coriander
+papalo,quilquina
+chive,common chive
+garlic-chive,Chinese chive
+garlic-chive,nira
+garlic-chive,ku chai
+curry-leaves,curry leaf
+curry-leaves,kadi patta
+curry-leaves,sweet neem
+fennel,finocchio
+fennel,anise bulb
+napa-cabbage,Chinese cabbage
+napa-cabbage,wombok
+napa-cabbage,hakusai
+bok-choy,pak choi
+bok-choy,Chinese white cabbage
+bok-choy,Shanghai bok choy
+chinese-broccoli,gai lan
+chinese-broccoli,kai lan
+chinese-broccoli,Chinese kale
+choy-sum,choi sum
+choy-sum,yu choy sum
+choy-sum,Chinese flowering cabbage
+yu-choy,yu choi
+yu-choy,edible rape
+tatsoi,spoon mustard
+tatsoi,rosette bok choy
+broccoli-rabe,rapini
+broccoli-rabe,broccoli raab
+broccoli-rabe,cime di rapa
+broccolini,baby broccoli
+broccolini,asparation
+kohlrabi,German turnip
+kohlrabi,turnip cabbage
+romanesco,Roman cauliflower
+romanesco,Romanesco broccoli
+daikon-radish,daikon
+daikon-radish,white radish
+daikon-radish,mooli
+daikon-radish,lo bak
+watermelon-radish,beauty heart radish
+watermelon-radish,red meat radish
+watermelon-radish,shinrimei
+black-radish,Spanish radish
+sunchoke,Jerusalem artichoke
+sunchoke,earth apple
+sunchoke,topinambour
+jicama,Mexican yam bean
+jicama,Mexican turnip
+cassava,yuca
+cassava,manioc
+cassava,tapioca root
+taro,dasheen
+taro,eddo
+taro,kalo
+taro,malanga
+celery-root,celery root
+celery-root,knob celery
+salsify,oyster plant
+salsify,goatsbeard
+burdock-root,gobo
+burdock-root,greater burdock
+rutabaga,swede
+rutabaga,Swedish turnip
+rutabaga,neep
+parsnip,white carrot
+lotus-root,renkon
+lotus-root,lotus rhizome
+water-chestnut,Chinese water chestnut
+water-chestnut,water caltrop
+arrowroot,arrowroot starch
+arrowroot,maranta
+horseradish-root,horseradish
+avocado,aguacate
+avocado,alligator pear
+passion-fruit,passionfruit
+passion-fruit,maracuya
+passion-fruit,lilikoi
+passion-fruit,granadilla
+dragon-fruit,pitaya
+dragon-fruit,pitahaya
+dragon-fruit,strawberry pear
+star-fruit,starfruit
+star-fruit,carambola
+carambola,star fruit
+carambola,starfruit
+carambola,five-finger fruit
+cherimoya,custard apple
+cherimoya,chirimoya
+guava,guayaba
+pineapple-guava,feijoa
+lychee,litchi
+lychee,lichi
+longan,dragon eye fruit
+rambutan,hairy lychee
+mangosteen,purple mangosteen
+mangosteen,queen of fruits
+jackfruit,nangka
+jackfruit,jaca
+durian,king of fruits
+soursop,guanabana
+soursop,graviola
+plantain,platano
+plantain,cooking banana
+prickly-pear,tuna fruit
+prickly-pear,cactus fruit
+prickly-pear,nopal fruit
+cactus-pear,tuna
+cactus-pear,Indian fig
+nopales,nopal
+nopales,cactus pad
+nopales,prickly pear cactus
+cactus-pad,nopalito
+cactus-pad,cactus paddle
+persimmon,kaki
+persimmon,sharon fruit
+jujube,Chinese date
+jujube,red date
+mamey-sapote,mamey
+mamey-sapote,zapote
+black-sapote,chocolate pudding fruit
+canistel,egg fruit
+tamarind,imli
+tejocote,Mexican hawthorn
+tejocote,manzanita
+cape-gooseberry,goldenberry
+cape-gooseberry,ground cherry
+cape-gooseberry,physalis
+cape-gooseberry,uchuva
+goldenberry,cape gooseberry
+goldenberry,Peruvian ground cherry
+goldenberry,physalis
+gold-kiwi,golden kiwi
+gold-kiwi,SunGold kiwi
+kiwi,kiwifruit
+kiwi,Chinese gooseberry
+ugli-fruit,uniq fruit
+ugli-fruit,Jamaican tangelo
+tangelo,Minneola tangelo
+tangelo,honeybell
+pummelo,pomelo
+pummelo,shaddock
+pummelo,Chinese grapefruit
+mandarin,mandarin orange
+mandarin,clementine
+mandarin,satsuma
+meyer-lemon,Meyer
+meyer-lemon,improved Meyer lemon
+key-lime,Mexican lime
+key-lime,West Indian lime
+key-lime,limoncillo
+kumquat,cumquat
+bittermelon,bitter melon
+bittermelon,bitter gourd
+bittermelon,karela
+bittermelon,ampalaya
+chayote,mirliton
+chayote,christophine
+chayote,vegetable pear
+bottle-gourd,calabash
+bottle-gourd,lauki
+bottle-gourd,long melon
+bottle-gourd,opo
+opo-squash,opo
+opo-squash,long squash
+opo-squash,bottle gourd
+winter-melon,wax gourd
+winter-melon,white gourd
+winter-melon,dong gua
+kabocha-squash,kabocha
+kabocha-squash,Japanese pumpkin
+calabaza,Caribbean pumpkin
+calabaza,West Indian pumpkin
+calabaza,calabaza squash
+delicata-squash,delicata
+delicata-squash,sweet potato squash
+moqua,fuzzy melon
+moqua,fuzzy gourd
+moqua,mo gua
+ridged-luffa,Chinese okra
+ridged-luffa,angled luffa
+ridged-luffa,see gua
+smooth-luffa,sponge gourd
+smooth-luffa,loofah
+sinqua,silk squash
+sinqua,silk gourd
+snake-gourd,serpent gourd
+snake-gourd,chichinda
+snap-pea,sugar snap pea
+snap-pea,snap peas
+snow-pea,mange tout
+snow-pea,Chinese pea
+english-pea,garden peas
+english-pea,shelling peas
+english-pea,sweet peas
+fava-bean,faba bean
+fava-bean,broad bean
+fava-bean,haba
+fresh-garbanzo-beans,chickpea
+fresh-garbanzo-beans,chickpeas
+fresh-garbanzo-beans,ceci bean
+fresh-garbanzo-beans,garbanzo
+chinese-long-bean,yard long bean
+chinese-long-bean,long bean
+chinese-long-bean,asparagus bean
+chinese-long-bean,dow gauk
+hyacinth-beans,lablab bean
+hyacinth-beans,dolichos bean
+lima-bean,butter bean
+winged-bean,winged pea
+winged-bean,goa bean
+winged-bean,four-angled bean
+blackeye-pea,black-eyed pea
+blackeye-pea,cowpea
+swiss-chard,chard
+swiss-chard,silverbeet
+swiss-chard,perpetual spinach
+collard-greens,collards
+chicory,Belgian endive
+chicory,witloof
+endive,Belgian endive
+endive,witlof
+frisee,curly endive
+frisee,frisee lettuce
+escarole,broad-leafed endive
+radicchio,Italian chicory
+mache,lamb's lettuce
+mache,corn salad
+mizuna,Japanese mustard greens
+mizuna,spider mustard
+chrysanthemum-leaves,shungiku
+chrysanthemum-leaves,crown daisy
+chrysanthemum-leaves,tong hao
+water-spinach,ong choy
+water-spinach,kangkong
+water-spinach,morning glory
+amaranth-greens,callaloo
+amaranth-greens,Chinese spinach
+pea-shoot,pea shoots
+pea-shoot,pea tendrils
+pea-shoot,dou miao
+purslane,verdolaga
+sorrel,dock
+upland-cress,land cress
+watercress,berro
+bamboo-shoot,bamboo shoots
+bamboo-shoot,takenoko
+hearts-of-palm,palm hearts
+hearts-of-palm,palmito
+fiddlehead-ferns,fiddleheads
+sea-bean,sea asparagus
+sea-bean,samphire
+sea-bean,salicornia
+rhubarb,pie plant
+cardoon,artichoke thistle
+squash-blossom,zucchini flower
+squash-blossom,flor de calabaza
+hibiscus,jamaica
+hibiscus,flor de jamaica
+hibiscus,roselle
+shiitake-mushroom,shiitake
+shiitake-mushroom,donko
+oyster-mushroom,oyster mushrooms
+oyster-mushroom,hiratake
+king-oyster-mushroom,king trumpet mushroom
+king-oyster-mushroom,eryngii
+enoki-mushroom,enoki
+enoki-mushroom,enokitake
+enoki-mushroom,golden needle mushroom
+lions-mane-mushroom,lion's mane
+lions-mane-mushroom,pom pom mushroom
+lions-mane-mushroom,hericium
+maitake-mushroom,maitake
+maitake-mushroom,hen of the woods
+button-mushroom,white mushroom
+button-mushroom,white button mushroom
+cremini-mushroom,cremini
+cremini-mushroom,baby bella
+cremini-mushroom,baby portobello
+cremini-mushroom,brown mushroom
+portobello-mushroom,portabella
+portobello-mushroom,portobella
+wood-ear-mushroom,wood ear
+wood-ear-mushroom,black fungus
+wood-ear-mushroom,cloud ear
+silver-ear-mushroom,snow fungus
+silver-ear-mushroom,white fungus
+silver-ear-mushroom,tremella
+straw-mushroom,paddy straw mushroom
+chanterelle-mushroom,chanterelle
+chanterelle-mushroom,golden chanterelle
+chanterelle-mushroom,girolle
+morel-mushroom,morel
+morel-mushroom,morels
+porcini-mushroom,porcini
+porcini-mushroom,cep
+porcini-mushroom,king bolete
+porcini-mushroom,penny bun
+matsutake-mushroom,matsutake
+matsutake-mushroom,pine mushroom
+chicken-of-the-woods,sulphur shelf
+lobster-mushroom,hypomyces
+black-truffle,truffle
+black-truffle,Perigord truffle
+taro-leaves,luau leaf
+taro-leaves,callaloo leaf
+sugarcane,sugar cane
+date,Medjool date
+date,deglet noor
+coconut,coco
+tamarillo,tree tomato
+yellow-pitaya,yellow dragon fruit
+peanut,groundnut
+peanut,goober
+pine-nut,pinon
+pine-nut,pignoli
+elephant-garlic,great-headed garlic
+shallot,eschalot
+sweet-onion,Vidalia onion
+sweet-onion,Walla Walla onion
+sweet-onion,Maui onion
+green-garlic,spring garlic
+green-garlic,young garlic
+okra,lady's finger
+okra,gumbo
+okra,bhindi
+beet,beetroot
+chioggia-beet,candy cane beet
+chioggia-beet,candy stripe beet
+golden-beet,golden beetroot
+corn,maize
+sweet-corn,corn on the cob
+baby-corn,miniature corn
+baby-corn,young corn
