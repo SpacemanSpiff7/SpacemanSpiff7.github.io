@@ -402,7 +402,9 @@ h1, h2, h3 {
   transition: fill 0.2s;
   opacity: 0;
 }
-.mid-segment:hover { fill: rgba(212, 112, 44, 0.15); }
+@media (hover: hover) {
+  .mid-segment:hover { fill: rgba(212, 112, 44, 0.15); }
+}
 .mid-segment.active {
   fill: rgba(212, 112, 44, 0.22);
   stroke: var(--text-accent);
@@ -428,7 +430,9 @@ h1, h2, h3 {
   transition: fill 0.2s;
   opacity: 0;
 }
-.inner-segment:hover { fill: rgba(212, 112, 44, 0.15); }
+@media (hover: hover) {
+  .inner-segment:hover { fill: rgba(212, 112, 44, 0.15); }
+}
 .inner-segment.active {
   fill: rgba(212, 112, 44, 0.22);
   stroke: var(--text-accent);
