@@ -1,6 +1,6 @@
 /* ============================================
    Seasonal Produce California — App
-   Dark theme with rotating ring navigator
+   Warm light theme with rotating ring navigator
    Concentric rings: month / category+source / status
    ============================================ */
 
@@ -41,6 +41,11 @@
     'Other': 'var(--color-root)',
   };
 
+  // --- Category -> Culinary Groups mapping (built at init from data) ---
+  var CATEGORY_TO_GROUPS = {};
+  var ALL_CULINARY_GROUPS = [];
+  var ORIGIN_GROUPS = [];
+
   // --- State ---
   var state = {
     data: null,
@@ -52,10 +57,28 @@
     activeCategories: new Set(),
     activeSource: new Set(),
     activeStatus: new Set(),
-    view: 'timeline',
+    activeCulinaryGroups: new Set(),
+    activeOriginGroups: new Set(),
+    availabilityFilter: null,
+    sortMode: 'status',
+    filterAccordionOpen: false,
+    expandedSections: new Set(),
     selectedItem: null,
-    showOffSeason: false,
   };
+
+  // --- Caches ---
+  // Per-month caches (invalidated on month change, populated at top of render)
+  var statusCache = {};       // slug -> 'peak'|'in-season'|'coming'|'off'|'none'
+  var comingSoonCache = {};    // slug -> boolean
+  var leavingPeakCache = {};   // slug -> boolean
+
+  // Data-dependent caches (populated once after data load, never invalidated)
+  var sourceTypesCache = {};    // slug -> { local: true, import: true, ... }
+  var seasonLengthCache = {};   // slug -> number
+  var yearRoundCache = {};      // slug -> boolean
+  var originGroupsCache = {};   // slug -> { groupName: true, ... }
+  var hasLocalSeasonCache = {}; // slug -> boolean
+  var earliestPeakMonthCache = {}; // slug -> number
 
   // --- Data Loading ---
   function loadData() {
@@ -83,9 +106,30 @@
       data.produce.forEach(function (p) { state.produceBySlug[p.slug] = p; });
       data.regions.forEach(function (r) { state.regionBySlug[r.slug] = r; });
       data.seasons.forEach(function (s) {
-        if (!state.seasonsBySlug[s.produceSlug]) state.seasonsBySlug[s.produceSlug] = [];
-        state.seasonsBySlug[s.produceSlug].push(s);
+        if (!state.seasonsBySlug[s.p]) state.seasonsBySlug[s.p] = [];
+        state.seasonsBySlug[s.p].push(s);
       });
+
+      // Build category -> culinary groups map
+      var groupSet = {};
+      data.produce.forEach(function (p) {
+        if (!CATEGORY_TO_GROUPS[p.category]) CATEGORY_TO_GROUPS[p.category] = {};
+        CATEGORY_TO_GROUPS[p.category][p.culinaryGroup] = true;
+        groupSet[p.culinaryGroup] = true;
+      });
+      // Convert to sorted arrays
+      Object.keys(CATEGORY_TO_GROUPS).forEach(function (cat) {
+        CATEGORY_TO_GROUPS[cat] = Object.keys(CATEGORY_TO_GROUPS[cat]).sort();
+      });
+      ALL_CULINARY_GROUPS = Object.keys(groupSet).sort();
+
+      // Build origin groups list
+      var og = {};
+      data.regions.forEach(function (r) { if (r.originGroup) og[r.originGroup] = true; });
+      ORIGIN_GROUPS = Object.keys(og).sort();
+
+      // Populate data-dependent caches (computed once, never invalidated)
+      computeDataCaches();
     });
   }
 
@@ -99,14 +143,14 @@
     if (!seasons || !seasons.length) return 'none';
     var isPeak = false, isSeason = false;
     for (var i = 0; i < seasons.length; i++) {
-      if (seasons[i].peakMonths.indexOf(month) !== -1) isPeak = true;
-      if (seasons[i].seasonMonths.indexOf(month) !== -1) isSeason = true;
+      if (seasons[i].pk.indexOf(month) !== -1) isPeak = true;
+      if (seasons[i].s.indexOf(month) !== -1) isSeason = true;
     }
     if (isPeak) return 'peak';
     if (isSeason) return 'in-season';
     var next = month === 12 ? 1 : month + 1;
     for (var j = 0; j < seasons.length; j++) {
-      if (seasons[j].seasonMonths.indexOf(next) !== -1) return 'coming';
+      if (seasons[j].s.indexOf(next) !== -1) return 'coming';
     }
     return 'off';
   }
@@ -129,7 +173,7 @@
   function getSourceTypes(slug) {
     var seasons = state.seasonsBySlug[slug] || [];
     var types = {};
-    seasons.forEach(function (s) { types[s.sourceType] = true; });
+    seasons.forEach(function (s) { types[s.t] = true; });
     return types;
   }
 
@@ -140,51 +184,142 @@
     var seasons = state.seasonsBySlug[slug];
     if (!seasons || !seasons.length) return false;
     for (var i = 0; i < seasons.length; i++) {
-      if (seasons[i].seasonMonths.length < 12) return false;
-      if (seasons[i].peakMonths.length > 0) return false;
+      if (seasons[i].s.length < 12) return false;
+      if (seasons[i].pk.length > 0) return false;
     }
     return true;
+  }
+
+  // --- New filter helpers ---
+  function getSeasonLength(slug) {
+    var seasons = state.seasonsBySlug[slug];
+    if (!seasons || !seasons.length) return 0;
+    var months = {};
+    seasons.forEach(function (s) {
+      s.s.forEach(function (m) { months[m] = true; });
+    });
+    return Object.keys(months).length;
+  }
+
+  function getEarliestPeakMonth(slug) {
+    var seasons = state.seasonsBySlug[slug];
+    if (!seasons || !seasons.length) return 13;
+    var earliest = 13;
+    seasons.forEach(function (s) {
+      s.pk.forEach(function (m) { if (m < earliest) earliest = m; });
+    });
+    return earliest;
+  }
+
+  function getOriginGroupsForItem(slug) {
+    var seasons = state.seasonsBySlug[slug] || [];
+    var groups = {};
+    seasons.forEach(function (s) {
+      var r = state.regionBySlug[s.r];
+      if (r && r.originGroup) groups[r.originGroup] = true;
+    });
+    return groups;
+  }
+
+  // --- Cache population ---
+  // Called once after data load to populate data-dependent caches
+  function computeDataCaches() {
+    state.data.produce.forEach(function (p) {
+      sourceTypesCache[p.slug] = getSourceTypes(p.slug);
+      seasonLengthCache[p.slug] = getSeasonLength(p.slug);
+      yearRoundCache[p.slug] = isYearRound(p.slug);
+      originGroupsCache[p.slug] = getOriginGroupsForItem(p.slug);
+      hasLocalSeasonCache[p.slug] = hasLocalSeason(p.slug);
+      earliestPeakMonthCache[p.slug] = getEarliestPeakMonth(p.slug);
+    });
+  }
+
+  // Called at top of render() to populate per-month caches
+  var lastComputedMonth = -1;
+  function computeAllStatuses(month) {
+    if (month === lastComputedMonth) return;
+    lastComputedMonth = month;
+    statusCache = {};
+    comingSoonCache = {};
+    leavingPeakCache = {};
+    state.data.produce.forEach(function (p) {
+      statusCache[p.slug] = getItemStatus(p.slug, month);
+      comingSoonCache[p.slug] = getItemIsComingSoon(p.slug, month);
+      leavingPeakCache[p.slug] = getItemIsLeavingPeak(p.slug, month);
+    });
   }
 
   // --- Filtering ---
   function filterProduce() {
     var items = [];
     var month = state.selectedMonth;
+    var hasAnyFilter = state.activeCategories.size > 0 || state.activeSource.size > 0 ||
+      (state.activeStatus.size > 0 && state.activeStatus.size < 3) ||
+      state.activeCulinaryGroups.size > 0 || state.activeOriginGroups.size > 0 ||
+      state.availabilityFilter !== null;
 
     state.data.produce.forEach(function (p) {
-      if (!state.seasonsBySlug[p.slug]) return;
+      var hasSeasons = !!state.seasonsBySlug[p.slug];
+      var isNoData = !hasSeasons;
 
-      // Hide year-round items with no peak differentiation unless searching
-      if (!state.searchQuery && isYearRound(p.slug)) return;
-
+      // Search applies to all items
       if (state.searchQuery) {
         if (p.name.toLowerCase().indexOf(state.searchQuery.toLowerCase()) === -1) return;
       }
 
+      // Category filter applies to all items
       if (state.activeCategories.size > 0) {
         if (!state.activeCategories.has(p.category)) return;
       }
 
+      // Culinary group filter applies to all items
+      if (state.activeCulinaryGroups.size > 0) {
+        if (!state.activeCulinaryGroups.has(p.culinaryGroup)) return;
+      }
+
+      // Source filter -- skip for no-data items
       if (state.activeSource.size > 0) {
-        var types = getSourceTypes(p.slug);
+        if (isNoData) return;
+        var types = sourceTypesCache[p.slug];
         var sourceMatch = false;
         state.activeSource.forEach(function (s) { if (types[s]) sourceMatch = true; });
         if (!sourceMatch) return;
       }
 
-      var status = getItemStatus(p.slug, month);
+      // Status filter -- skip for no-data items
+      var status = isNoData ? 'no-data' : statusCache[p.slug];
 
       if (state.activeStatus.size > 0 && state.activeStatus.size < 3) {
+        if (isNoData) return;
         var passes = false;
         if (state.activeStatus.has('peak') && status === 'peak') passes = true;
-        if (state.activeStatus.has('coming') && getItemIsComingSoon(p.slug, month)) passes = true;
-        if (state.activeStatus.has('leaving') && getItemIsLeavingPeak(p.slug, month)) passes = true;
+        if (state.activeStatus.has('coming') && comingSoonCache[p.slug]) passes = true;
+        if (state.activeStatus.has('leaving') && leavingPeakCache[p.slug]) passes = true;
         if (!passes) return;
       }
 
-      if (state.view === 'grid' && !state.showOffSeason && (status === 'off' || status === 'none')) {
-        return;
+      // Origin group filter -- skip for no-data items
+      if (state.activeOriginGroups.size > 0) {
+        if (isNoData) return;
+        var itemOrigins = originGroupsCache[p.slug];
+        var originMatch = false;
+        state.activeOriginGroups.forEach(function (g) { if (itemOrigins[g]) originMatch = true; });
+        if (!originMatch) return;
       }
+
+      // Availability filter -- skip for no-data items
+      if (state.availabilityFilter !== null) {
+        if (isNoData) return;
+        var seasonLen = seasonLengthCache[p.slug];
+        var yr = yearRoundCache[p.slug] || seasonLen === 12;
+        if (state.availabilityFilter === 'year-round' && !yr) return;
+        if (state.availabilityFilter === 'seasonal' && yr) return;
+        if (state.availabilityFilter === 'short' && (yr || seasonLen > 4)) return;
+        if (state.availabilityFilter === 'long' && (yr || seasonLen < 8)) return;
+      }
+
+      // Year-round hiding: hide year-round items unless searching, or availability filter is year-round
+      if (!isNoData && !state.searchQuery && state.availabilityFilter !== 'year-round' && !hasAnyFilter && yearRoundCache[p.slug]) return;
 
       items.push({ produce: p, status: status });
     });
@@ -193,14 +328,61 @@
   }
 
   function sortItems(items) {
-    var order = { peak: 0, 'in-season': 1, coming: 2, off: 3, none: 4 };
+    var mode = state.sortMode;
+
+    if (mode === 'alpha') {
+      items.sort(function (a, b) {
+        return a.produce.name.localeCompare(b.produce.name);
+      });
+      return items;
+    }
+
+    if (mode === 'peak-month') {
+      items.sort(function (a, b) {
+        var aND = a.status === 'no-data' ? 1 : 0;
+        var bND = b.status === 'no-data' ? 1 : 0;
+        if (aND !== bND) return aND - bND;
+        var aPeak = earliestPeakMonthCache[a.produce.slug];
+        var bPeak = earliestPeakMonthCache[b.produce.slug];
+        if (aPeak !== bPeak) return aPeak - bPeak;
+        return a.produce.name.localeCompare(b.produce.name);
+      });
+      return items;
+    }
+
+    if (mode === 'season-length') {
+      items.sort(function (a, b) {
+        var aND = a.status === 'no-data' ? 1 : 0;
+        var bND = b.status === 'no-data' ? 1 : 0;
+        if (aND !== bND) return aND - bND;
+        var aLen = seasonLengthCache[a.produce.slug];
+        var bLen = seasonLengthCache[b.produce.slug];
+        if (aLen !== bLen) return aLen - bLen;
+        return a.produce.name.localeCompare(b.produce.name);
+      });
+      return items;
+    }
+
+    if (mode === 'category') {
+      items.sort(function (a, b) {
+        var aND = a.status === 'no-data' ? 1 : 0;
+        var bND = b.status === 'no-data' ? 1 : 0;
+        if (aND !== bND) return aND - bND;
+        var catCmp = a.produce.category.localeCompare(b.produce.category);
+        if (catCmp !== 0) return catCmp;
+        return a.produce.name.localeCompare(b.produce.name);
+      });
+      return items;
+    }
+
+    // Default: status sort (peak first)
+    var order = { peak: 0, 'in-season': 1, coming: 2, off: 3, none: 4, 'no-data': 5 };
     items.sort(function (a, b) {
-      var oa = order[a.status] !== undefined ? order[a.status] : 4;
-      var ob = order[b.status] !== undefined ? order[b.status] : 4;
+      var oa = order[a.status] !== undefined ? order[a.status] : 5;
+      var ob = order[b.status] !== undefined ? order[b.status] : 5;
       if (oa !== ob) return oa - ob;
-      // Locality tiebreaker: local items rank higher than import
-      var aLocal = hasLocalSeason(a.produce.slug) ? 0 : 1;
-      var bLocal = hasLocalSeason(b.produce.slug) ? 0 : 1;
+      var aLocal = hasLocalSeasonCache[a.produce.slug] ? 0 : 1;
+      var bLocal = hasLocalSeasonCache[b.produce.slug] ? 0 : 1;
       if (aLocal !== bLocal) return aLocal - bLocal;
       return a.produce.name.localeCompare(b.produce.name);
     });
@@ -210,7 +392,7 @@
   function hasLocalSeason(slug) {
     var seasons = state.seasonsBySlug[slug] || [];
     for (var i = 0; i < seasons.length; i++) {
-      if (seasons[i].sourceType === 'local') return true;
+      if (seasons[i].t === 'local') return true;
     }
     return false;
   }
@@ -219,7 +401,7 @@
   function computeStats(month) {
     var inSeason = 0, atPeak = 0;
     state.data.produce.forEach(function (p) {
-      var status = getItemStatus(p.slug, month);
+      var status = statusCache[p.slug];
       if (status === 'peak') { atPeak++; inSeason++; }
       else if (status === 'in-season') { inSeason++; }
     });
@@ -601,55 +783,12 @@
   }
 
   // ============================================
-  // Stoumann-inspired leaf embellishments
-  // Translates CSS shape() arcs to SVG paths
+  // Ring bezels — thin divider lines between rings
   // ============================================
   function buildLeafDecor() {
     var group = document.getElementById('ring-leaf-decor');
     group.innerHTML = '';
 
-    // Stoumann .leaf-main: almond shape — two opposing elliptical arcs
-    // shape(from 50% 0%, arc to 50% 100% of 100% 75% ccw, arc to 50% 0% of 100% 75% ccw)
-    // In SVG: a vertical almond centered on 150,150, ~260px tall
-    var leafMain = 'M 150 30 C 80 90 80 210 150 270 C 220 210 220 90 150 30 Z';
-
-    var l1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    l1.setAttribute('d', leafMain);
-    l1.setAttribute('class', 'leaf-embellish leaf-main');
-    l1.setAttribute('transform', 'rotate(22 150 150)');
-    group.appendChild(l1);
-
-    var l2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    l2.setAttribute('d', leafMain);
-    l2.setAttribute('class', 'leaf-embellish leaf-main');
-    l2.setAttribute('transform', 'rotate(-22 150 150)');
-    group.appendChild(l2);
-
-    // Stoumann .leaf-left / .leaf-right: smaller horizontal leaves
-    // shape(from 0% 50%, arc to 100% 50% of 100% 250% ccw, arc to 0% 50% of 100% 250% ccw)
-    var leafSmall = 'M 120 150 C 135 130 165 130 180 150 C 165 170 135 170 120 150 Z';
-
-    var l3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    l3.setAttribute('d', leafSmall);
-    l3.setAttribute('class', 'leaf-embellish leaf-side');
-    l3.setAttribute('transform', 'rotate(50 150 150) translate(0 -80)');
-    group.appendChild(l3);
-
-    var l4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    l4.setAttribute('d', leafSmall);
-    l4.setAttribute('class', 'leaf-embellish leaf-side');
-    l4.setAttribute('transform', 'rotate(-50 150 150) translate(0 -80)');
-    group.appendChild(l4);
-
-    // Stoumann .sun: gold circle accent
-    var sun = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    sun.setAttribute('cx', '150');
-    sun.setAttribute('cy', '150');
-    sun.setAttribute('r', '56');
-    sun.setAttribute('class', 'leaf-embellish sun-glow');
-    group.appendChild(sun);
-
-    // Thin ring dividers (like brass bezels on a watchface)
     [OUTER_IR, MID_OUTER, MID_INNER, INNER_OUTER, INNER_INNER].forEach(function (r) {
       var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       circle.setAttribute('cx', '150');
@@ -663,22 +802,55 @@
   // ============================================
   // Reset Filters
   // ============================================
+  function resetFilters() {
+    state.activeCategories.clear();
+    state.activeSource.clear();
+    state.activeStatus.clear();
+    state.activeCulinaryGroups.clear();
+    state.activeOriginGroups.clear();
+    state.availabilityFilter = null;
+    state.sortMode = 'status';
+    state.filterAccordionOpen = false;
+    state.expandedSections.clear();
+    state.selectedMonth = new Date().getMonth() + 1;
+    midLastClicked = 0;
+    innerLastClicked = 3; // rotate "All" to top
+    document.getElementById('filter-accordion').classList.add('hidden');
+    document.getElementById('filter-toggle').classList.remove('accordion-open');
+    render();
+  }
+
   function bindResetFilters() {
-    document.getElementById('reset-filters').addEventListener('click', function () {
-      state.activeCategories.clear();
-      state.activeSource.clear();
-      state.activeStatus.clear();
-      midLastClicked = 0;
-      innerLastClicked = 3; // rotate "All" to top
-      render();
+    document.getElementById('filter-reset').addEventListener('click', function (e) {
+      e.stopPropagation();
+      resetFilters();
     });
   }
 
+  function countActiveFilters() {
+    var count = 0;
+    count += state.activeCategories.size;
+    count += state.activeSource.size;
+    if (state.activeStatus.size > 0 && state.activeStatus.size < 3) count += state.activeStatus.size;
+    count += state.activeCulinaryGroups.size;
+    count += state.activeOriginGroups.size;
+    if (state.availabilityFilter !== null) count += 1;
+    return count;
+  }
+
   function updateResetButton() {
-    var hasFilters = state.activeCategories.size > 0 ||
-                     state.activeSource.size > 0 ||
-                     (state.activeStatus.size > 0 && state.activeStatus.size < 3);
-    document.getElementById('reset-filters').classList.toggle('hidden', !hasFilters);
+    var count = countActiveFilters();
+    var isNotCurrentMonth = state.selectedMonth !== (new Date().getMonth() + 1);
+    var hasFilters = count > 0 || state.sortMode !== 'status' || isNotCurrentMonth;
+    document.getElementById('filter-toggle-wrap').classList.toggle('has-filters', hasFilters);
+
+    var badge = document.getElementById('filter-badge');
+    if (count > 0) {
+      badge.textContent = count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
   }
 
   // --- Now line position ---
@@ -689,12 +861,29 @@
     return ((month - 1 + fraction) / 12) * 100;
   }
 
-  // --- Render: Timeline ---
-  function renderTimeline() {
-    var header = document.getElementById('timeline-header');
-    var body = document.getElementById('timeline-body');
+  // --- Render: Timeline (DOM-recycling) ---
 
+  // Persistent header -- built once, now-line updated on month change
+  var _tlHeaderBuilt = false;
+  var _tlHeaderNowLine = null;
+  var _tlHeaderMonth = null;
+
+  // Persistent body now-line
+  var _tlBodyNowContainer = null;
+  var _tlBodyNowLine = null;
+
+  // Row recycling pools
+  var _tlActiveDataRows = {};     // slug -> DOM element
+  var _tlActiveNoDataRows = {};   // slug -> DOM element
+  // (no pool -- active-rows maps prevent redundant creation)
+  var _tlNoDataDivider = null;    // persistent divider element
+  var _tlEmptyMsg = null;         // persistent empty-state element
+  var _tlLastMonth = null;        // track month for scroll-on-change
+
+  function _tlBuildHeader() {
+    var header = document.getElementById('timeline-header');
     header.innerHTML = '';
+
     var spacer = document.createElement('div');
     spacer.className = 'timeline-header-spacer';
     header.appendChild(spacer);
@@ -709,84 +898,310 @@
       monthsRow.appendChild(label);
     });
 
-    var nowLineH = document.createElement('div');
-    nowLineH.className = 'now-line-header';
-    nowLineH.style.left = getNowPosition(state.selectedMonth) + '%';
-    monthsRow.appendChild(nowLineH);
-
+    _tlHeaderNowLine = document.createElement('div');
+    _tlHeaderNowLine.className = 'now-line-header';
+    _tlHeaderNowLine.style.left = getNowPosition(state.selectedMonth) + '%';
+    monthsRow.appendChild(_tlHeaderNowLine);
     header.appendChild(monthsRow);
 
-    body.innerHTML = '';
+    _tlHeaderMonth = state.selectedMonth;
+    _tlHeaderBuilt = true;
+  }
+
+  function _tlUpdateNowLines() {
+    var pos = getNowPosition(state.selectedMonth) + '%';
+    if (_tlHeaderNowLine) _tlHeaderNowLine.style.left = pos;
+    if (_tlBodyNowLine) _tlBodyNowLine.style.left = pos;
+    _tlHeaderMonth = state.selectedMonth;
+  }
+
+  function _tlEnsureBodyNowLine(body) {
+    if (!_tlBodyNowContainer) {
+      _tlBodyNowContainer = document.createElement('div');
+      _tlBodyNowContainer.style.cssText = 'position: absolute; left: var(--name-col); width: var(--timeline-width); top: 0; bottom: 0; pointer-events: none; z-index: 5;';
+      _tlBodyNowLine = document.createElement('div');
+      _tlBodyNowLine.className = 'now-line';
+      _tlBodyNowContainer.appendChild(_tlBodyNowLine);
+    }
+    _tlBodyNowLine.style.left = getNowPosition(state.selectedMonth) + '%';
+    if (_tlBodyNowContainer.parentNode !== body) {
+      body.insertBefore(_tlBodyNowContainer, body.firstChild);
+    }
+  }
+
+  // Build a fully-populated data row for a produce item
+  function _tlMakeDataRow(item) {
+    var slug = item.produce.slug;
+    var seasons = state.seasonsBySlug[slug] || [];
+    var color = getColor(item.produce);
+
+    var localSeasons = seasons.filter(function (s) { return s.t === 'local'; });
+    var importSeasons = seasons.filter(function (s) { return s.t === 'import'; });
+    var isDual = localSeasons.length > 0 && importSeasons.length > 0;
+
+    var row = document.createElement('div');
+    row.className = 'timeline-row' + (isDual ? ' dual-row' : '') + (state.selectedItem === slug ? ' selected' : '');
+    row.setAttribute('data-slug', slug);
+    row._tlSlug = slug;
+
+    row.addEventListener('click', function () {
+      state.selectedItem = state.selectedItem === slug ? null : slug;
+      renderSelectionOnly();
+    });
+
+    var nameCell = document.createElement('div');
+    nameCell.className = 'timeline-name';
+    nameCell.style.borderLeft = '3px solid ' + color;
+    nameCell.appendChild(document.createTextNode(item.produce.name));
+    nameCell.title = item.produce.name;
+    row.appendChild(nameCell);
+
+    var barsArea = document.createElement('div');
+    barsArea.className = 'timeline-bars';
+
+    if (isDual) {
+      renderBars(barsArea, localSeasons, color, 'local', true);
+      renderBars(barsArea, importSeasons, color, 'import', true);
+    } else {
+      renderBars(barsArea, seasons, color, seasons[0] ? seasons[0].t : 'local', false);
+    }
+
+    // Add sticky source labels for all bars
+    var bars = barsArea.querySelectorAll('.season-bar');
+    bars.forEach(function (bar) {
+      if (!bar._sourceLabel) return;
+      var leftPct = parseFloat(bar.style.left);
+      var widthPct = parseFloat(bar.style.width);
+      var wrap = document.createElement('div');
+      var posClass = isDual
+        ? (bar.classList.contains('bar-import') ? ' bar-label-import' : ' bar-label-local')
+        : ' bar-label-single';
+      wrap.className = 'bar-label-track' + posClass;
+      wrap.style.left = leftPct + '%';
+      wrap.style.width = widthPct + '%';
+      var lbl = document.createElement('span');
+      lbl.className = 'bar-source-label';
+      lbl.textContent = bar._sourceLabel;
+      wrap.appendChild(lbl);
+      barsArea.appendChild(wrap);
+    });
+
+    row.appendChild(barsArea);
+    return row;
+  }
+
+  // Build a no-data row
+  function _tlMakeNoDataRow(item) {
+    var slug = item.produce.slug;
+    var color = getColor(item.produce);
+
+    var row = document.createElement('div');
+    row.className = 'timeline-row no-data' + (state.selectedItem === slug ? ' selected' : '');
+    row.setAttribute('data-slug', slug);
+    row._tlSlug = slug;
+
+    row.addEventListener('click', function () {
+      state.selectedItem = state.selectedItem === slug ? null : slug;
+      renderSelectionOnly();
+    });
+
+    var nameCell = document.createElement('div');
+    nameCell.className = 'timeline-name';
+    nameCell.style.borderLeft = '3px solid ' + color;
+    nameCell.appendChild(document.createTextNode(item.produce.name));
+    nameCell.title = item.produce.name;
+    row.appendChild(nameCell);
+
+    var barsArea = document.createElement('div');
+    barsArea.className = 'timeline-bars no-data-bars';
+    var noDataLine = document.createElement('div');
+    noDataLine.className = 'no-data-line';
+    var noDataLabel = document.createElement('span');
+    noDataLabel.className = 'no-data-label';
+    noDataLabel.textContent = 'no data';
+    noDataLine.appendChild(noDataLabel);
+    barsArea.appendChild(noDataLine);
+
+    row.appendChild(barsArea);
+    return row;
+  }
+
+  // Detach a row from the DOM
+  function _tlPoolRow(row) {
+    if (row.parentNode) row.parentNode.removeChild(row);
+  }
+
+  function renderTimeline() {
+    var body = document.getElementById('timeline-body');
+
+    // Build header once; only update now-lines on month change
+    if (!_tlHeaderBuilt) {
+      _tlBuildHeader();
+    } else if (_tlHeaderMonth !== state.selectedMonth) {
+      _tlUpdateNowLines();
+    }
+
     var items = sortItems(filterProduce());
 
+    // --- Empty state ---
     if (items.length === 0) {
-      body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No produce matches your filters.</div>';
+      // Pool all active rows
+      var s;
+      for (s in _tlActiveDataRows) {
+        _tlPoolRow(_tlActiveDataRows[s]);
+        delete _tlActiveDataRows[s];
+      }
+      for (s in _tlActiveNoDataRows) {
+        _tlPoolRow(_tlActiveNoDataRows[s]);
+        delete _tlActiveNoDataRows[s];
+      }
+      if (_tlNoDataDivider && _tlNoDataDivider.parentNode) _tlNoDataDivider.parentNode.removeChild(_tlNoDataDivider);
+      if (_tlBodyNowContainer && _tlBodyNowContainer.parentNode) _tlBodyNowContainer.parentNode.removeChild(_tlBodyNowContainer);
+
+      if (!_tlEmptyMsg) {
+        _tlEmptyMsg = document.createElement('div');
+        _tlEmptyMsg.style.cssText = 'padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.85rem;';
+        _tlEmptyMsg.textContent = 'No produce matches your filters.';
+      }
+      if (_tlEmptyMsg.parentNode !== body) {
+        body.innerHTML = '';
+        body.appendChild(_tlEmptyMsg);
+      }
       return;
     }
 
-    var nowLineContainer = document.createElement('div');
-    nowLineContainer.style.cssText = 'position: absolute; left: var(--name-col); width: var(--timeline-width); top: 0; bottom: 0; pointer-events: none; z-index: 5;';
-    var nowLine = document.createElement('div');
-    nowLine.className = 'now-line';
-    nowLine.style.left = getNowPosition(state.selectedMonth) + '%';
-    nowLineContainer.appendChild(nowLine);
-    body.appendChild(nowLineContainer);
+    // Remove empty message if showing
+    if (_tlEmptyMsg && _tlEmptyMsg.parentNode) _tlEmptyMsg.parentNode.removeChild(_tlEmptyMsg);
 
+    // Ensure now-line is first child
+    _tlEnsureBodyNowLine(body);
+
+    // Separate data vs no-data
+    var dataItems = [];
+    var noDataItems = [];
     items.forEach(function (item) {
-      var slug = item.produce.slug;
-      var seasons = state.seasonsBySlug[slug] || [];
-      var color = getColor(item.produce);
+      if (item.status === 'no-data') noDataItems.push(item);
+      else dataItems.push(item);
+    });
 
-      var localSeasons = seasons.filter(function (s) { return s.sourceType === 'local'; });
-      var importSeasons = seasons.filter(function (s) { return s.sourceType === 'import'; });
-      var isDual = localSeasons.length > 0 && importSeasons.length > 0;
+    // Build lookup of wanted slugs
+    var wantData = {};
+    dataItems.forEach(function (item) { wantData[item.produce.slug] = true; });
+    var wantNoData = {};
+    noDataItems.forEach(function (item) { wantNoData[item.produce.slug] = true; });
 
-      var row = document.createElement('div');
-      row.className = 'timeline-row' + (isDual ? ' dual-row' : '') + (state.selectedItem === slug ? ' selected' : '');
-
-      row.addEventListener('click', function () {
-        state.selectedItem = state.selectedItem === slug ? null : slug;
-        render();
-      });
-
-      var nameCell = document.createElement('div');
-      nameCell.className = 'timeline-name';
-      nameCell.style.borderLeft = '3px solid ' + color;
-
-      nameCell.appendChild(document.createTextNode(item.produce.name));
-      nameCell.title = item.produce.name;
-      row.appendChild(nameCell);
-
-      var barsArea = document.createElement('div');
-      barsArea.className = 'timeline-bars';
-
-      if (isDual) {
-        renderBars(barsArea, localSeasons, color, 'local', true);
-        renderBars(barsArea, importSeasons, color, 'import', true);
-      } else {
-        renderBars(barsArea, seasons, color, seasons[0] ? seasons[0].sourceType : 'local', false);
+    // Pool rows no longer in the filtered set
+    var slug;
+    for (slug in _tlActiveDataRows) {
+      if (!wantData[slug]) {
+        _tlPoolRow(_tlActiveDataRows[slug]);
+        delete _tlActiveDataRows[slug];
       }
+    }
+    for (slug in _tlActiveNoDataRows) {
+      if (!wantNoData[slug]) {
+        _tlPoolRow(_tlActiveNoDataRows[slug]);
+        delete _tlActiveNoDataRows[slug];
+      }
+    }
 
-      row.appendChild(barsArea);
+    // Append data rows in sorted order. appendChild moves existing DOM nodes.
+    dataItems.forEach(function (item) {
+      var s = item.produce.slug;
+      var row = _tlActiveDataRows[s];
+      if (row) {
+        // Reuse -- only toggle selected class
+        row.classList.toggle('selected', state.selectedItem === s);
+      } else {
+        // Create new row for this slug
+        row = _tlMakeDataRow(item);
+        _tlActiveDataRows[s] = row;
+      }
       body.appendChild(row);
     });
 
-    // Scroll to now line
+    // No-data divider + rows
+    if (noDataItems.length > 0) {
+      if (!_tlNoDataDivider) {
+        _tlNoDataDivider = document.createElement('div');
+        _tlNoDataDivider.className = 'no-data-divider';
+      }
+      _tlNoDataDivider.innerHTML = '<span>No season data (' + noDataItems.length + ' items)</span>';
+      body.appendChild(_tlNoDataDivider);
+
+      noDataItems.forEach(function (item) {
+        var s = item.produce.slug;
+        var row = _tlActiveNoDataRows[s];
+        if (row) {
+          row.classList.toggle('selected', state.selectedItem === s);
+        } else {
+          row = _tlMakeNoDataRow(item);
+          _tlActiveNoDataRows[s] = row;
+        }
+        body.appendChild(row);
+      });
+    } else if (_tlNoDataDivider && _tlNoDataDivider.parentNode) {
+      _tlNoDataDivider.parentNode.removeChild(_tlNoDataDivider);
+    }
+
+    // Scroll to now-line on month change or first render
+    var monthChanged = _tlLastMonth !== state.selectedMonth;
+    _tlLastMonth = state.selectedMonth;
+
     var container = document.getElementById('timeline-container');
     var firstBars = body.querySelector('.timeline-bars');
     var totalBarWidth = firstBars ? firstBars.offsetWidth : 1200;
     var firstName = body.querySelector('.timeline-name');
     var nameColWidth = firstName ? firstName.offsetWidth : 160;
-    var nowPct = getNowPosition(state.selectedMonth) / 100;
-    var scrollTarget = nameColWidth + (nowPct * totalBarWidth) - container.clientWidth / 2;
-    container.scrollLeft = Math.max(0, scrollTarget);
+
+    if (monthChanged) {
+      var nowPct = getNowPosition(state.selectedMonth) / 100;
+      var scrollTarget = nameColWidth + (nowPct * totalBarWidth) - container.clientWidth / 2;
+      container.scrollLeft = Math.max(0, scrollTarget);
+    }
+
+    // Sticky source labels -- update on scroll
+    updateStickyLabels(container, nameColWidth, totalBarWidth);
+    container.removeEventListener('scroll', container._stickyHandler);
+    container._stickyHandler = function () {
+      if (!container._stickyRaf) {
+        container._stickyRaf = requestAnimationFrame(function () {
+          container._stickyRaf = null;
+          updateStickyLabels(container, nameColWidth, totalBarWidth);
+        });
+      }
+    };
+    container.addEventListener('scroll', container._stickyHandler);
+  }
+
+  function updateStickyLabels(container, nameColW, barsW) {
+    var scrollL = container.scrollLeft;
+    // The bars area starts at nameColW in the document flow,
+    // but nameCol is sticky so the visible bars left edge = scrollL
+    var visibleBarsLeft = scrollL; // px offset within bars area that's at the left visible edge
+    var labels = container.querySelectorAll('.bar-label-track');
+    for (var i = 0; i < labels.length; i++) {
+      var track = labels[i];
+      var trackLeftPct = parseFloat(track.style.left) / 100;
+      var trackWidthPct = parseFloat(track.style.width) / 100;
+      var trackLeftPx = trackLeftPct * barsW;
+      var trackRightPx = (trackLeftPct + trackWidthPct) * barsW;
+      var lbl = track.querySelector('.bar-source-label');
+      if (!lbl) continue;
+      var lblW = lbl.offsetWidth || 40;
+      // Clamp: label left = max(0, visibleBarsLeft - trackLeftPx), but don't push past right edge
+      var offset = Math.max(0, visibleBarsLeft - trackLeftPx);
+      offset = Math.min(offset, trackRightPx - trackLeftPx - lblW);
+      if (offset < 0) offset = 0;
+      lbl.style.left = offset + 'px';
+    }
   }
 
   function renderBars(container, seasons, color, sourceType, isDual) {
     var allMonths = {}, peakMonths = {};
     seasons.forEach(function (s) {
-      s.seasonMonths.forEach(function (m) { allMonths[m] = true; });
-      s.peakMonths.forEach(function (m) { peakMonths[m] = true; });
+      s.s.forEach(function (m) { allMonths[m] = true; });
+      s.pk.forEach(function (m) { peakMonths[m] = true; });
     });
 
     var segments = buildSegments(allMonths);
@@ -798,22 +1213,14 @@
       bar.style.left = ((seg.start - 1) / 12 * 100) + '%';
       bar.style.width = (seg.months.length / 12 * 100) + '%';
 
-      if (isDual) {
-        var lbl = document.createElement('span');
-        lbl.className = 'bar-source-label';
-        if (sourceType === 'local') {
-          lbl.textContent = 'CA';
-        } else {
-          // Show origin region abbreviation for imports
-          var importRegions = [];
-          seasons.forEach(function (s) {
-            var r = state.regionBySlug[s.regionSlug];
-            if (r && importRegions.indexOf(r.originGroup) === -1) importRegions.push(r.originGroup);
-          });
-          lbl.textContent = importRegions.length ? importRegions[0] : 'Import';
-        }
-        bar.appendChild(lbl);
-      }
+      bar._sourceLabel = sourceType === 'local' ? 'CA' : (function () {
+        var importRegions = [];
+        seasons.forEach(function (s) {
+          var r = state.regionBySlug[s.r];
+          if (r && importRegions.indexOf(r.originGroup) === -1) importRegions.push(r.originGroup);
+        });
+        return importRegions.length ? importRegions[0] : 'Import';
+      })();
 
       seg.months.forEach(function (m, mi) {
         var sub = document.createElement('div');
@@ -831,7 +1238,7 @@
       } else {
         var ttRegions = [];
         seasons.forEach(function (s) {
-          var r = state.regionBySlug[s.regionSlug];
+          var r = state.regionBySlug[s.r];
           if (r && ttRegions.indexOf(r.name) === -1) ttRegions.push(r.name);
         });
         tt.textContent = ttRegions.length ? ttRegions.join(', ') : 'Imported';
@@ -854,101 +1261,6 @@
     }
     segs.push({ start: cur[0], months: cur });
     return segs;
-  }
-
-  // --- Grid ---
-  function renderGrid() {
-    var container = document.getElementById('grid-container');
-    container.innerHTML = '';
-    var items = sortItems(filterProduce());
-
-    if (!items.length) {
-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No produce matches your filters.</div>';
-      return;
-    }
-
-    var groups = {};
-    items.forEach(function (item) {
-      var cat = item.produce.category;
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(item);
-    });
-
-    Object.keys(groups).sort().forEach(function (cat) {
-      var group = document.createElement('div');
-      group.className = 'grid-category-group';
-      var title = document.createElement('h2');
-      title.className = 'grid-category-title';
-      title.textContent = cat;
-      group.appendChild(title);
-
-      var cards = document.createElement('div');
-      cards.className = 'grid-cards';
-      groups[cat].forEach(function (item) { cards.appendChild(createGridCard(item)); });
-      group.appendChild(cards);
-      container.appendChild(group);
-    });
-  }
-
-  function createGridCard(item) {
-    var slug = item.produce.slug;
-    var seasons = state.seasonsBySlug[slug] || [];
-    var color = getColor(item.produce);
-
-    var card = document.createElement('div');
-    card.className = 'grid-card' + (state.selectedItem === slug ? ' selected' : '');
-    card.addEventListener('click', function () {
-      state.selectedItem = state.selectedItem === slug ? null : slug;
-      render();
-    });
-
-    var name = document.createElement('div');
-    name.className = 'grid-card-name';
-    name.textContent = item.produce.name;
-    card.appendChild(name);
-
-    var gl = document.createElement('div');
-    gl.className = 'grid-card-group';
-    gl.textContent = item.produce.culinaryGroup;
-    card.appendChild(gl);
-
-    var minibar = document.createElement('div');
-    minibar.className = 'grid-card-minibar';
-    var allM = {}, peakM = {};
-    seasons.forEach(function (s) {
-      s.seasonMonths.forEach(function (m) { allM[m] = true; });
-      s.peakMonths.forEach(function (m) { peakM[m] = true; });
-    });
-    for (var m = 1; m <= 12; m++) {
-      var cell = document.createElement('div');
-      cell.className = 'minibar-cell';
-      if (peakM[m]) { cell.classList.add('peak'); cell.style.backgroundColor = color; }
-      else if (allM[m]) { cell.classList.add('in-season'); cell.style.backgroundColor = color; }
-      minibar.appendChild(cell);
-    }
-    card.appendChild(minibar);
-
-    var regionNames = [];
-    var primarySource = 'local';
-    seasons.forEach(function (s) {
-      var r = state.regionBySlug[s.regionSlug];
-      if (r && regionNames.indexOf(r.name) === -1) regionNames.push(r.name);
-      if (s.sourceType === 'import') primarySource = 'import';
-    });
-    if (regionNames.length) {
-      var re = document.createElement('div');
-      re.className = 'grid-card-region';
-      re.textContent = regionNames.slice(0, 2).join(', ');
-      if (regionNames.length > 2) re.textContent += ' +' + (regionNames.length - 2);
-      card.appendChild(re);
-    }
-
-    var se = document.createElement('span');
-    se.className = 'grid-card-source ' + primarySource;
-    se.textContent = primarySource;
-    card.appendChild(se);
-
-    return card;
   }
 
   // --- Detail Panel ---
@@ -974,35 +1286,41 @@
     var html = '<h2 class="detail-name">' + escHtml(item.name) + '</h2>';
     html += '<div class="detail-meta"><span>' + escHtml(item.category) + '</span><span>' + escHtml(item.culinaryGroup) + '</span></div>';
 
+    if (!seasons.length) {
+      html += '<p class="detail-notes" style="font-style: normal; color: var(--text-muted);">No season data available for this item.</p>';
+      content.innerHTML = html;
+      return;
+    }
+
     var notes = '', storageTip = '';
     for (var i = 0; i < seasons.length; i++) {
-      if (seasons[i].notes && !notes) notes = seasons[i].notes;
-      if (seasons[i].storageTip && !storageTip) storageTip = seasons[i].storageTip;
+      if (seasons[i].n && !notes) notes = seasons[i].n;
+      if (seasons[i].st && !storageTip) storageTip = seasons[i].st;
     }
     if (notes) html += '<p class="detail-notes">"' + escHtml(notes) + '"</p>';
 
     html += '<div class="detail-seasons">';
     var seen = {};
     seasons.forEach(function (s) {
-      var key = s.regionSlug + ':' + s.sourceType;
+      var key = s.r + ':' + s.t;
       if (!seen[key]) {
-        seen[key] = { season: s, seasonMonths: new Set(s.seasonMonths), peakMonths: new Set(s.peakMonths) };
+        seen[key] = { season: s, seasonMonths: new Set(s.s), peakMonths: new Set(s.pk) };
       } else {
-        s.seasonMonths.forEach(function (m) { seen[key].seasonMonths.add(m); });
-        s.peakMonths.forEach(function (m) { seen[key].peakMonths.add(m); });
+        s.s.forEach(function (m) { seen[key].seasonMonths.add(m); });
+        s.pk.forEach(function (m) { seen[key].peakMonths.add(m); });
       }
     });
 
     Object.keys(seen).forEach(function (key) {
       var entry = seen[key], s = entry.season;
-      var region = state.regionBySlug[s.regionSlug];
-      var rn = region ? region.name : s.regionSlug;
+      var region = state.regionBySlug[s.r];
+      var rn = region ? region.name : s.r;
       var sArr = Array.from(entry.seasonMonths).sort(function (a, b) { return a - b; });
       var pArr = Array.from(entry.peakMonths).sort(function (a, b) { return a - b; });
 
       html += '<div class="detail-season-entry">';
       html += '<div class="detail-season-header"><span class="detail-region-name">' + escHtml(rn) + '</span>';
-      html += '<span class="detail-source-badge ' + s.sourceType + '">' + s.sourceType + '</span></div>';
+      html += '<span class="detail-source-badge ' + escHtml(s.t) + '">' + escHtml(s.t) + '</span></div>';
       html += '<div class="detail-season-months">Season: ' + monthRangeText(sArr) + ' &middot; Peak: ' + (pArr.length ? monthRangeText(pArr) : 'no clear peak') + '</div>';
       html += '<div class="detail-minibar-labels">';
       'JFMAMJJASOND'.split('').forEach(function (l) { html += '<span>' + l + '</span>'; });
@@ -1054,27 +1372,26 @@
     return d.innerHTML;
   }
 
-  // --- View toggle ---
-  function bindViewToggle() {
-    document.getElementById('view-timeline').addEventListener('click', function () { state.view = 'timeline'; render(); });
-    document.getElementById('view-grid').addEventListener('click', function () { state.view = 'grid'; render(); });
-  }
-
-  function updateViewToggle() {
-    document.getElementById('view-timeline').classList.toggle('active', state.view === 'timeline');
-    document.getElementById('view-grid').classList.toggle('active', state.view === 'grid');
-  }
-
   // --- Search ---
   var searchTimeout;
   function bindSearch() {
     var input = document.getElementById('search');
+    var clearBtn = document.getElementById('search-clear');
     input.addEventListener('input', function () {
       clearTimeout(searchTimeout);
+      clearBtn.classList.toggle('visible', input.value.length > 0);
       searchTimeout = setTimeout(function () {
         state.searchQuery = input.value.trim();
         render();
       }, 150);
+    });
+    clearBtn.addEventListener('click', function () {
+      input.value = '';
+      clearBtn.classList.remove('visible');
+      state.searchQuery = '';
+      state.selectedItem = null;
+      render();
+      input.focus();
     });
   }
 
@@ -1094,7 +1411,7 @@
   function bindDetailClose() {
     document.getElementById('detail-close').addEventListener('click', function () {
       state.selectedItem = null;
-      render();
+      renderSelectionOnly();
     });
   }
 
@@ -1105,9 +1422,10 @@
   var animDone = false;
 
   function playLoadAnimation() {
-    animTimers.push(setTimeout(function () {
-      document.querySelector('.site-title').classList.add('anim-in');
-    }, 0));
+    // Guard against re-entrancy
+    if (animDone) return;
+    animTimers.forEach(clearTimeout);
+    animTimers = [];
 
     // Outer ring — clockwise stagger
     var segments = document.querySelectorAll('.ring-segment');
@@ -1153,7 +1471,7 @@
     animTimers.forEach(clearTimeout);
     animTimers = [];
     animDone = true;
-    document.querySelectorAll('.site-title, .ring-segment, .ring-center, .controls, .mid-segment, .inner-segment, .timeline-row')
+    document.querySelectorAll('.ring-segment, .ring-center, .controls, .mid-segment, .inner-segment, .timeline-row')
       .forEach(function (el) { el.classList.add('anim-in'); el.style.animationDelay = '0ms'; });
   }
 
@@ -1170,10 +1488,9 @@
       return;
     }
 
-    var month = state.selectedMonth;
     var peakItems = [];
     state.data.produce.forEach(function (p) {
-      if (getItemStatus(p.slug, month) === 'peak') {
+      if (statusCache[p.slug] === 'peak') {
         peakItems.push(p);
       }
     });
@@ -1202,36 +1519,326 @@
       card.textContent = p.name;
       card.addEventListener('click', function () {
         state.selectedItem = state.selectedItem === p.slug ? null : p.slug;
-        render();
+        renderSelectionOnly();
       });
       container.appendChild(card);
     });
   }
 
+  // --- Filter Accordion ---
+  var AVAILABILITY_OPTIONS = [
+    { id: 'year-round', label: 'Year-round' },
+    { id: 'seasonal', label: 'Seasonal' },
+    { id: 'short', label: 'Short Season' },
+    { id: 'long', label: 'Long Season' },
+  ];
+
+  var SORT_OPTIONS = [
+    { id: 'status', label: 'Default' },
+    { id: 'alpha', label: 'A-Z' },
+    { id: 'peak-month', label: 'Peak Month' },
+    { id: 'season-length', label: 'Season Length' },
+    { id: 'category', label: 'Category' },
+  ];
+
+  function buildFilterAccordion() {
+    // -- Status chips --
+    var statusChips = document.getElementById('status-chips');
+    INNER_ITEMS.forEach(function (item, idx) {
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.textContent = item.label;
+      chip.setAttribute('data-id', item.id);
+      chip.addEventListener('click', function () {
+        innerLastClicked = idx;
+        if (item.id === 'all') {
+          state.activeStatus.clear();
+        } else {
+          if (state.activeStatus.has(item.id)) { state.activeStatus.delete(item.id); }
+          else { state.activeStatus.add(item.id); }
+          if (state.activeStatus.size === 3) { state.activeStatus.clear(); innerLastClicked = 3; }
+        }
+        render();
+      });
+      statusChips.appendChild(chip);
+    });
+
+    // -- Category chips --
+    var catChips = document.getElementById('category-chips');
+    MID_ITEMS.forEach(function (item, idx) {
+      if (item.type !== 'category') return;
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.textContent = item.label;
+      chip.setAttribute('data-match', item.match);
+      chip.addEventListener('click', function () {
+        midLastClicked = idx;
+        if (state.activeCategories.has(item.match)) { state.activeCategories.delete(item.match); }
+        else { state.activeCategories.add(item.match); }
+        updateCulinaryChips();
+        render();
+      });
+      catChips.appendChild(chip);
+    });
+
+    // -- Culinary group chips --
+    buildCulinaryChips();
+
+    // -- Source chips --
+    var srcChips = document.getElementById('source-chips');
+    MID_ITEMS.forEach(function (item, idx) {
+      if (item.type !== 'source') return;
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.textContent = item.label;
+      chip.setAttribute('data-match', item.match);
+      chip.addEventListener('click', function () {
+        midLastClicked = idx;
+        if (state.activeSource.has(item.match)) { state.activeSource.delete(item.match); }
+        else { state.activeSource.add(item.match); }
+        render();
+      });
+      srcChips.appendChild(chip);
+    });
+
+    // -- Origin group chips --
+    var originChips = document.getElementById('origin-chips');
+    ORIGIN_GROUPS.forEach(function (group) {
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.textContent = group;
+      chip.setAttribute('data-group', group);
+      chip.addEventListener('click', function () {
+        if (state.activeOriginGroups.has(group)) { state.activeOriginGroups.delete(group); }
+        else { state.activeOriginGroups.add(group); }
+        render();
+      });
+      originChips.appendChild(chip);
+    });
+
+    // -- Availability chips --
+    var availChips = document.getElementById('availability-chips');
+    AVAILABILITY_OPTIONS.forEach(function (opt) {
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.textContent = opt.label;
+      chip.setAttribute('data-id', opt.id);
+      chip.addEventListener('click', function () {
+        if (state.availabilityFilter === opt.id) { state.availabilityFilter = null; }
+        else { state.availabilityFilter = opt.id; }
+        render();
+      });
+      availChips.appendChild(chip);
+    });
+
+    // -- Sort chips --
+    var sortChips = document.getElementById('sort-chips');
+    SORT_OPTIONS.forEach(function (opt) {
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip' + (opt.id === 'status' ? ' active' : '');
+      chip.textContent = opt.label;
+      chip.setAttribute('data-sort', opt.id);
+      chip.addEventListener('click', function () {
+        state.sortMode = opt.id;
+        render();
+      });
+      sortChips.appendChild(chip);
+    });
+
+    // -- Accordion header toggles --
+    var headers = document.querySelectorAll('.accordion-header');
+    headers.forEach(function (header) {
+      header.addEventListener('click', function () {
+        var section = header.parentElement.getAttribute('data-section');
+        var expanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        if (expanded) { state.expandedSections.delete(section); }
+        else { state.expandedSections.add(section); }
+      });
+    });
+
+    // -- Filter toggle button --
+    document.getElementById('filter-toggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      state.filterAccordionOpen = !state.filterAccordionOpen;
+      document.getElementById('filter-accordion').classList.toggle('hidden', !state.filterAccordionOpen);
+      document.getElementById('filter-toggle').classList.toggle('accordion-open', state.filterAccordionOpen);
+      if (!state.filterAccordionOpen) this.blur();
+    });
+  }
+
+  function buildCulinaryChips() {
+    var container = document.getElementById('culinary-chips');
+    container.innerHTML = '';
+    var groups = getVisibleCulinaryGroups();
+    groups.forEach(function (group) {
+      var chip = document.createElement('button');
+      chip.className = 'filter-chip' + (state.activeCulinaryGroups.has(group) ? ' active' : '');
+      chip.textContent = group;
+      chip.setAttribute('data-group', group);
+      chip.addEventListener('click', function () {
+        if (state.activeCulinaryGroups.has(group)) { state.activeCulinaryGroups.delete(group); }
+        else { state.activeCulinaryGroups.add(group); }
+        render();
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  function getVisibleCulinaryGroups() {
+    if (state.activeCategories.size === 0) return ALL_CULINARY_GROUPS;
+    var visible = {};
+    state.activeCategories.forEach(function (cat) {
+      var groups = CATEGORY_TO_GROUPS[cat] || [];
+      groups.forEach(function (g) { visible[g] = true; });
+    });
+    return Object.keys(visible).sort();
+  }
+
+  function updateCulinaryChips() {
+    // Clear orphaned selections
+    var visible = getVisibleCulinaryGroups();
+    var visibleSet = {};
+    visible.forEach(function (g) { visibleSet[g] = true; });
+    state.activeCulinaryGroups.forEach(function (g) {
+      if (!visibleSet[g]) state.activeCulinaryGroups.delete(g);
+    });
+    buildCulinaryChips();
+  }
+
+  function updateFilterAccordion() {
+    // Sync status chips
+    var statusChips = document.getElementById('status-chips').children;
+    for (var i = 0; i < INNER_ITEMS.length; i++) {
+      var isActive;
+      if (INNER_ITEMS[i].id === 'all') {
+        isActive = state.activeStatus.size === 0;
+      } else {
+        isActive = state.activeStatus.has(INNER_ITEMS[i].id);
+      }
+      statusChips[i].classList.toggle('active', isActive);
+    }
+
+    // Sync category chips
+    var catChips = document.getElementById('category-chips').children;
+    var catIdx = 0;
+    MID_ITEMS.forEach(function (item) {
+      if (item.type !== 'category') return;
+      catChips[catIdx].classList.toggle('active', state.activeCategories.has(item.match));
+      catIdx++;
+    });
+
+    // Update culinary chips visibility
+    updateCulinaryChips();
+
+    // Sync source chips
+    var srcChips = document.getElementById('source-chips').children;
+    var srcIdx = 0;
+    MID_ITEMS.forEach(function (item) {
+      if (item.type !== 'source') return;
+      srcChips[srcIdx].classList.toggle('active', state.activeSource.has(item.match));
+      srcIdx++;
+    });
+
+    // Sync origin chips
+    var originChips = document.getElementById('origin-chips').children;
+    for (var j = 0; j < ORIGIN_GROUPS.length; j++) {
+      originChips[j].classList.toggle('active', state.activeOriginGroups.has(ORIGIN_GROUPS[j]));
+    }
+
+    // Sync availability chips
+    var availChips = document.getElementById('availability-chips').children;
+    for (var k = 0; k < AVAILABILITY_OPTIONS.length; k++) {
+      availChips[k].classList.toggle('active', state.availabilityFilter === AVAILABILITY_OPTIONS[k].id);
+    }
+
+    // Sync sort chips
+    var sortChips = document.getElementById('sort-chips').children;
+    for (var s = 0; s < SORT_OPTIONS.length; s++) {
+      sortChips[s].classList.toggle('active', state.sortMode === SORT_OPTIONS[s].id);
+    }
+
+    // Update section badges
+    updateAccordionBadge('badge-status',
+      state.activeStatus.size > 0 && state.activeStatus.size < 3 ? state.activeStatus.size : 0);
+    updateAccordionBadge('badge-category', state.activeCategories.size);
+    updateAccordionBadge('badge-culinary', state.activeCulinaryGroups.size);
+    updateAccordionBadge('badge-source-origin', state.activeSource.size + state.activeOriginGroups.size);
+    updateAccordionBadge('badge-availability', state.availabilityFilter !== null ? 1 : 0);
+    updateAccordionBadge('badge-sort', state.sortMode !== 'status' ? 1 : 0);
+  }
+
+  function updateAccordionBadge(id, count) {
+    var badge = document.getElementById(id);
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
   // --- Main Render ---
+  // --- Lightweight render for selection-only changes ---
+  // Toggles .selected on timeline rows and updates the detail panel
+  // without rebuilding the entire timeline, rings, or filters.
+  function renderSelectionOnly() {
+    var prev = document.querySelector('.timeline-row.selected');
+    if (prev) prev.classList.remove('selected');
+
+    if (state.selectedItem) {
+      var next = document.querySelector('.timeline-row[data-slug="' + state.selectedItem + '"]');
+      if (next) next.classList.add('selected');
+    }
+
+    renderDetail();
+  }
+
   function render() {
+    computeAllStatuses(state.selectedMonth);
     renderRing();
     updateMiddleRing();
     updateInnerRing();
     updateResetButton();
-    updateViewToggle();
+    updateFilterAccordion();
     renderPeakStrip();
 
-    if (state.view === 'timeline') {
-      document.getElementById('timeline-container').classList.remove('hidden');
-      document.getElementById('grid-container').classList.add('hidden');
-      renderTimeline();
-    } else {
-      document.getElementById('timeline-container').classList.add('hidden');
-      document.getElementById('grid-container').classList.remove('hidden');
-      renderGrid();
-    }
+    renderTimeline();
 
     renderDetail();
 
     if (animDone) {
       document.querySelectorAll('.timeline-row:not(.anim-in)').forEach(function (row) {
         row.classList.add('anim-in');
+      });
+    }
+  }
+
+  // --- Nav Hamburger Menu ---
+  function bindNavMenu() {
+    var hamburger = document.getElementById('nav-hamburger');
+    var menu = document.getElementById('nav-menu');
+    if (!hamburger || !menu) return;
+
+    hamburger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      hamburger.classList.toggle('open');
+      menu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target)) {
+        hamburger.classList.remove('open');
+        menu.classList.remove('open');
+      }
+    });
+
+    var brand = document.getElementById('nav-brand');
+    if (brand) {
+      brand.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
   }
@@ -1243,15 +1850,23 @@
       buildInnerRing();
       buildLeafDecor();
       bindSearch();
-      bindViewToggle();
+      buildFilterAccordion();
       bindResetFilters();
       bindRingArrows();
       bindDetailClose();
+      bindNavMenu();
       render();
       playLoadAnimation();
 
       document.addEventListener('click', skipAnimation, { once: true });
       document.addEventListener('keydown', skipAnimation, { once: true });
+    }).catch(function (err) {
+      var main = document.getElementById('main-content');
+      if (main) {
+        main.innerHTML = '<p style="padding:2rem;text-align:center;color:var(--text-secondary);">'
+          + 'Unable to load produce data. Please try refreshing the page.</p>';
+      }
+      console.error('Data load failed:', err);
     });
   }
 

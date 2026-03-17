@@ -11,7 +11,7 @@ The circular dial at the top is a **month selector** with three concentric rings
 | Ring | What it controls |
 |------|-----------------|
 | **Outer ring** (months) | Select a month. The ring rotates to center your selection at 12 o'clock. |
-| **Middle ring** (categories + source) | Filter by produce type (Fruit, Veg, Chile, Herb, Mushroom, Nut) or by source (Local, Import). Click to toggle; click again to deselect. Multiple selections combine. |
+| **Middle ring** (categories + source) | Filter by produce type (Fruit, Veg, Chile, Herb, Mushroom, Nut, Edible Flower) or by source (Local, Import). Click to toggle; click again to deselect. Multiple selections combine. |
 | **Inner ring** (status) | Filter by season status: Peak, Coming Soon, Leaving Peak, or All. |
 
 The **gold tick mark** on the outer edge shows today's position within the selected month.
@@ -46,22 +46,13 @@ The **gold vertical line** marks the current date position within the selected m
 
 Within each group, local items sort before imports, then alphabetically.
 
-### The Grid View
-
-Cards showing items in season for the selected month, grouped by category. Each card shows:
-- Produce name
-- Culinary group
-- A mini 12-month bar (same color coding as the timeline)
-- Growing region
-- Source badge (Local or Import)
-
 ### The Peak Strip
 
 The horizontal row of cards between the controls and the timeline shows items currently at peak for the selected month. Quick answer to "what should I buy today?" Only visible when the status filter is set to "All" or "Peak".
 
 ### Item Detail
 
-Click any item (in timeline or grid) to open a detail panel showing:
+Click any timeline row or peak-strip card to open a detail panel showing:
 - Full name, category, and culinary group
 - All season entries with region, source type, and month ranges
 - Mini 12-month bar per region entry with single-letter month labels (J F M A M J J A S O N D)
@@ -97,9 +88,9 @@ All filters combine. Selecting "Fruit" + "Local" shows only locally-grown fruit.
 
 The app reads a single `web/data.json` file compiled from three CSV layers:
 
-- **`data/produce_items.csv`** -- 332 canonical produce items (ontology)
-- **`data/regions.csv`** -- 32 growing regions: 12 California, 4 other US, 5 Mexico, 5 South America, 2 Central America, 4 other
-- **`data/produce_seasons.csv`** -- ~163 season entries covering 97 items
+- **`data/produce_items.csv`** -- 335 canonical produce items (ontology)
+- **`data/regions.csv`** -- 33 growing regions: 12 California, 5 Mexico, 5 South America, 3 Asia, 2 Pacific Northwest, 2 Southeast US, 2 Central America, 1 Hawaii, 1 Oceania
+- **`data/produce_seasons.csv`** -- 284 season entries covering 208 items
 
 See `data-sources.md` (in the parent directory) for sourcing methodology.
 
@@ -137,13 +128,14 @@ seasonal-produce/
 │   ├── produce_seasons.csv  # When it's harvested (seasonality)
 │   └── compiled.json        # Compiled output
 ├── input/                   # Original input files
-├── reference/               # Design direction docs
+├── reference/               # Design/archive docs
+├── docs/                    # Lessons + data sources
 ├── scripts/
 │   ├── compile_data.py      # CSV -> JSON compiler
 │   └── validate_data.py     # Data validation + coverage
 └── web/
     ├── index.html           # Main app
-    ├── compact.html         # Compact/legacy view
+    ├── stone-fruit-guide.html # Companion guide page
     ├── style.css            # All styles
     ├── app.js               # All application logic
     └── data.json            # Compiled data (copy of compiled.json)

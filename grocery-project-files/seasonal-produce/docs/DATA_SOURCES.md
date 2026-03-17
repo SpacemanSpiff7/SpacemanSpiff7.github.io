@@ -27,8 +27,7 @@ Authoritative references used to build and validate the seasonal produce dataset
 
 ## Coverage
 
-- 97 items had season data as of initial build (29% of the 332-item ontology).
-- After expansion: ~160+ items with season data (~48%+).
+- Current coverage: 208 items with season data out of 335 total ontology items (62.1%).
 - **Strong coverage:** citrus, berries, stone fruit, leafy greens, root vegetables.
 - **New coverage:** herbs, chile peppers, mushrooms (cultivated), key imports, squash varieties.
 - **Remaining gaps:** edible flowers, nuts (mostly), wild mushrooms, exotic tropicals.

@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stone Fruit Variety Guide -- California Seasonal Produce</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg-body: #F7F3ED;
+  --bg-panel: #FFFDF8;
+  --bg-panel-hover: #FAF6EF;
+  --text-primary: #3A2E22;
+  --text-secondary: #6B5B4D;
+  --text-muted: #9A8A7A;
+  --text-accent: #D4702C;
+  --text-inverse: #FFFDF8;
+  --ring-border: #E5DDD0;
+  --shadow-panel: 0px 2px 4px rgba(0,0,0,0.08);
+  --font-heading: 'Fraunces', 'Georgia', serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --radius: 3px;
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --color-cherry: #7A2332;
+  --color-apricot: #C9943A;
+  --color-yellow-peach: #D4885C;
+  --color-white-peach: #C9A0A0;
+  --color-donut-peach: #D4977A;
+  --color-nectarine: #B05A3A;
+  --color-plum: #5C2D5E;
+  --color-pluot: #8A3A6A;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 15px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--bg-body);
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.15; }
+a { color: var(--text-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- Background Composition --- */
+.bg-decor { position: fixed; pointer-events: none; z-index: -1; }
+.bg-cream-tri {
+  top: -10%; right: -5%; width: 50vw; height: 50vh;
+  background: #D4702C; opacity: 0.04;
+  clip-path: polygon(30% 0%, 100% 0%, 100% 100%);
+}
+.bg-rust-wedge {
+  top: 5%; left: -8%; width: 45vw; height: 55vh;
+  background: #CB5207; opacity: 0.03;
+  clip-path: polygon(0% 20%, 80% 0%, 60% 100%, 0% 80%);
+  filter: blur(40px);
+}
+.bg-deep-red-blob {
+  bottom: -5%; left: -10%; width: 50vw; height: 45vh;
+  background: #8D2A0D; opacity: 0.03;
+  border-radius: 60% 40% 70% 30%; filter: blur(60px);
+}
+.bg-gold-stripe {
+  top: 30%; right: 0; width: 8vw; height: 40vh;
+  background: linear-gradient(180deg, #F29A0D 0%, #4A9068 100%);
+  opacity: 0.04; filter: blur(30px);
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* --- Nav Bar --- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--bg-body);
+  border-bottom: 1px solid var(--ring-border);
+}
+
+.nav-brand {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.nav-brand span { color: var(--text-accent); }
+.nav-brand:hover { text-decoration: none; }
+
+.nav-hamburger {
+  width: 36px; height: 36px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px;
+  background: none;
+  border: 1px solid var(--ring-border);
+  border-radius: var(--radius);
+  cursor: pointer; padding: 0;
+  transition: border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-hamburger:hover { border-color: var(--text-accent); }
+
+.nav-hamburger span {
+  display: block; width: 16px; height: 1.5px;
+  background: var(--text-secondary); border-radius: 1px;
+  transition: transform 0.25s var(--ease), opacity 0.2s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.nav-menu {
+  position: absolute;
+  top: 100%; right: var(--space-lg);
+  background: var(--bg-panel);
+  border: 1px solid var(--ring-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+  z-index: 160;
+  min-width: 200px;
+  display: none;
+}
+.nav-menu.open { display: block; }
+.nav-menu-inner { padding: var(--space-md); }
+
+.nav-menu-label {
+  font-size: 0.6rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+.nav-menu-link {
+  display: block; font-size: 0.82rem;
+  color: var(--text-primary); text-decoration: none;
+  padding: var(--space-xs) 0;
+  transition: color 0.15s;
+}
+.nav-menu-link:hover { color: var(--text-accent); text-decoration: none; }
+
+/* --- Page Header --- */
+.page-header {
+  text-align: center;
+  padding: 0 var(--space-lg) var(--space-lg);
+  opacity: 0;
+}
+.page-title {
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+.page-title span { color: var(--text-accent); }
+.page-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* --- Legend --- */
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  padding: var(--space-sm) var(--space-lg) var(--space-lg);
+  opacity: 0;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.7rem; color: var(--text-secondary);
+}
+.legend-swatch {
+  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+}
+
+/* --- Month Sections --- */
+.months-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.month-section {
+  margin-bottom: var(--space-xl);
+  opacity: 0;
+}
+
+.month-header {
+  padding: var(--space-md) 0 var(--space-sm);
+  border-bottom: 1px solid var(--ring-border);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.month-name {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.month-count {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.month-now-badge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+  background: rgba(212,112,44,0.1);
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-left: auto;
+}
+
+.month-body {
+  padding: var(--space-sm) 0;
+}
+
+.month-empty {
+  padding: var(--space-xl) 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* --- Golden Window Banner --- */
+.golden-banner {
+  max-width: 680px;
+  margin: 0 auto var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(212,112,44,0.06);
+  border-left: 3px solid rgba(212,112,44,0.3);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0;
+}
+
+.golden-banner strong {
+  color: var(--text-accent);
+  font-weight: 700;
+}
+
+/* --- Variety Cards (Accordion) --- */
+.variety-card {
+  border: 1px solid var(--ring-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-panel);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.variety-card.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.variety-card.import-card {
+  border-style: dashed;
+}
+.variety-card.import-card .card-head {
+  opacity: 0.6;
+}
+.variety-card.import-card.revealed {
+  opacity: 1;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-md);
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card-head:hover { background: var(--bg-panel-hover); }
+
+.card-type-dot {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.card-info { flex: 1; min-width: 0; }
+
+.card-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: 1px;
+}
+
+.card-type-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card-timing {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.card-badge {
+  display: inline-block;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.badge-rare { background: rgba(196,122,108,0.2); color: #B05A3A; }
+.badge-import { background: rgba(58,46,34,0.08); color: var(--text-muted); }
+
+.card-chevron {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.25s var(--ease);
+}
+
+.variety-card.open .card-chevron {
+  transform: rotate(180deg);
+}
+
+/* --- Accordion Body --- */
+.card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--ease);
+}
+
+.variety-card.open .card-body {
+  max-height: 800px;
+  transition: max-height 0.45s var(--ease);
+}
+
+.card-body-inner {
+  padding: 0 var(--space-md) var(--space-md);
+  border-top: 1px solid var(--ring-border);
+}
+
+.detail-section {
+  padding-top: var(--space-md);
+}
+
+.detail-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.detail-text {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.detail-text em {
+  color: var(--text-primary);
+  font-style: italic;
+}
+
+/* Season minibar */
+.detail-minibar-wrap {
+  margin-top: var(--space-sm);
+}
+.detail-minibar-labels {
+  display: flex; gap: 1px; margin-bottom: 2px;
+}
+.detail-minibar-labels span {
+  flex: 1; text-align: center;
+  font-size: 0.55rem; font-weight: 500;
+  color: var(--text-muted); line-height: 1;
+}
+.detail-minibar {
+  display: flex; gap: 1px; height: 8px;
+  border-radius: 1px; overflow: hidden;
+}
+.minibar-cell {
+  flex: 1; background: rgba(58,46,34,0.06); border-radius: 1px;
+}
+.minibar-cell.in-season { opacity: 0.45; }
+.minibar-cell.peak { opacity: 1; }
+
+.detail-note {
+  margin-top: var(--space-md);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(58,46,34,0.04);
+  border-radius: var(--radius);
+  line-height: 1.55;
+  font-style: italic;
+}
+
+/* --- Now Indicator --- */
+.now-indicator {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  position: relative;
+}
+
+.now-line {
+  height: 2px;
+  background: linear-gradient(90deg, var(--text-accent), transparent);
+  opacity: 0.4;
+  margin: var(--space-sm) 0;
+}
+
+.now-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-accent);
+  letter-spacing: 0.03em;
+}
+
+/* --- Footer --- */
+.site-footer {
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--ring-border);
+}
+.site-footer a { color: var(--text-accent); }
+
+/* --- Animations --- */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.anim-in { animation: fadeSlideIn 0.4s var(--ease) forwards; }
+.anim-fade { animation: fadeIn 0.4s var(--ease) forwards; }
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+  .page-header { padding: 0 var(--space-md) var(--space-md); }
+  .legend { padding: var(--space-xs) var(--space-md) var(--space-md); gap: var(--space-xs) var(--space-sm); }
+  .legend-item { font-size: 0.62rem; }
+  .months-container { padding: 0 var(--space-sm); }
+  .month-name { font-size: 1.1rem; }
+  .card-name { font-size: 0.8rem; }
+  .golden-banner { margin-left: var(--space-sm); margin-right: var(--space-sm); }
+}
+
+@media (min-width: 768px) {
+  .months-container { padding: 0 var(--space-lg); }
+  .month-name { font-size: 1.5rem; }
+
+  /* Two-column card grid within each month */
+  .month-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-nav, .page-header, .legend, .month-section,
+  .variety-card, .golden-banner { opacity: 1 !important; transform: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <div class="bg-decor bg-cream-tri" aria-hidden="true"></div>
+  <div class="bg-decor bg-rust-wedge" aria-hidden="true"></div>
+  <div class="bg-decor bg-deep-red-blob" aria-hidden="true"></div>
+  <div class="bg-decor bg-gold-stripe" aria-hidden="true"></div>
+
+  <nav class="site-nav" id="site-nav">
+    <a href="#" class="nav-brand" id="nav-brand">California <span>Seasonal Produce</span></a>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-menu" id="nav-menu">
+      <div class="nav-menu-inner">
+        <div class="nav-menu-section">
+          <a href="index.html" class="nav-menu-link">Home</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-header" id="page-header">
+    <h1 class="page-title">Stone Fruit <span>Variety Guide</span></h1>
+    <p class="page-subtitle">California stone fruits by variety and peak timing. Scroll through the year.</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div id="timeline-content"></div>
+
+  <footer class="site-footer">
+    <p><a href="index.html">California Seasonal Produce</a></p>
+  </footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var FRUIT_TYPES = [
+    { id: 'cherry',       label: 'Cherries',      color: '#7A2332' },
+    { id: 'apricot',      label: 'Apricots',      color: '#C9943A' },
+    { id: 'yellow-peach', label: 'Yellow Peach',   color: '#D4885C' },
+    { id: 'white-peach',  label: 'White Peach',    color: '#C9A0A0' },
+    { id: 'donut-peach',  label: 'Donut Peach',    color: '#D4977A' },
+    { id: 'nectarine',    label: 'Nectarines',     color: '#B05A3A' },
+    { id: 'plum',         label: 'Plums',          color: '#5C2D5E' },
+    { id: 'pluot',        label: 'Pluots',         color: '#8A3A6A' }
+  ];
+
+  var VARIETIES = [
+    // --- Cherries ---
+    {
+      id: 'brooks', name: 'Brooks', type: 'cherry',
+      peakStart: [4, 15], peakEnd: [5, 10],
+      seasonStart: [4, 5], seasonEnd: [5, 20],
+      flavor: 'Mild sweetness with low acidity. Large, firm fruit with a satisfying snap. A dependable early cherry -- not the most complex but reliably good.',
+      buyingTip: 'Look for deep red-to-mahogany color with firm, glossy skin. First CA cherry of the season -- appears at farmers markets mid-April.',
+      where: 'San Joaquin Valley farms, early season farmers markets. Grocery stores by late April.',
+      notes: 'The earliest California cherry. Opens the stone fruit season.'
+    },
+    {
+      id: 'bing', name: 'Bing', type: 'cherry',
+      peakStart: [5, 15], peakEnd: [6, 20],
+      seasonStart: [5, 5], seasonEnd: [7, 5],
+      flavor: 'The benchmark cherry. Deep, rich sweetness balanced by bright acidity. Firm, dense flesh with an almost wine-like complexity when fully ripe. The flavor most people picture when they think "cherry."',
+      buyingTip: 'Should be nearly black-red. Avoid any with brown spots or softness. Stems should be green, not brown. Heavier is better -- that means juicy.',
+      where: 'Everywhere: grocery stores, farmers markets, farm stands across the Central Valley.',
+      notes: 'Accounts for most CA cherry production. Named after a Chinese-American foreman in Oregon, 1875.'
+    },
+    {
+      id: 'rainier', name: 'Rainier', type: 'cherry',
+      peakStart: [5, 25], peakEnd: [6, 25],
+      seasonStart: [5, 15], seasonEnd: [7, 10],
+      flavor: 'Exceptionally sweet with almost no acidity -- pure sugar-honey flavor. Delicate, yielding flesh. The yellow-blushed skin is thin and bruises easily, which is why they cost more.',
+      buyingTip: 'Yellow-pink with a rosy blush. Light brown freckles are fine (sun spots, not damage). Any with dark bruising will be mushy. Handle gently.',
+      where: 'Premium at farmers markets and upscale grocers. California-grown available for a short window.',
+      rarity: true,
+      notes: 'Premium pricing reflects both flavor and the difficulty of growing/handling them without damage.'
+    },
+    {
+      id: 'chilean-cherry', name: 'Chilean Cherry', type: 'cherry',
+      peakStart: [12, 15], peakEnd: [1, 31],
+      seasonStart: [12, 1], seasonEnd: [2, 15],
+      flavor: 'Variable quality. Some are firm and sweet; many are mealy from the long journey. Best compared to an average domestic cherry -- rarely exceptional but fills the winter gap.',
+      buyingTip: 'Check firmness carefully. Reject any batch where more than a few are soft. Stems should still be green. Refrigerate immediately.',
+      where: 'Major grocery chains, December through February.',
+      isImport: true,
+      notes: 'Southern hemisphere harvest fills the US winter gap. Quality depends on shipping conditions.'
+    },
+
+    // --- Apricots ---
+    {
+      id: 'patterson', name: 'Patterson', type: 'apricot',
+      peakStart: [6, 1], peakEnd: [6, 25],
+      seasonStart: [5, 20], seasonEnd: [7, 10],
+      flavor: 'Balanced sweet-tart with a musky apricot aroma. Firm flesh that holds up well. The workhorse variety -- solid and reliable if not extraordinary.',
+      buyingTip: 'Deep golden-orange with a slight give. Avoid green-tinged fruit (picked too early and won\'t ripen well). Should smell like apricot at the stem end.',
+      where: 'Grocery stores and farmers markets throughout June. The most common variety you\'ll find.',
+      notes: 'The commercial standard. Originally bred for canning but the fresh fruit is quite good.'
+    },
+    {
+      id: 'blenheim', name: 'Blenheim (Royal)', type: 'apricot',
+      peakStart: [6, 15], peakEnd: [7, 5],
+      seasonStart: [6, 10], seasonEnd: [7, 10],
+      flavor: 'Intensely aromatic with honeyed sweetness and a floral, almost perfumed quality. Soft, melting flesh. Many consider this the finest apricot in the world. The flavor is so concentrated it\'s like eating apricot jam fresh off the tree.',
+      buyingTip: 'Small, pale gold with red freckles. Should be fragrant and slightly soft. Farmers market is the only reliable source. Peak window is barely 10 days -- if you see them, buy them immediately.',
+      where: 'Farmers markets ONLY, primarily from orchards in the Santa Clara Valley and Hollister area. Almost never in grocery stores -- too fragile to ship.',
+      rarity: true,
+      notes: 'Heritage variety. Orchards are declining because the trees are commercially unviable. Each year there are fewer. A living artifact of California agriculture.'
+    },
+    {
+      id: 'tilton', name: 'Tilton', type: 'apricot',
+      peakStart: [6, 20], peakEnd: [7, 15],
+      seasonStart: [6, 10], seasonEnd: [7, 20],
+      flavor: 'Bright acidity with moderate sweetness. Firmer and more tart than Patterson. Better for cooking than eating fresh -- makes exceptional preserves.',
+      buyingTip: 'Look for uniformly orange fruit. A bit of firmness is fine for this variety. Good for baking and jamming.',
+      where: 'Farmers markets, occasionally at grocery stores. More common in Northern California.',
+      notes: 'Traditionally a canning/drying apricot. The tart flavor intensifies beautifully when cooked.'
+    },
+
+    // --- Yellow Peaches ---
+    {
+      id: 'elegant-lady', name: 'Elegant Lady', type: 'yellow-peach',
+      peakStart: [7, 5], peakEnd: [8, 5],
+      seasonStart: [6, 25], seasonEnd: [8, 15],
+      flavor: 'Classic yellow peach flavor: bright, sweet, with a tang that lifts the sweetness. Firm but juicy flesh. The reliable all-rounder -- great eaten fresh, holds up in pies and cobblers.',
+      buyingTip: 'Golden yellow with a red blush. Should give slightly at the shoulder when ripe. Avoid hard, green-tinged fruit. Fragrant at the stem end.',
+      where: 'The most common peach in CA grocery stores and markets throughout July.',
+      notes: 'The dominant California peach variety. Consistent quality year over year.'
+    },
+    {
+      id: 'suncrest', name: 'Suncrest', type: 'yellow-peach',
+      peakStart: [7, 10], peakEnd: [7, 30],
+      seasonStart: [7, 5], seasonEnd: [8, 5],
+      flavor: 'Exceptionally high sugar with balancing acidity. Complex, layered flavor that shifts between honey, citrus, and vanilla. Melting, juicy flesh that drips down your chin. Many growers consider this the best-tasting peach ever developed.',
+      buyingTip: 'Ugly is good with Suncrest -- they don\'t color up pretty but the flavor is unreal. Look for them by name at farmers markets. Worth any premium.',
+      where: 'Farmers markets only. Too soft and irregularly shaped for commercial packing.',
+      rarity: true,
+      notes: 'Commercially extinct but kept alive by small farmers who grow it for flavor, not appearance. The anti-grocery-store peach.'
+    },
+    {
+      id: 'ohenry', name: 'O\'Henry', type: 'yellow-peach',
+      peakStart: [8, 1], peakEnd: [8, 25],
+      seasonStart: [7, 25], seasonEnd: [9, 5],
+      flavor: 'Rich, full-bodied peach flavor with deep sweetness and a slightly tangy finish. Firm flesh with excellent texture. Arguably the best widely-available peach.',
+      buyingTip: 'Heavy for its size with strong red blush over golden skin. Freestone -- the pit pops right out, making it ideal for cooking.',
+      where: 'Grocery stores and farmers markets throughout August. Well-distributed across California.',
+      notes: 'Late season star. A freestone that combines commercial viability with genuine quality.'
+    },
+    {
+      id: 'cal-red', name: 'Cal Red', type: 'yellow-peach',
+      peakStart: [8, 10], peakEnd: [9, 5],
+      seasonStart: [8, 5], seasonEnd: [9, 15],
+      flavor: 'Solid, straightforward peach flavor. Less complex than O\'Henry but still sweet and pleasant. Firm flesh that holds its shape when sliced.',
+      buyingTip: 'Deep red over yellow. Should be firm but not hard. A dependable late-season peach when the better varieties are gone.',
+      where: 'Grocery stores and farmers markets in August through early September.',
+      notes: 'A reliable late-season variety that extends the yellow peach window.'
+    },
+
+    // --- White Peaches ---
+    {
+      id: 'babcock', name: 'Babcock', type: 'white-peach',
+      peakStart: [6, 20], peakEnd: [7, 15],
+      seasonStart: [6, 10], seasonEnd: [7, 25],
+      flavor: 'Delicate, floral sweetness with almost no acidity. Aromatic and perfumed. The flesh is so tender it practically dissolves on the tongue. Like eating a sweet cloud with a hint of jasmine.',
+      buyingTip: 'Creamy white skin with a pink blush. Should be fragile-soft when ripe. These do not keep -- eat within a day or two of buying.',
+      where: 'Farmers markets and some grocery stores, late June through mid-July.',
+      notes: 'One of the oldest white peach varieties in California. Sets the standard for the category.'
+    },
+    {
+      id: 'snow-beauty', name: 'Snow Beauty', type: 'white-peach',
+      peakStart: [7, 5], peakEnd: [8, 5],
+      seasonStart: [6, 25], seasonEnd: [8, 15],
+      flavor: 'Crisp, sweet, low-acid with a subtle floral note. Firmer than Babcock, more structured. Clean, refreshing -- almost pear-like in texture when slightly underripe.',
+      buyingTip: 'White skin with a dramatic dark red blush. Can be eaten firm-ripe for a crunchy texture or allowed to soften for more sweetness.',
+      where: 'Farmers markets and select grocery stores through July and August.',
+      notes: 'Part of the "Snow" series of white peaches developed by Zaiger Genetics.'
+    },
+    {
+      id: 'arctic-supreme', name: 'Arctic Supreme', type: 'white-peach',
+      peakStart: [7, 15], peakEnd: [8, 15],
+      seasonStart: [7, 5], seasonEnd: [8, 25],
+      flavor: 'Extraordinary -- widely considered the best white peach. Intensely sweet with floral complexity and a hint of tropical fruit. Melting, dripping-juice flesh. The sugar content is off the charts.',
+      buyingTip: 'Mostly white with some red. Very soft when fully ripe. Handle with extreme care. Buy at the market and eat the same day.',
+      where: 'Farmers markets from specialty growers. Occasionally at premium grocery stores.',
+      rarity: true,
+      notes: 'The peach that converts people who think they don\'t like white peaches.'
+    },
+
+    // --- Donut Peaches ---
+    {
+      id: 'galaxy', name: 'Galaxy (Saturn)', type: 'donut-peach',
+      peakStart: [6, 15], peakEnd: [7, 20],
+      seasonStart: [6, 5], seasonEnd: [7, 30],
+      flavor: 'Distinctively sweet with an almond-like undertone unique to flat peaches. Low acid, candy-like. The small pit and flat shape mean a higher flesh-to-pit ratio.',
+      buyingTip: 'Flat, saucer-shaped. Should be slightly soft with white-to-pale-yellow skin and a red blush. Size varies -- smaller ones are often sweeter.',
+      where: 'Grocery stores (usually labeled "donut peach" or "Saturn peach") and farmers markets.',
+      notes: 'The flat shape is a natural mutation from China, not genetic engineering. Also called "peento" peaches.'
+    },
+
+    // --- Nectarines ---
+    {
+      id: 'snow-queen', name: 'Snow Queen', type: 'nectarine',
+      peakStart: [6, 20], peakEnd: [7, 10],
+      seasonStart: [6, 10], seasonEnd: [7, 20],
+      flavor: 'White-fleshed nectarine with exceptional sweetness and a tropical edge -- hints of lychee and mango. Smooth, glossy skin adds a slight tang that balances the sugar.',
+      buyingTip: 'Deep red over creamy white. Should be fragrant and give slightly at the shoulder. White nectarines bruise easily.',
+      where: 'Farmers markets starting late June. Some specialty grocers.',
+      notes: 'A white nectarine -- same species as a peach but with a gene that suppresses fuzz.'
+    },
+    {
+      id: 'independence', name: 'Independence', type: 'nectarine',
+      peakStart: [7, 10], peakEnd: [8, 5],
+      seasonStart: [7, 1], seasonEnd: [8, 15],
+      flavor: 'Bold, tangy-sweet with a firm, satisfying crunch. More assertive than peaches -- the skin has a pleasant tartness that plays against sweet flesh.',
+      buyingTip: 'Bright red over yellow. Should be firm with slight give. A good nectarine should feel heavy for its size.',
+      where: 'Grocery stores and farmers markets throughout July.',
+      notes: 'Classic yellow nectarine. The acidity makes it pair especially well with cheese and charcuterie.'
+    },
+    {
+      id: 'fantasia', name: 'Fantasia', type: 'nectarine',
+      peakStart: [7, 20], peakEnd: [8, 15],
+      seasonStart: [7, 10], seasonEnd: [8, 25],
+      flavor: 'Sweet and aromatic with good balance. Smooth, firm flesh with a rich, concentrated nectarine flavor. Less tart than Independence, more approachable.',
+      buyingTip: 'Large, bright yellow with red blush. Freestone at full maturity -- the pit should release cleanly. Excellent for grilling.',
+      where: 'Widely available at grocery stores and farmers markets in late July and August.',
+      notes: 'One of the most popular nectarine varieties for both fresh eating and cooking.'
+    },
+    {
+      id: 'arctic-star', name: 'Arctic Star', type: 'nectarine',
+      peakStart: [6, 15], peakEnd: [9, 1],
+      seasonStart: [6, 5], seasonEnd: [9, 15],
+      flavor: 'White-fleshed with candy-sweet flavor, almost no acidity. Extremely high sugar content. The long season means the early and late fruit can taste quite different -- mid-season is peak.',
+      buyingTip: 'Mostly red skin over white. Can be eaten crunchy or soft. The long season means you\'ll find these for months.',
+      where: 'Grocery stores and farmers markets, June through September. Widely available.',
+      notes: 'The longest-season white nectarine. Accessible and consistent.'
+    },
+
+    // --- Plums ---
+    {
+      id: 'santa-rosa', name: 'Santa Rosa', type: 'plum',
+      peakStart: [6, 10], peakEnd: [7, 5],
+      seasonStart: [6, 1], seasonEnd: [7, 15],
+      flavor: 'The quintessential plum. Deep, complex flavor with tart purple skin giving way to sweet amber-red flesh. Juicy, aromatic, with a punch of acidity that makes the sweetness sing.',
+      buyingTip: 'Deep reddish-purple. Should yield to gentle pressure. The skin is tart so eat the whole thing for the full experience.',
+      where: 'Everywhere from June. The most planted plum in California.',
+      notes: 'Developed by Luther Burbank in 1906. Named after the city. Still the gold standard over a century later.'
+    },
+    {
+      id: 'satsuma', name: 'Satsuma', type: 'plum',
+      peakStart: [7, 1], peakEnd: [7, 25],
+      seasonStart: [6, 20], seasonEnd: [8, 5],
+      flavor: 'Deep crimson flesh with a rich, wine-like complexity. Less sweet than Santa Rosa but more nuanced. The firm flesh has a satisfying chew. Blood-red juice stains everything.',
+      buyingTip: 'Dark maroon skin. Cut one open -- the flesh should be deep red throughout. Firmer than most plums and keeps well.',
+      where: 'Farmers markets and some grocers. Look for them by name.',
+      notes: 'A Japanese variety. The red flesh makes stunning preserves and baked goods.'
+    },
+    {
+      id: 'elephant-heart', name: 'Elephant Heart', type: 'plum',
+      peakStart: [7, 25], peakEnd: [8, 15],
+      seasonStart: [7, 15], seasonEnd: [8, 25],
+      flavor: 'Extraordinarily sweet and juicy with blood-red flesh and complex, honey-wine flavor. The skin is tough but the interior is explosively juicy -- like biting into a plum grenade.',
+      buyingTip: 'Large, heart-shaped, mottled dark red-green skin that doesn\'t look like much. Ugly exterior hides the best plum you\'ll ever eat. Should be soft and heavy.',
+      where: 'Farmers markets ONLY. Extremely rare commercially. If you spot them, buy every one.',
+      rarity: true,
+      notes: 'Another Luther Burbank creation. Commercially nonviable because the fruit is too large and soft to pack.'
+    },
+    {
+      id: 'black-amber', name: 'Black Amber', type: 'plum',
+      peakStart: [7, 5], peakEnd: [7, 30],
+      seasonStart: [6, 25], seasonEnd: [8, 10],
+      flavor: 'Firm, mildly sweet with a pleasant balance. Less complex than Santa Rosa but consistently good. The dark skin has a slight tang.',
+      buyingTip: 'Very dark, nearly black skin. Should be firm with slight give. Good keeper -- lasts longer than most plums in the fridge.',
+      where: 'Widely available at grocery stores throughout July.',
+      notes: 'A solid commercial variety. Not as exciting as heirloom plums but dependable and widely grown.'
+    },
+    {
+      id: 'chilean-plum', name: 'Chilean Plum', type: 'plum',
+      peakStart: [1, 10], peakEnd: [2, 20],
+      seasonStart: [1, 1], seasonEnd: [3, 1],
+      flavor: 'Variable. The best are pleasantly sweet and firm; many are bland from the long transit. A winter plum that reminds you why you should wait for summer.',
+      buyingTip: 'Check firmness and avoid mealy fruit. These travel thousands of miles -- quality is a lottery.',
+      where: 'Major grocery chains, January through February.',
+      isImport: true,
+      notes: 'Southern hemisphere imports. Fills the winter gap but rarely matches California quality.'
+    },
+
+    // --- Pluots ---
+    {
+      id: 'flavor-queen', name: 'Flavor Queen', type: 'pluot',
+      peakStart: [7, 5], peakEnd: [7, 25],
+      seasonStart: [6, 25], seasonEnd: [8, 5],
+      flavor: 'Intensely sweet with no acidity at all. Green-yellow skin hides candy-sweet golden flesh. Tastes more like a tropical fruit than a stone fruit -- mango and pineapple notes.',
+      buyingTip: 'Green-yellow and slightly soft. Don\'t judge by color -- these look unripe even when perfect. Should smell sweet at the stem.',
+      where: 'Farmers markets. Hard to find in grocery stores because the green color doesn\'t sell.',
+      notes: 'A Zaiger Genetics creation. Plum-apricot hybrid (technically an "interspecific plum").'
+    },
+    {
+      id: 'flavor-grenade', name: 'Flavor Grenade', type: 'pluot',
+      peakStart: [7, 10], peakEnd: [8, 10],
+      seasonStart: [7, 1], seasonEnd: [8, 20],
+      flavor: 'Explosive sweet-tart crunch. Elongated shape (like a small grenade). Green skin, amber flesh. Uniquely crisp for a pluot -- almost apple-like texture.',
+      buyingTip: 'Elongated green shape. Should be firm-crisp. Can be eaten crunchy like an apple. One of the few stone fruits that\'s good when still firm.',
+      where: 'Farmers markets. Growing in popularity at premium grocers.',
+      notes: 'The shape and texture make this unlike any other stone fruit. A conversation starter.'
+    },
+    {
+      id: 'flavor-king', name: 'Flavor King', type: 'pluot',
+      peakStart: [8, 10], peakEnd: [8, 30],
+      seasonStart: [8, 1], seasonEnd: [9, 10],
+      flavor: 'The single best stone fruit you can eat. Devastatingly complex: plum-berry-spice with layers that shift as you chew. Sugar level is almost unbelievable -- 25+ Brix is common. Dark, jammy flesh with a wine-like depth.',
+      buyingTip: 'Dark reddish-purple, should be very soft. If it\'s firm, wait. A ripe Flavor King is one of the peak experiences of California summer.',
+      where: 'Farmers markets mid-August. Some premium grocery stores. Sell out fast.',
+      rarity: true,
+      notes: 'Zaiger Genetics. Consistently wins taste tests. The king title is earned.'
+    },
+    {
+      id: 'dapple-dandy', name: 'Dapple Dandy', type: 'pluot',
+      peakStart: [8, 15], peakEnd: [9, 10],
+      seasonStart: [8, 5], seasonEnd: [9, 20],
+      flavor: 'Very sweet with a distinctive speckled appearance. Pink-red flesh is juicy and complex. Richer than Flavor Queen, more approachable than Flavor King.',
+      buyingTip: 'Marbled green-red skin (the "dapple"). Pink-red flesh. Should be soft and heavy. Also sold as "Dinosaur Egg" pluot.',
+      where: 'Farmers markets and some grocery stores (often labeled "Dinosaur Egg"). Late August into September.',
+      notes: 'The fun name and speckled look make this a farmers market favorite.'
+    }
+  ];
+
+  var MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+  var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function getType(typeId) {
+    for (var i = 0; i < FRUIT_TYPES.length; i++) {
+      if (FRUIT_TYPES[i].id === typeId) return FRUIT_TYPES[i];
+    }
+    return { id: typeId, label: typeId, color: '#9A8A7A' };
+  }
+
+  function isInRange(month, start, end) {
+    var sm = start[0], em = end[0];
+    if (em >= sm) return month >= sm && month <= em;
+    return month >= sm || month <= em;
+  }
+
+  function formatRange(start, end) {
+    return MONTH_SHORT[start[0]-1] + ' ' + start[1] + ' -- ' + MONTH_SHORT[end[0]-1] + ' ' + end[1];
+  }
+
+  // Determine which months a variety appears in (by peak period)
+  function peakMonths(v) {
+    var months = [];
+    var s = v.peakStart[0], e = v.peakEnd[0];
+    if (e >= s) {
+      for (var m = s; m <= e; m++) months.push(m);
+    } else {
+      for (var m = s; m <= 12; m++) months.push(m);
+      for (var m = 1; m <= e; m++) months.push(m);
+    }
+    return months;
+  }
+
+  // --- Build Legend ---
+  function buildLegend() {
+    var el = document.getElementById('legend');
+    FRUIT_TYPES.forEach(function(t) {
+      var item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = '<div class="legend-swatch" style="background:' + t.color + '"></div>' + t.label;
+      el.appendChild(item);
+    });
+  }
+
+  // --- Build Month Sections ---
+  function buildTimeline() {
+    var container = document.getElementById('timeline-content');
+    var now = new Date();
+    var currentMonth = now.getMonth() + 1; // 1-indexed
+
+    // Build a map: month -> varieties peaking that month
+    // Sort within each month by type order, then by peak start day
+    var monthMap = {};
+    for (var m = 1; m <= 12; m++) monthMap[m] = [];
+
+    VARIETIES.forEach(function(v) {
+      var months = peakMonths(v);
+      months.forEach(function(m) {
+        monthMap[m].push(v);
+      });
+    });
+
+    // Sort each month's varieties by fruit type order, then peak start day
+    var typeOrder = {};
+    FRUIT_TYPES.forEach(function(t, i) { typeOrder[t.id] = i; });
+
+    for (var m = 1; m <= 12; m++) {
+      monthMap[m].sort(function(a, b) {
+        var ta = typeOrder[a.type] || 0, tb = typeOrder[b.type] || 0;
+        if (ta !== tb) return ta - tb;
+        return a.peakStart[1] - b.peakStart[1];
+      });
+    }
+
+    // Render months
+    for (var m = 1; m <= 12; m++) {
+      var items = monthMap[m];
+      var isNow = (m === currentMonth);
+
+      // Golden window banner before July
+      if (m === 7) {
+        var banner = document.createElement('div');
+        banner.className = 'golden-banner';
+        banner.id = 'golden-banner';
+        banner.innerHTML = '<strong>Peak Season</strong> -- Late July through mid-August is the golden window for California stone fruit. The widest selection and best quality of the year.';
+        container.appendChild(banner);
+      }
+
+      var section = document.createElement('section');
+      section.className = 'month-section';
+      section.id = 'month-' + m;
+
+      // Header
+      var header = document.createElement('div');
+      header.className = 'month-header';
+      header.innerHTML = '<span class="month-name">' + MONTH_NAMES[m-1] + '</span>' +
+        (items.length > 0 ? '<span class="month-count">' + items.length + ' variet' + (items.length === 1 ? 'y' : 'ies') + '</span>' : '') +
+        (isNow ? '<span class="month-now-badge">Now</span>' : '');
+      section.appendChild(header);
+
+      var body = document.createElement('div');
+      body.className = 'month-body';
+
+      if (items.length === 0) {
+        body.innerHTML = '<div class="month-empty">No stone fruit in peak season</div>';
+      } else {
+        items.forEach(function(v) {
+          body.appendChild(buildCard(v));
+        });
+      }
+
+      section.appendChild(body);
+      container.appendChild(section);
+    }
+  }
+
+  // --- Build Variety Card ---
+  function buildCard(v) {
+    var t = getType(v.type);
+    var card = document.createElement('div');
+    card.className = 'variety-card';
+    if (v.isImport) card.classList.add('import-card');
+    card.dataset.id = v.id;
+
+    // Badges
+    var badges = '';
+    if (v.rarity) badges += '<span class="card-badge badge-rare">Rare</span>';
+    if (v.isImport) badges += '<span class="card-badge badge-import">Import</span>';
+
+    // Head
+    var head = document.createElement('div');
+    head.className = 'card-head';
+    head.innerHTML =
+      '<div class="card-type-dot" style="background:' + t.color + '"></div>' +
+      '<div class="card-info">' +
+        '<div class="card-name" style="color:' + t.color + '">' + v.name + ' ' + badges + '</div>' +
+        '<div class="card-meta">' +
+          '<span class="card-type-label" style="color:' + t.color + '">' + t.label + '</span>' +
+          '<span class="card-timing">Peak ' + formatRange(v.peakStart, v.peakEnd) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<svg class="card-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 8 10 12 14 8"/></svg>';
+
+    // Body (accordion content)
+    var body = document.createElement('div');
+    body.className = 'card-body';
+
+    // Minibar
+    var monthLabels = MONTH_SHORT.map(function(n) { return '<span>' + n.charAt(0) + '</span>'; }).join('');
+    var cells = '';
+    for (var m = 1; m <= 12; m++) {
+      var cls = 'minibar-cell';
+      if (isInRange(m, v.seasonStart, v.seasonEnd)) cls += ' in-season';
+      if (isInRange(m, v.peakStart, v.peakEnd)) cls += ' peak';
+      var hasFill = cls.indexOf('in-season') >= 0 || cls.indexOf('peak') >= 0;
+      cells += '<div class="' + cls + '"' + (hasFill ? ' style="background:' + t.color + '"' : '') + '></div>';
+    }
+
+    var inner = '<div class="card-body-inner">' +
+      '<div class="detail-section">' +
+        '<div class="detail-section-title">Season</div>' +
+        '<div class="detail-text">Peak: <em>' + formatRange(v.peakStart, v.peakEnd) + '</em><br>' +
+          'Available: ' + formatRange(v.seasonStart, v.seasonEnd) + '</div>' +
+        '<div class="detail-minibar-wrap">' +
+          '<div class="detail-minibar-labels">' + monthLabels + '</div>' +
+          '<div class="detail-minibar">' + cells + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-section">' +
+        '<div class="detail-section-title">Flavor</div>' +
+        '<div class="detail-text">' + v.flavor + '</div>' +
+      '</div>' +
+      '<div class="detail-section">' +
+        '<div class="detail-section-title">Buying Tips</div>' +
+        '<div class="detail-text">' + v.buyingTip + '</div>' +
+      '</div>' +
+      '<div class="detail-section">' +
+        '<div class="detail-section-title">Where to Find</div>' +
+        '<div class="detail-text">' + v.where + '</div>' +
+      '</div>';
+
+    if (v.notes) {
+      inner += '<div class="detail-note">' + v.notes + '</div>';
+    }
+
+    inner += '</div>';
+    body.innerHTML = inner;
+
+    card.appendChild(head);
+    card.appendChild(body);
+
+    // Click handler
+    head.addEventListener('click', function() {
+      var wasOpen = card.classList.contains('open');
+      card.classList.toggle('open');
+
+      // Scroll into view if opening and card is near viewport top
+      if (!wasOpen) {
+        setTimeout(function() {
+          var rect = card.getBoundingClientRect();
+          if (rect.top < 60) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    });
+
+    return card;
+  }
+
+  // --- IntersectionObserver for reveals ---
+  function setupObserver() {
+    var targets = document.querySelectorAll('.month-section, .variety-card, .golden-banner');
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(function(el) {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        if (el.classList.contains('variety-card')) el.classList.add('revealed');
+      });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        if (el.classList.contains('variety-card')) {
+          el.classList.add('revealed');
+        } else {
+          el.classList.add('anim-in');
+        }
+        observer.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -30px 0px', threshold: 0.05 });
+
+    targets.forEach(function(el) { observer.observe(el); });
+  }
+
+  // --- Nav Menu ---
+  function bindNavMenu() {
+    var hamburger = document.getElementById('nav-hamburger');
+    var menu = document.getElementById('nav-menu');
+    if (!hamburger || !menu) return;
+
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      hamburger.classList.toggle('open');
+      menu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target)) {
+        hamburger.classList.remove('open');
+        menu.classList.remove('open');
+      }
+    });
+
+    var brand = document.getElementById('nav-brand');
+    if (brand) {
+      brand.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  }
+
+  // --- Load Animation ---
+  function runLoadAnimation() {
+    setTimeout(function() { document.getElementById('page-header').classList.add('anim-in'); }, 100);
+    setTimeout(function() { document.getElementById('legend').classList.add('anim-fade'); }, 250);
+    setTimeout(setupObserver, 350);
+  }
+
+  // --- Scroll to current season ---
+  function scrollToNow() {
+    var now = new Date();
+    var month = now.getMonth() + 1;
+    // If outside stone fruit season (Apr-Sep), go to April
+    var target = (month >= 4 && month <= 9) ? month : 4;
+    var el = document.getElementById('month-' + target);
+    if (!el) return;
+
+    setTimeout(function() {
+      var y = el.offsetTop - 20;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 600);
+  }
+
+
+
+  // --- Init ---
+  function init() {
+    buildLegend();
+    buildTimeline();
+    bindNavMenu();
+    runLoadAnimation();
+    scrollToNow();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

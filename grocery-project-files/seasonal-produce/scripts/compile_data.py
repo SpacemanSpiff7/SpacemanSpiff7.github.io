@@ -3,6 +3,7 @@
 import csv
 import json
 import os
+import sys
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,11 +13,16 @@ WEB = os.path.join(ROOT, 'web')
 
 def load_csv(filename):
     path = os.path.join(DATA, filename)
-    with open(path) as f:
-        return list(csv.DictReader(f))
+    try:
+        with open(path) as f:
+            return list(csv.DictReader(f))
+    except (OSError, csv.Error) as e:
+        print(f"ERROR: Failed to read {path}: {e}")
+        sys.exit(1)
 
 
 def main():
+    errors = []
     produce_rows = load_csv('produce_items.csv')
     region_rows = load_csv('regions.csv')
     season_rows = load_csv('produce_seasons.csv')
@@ -31,29 +37,57 @@ def main():
         })
 
     regions = []
-    for r in region_rows:
+    for i, r in enumerate(region_rows):
+        line = i + 2
+        try:
+            lat = float(r['latitude'])
+            lng = float(r['longitude'])
+        except (ValueError, TypeError) as e:
+            errors.append(f"regions.csv line {line}: invalid coordinates: {e}")
+            continue
+        if not (-90 <= lat <= 90):
+            errors.append(f"regions.csv line {line}: latitude {lat} out of range (-90..90)")
+        if not (-180 <= lng <= 180):
+            errors.append(f"regions.csv line {line}: longitude {lng} out of range (-180..180)")
         regions.append({
             'slug': r['region_slug'],
             'name': r['region_name'],
             'originGroup': r['origin_group'],
             'country': r['country'],
-            'lat': float(r['latitude']),
-            'lng': float(r['longitude']),
+            'lat': lat,
+            'lng': lng,
         })
 
     seasons = []
-    for r in season_rows:
+    for i, r in enumerate(season_rows):
+        line = i + 2
+        try:
+            season_months = json.loads(r['season_months'])
+        except (json.JSONDecodeError, TypeError) as e:
+            errors.append(f"produce_seasons.csv line {line}: invalid season_months JSON: {e}")
+            continue
+        try:
+            peak_months = json.loads(r['peak_months'])
+        except (json.JSONDecodeError, TypeError) as e:
+            errors.append(f"produce_seasons.csv line {line}: invalid peak_months JSON: {e}")
+            continue
         seasons.append({
-            'produceSlug': r['produce_slug'],
-            'regionSlug': r['region_slug'],
-            'seasonMonths': json.loads(r['season_months']),
-            'peakMonths': json.loads(r['peak_months']),
-            'sourceType': r['source_type'],
-            'notes': r['notes'],
-            'storageTip': r['storage_tip'],
+            'p': r['produce_slug'],
+            'r': r['region_slug'],
+            's': season_months,
+            'pk': peak_months,
+            't': r['source_type'],
+            'n': r['notes'],
+            'st': r['storage_tip'],
         })
 
-    items_with_seasons = len(set(s['produceSlug'] for s in seasons))
+    if errors:
+        print(f"ERRORS ({len(errors)}):")
+        for e in errors:
+            print(f"  {e}")
+        sys.exit(1)
+
+    items_with_seasons = len(set(s['p'] for s in seasons))
 
     compiled = {
         'produce': produce,
@@ -63,7 +97,7 @@ def main():
             'generated': datetime.now(timezone.utc).isoformat(),
             'produceCount': len(produce),
             'seasonsCount': len(seasons),
-            'coveragePct': round(items_with_seasons / len(produce) * 100),
+            'coveragePct': round(items_with_seasons / len(produce) * 100, 1),
         }
     }
 
@@ -77,7 +111,7 @@ def main():
         print(f"Wrote {out_path} ({size:,} bytes)")
 
     print(f"\nProduce: {len(produce)}, Regions: {len(regions)}, Seasons: {len(seasons)}")
-    print(f"Coverage: {compiled['meta']['coveragePct']}%")
+    print(f"Coverage: {compiled['meta']['coveragePct']:.1f}%")
 
 
 if __name__ == '__main__':

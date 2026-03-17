@@ -1,0 +1,652 @@
+[
+  {
+    "slug": "baby-artichoke",
+    "entries": [
+      {
+        "region": "central-coast",
+        "season": [3, 4, 5, 6],
+        "peak": [4, 5],
+        "source": "local",
+        "notes": "Smaller lateral buds harvested from the same plant after the main terminal bud. Grown primarily around Castroville in Monterey County. More tender than full-size globes with less developed choke, often edible whole. Spring crop is the primary harvest.",
+        "storage": "Refrigerate unwashed in a plastic bag for up to 5-7 days. Sprinkle with water to maintain freshness."
+      },
+      {
+        "region": "central-coast",
+        "season": [9, 10, 11],
+        "peak": [10],
+        "source": "local",
+        "notes": "Smaller fall harvest of baby artichokes from the Castroville area. Plants are cut back in summer to force dormancy, then regrown for fall production. Fall buds tend to be slightly more compact.",
+        "storage": "Refrigerate unwashed in a plastic bag for up to 5-7 days. Sprinkle with water to maintain freshness."
+      }
+    ]
+  },
+  {
+    "slug": "beet-greens",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [3, 4, 5, 10, 11],
+        "source": "local",
+        "notes": "Tender tops harvested from young beet plants, available as a byproduct of beet thinning or from dedicated greens production. Best flavor in cool weather -- bolts and turns tough in summer heat. Rich in iron, vitamin K, and oxalic acid similar to chard.",
+        "storage": "Wrap in damp paper towel and refrigerate in a plastic bag. Use within 3-5 days as leaves wilt quickly."
+      }
+    ]
+  },
+  {
+    "slug": "blackeye-pea",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [7, 8, 9, 10],
+        "peak": [8, 9],
+        "source": "local",
+        "notes": "Fresh shelling blackeye peas from the Central Valley. California Blackeye No. 5 and No. 46 are the dominant commercial varieties. Heat-loving legume planted after soil reaches 65F, harvested when pods are plump and easily snapped. Fresh peas cook much faster than dried.",
+        "storage": "Refrigerate unshelled in a plastic bag for up to 5 days. Shelled peas should be used within 2-3 days or frozen."
+      },
+      {
+        "region": "southeast-us",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "import",
+        "notes": "Georgia, Arkansas, and Tennessee are leading producers of fresh shelling cowpeas. Southern states have longer warm seasons that extend availability beyond the California window.",
+        "storage": "Refrigerate unshelled in a plastic bag for up to 5 days. Shelled peas should be used within 2-3 days or frozen."
+      }
+    ]
+  },
+  {
+    "slug": "chayote",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [10, 11, 12],
+        "peak": [10, 11],
+        "source": "local",
+        "notes": "Short-day plant that only flowers when daylength drops below 12 hours. In Southern California, blossoms appear in September and fruit ripens in October. Produces prolifically until first frost. Mild, crisp flesh similar to a cross between cucumber and jicama.",
+        "storage": "Refrigerate unwrapped in the crisper drawer for up to 3-4 weeks. Do not peel until ready to use."
+      },
+      {
+        "region": "sinaloa",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "import",
+        "notes": "Mexico supplies roughly 89% of US chayote imports. Available in most Latin grocery stores year-round, with peak supply in fall and winter. Also imported from Costa Rica and Guatemala to fill supply gaps.",
+        "storage": "Refrigerate unwrapped in the crisper drawer for up to 3-4 weeks. Do not peel until ready to use."
+      }
+    ]
+  },
+  {
+    "slug": "chinese-broccoli",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 9, 10, 11, 12],
+        "peak": [3, 4, 10, 11],
+        "source": "local",
+        "notes": "Also called gai lan or kai lan. Cool-season brassica that bolts quickly in heat above 75F. Thick, glossy stems are the prized part -- harvest at 6-8 inches before white flower buds open. Fast crop at 55-70 days from seed. Flavor is sweeter and less bitter than conventional broccoli.",
+        "storage": "Wrap stems in damp paper towel and refrigerate in a plastic bag. Use within 4-5 days. Stems stay crisp longer than leaves."
+      }
+    ]
+  },
+  {
+    "slug": "escarole",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Broad-leaved endive grown commercially in the Salinas Valley. Best planted in summer for fall/winter harvest -- bolts before reaching full size if spring-planted. Outer leaves are pleasantly bitter, inner heart is mild and buttery. Takes 85-100 days to mature. Excellent braised or in Italian wedding soup.",
+        "storage": "Wrap in damp paper towel and refrigerate for up to 5-7 days. Inner leaves keep longer than outer ones."
+      },
+      {
+        "region": "florida",
+        "season": [1, 2, 3, 11, 12],
+        "peak": [1, 2, 12],
+        "source": "import",
+        "notes": "Florida supplies the East Coast and supplements California production during winter months. Same growing requirements as California -- cool-season crop that needs consistent moisture.",
+        "storage": "Wrap in damp paper towel and refrigerate for up to 5-7 days. Inner leaves keep longer than outer ones."
+      }
+    ]
+  },
+  {
+    "slug": "golden-beet",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [3, 4, 11, 12],
+        "source": "local",
+        "notes": "Heirloom variety (often Burpee's Golden or Touchstone Gold) that does not bleed like red beets. Sweeter and milder than red varieties. Matures in 55-65 days, best in cool weather between 50-70F. Flesh turns rich golden-orange when roasted. Prized at farmers markets for salads and roasting.",
+        "storage": "Remove greens immediately (they draw moisture from the root). Refrigerate unwashed roots in a plastic bag for 2-3 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "green-tomato",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9, 10, 11],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Unripe tomatoes harvested firm before coloring, or heirloom varieties like Green Zebra and Cherokee Green that stay green when ripe. Most common at farmers markets in September-October as growers clear plants. Tart, firm flesh is ideal for frying, pickling, and chutney.",
+        "storage": "Store at room temperature out of direct sunlight. Will begin to ripen within a week. Refrigerate only if fully green and firm -- keeps 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "savoy-cabbage",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Crinkled, deeply veined leaves are more tender and delicate than smooth-leaf cabbage. Best in cool weather. Takes 70-110 days depending on variety. Lighter and more pliable than green cabbage, making it superior for stuffed cabbage rolls.",
+        "storage": "Refrigerate whole head in a plastic bag for up to 1-2 weeks. Cut cabbage dries out faster -- wrap tightly in plastic."
+      },
+      {
+        "region": "santa-maria-valley",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Santa Maria Valley cool-season production. Quality and sweetness are best after light frost exposure in winter months.",
+        "storage": "Refrigerate whole head in a plastic bag for up to 1-2 weeks. Cut cabbage dries out faster -- wrap tightly in plastic."
+      }
+    ]
+  },
+  {
+    "slug": "sweet-onion",
+    "entries": [
+      {
+        "region": "imperial-valley",
+        "season": [4, 5, 6],
+        "peak": [4, 5],
+        "source": "local",
+        "notes": "Imperial Sweets are short-day varieties with high sugar-to-pyruvic acid ratio, resulting in mild sweetness without the bite. Planted in fall, harvested starting late April. The Imperial Valley is one of the largest sweet onion districts in the US.",
+        "storage": "Store in a cool, dry, well-ventilated area. Sweet onions have higher water content and spoil faster than storage onions -- use within 2-3 weeks. Refrigerate for longer storage."
+      },
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8],
+        "peak": [6, 7],
+        "source": "local",
+        "notes": "San Joaquin Valley harvest begins around Bakersfield in late May and moves north through Kern and Fresno counties. Intermediate-day sweet varieties extend availability after the Imperial Valley deal finishes.",
+        "storage": "Store in a cool, dry, well-ventilated area. Sweet onions have higher water content and spoil faster than storage onions -- use within 2-3 weeks. Refrigerate for longer storage."
+      }
+    ]
+  },
+  {
+    "slug": "white-onion",
+    "entries": [
+      {
+        "region": "imperial-valley",
+        "season": [4, 5, 6],
+        "peak": [5, 6],
+        "source": "local",
+        "notes": "Short-day white varieties planted in fall and harvested spring. Sharp, clean flavor when raw that mellows when cooked. Essential in Mexican cuisine for salsas and pickled onions.",
+        "storage": "Store in a cool, dry, dark location with good air circulation for 2-4 weeks. White onions have thinner, more papery skin and don't store as long as yellow varieties."
+      },
+      {
+        "region": "central-valley",
+        "season": [6, 7, 8, 9],
+        "peak": [7, 8],
+        "source": "local",
+        "notes": "Intermediate-day white varieties from the San Joaquin Valley extend the California season after Imperial Valley finishes. Harvest progresses from Bakersfield north through the valley.",
+        "storage": "Store in a cool, dry, dark location with good air circulation for 2-4 weeks. White onions have thinner, more papery skin and don't store as long as yellow varieties."
+      },
+      {
+        "region": "sinaloa",
+        "season": [1, 2, 3, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "import",
+        "notes": "Mexican white onions fill the gap when California production ends. Mexico is the primary source for US white onion imports, with Sinaloa and Chihuahua as major growing regions.",
+        "storage": "Store in a cool, dry, dark location with good air circulation for 2-4 weeks. White onions have thinner, more papery skin and don't store as long as yellow varieties."
+      }
+    ]
+  },
+  {
+    "slug": "turnip-greens",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [1, 2, 3, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Cool-season crop grown commercially in the Central Valley during fall and winter. Greens are ready to pick within a month of sowing. Best flavor at 50-65F; high temperatures cause bitterness. Traditional Southern cooking green, excellent braised with vinegar and smoked pork.",
+        "storage": "Wrap in damp paper towel and refrigerate in a plastic bag. Use within 3-5 days. Blanch and freeze for longer storage."
+      },
+      {
+        "region": "southeast-us",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "import",
+        "notes": "Southeast US states (Georgia, Alabama, Tennessee) are major producers of turnip greens. Longer mild-winter season extends availability.",
+        "storage": "Wrap in damp paper towel and refrigerate in a plastic bag. Use within 3-5 days. Blanch and freeze for longer storage."
+      }
+    ]
+  },
+  {
+    "slug": "pearl-onion",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [4, 5, 6, 7, 8, 9],
+        "peak": [5, 6, 7],
+        "source": "local",
+        "notes": "Tiny bulb onion (under 1 inch diameter) harvested young from dense plantings. White, red, and gold varieties available. Mild, sweet flavor prized for braising, pickling, and stews.",
+        "storage": "Store in a cool, dry, well-ventilated spot for 2-4 weeks. Refrigerate in a mesh bag for up to 1 month. Avoid plastic bags which trap moisture."
+      },
+      {
+        "region": "imperial-valley",
+        "season": [3, 4, 5],
+        "peak": [4, 5],
+        "source": "local",
+        "notes": "Early-season desert production from the Imperial Valley onion region. Short-day varieties planted in fall for spring harvest.",
+        "storage": "Store in a cool, dry, well-ventilated spot for 2-4 weeks. Refrigerate in a mesh bag for up to 1 month."
+      }
+    ]
+  },
+  {
+    "slug": "watermelon-radish",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 11, 12],
+        "source": "local",
+        "notes": "Chinese heirloom daikon-type radish with pale green skin and striking pink-to-magenta interior. Takes 55-65 days to mature. Flavor sweetens as temperatures drop in fall and winter. Best planted midsummer for late fall harvest. Sizes up to 2-4 inches in diameter for optimal quality.",
+        "storage": "Refrigerate unwashed in a plastic bag with a damp paper towel for 2-3 weeks. Remove greens promptly as they draw moisture from the root."
+      }
+    ]
+  },
+  {
+    "slug": "taro",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [9, 10, 11],
+        "peak": [10, 11],
+        "source": "local",
+        "notes": "Limited California production on small-scale farms in warm inland areas. Requires 7-12 months of hot weather and soil temperatures above 70F. Primarily dasheen and eddoe types. Harvested in fall when lower leaves yellow.",
+        "storage": "Store unwashed in a cool, dark, dry place for up to 1 week. Refrigerate loosely wrapped for up to 2 weeks. Do not eat raw; taro must be cooked thoroughly to neutralize calcium oxalate crystals."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Year-round tropical imports from the Philippines, Fiji, Samoa, and other Pacific Island nations. The US imports over 64,000 metric tons annually. Also imported from Mexico, Costa Rica, and Ecuador.",
+        "storage": "Store unwashed in a cool, dark, dry place for up to 1 week. Refrigerate loosely wrapped for up to 2 weeks. Must be cooked before eating."
+      }
+    ]
+  },
+  {
+    "slug": "chicory",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [6, 7, 8, 9, 10],
+        "source": "local",
+        "notes": "Broad chicory family includes radicchio, Belgian endive, frisee, and puntarelle. Salinas Valley is the primary California production region, with radicchio harvested May through January. Cool-season crop thriving at 45-75F. Takes 85-100 days to mature. Coastal fog belt is ideal.",
+        "storage": "Wrap loosely in damp paper towels and refrigerate in a plastic bag for 1-2 weeks. Radicchio heads keep longest; loose-leaf types like frisee keep 5-7 days."
+      },
+      {
+        "region": "central-valley",
+        "season": [1, 2, 3],
+        "peak": [1, 2],
+        "source": "local",
+        "notes": "Winter Central Valley production fills the gap when Salinas is too cold for field crops. Radicchio rosa season typically begins in January. Shorter window due to warming spring temperatures which cause bolting.",
+        "storage": "Wrap loosely in damp paper towels and refrigerate for 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "mizuna",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 10, 11, 12],
+        "peak": [2, 3, 4, 11],
+        "source": "local",
+        "notes": "Japanese mustard green with feathery, deeply serrated leaves and mild peppery flavor. Fast-growing at 40 days to maturity. More bolt-resistant than most brassica greens. Grown commercially alongside other salad mix components in the Salinas Valley.",
+        "storage": "Refrigerate unwashed in a loosely sealed bag or container lined with paper towels for 5-7 days. Wilts quickly at room temperature."
+      },
+      {
+        "region": "santa-maria-valley",
+        "season": [1, 2, 3, 4, 5, 6, 10, 11, 12],
+        "peak": [3, 4, 5, 11, 12],
+        "source": "local",
+        "notes": "Coastal fog belt allows extended cool-season production. Often included in spring mix and mesclun blends. Mild marine climate reduces bolting pressure during shoulder months.",
+        "storage": "Refrigerate in a loosely sealed container lined with paper towels for 5-7 days."
+      }
+    ]
+  },
+  {
+    "slug": "yu-choy",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [2, 3, 4, 5, 9, 10, 11],
+        "peak": [3, 4, 10, 11],
+        "source": "local",
+        "notes": "Also called yu choy sum, meaning 'oil vegetable' in Cantonese. Produces fleshy pale green stalks with broad dark green leaves and small yellow flowers. Grown extensively by Southeast Asian farmers in Fresno County. Fast-growing at 30-45 days. Bolts quickly in summer heat. Milder and sweeter than bok choy.",
+        "storage": "Refrigerate unwashed, wrapped in a damp paper towel inside a plastic bag for 3-5 days. Stems should be firm and crisp; yellowing flowers indicate age."
+      },
+      {
+        "region": "salinas-valley",
+        "season": [3, 4, 5, 6, 9, 10, 11],
+        "peak": [4, 5, 10],
+        "source": "local",
+        "notes": "Coastal production extends the window slightly into early summer thanks to cooler temperatures. Grown alongside other Asian brassicas for specialty and wholesale markets.",
+        "storage": "Refrigerate unwashed in a damp paper towel inside a plastic bag for 3-5 days."
+      }
+    ]
+  },
+  {
+    "slug": "water-spinach",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8, 9],
+        "source": "local",
+        "notes": "Semi-aquatic tropical green also called kangkong or ong choy. Federally classified as a noxious weed; California requires CDFA cultivation permits. The Ching Quat variety is preferred in California as it grows in damp soil without free water. Thrives at 68-86F. Extremely perishable.",
+        "storage": "Highly perishable. Refrigerate unwashed with stems in water or wrapped in damp paper towels for 1-3 days maximum. Use as soon as possible after purchase."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Year-round imports from Southeast Asian countries supplement domestic California supply, especially during winter months when local production ceases. Available at Asian grocery stores and specialty distributors.",
+        "storage": "Extremely perishable. Refrigerate and use within 1-2 days of purchase."
+      }
+    ]
+  },
+  {
+    "slug": "chioggia-beet",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 5, 6, 10, 11, 12],
+        "peak": [3, 4, 5, 11, 12],
+        "source": "local",
+        "notes": "Italian heirloom beet with distinctive concentric pink and white ring pattern when sliced. Also called candy cane or bull's-eye beet. Takes 50-60 days to harvest. Flavor declines and rings fade with cooking heat. Best eaten raw or lightly roasted.",
+        "storage": "Remove greens (store separately for 2-3 days). Refrigerate unwashed roots in a plastic bag for 2-3 weeks. Do not peel until ready to use."
+      },
+      {
+        "region": "central-valley",
+        "season": [3, 4, 5, 10, 11],
+        "peak": [4, 5],
+        "source": "local",
+        "notes": "Spring and fall production in the Central Valley avoids summer heat stress which causes bitterness and poor ring development.",
+        "storage": "Remove greens and refrigerate unwashed roots in a plastic bag for 2-3 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "cardoon",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 11, 12],
+        "peak": [1, 2, 12],
+        "source": "local",
+        "notes": "Thistle-like relative of the artichoke grown for its thick, celery-like leaf stalks. Requires blanching (wrapping stalks in burlap for 4-5 weeks) to reduce bitterness. Takes 120-150 days to mature. Thrives in mild, damp coastal California. Popular in Italian and North African cuisine.",
+        "storage": "Wrap blanched stalks in damp paper towels and refrigerate in a plastic bag for up to 1 week. Trim and peel tough outer fibers before cooking. Place cut pieces in acidulated water to prevent browning."
+      }
+    ]
+  },
+  {
+    "slug": "purslane",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [6, 7, 8],
+        "source": "local",
+        "notes": "Succulent summer annual with thick, fleshy leaves and a mild lemony, slightly peppery flavor. Both wild-foraged and commercially cultivated. Rich in omega-3 fatty acids, more than any other leafy green. Common agricultural weed rebranded as a gourmet green.",
+        "storage": "Refrigerate in a loosely sealed container lined with a damp paper towel for 3-5 days. Wilts and yellows quickly at room temperature."
+      },
+      {
+        "region": "salinas-valley",
+        "season": [6, 7, 8, 9],
+        "peak": [7, 8],
+        "source": "local",
+        "notes": "Coastal production season is slightly shorter due to cooler marine influence. Found at farmers markets and in specialty salad mixes.",
+        "storage": "Refrigerate in a loosely sealed container for 3-5 days."
+      }
+    ]
+  },
+  {
+    "slug": "sorrel",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [2, 3, 4, 5, 6, 10, 11],
+        "peak": [3, 4, 5],
+        "source": "local",
+        "notes": "Perennial herb with bright, tart, lemony flavor from oxalic acid content. Garden sorrel and French sorrel are the most common culinary varieties. Hardy perennial that regrows vigorously each spring. Flavor is sharpest in cool weather; leaves become tough and overly acidic in summer heat. Classic in French cuisine for sauces and soups.",
+        "storage": "Refrigerate unwashed in a plastic bag lined with paper towels for 3-5 days. Wilts quickly once picked. Freezes well when blanched for use in cooked dishes."
+      }
+    ]
+  },
+  {
+    "slug": "mache",
+    "entries": [
+      {
+        "region": "salinas-valley",
+        "season": [1, 2, 3, 4, 10, 11, 12],
+        "peak": [1, 2, 3, 11, 12],
+        "source": "local",
+        "notes": "Also called corn salad or lamb's lettuce. Delicate, nutty, mildly sweet rosette green prized in French cuisine. Thrives in cool temperatures (45-65F) and tolerates light frost. Takes 40-50 days to mature. One of the few fresh salad greens available through winter.",
+        "storage": "Very delicate. Refrigerate unwashed in a loosely sealed container lined with a damp paper towel for 3-5 days maximum. Handle gently as leaves bruise easily."
+      }
+    ]
+  },
+  {
+    "slug": "jackfruit",
+    "entries": [
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [3, 4, 5, 6, 7, 8],
+        "source": "import",
+        "notes": "World's largest tree fruit, imported primarily from India, Thailand, Malaysia, and the Philippines. Also sourced from Mexico and Guatemala. Flesh is sweet and aromatic with a distinctive tropical flavor. Available as whole fruit, pre-cut fresh, frozen, and canned. Unripe jackfruit is used as a meat substitute.",
+        "storage": "Whole uncut jackfruit keeps at room temperature for 3-5 days or refrigerated up to 1 week. Cut flesh should be refrigerated in an airtight container and used within 5 days. Freezes well for up to 2 months."
+      }
+    ]
+  },
+  {
+    "slug": "jujube",
+    "entries": [
+      {
+        "region": "central-valley",
+        "season": [8, 9, 10, 11],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Also called Chinese date. Popular California varieties include Li (large, sweet, crisp), Lang (ideal for drying, slightly tangy), and GA866 (UC Davis variety, high sugar, apple-like flavor). Thrives in hot Central Valley summers. Fruit ripens unevenly, transitioning from green to mahogany brown.",
+        "storage": "Fresh jujubes keep at room temperature for about 1 week. Refrigerate in a perforated bag for 2-3 weeks. Dried jujubes store indefinitely at room temperature."
+      },
+      {
+        "region": "sacramento-valley",
+        "season": [8, 9, 10, 11],
+        "peak": [9, 10],
+        "source": "local",
+        "notes": "Grows well in Northern California's hot interior valleys. Drought-resistant once established. Trees need full sun and hot summers for ample fruit set.",
+        "storage": "Fresh jujubes keep at room temperature for about 1 week. Refrigerate in a perforated bag for 2-3 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "star-fruit",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [1, 2, 3, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 12],
+        "source": "local",
+        "notes": "Also called carambola. Small-scale production in frost-free coastal Southern California. Fruit has a distinctive five-pointed star cross-section. Sweet varieties (B-10, Arkin) preferred for fresh eating. Trees bloom in spring, summer, and fall, enabling multiple fruiting periods.",
+        "storage": "Firm green star fruit ripens at room temperature in 2-4 days. Ripe yellow fruit refrigerates well for 1-2 weeks. Cut slices should be used within 2-3 days."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [8, 9, 10, 11],
+        "source": "import",
+        "notes": "Imported year-round from Taiwan, Thailand, and Mexico. Florida is the main US domestic producer. About 59% of US availability comes from imports. Sweet and tart varieties available; sweet types dominate the US market.",
+        "storage": "Imported fruit keeps 1-2 weeks refrigerated. Select firm, bright yellow fruit with minimal brown edges."
+      }
+    ]
+  },
+  {
+    "slug": "sugarcane",
+    "entries": [
+      {
+        "region": "imperial-valley",
+        "season": [1, 10, 11, 12],
+        "peak": [11, 12],
+        "source": "local",
+        "notes": "Grown commercially in the Imperial Valley, where the dry climate, intense sunlight, and irrigation support production. Takes about 14 months from planting to harvest. Fresh stalks sold at farmers markets and grocery stores for chewing and juicing.",
+        "storage": "Fresh whole stalks keep at room temperature for 1-2 weeks. Refrigerate cut pieces wrapped in plastic for up to 2 weeks. Sugarcane juice oxidizes quickly and should be consumed within hours of pressing."
+      },
+      {
+        "region": "brazil",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [4, 5, 6, 7, 8, 9, 10, 11],
+        "source": "import",
+        "notes": "Fresh sugarcane stalks available year-round in US grocery stores, largely sourced from tropical producing regions including Central America and the Caribbean.",
+        "storage": "Store whole stalks upright in a cool place for up to 2 weeks. Refrigerate cut pieces in plastic wrap for 1-2 weeks."
+      }
+    ]
+  },
+  {
+    "slug": "tamarind",
+    "entries": [
+      {
+        "region": "india",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5],
+        "source": "import",
+        "notes": "India is the world's largest tamarind producer. Pods contain a sweet-sour pulp used in cooking, beverages, and candy. Both sweet and sour varieties available. Dried pods and paste are the most common forms in US markets.",
+        "storage": "Dried tamarind pods keep at room temperature in an airtight container for up to 1 year. Tamarind paste refrigerates well for several months. Fresh pods last 2-3 weeks refrigerated."
+      },
+      {
+        "region": "southeast-asia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 11, 12],
+        "source": "import",
+        "notes": "Thailand is a major exporter of sweet tamarind, with peak harvest from late November through March. Thai sweet tamarind is particularly prized for fresh eating.",
+        "storage": "Fresh sweet tamarind pods keep 2-3 weeks at room temperature or up to 1 month refrigerated."
+      },
+      {
+        "region": "michoacan",
+        "season": [3, 4, 5, 6, 7, 8],
+        "peak": [4, 5, 6],
+        "source": "import",
+        "notes": "Mexican tamarind is widely used for agua fresca, candy, and sauces. Pods are available fresh in spring and summer at Latin American grocery stores throughout California.",
+        "storage": "Fresh pods keep 2-3 weeks at room temperature. Processed tamarind candy and paste have a long shelf life."
+      }
+    ]
+  },
+  {
+    "slug": "loganberry",
+    "entries": [
+      {
+        "region": "central-coast",
+        "season": [6, 7, 8],
+        "peak": [7],
+        "source": "local",
+        "notes": "Accidentally created in 1883 in Santa Cruz, California by horticulturist James Harvey Logan. A cross between blackberry and raspberry with dark red, elongated fruit. Distinctive tart-sweet flavor. Very perishable and rarely found in mainstream retail.",
+        "storage": "Extremely perishable. Refrigerate immediately unwashed in a single layer on a paper towel-lined container. Use within 2-3 days. Freezes well for up to 6 months."
+      },
+      {
+        "region": "santa-maria-valley",
+        "season": [6, 7, 8],
+        "peak": [7],
+        "source": "local",
+        "notes": "Grows well in coastal California berry-producing regions with moderate temperatures. Most popular in the Pacific Northwest but has historical roots in California.",
+        "storage": "Handle gently and refrigerate immediately. Best eaten within 2-3 days. Excellent for jams, pies, and freezing."
+      }
+    ]
+  },
+  {
+    "slug": "tayberry",
+    "entries": [
+      {
+        "region": "central-coast",
+        "season": [6, 7, 8],
+        "peak": [6, 7],
+        "source": "local",
+        "notes": "A raspberry-blackberry cross developed in Scotland in 1979 and named after the River Tay. Larger and sweeter than loganberries with a dark purple color when fully ripe. Very limited commercial availability; mostly found at u-pick farms and specialty markets.",
+        "storage": "Very perishable. Refrigerate unwashed in a shallow container with paper towel lining. Use within 2-3 days. Freezes well for up to 6 months."
+      },
+      {
+        "region": "santa-maria-valley",
+        "season": [6, 7, 8],
+        "peak": [6, 7],
+        "source": "local",
+        "notes": "Suited to California's coastal berry-growing regions where cool marine influence prevents heat stress. Vigorous grower with complex raspberry-blackberry flavor.",
+        "storage": "Handle gently and refrigerate immediately in a single layer. Consume within 2-3 days. Excellent for preserves, syrups, and freezing."
+      }
+    ]
+  },
+  {
+    "slug": "ugli-fruit",
+    "entries": [
+      {
+        "region": "costa-rica",
+        "season": [1, 2, 3, 4, 11, 12],
+        "peak": [1, 2, 3, 12],
+        "source": "import",
+        "notes": "Trademarked name for the Jamaican tangelo, a natural hybrid of grapefruit, orange, and tangerine discovered in Jamaica. Rough, loose-fitting greenish-yellow skin but exceptionally juicy, sweet-tart flesh. Available at specialty grocers and some supermarkets during winter months.",
+        "storage": "Keeps at room temperature for up to 5 days. Refrigerate for 2-3 weeks. Peels easily by hand like a tangerine."
+      }
+    ]
+  },
+  {
+    "slug": "cape-gooseberry",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Physalis peruviana, also known as goldenberry. Small golden-orange fruit enclosed in a papery husk. Grown on small scale in frost-free areas of Southern California. Sweet-tart flavor with tropical notes.",
+        "storage": "Keep in husks until ready to eat. Refrigerate in a single layer for 2-3 weeks (husks protect the fruit). Remove husks and rinse before eating."
+      },
+      {
+        "region": "colombia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Colombia is the world's leading exporter of cape gooseberries. Approved for US import since 2014. Available year-round in US supermarkets as part of berry programs.",
+        "storage": "Imported berries keep 2-3 weeks refrigerated in their clamshell packaging. Leave husks on until ready to eat for maximum shelf life."
+      }
+    ]
+  },
+  {
+    "slug": "goldenberry",
+    "entries": [
+      {
+        "region": "socal-coastal",
+        "season": [5, 6, 7, 8, 9, 10],
+        "peak": [7, 8, 9],
+        "source": "local",
+        "notes": "Same species as cape gooseberry (Physalis peruviana), marketed as goldenberry in the United States. Small golden fruit in a papery husk with sweet-tart tropical flavor. Limited small-scale local production in frost-free Southern California.",
+        "storage": "Keep husked until ready to eat. Refrigerate for 2-3 weeks. Remove husk and rinse before eating."
+      },
+      {
+        "region": "colombia",
+        "season": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "peak": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "source": "import",
+        "notes": "Goldenberry is the primary US marketing name for Colombian cape gooseberries. Colombia dominates global exports. Available year-round in US supermarkets, often in the berry section.",
+        "storage": "Store in original clamshell packaging, refrigerated, for 2-3 weeks. Leave papery husks intact for longest shelf life."
+      }
+    ]
+  }
+]

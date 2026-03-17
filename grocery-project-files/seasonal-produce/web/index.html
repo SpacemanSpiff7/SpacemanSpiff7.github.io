@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seasonal Produce California</title>
+  <title>California Seasonal Produce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"></noscript>
+  <link rel="preload" href="data.json" as="fetch" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,15 +19,27 @@
   <div class="bg-decor bg-deep-red-blob" aria-hidden="true"></div>
   <div class="bg-decor bg-gold-stripe" aria-hidden="true"></div>
 
-  <header class="site-header">
-    <h1 class="site-title">Seasonal Produce <span>California</span></h1>
-  </header>
+  <!-- Sticky nav bar -->
+  <nav class="site-nav" id="site-nav">
+    <h1 class="nav-brand" id="nav-brand"><a href="#">California <span>Seasonal Produce</span></a></h1>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-menu" id="nav-menu">
+      <div class="nav-menu-inner">
+        <div class="nav-menu-section">
+          <div class="nav-menu-label">Guides</div>
+          <a href="stone-fruit-guide.html" class="nav-menu-link">Stone Fruit Variety Guide</a>
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <section class="ring-section">
     <div class="ring-nav-row">
       <button class="ring-arrow" id="ring-prev" aria-label="Previous month">&#8249;</button>
       <div class="ring-container" id="ring-container">
-        <svg class="ring-svg" viewBox="0 0 300 300" id="ring-svg">
+        <svg class="ring-svg" viewBox="0 0 300 300" id="ring-svg" role="img" aria-label="Seasonal produce ring navigator showing months, categories, and status filters">
           <g class="ring-leaf-decor" id="ring-leaf-decor"></g>
           <g class="ring-segments-group" id="ring-group"></g>
           <g class="mid-ring-group" id="mid-ring-group"></g>
@@ -46,15 +60,91 @@
   <section class="controls">
     <div class="controls-inner">
       <div class="search-row">
-        <input type="text" id="search" class="search-input" placeholder="Search produce..." autocomplete="off" spellcheck="false">
-        <div class="view-toggle">
-          <button class="view-btn active" id="view-timeline">Timeline</button>
-          <button class="view-btn" id="view-grid">Grid</button>
+        <div class="search-wrap">
+          <label for="search" class="visually-hidden">Search produce</label>
+          <input type="text" id="search" class="search-input" placeholder="Search produce..." autocomplete="off" spellcheck="false">
+          <button type="button" class="search-clear" id="search-clear" aria-label="Clear search">&times;</button>
+        </div>
+        <div class="filter-toggle-wrap" id="filter-toggle-wrap">
+          <button type="button" class="filter-btn" id="filter-toggle" aria-label="Filters">
+            <svg class="filter-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="6" y1="12" x2="10" y2="12"/></svg>
+            <span class="filter-badge hidden" id="filter-badge">0</span>
+          </button>
+          <button type="button" class="filter-reset-btn" id="filter-reset" aria-label="Clear filters">
+            <svg class="filter-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
         </div>
       </div>
-      <button class="reset-filters-btn hidden" id="reset-filters">Clear filters</button>
     </div>
   </section>
+
+  <div class="filter-accordion hidden" id="filter-accordion">
+    <div class="accordion-inner">
+      <div class="accordion-section" data-section="status">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-status">
+          <span class="accordion-title">Status</span>
+          <span class="accordion-badge hidden" id="badge-status">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-status">
+          <div class="filter-chips" id="status-chips"></div>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="category">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-category">
+          <span class="accordion-title">Category</span>
+          <span class="accordion-badge hidden" id="badge-category">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-category">
+          <div class="filter-chips" id="category-chips"></div>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="culinary">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-culinary">
+          <span class="accordion-title">Culinary Group</span>
+          <span class="accordion-badge hidden" id="badge-culinary">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-culinary">
+          <div class="filter-chips filter-subchips" id="culinary-chips"></div>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="source-origin">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-source-origin">
+          <span class="accordion-title">Source / Origin</span>
+          <span class="accordion-badge hidden" id="badge-source-origin">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-source-origin">
+          <div class="filter-group-label">Source</div>
+          <div class="filter-chips" id="source-chips"></div>
+          <div class="filter-group-label filter-group-label-spaced">Origin</div>
+          <div class="filter-chips" id="origin-chips"></div>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="availability">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-availability">
+          <span class="accordion-title">Availability</span>
+          <span class="accordion-badge hidden" id="badge-availability">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-availability">
+          <div class="filter-chips" id="availability-chips"></div>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="sort">
+        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="accordion-body-sort">
+          <span class="accordion-title">Sort</span>
+          <span class="accordion-badge hidden" id="badge-sort">0</span>
+          <span class="accordion-caret"></span>
+        </button>
+        <div class="accordion-body" id="accordion-body-sort">
+          <div class="filter-chips" id="sort-chips"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="peak-strip hidden" id="peak-strip"></div>
 
@@ -64,17 +154,12 @@
       <div class="timeline-body" id="timeline-body"></div>
     </div>
 
-    <div class="grid-container hidden" id="grid-container"></div>
   </main>
 
   <div class="detail-panel hidden" id="detail-panel">
-    <button class="detail-close" id="detail-close" aria-label="Close detail">&times;</button>
+    <button type="button" class="detail-close" id="detail-close" aria-label="Close detail">&times;</button>
     <div class="detail-content" id="detail-content"></div>
   </div>
-
-  <footer class="site-footer">
-    <p>Data covers 97 of 332 produce items. <a href="compact.html">Compact view</a></p>
-  </footer>
 
   <script src="app.js" defer></script>
 </body>

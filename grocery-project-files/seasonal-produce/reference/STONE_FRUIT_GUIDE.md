@@ -18,7 +18,7 @@ Most grocery store stone fruit is bred for shipping durability, not flavor. The 
 
 ### White Peaches (Central Valley, Jun--Aug, peak Jun--Jul)
 
-- **Babcock** (late Jun): The classic California white peach. Floral, honey-sweet, low acid. The skin is so thin it's nearly transparent.
+- **Babcock** (mid-Jul): The classic California white peach. Floral, honey-sweet, low acid. The skin is so thin it's nearly transparent.
 - **Snow series** (various): Snow Beauty, Snow King -- consistently sweet whites from Zaiger Genetics.
 - **Arctic whites** (various): Bred by Zaiger, available at farmers markets across the season.
 - White peaches are sweeter and more floral than yellow, with lower acid. More delicate -- buy at farmers markets for best quality.
@@ -73,8 +73,8 @@ Created by Floyd Zaiger of Zaiger Genetics in Modesto, CA. Plum-apricot hybrids 
 
 - **Flavor King** (mid-Aug): Widely considered THE best pluot. Incredibly complex -- sweet, spicy, with a richness that's hard to describe. Deep purple-red.
 - **Dapple Dandy / Dinosaur Egg** (mid-Aug to mid-Sep): Marbled green-and-red skin, pink flesh. Sweet and juicy.
-- **Flavor Queen** (early Jul): Honey-sweet green/yellow pluot. Early season.
-- **Flavor Grenade** (Jul--Aug): Green oblong shape, crunchy texture, grape-like sweetness.
+- **Flavor Queen** (mid-to-late Jul): Honey-sweet green/yellow pluot. Early-to-mid pluot season.
+- **Flavor Grenade** (Aug--Sep): Green oblong shape, crunchy texture, grape-like sweetness.
 - Pluots typically measure 2-5 brix higher than plums. The sugar content is genuinely remarkable.
 
 ---
@@ -84,7 +84,7 @@ Created by Floyd Zaiger of Zaiger Genetics in Modesto, CA. Plum-apricot hybrids 
 ### Central Valley, May--Jul, peak Jun
 
 - **Blenheim / Royal** (late Jun): THE gold standard. Complex sweet-tart with honeysuckle notes. On the Slow Food Ark of Taste. Season is often just 10 days in late June at farmers markets. One of the most seasonal fruits in California.
-- **Patterson**: Dominates commercial production (~95% of CA crop). Bred for machine harvest and canning. Bland compared to Blenheim but widely available.
+- **Patterson**: Dominates commercial production (roughly low-80% share in cited UC ANR summaries). Bred for machine harvest and canning. Bland compared to Blenheim but widely available.
 - **Tilton**: Another commercial variety. Acceptable for cooking/preserving, mediocre fresh.
 - The gap between a grocery store Patterson and a farmers market Blenheim is possibly the largest quality gap in all of produce.
 

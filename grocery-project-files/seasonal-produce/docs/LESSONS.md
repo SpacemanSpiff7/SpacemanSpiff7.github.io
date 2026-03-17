@@ -49,7 +49,7 @@ Season data that crosses the year boundary (e.g., Nov-Mar) is stored as a flat a
 
 ### Coverage
 
-As of initial build: 97 of 332 produce items have season data (~29% coverage). The remaining ~235 items exist in `produce_items.csv` but have no entries in `produce_seasons.csv`. The app excludes items with no season data from all views.
+Current dataset coverage is 208 of 335 produce items (~62.1% coverage). The remaining items exist in `produce_items.csv` but have no entries in `produce_seasons.csv`. The app excludes items with no season data from all views.
 
 ---
 
@@ -83,11 +83,11 @@ Adding a 3px left border in the produce category color to `.timeline-name` eleme
 
 ### Background Composition (Stoumann Shapes)
 
-The flat dark teal background becomes warm and layered by adding 4-5 absolutely-positioned divs with CSS `clip-path`, warm colors (#CB5207, #F0C67C, #8D2A0D), and very low opacity (3-6%). Key: use `filter: blur()` on most shapes so they feel like colored light rather than sharp geometric blocks. `position: fixed; z-index: -1; pointer-events: none`.
+The warm off-white background becomes layered by adding 4 fixed-position divs with CSS `clip-path`, warm colors (#D4702C, #CB5207, #8D2A0D, gold-green), and very low opacity (3-4%). Use `filter: blur()` on most shapes so they feel like colored light rather than sharp geometric blocks. `position: fixed; z-index: -1; pointer-events: none`.
 
-### Leaf Embellishments Need Visible Opacity
+### Ring Bezel Circles
 
-The SVG leaf/botanical decorations behind the ring were initially at 2-6% opacity -- essentially invisible. They need 8-12% to register as design elements rather than rendering artifacts.
+The SVG helper attached to `#ring-leaf-decor` currently renders thin bezel circles between rings, not botanical leaf shapes. If decorative foliage returns later, document it separately from these structural dividers.
 
 ### Ring Section Radial Gradient
 
@@ -97,9 +97,25 @@ A subtle radial gradient on `.ring-section` with warm tones (e.g., `rgba(203, 82
 
 ## Performance
 
-### Timeline Re-renders Everything
+### DOM Recycling vs. Virtualization
 
-`renderTimeline()` rebuilds the entire DOM on every call (search keystroke, filter change, month change). This is acceptable for ~100 visible items but would need virtualization at 500+. Current approach: no virtual scrolling, no DOM diffing, full rebuild.
+The original `renderTimeline()` rebuilt the entire DOM on every call. At ~335 items this caused visible jank on filter/month changes. Full virtualization (intersection observers, scroll-position-aware row pool) was considered but rejected -- the dataset is small enough that keeping all rows in the DOM is fine. Instead, timeline rows are recycled via slug-keyed maps (`_tlActiveDataRows`, `_tlActiveNoDataRows`). Rows are created once per slug, then shown/hidden/reordered. The header, now-line, and no-data divider are persistent singletons. This eliminated the DOM allocation cost without the complexity of a virtual scroll system.
+
+### Cache Invalidation Strategy
+
+Caches split into two tiers based on what invalidates them:
+- **Data caches** (never change after load): sourceTypes, seasonLength, yearRound, originGroups, hasLocalSeason, earliestPeakMonth. These derive from the static season dataset and are computed once.
+- **Per-month caches** (keyed by month index): status classification (peak/available/none), comingSoon, leavingPeak. Invalidated automatically when the selected month changes. Subsequent calls within the same month (e.g., filtering, sorting) hit the cache.
+
+This avoids recomputing status for every item on every filter change while keeping month transitions correct.
+
+### Preload Credential Mode Matching
+
+`<link rel="preload" as="fetch">` for `data.json` requires `crossorigin="anonymous"` to match the fetch request's credential mode. Without it, the browser treats the preloaded resource as a different request and fetches it again, defeating the preload entirely. No console error -- it silently double-fetches.
+
+### content-visibility for Offscreen Rows
+
+`content-visibility: auto` on `.timeline-row` tells the browser to skip layout and paint for offscreen rows. This is essentially free performance -- no JS needed, no intersection observers, just a CSS property. The browser still reserves vertical space via `contain-intrinsic-size` so scroll height stays correct. One caveat: if row heights vary dynamically (e.g., expanding detail within a row), you need accurate `contain-intrinsic-size` or scrollbar jitter occurs.
 
 ### Now-Line Position Is Proportional
 
@@ -111,7 +127,7 @@ A subtle radial gradient on `.ring-section` with warm tones (e.g., `rgba(203, 82
 
 ### Paper Grain Texture
 
-The body::after pseudo-element renders an SVG noise pattern at 2% opacity. It's `position: fixed` with `z-index: 9999` and `pointer-events: none`. The high z-index is intentional -- it sits above everything as a texture overlay. Don't reduce the z-index or it disappears behind content.
+The body::after pseudo-element renders an SVG noise pattern at 3.5% opacity. It's `position: fixed` with `z-index: 9999` and `pointer-events: none`. The high z-index is intentional -- it sits above everything as a texture overlay. Don't reduce the z-index or it disappears behind content.
 
 ### prefers-reduced-motion
 
@@ -135,7 +151,7 @@ The center `width: 105px` is tightly constrained to fit inside the inner ring (r
 
 ## Year-Round Item Filtering
 
-Items where ALL season entries span all 12 months AND have no peak differentiation (no peak months, or peak = all 12 months) are hidden from the default browse view. They appear when searched. This keeps cultivated mushrooms (shiitake, cremini, portobello, oyster), year-round imports (banana, plantain, coconut, ginger), and similar "always available" items from cluttering the seasonal view.
+Items where ALL season entries span all 12 months AND have no peak differentiation (no peak months at all) are hidden from the default browse view. They appear when searched. This keeps always-available items such as bananas, plantains, coconuts, and similar year-round imports from cluttering the seasonal view.
 
 Items with peak month subsets (e.g., pineapple with peak [3-7], rosemary with season=[1-12] but peak=[1-12]) remain visible because they still have seasonal quality variation worth highlighting.
 

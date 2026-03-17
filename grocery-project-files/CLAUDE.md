@@ -35,9 +35,25 @@ python seasonal-produce/scripts/validate_data.py
 # Compile CSVs to web/data.json
 python seasonal-produce/scripts/compile_data.py
 
+# Report coverage gaps
+python seasonal-produce/scripts/find_gaps.py
+python seasonal-produce/scripts/find_gaps.py --category Herb --json
+
+# Add season data from batch JSON
+python seasonal-produce/scripts/add_seasons.py batch.json --dry-run
+python seasonal-produce/scripts/add_seasons.py batch.json
+
+# Full pipeline (add + validate + compile + gaps)
+bash seasonal-produce/scripts/pipeline.sh              # without batch
+bash seasonal-produce/scripts/pipeline.sh batch.json   # with batch
+
 # Serve locally
 python -m http.server 8000 --directory seasonal-produce/web
 ```
+
+## Skills
+
+- `/add-seasons` -- Research and add seasonal produce data for missing items. See `.claude/skills/add-seasons/SKILL.md`.
 
 Always use `python` (not `python3`) via virtual environment.
 
