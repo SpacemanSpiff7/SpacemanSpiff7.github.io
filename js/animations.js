@@ -772,6 +772,7 @@ function setupScrollListener() {
             if (!sc) return;
             window.dispatchEvent(new CustomEvent('scrollToTop'));
             sc.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof sa === 'function') sa('back_to_top');
         });
     }
 
@@ -941,6 +942,7 @@ function renderBlob(currentTime) {
                 if (shapeDropdown) shapeDropdown.value = shapeId;
             }
             CAROUSEL_CONFIG._lastRenderedIndex = CAROUSEL_CONFIG.currentIndex;
+            if (typeof sa === 'function') sa('carousel_shape', { shape_id: shapeId, shape_index: CAROUSEL_CONFIG.currentIndex });
         }
     } else {
         CONFIG.carouselXOffset = 0;
@@ -1594,6 +1596,7 @@ function initControlPanel() {
     toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         controlPanel.classList.toggle('open');
+        if (typeof sa === 'function') sa('panel_toggle', { panel_state: controlPanel.classList.contains('open') ? 'open' : 'closed' });
     });
 
     // Close panel when clicking outside
@@ -1683,6 +1686,7 @@ function initControlPanel() {
             applyControlValue(def, value);
             updateControlDisplay(def, readControlValue(def));
             saveSettings();
+            if (typeof sa === 'function') sa('panel_slider', { slider_name: def.key });
         });
 
         if (def.liveDisplayOnly || typeof def.afterCommit === 'function') {
@@ -1711,6 +1715,7 @@ function initControlPanel() {
         shapeSelect.addEventListener('change', (e) => {
             const shapeId = e.target.value;
             if (!window.BLOB_SHAPES || !window.BLOB_SHAPES[shapeId]) return;
+            if (typeof sa === 'function') sa('panel_shape', { shape_id: shapeId });
 
             // Always scroll to the shape's position in the carousel
             const carouselIdx = CAROUSEL_CONFIG._resolvedSequence.indexOf(shapeId);
@@ -1760,6 +1765,7 @@ function initControlPanel() {
                 easterEggIcon.classList.add('is-activated');
             }
             activateGlobalRainbowMode();
+            if (typeof sa === 'function') sa('rainbow_activate');
         }, 1600);
     }
 
@@ -1905,6 +1911,7 @@ function initControlPanel() {
 
     // Reset to defaults
     resetBtn.addEventListener('click', () => {
+        if (typeof sa === 'function') sa('panel_reset');
         // Deactivate rainbow
         deactivateRainbow();
 

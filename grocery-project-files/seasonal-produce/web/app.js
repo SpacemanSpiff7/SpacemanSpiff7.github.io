@@ -510,7 +510,7 @@
       path.setAttribute('class', 'ring-segment');
       path.setAttribute('data-month', month);
       path.addEventListener('click', (function (m) {
-        return function () { state.selectedMonth = m; render(); };
+        return function () { state.selectedMonth = m; if (typeof sa === 'function') sa('month_navigate', { month_name: m, method: 'ring' }); render(); };
       })(month));
       group.appendChild(path);
       ringSegments.push(path);
@@ -982,6 +982,7 @@
 
     row.addEventListener('click', function () {
       state.selectedItem = state.selectedItem === slug ? null : slug;
+      if (typeof sa === 'function') sa('produce_select', { produce_name: slug, category: '' });
       renderSelectionOnly();
     });
 
@@ -1047,6 +1048,7 @@
 
     row.addEventListener('click', function () {
       state.selectedItem = state.selectedItem === slug ? null : slug;
+      if (typeof sa === 'function') sa('produce_select', { produce_name: slug, category: '' });
       renderSelectionOnly();
     });
 
@@ -1465,10 +1467,12 @@
   function bindRingArrows() {
     document.getElementById('ring-prev').addEventListener('click', function () {
       state.selectedMonth = state.selectedMonth === 1 ? 12 : state.selectedMonth - 1;
+      if (typeof sa === 'function') sa('month_navigate', { month_name: state.selectedMonth, method: 'arrow' });
       render();
     });
     document.getElementById('ring-next').addEventListener('click', function () {
       state.selectedMonth = state.selectedMonth === 12 ? 1 : state.selectedMonth + 1;
+      if (typeof sa === 'function') sa('month_navigate', { month_name: state.selectedMonth, method: 'arrow' });
       render();
     });
   }
@@ -1677,6 +1681,7 @@
     document.getElementById('filter-toggle').addEventListener('click', function (e) {
       e.stopPropagation();
       state.filterAccordionOpen = !state.filterAccordionOpen;
+      if (typeof sa === 'function') sa('filter_toggle', { filter_type: 'accordion', filter_value: state.filterAccordionOpen ? 'open' : 'closed' });
       document.getElementById('filter-accordion').classList.toggle('hidden', !state.filterAccordionOpen);
       document.getElementById('filter-toggle').classList.toggle('accordion-open', state.filterAccordionOpen);
       if (!state.filterAccordionOpen) this.blur();

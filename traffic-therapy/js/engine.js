@@ -202,6 +202,7 @@ window.TT = window.TT || {};
   function reset() {
     if (!currentLevel) return;
     moveCount = 0;
+    if (typeof sa === 'function') sa('level_reset', { level_id: currentLevel?.id || '', move_count: 0 });
     won = false;
     updateMoveDisplay();
 

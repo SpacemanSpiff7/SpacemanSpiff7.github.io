@@ -426,6 +426,7 @@ function addBoard() {
   const colorIndex = state.boards.length;
   const newBoard = defaultBoard(randomName(existingTitles), BOARD_COLORS[colorIndex % BOARD_COLORS.length], state.defaults);
   state.boards.push(newBoard);
+  if (typeof sa === 'function') sa('board_create');
   state.activeBoardIndex = state.boards.length - 1;
   saveBoardState();
   renderBoard();
@@ -553,6 +554,7 @@ function createTicket({ title, description = "", status = "todo", priority = "me
   board.tickets.push(ticket);
   if (!board.columnOrder[status]) board.columnOrder[status] = [];
   board.columnOrder[status].push(ticket.id);
+  if (typeof sa === 'function') sa('ticket_create', { status: status });
   saveBoardState();
   renderBoard();
 
@@ -1309,8 +1311,10 @@ function handleDragEnd(evt) {
   const movedToNewCol = ticket && ticket.status !== newStatus;
 
   if (movedToNewCol) {
+    const oldStatus = ticket.status;
     ticket.status = newStatus;
     ticket.updatedAt = new Date().toISOString();
+    if (typeof sa === 'function') sa('ticket_move', { from_column: oldStatus, to_column: newStatus });
   }
 
   saveBoardState();
@@ -1344,6 +1348,7 @@ function exportBoard() {
   a.download = "agile-this-" + (sanitized || "project") + "-" + new Date().toISOString().slice(0, 10) + ".json";
   a.click();
   URL.revokeObjectURL(url);
+  if (typeof sa === 'function') sa('board_export', { ticket_count: activeBoard().tickets.length });
   showToast("Project exported");
 }
 
@@ -1509,6 +1514,7 @@ function handleImportAddToBoard() {
     return;
   }
 
+  if (typeof sa === 'function') sa('board_import', { import_mode: 'add_to_board' });
   showToast(count + " ticket" + (count !== 1 ? "s" : "") + " added", {
     undo: () => {
       state = oldState;
@@ -1538,6 +1544,7 @@ function doImportReplace() {
     return;
   }
 
+  if (typeof sa === 'function') sa('board_import', { import_mode: 'new_project' });
   showToast("Project replaced", {
     undo: () => {
       state = oldState;
@@ -1603,6 +1610,7 @@ function handleImportAddBoards() {
     return;
   }
 
+  if (typeof sa === 'function') sa('board_import', { import_mode: 'add_boards' });
   showToast(importedBoards.length + " board" + (importedBoards.length > 1 ? "s" : "") + " added", {
     undo: () => {
       state = oldState;

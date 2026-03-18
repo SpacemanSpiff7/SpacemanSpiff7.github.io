@@ -421,6 +421,7 @@ function setupNavigation() {
                 // Update active state
                 navLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
+                if (typeof sa === 'function') sa('nav_click', { link_target: targetSection, nav_type: 'main' });
             }
         });
     });
@@ -435,6 +436,7 @@ function setupNavigation() {
                 window.dispatchEvent(new CustomEvent('scrollToTop'));
                 heroSection.scrollIntoView({ behavior: 'smooth' });
 
+                if (typeof sa === 'function') sa('nav_click', { link_target: 'hero', nav_type: 'logo' });
                 // Update active state to home
                 navLinks.forEach(l => l.classList.remove('active'));
                 const homeLink = document.querySelector('.nav-link[data-section="hero"]');
@@ -551,6 +553,7 @@ function buildGroupedNav(homepage, sectionRegistry) {
                     const targetEl = document.getElementById(targetId);
                     if (targetEl) {
                         targetEl.scrollIntoView({ behavior: 'smooth' });
+                        if (typeof sa === 'function') sa('nav_click', { link_target: targetId, nav_type: 'subnav' });
                     }
                     // Close mobile menu
                     const navToggle = document.querySelector('.nav-toggle');
@@ -645,6 +648,12 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
                     shapeId: sectionConfig.shapeId || 'defaultBlob'
                 }
             }));
+            if (typeof sa === 'function') {
+                clearTimeout(window._sectionDwellTimer);
+                window._sectionDwellTimer = setTimeout(function() {
+                    sa('section_visible', { section_id: sectionConfig.id, section_type: sectionConfig.type || '', section_index: sectionConfig._index || 0 });
+                }, 500);
+            }
         }
     }
 
@@ -799,6 +808,29 @@ async function loadProjects() {
                 const el = document.getElementById(scrollLink.dataset.scrollTo);
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
             }
+
+            // Analytics: track link clicks in featured, project cards, and contact sections
+            if (typeof sa === 'function') {
+                const link = e.target.closest('a');
+                if (link) {
+                    const featured = link.closest('.featured-project');
+                    if (featured) {
+                        sa('featured_click', { project_id: featured.dataset.projectId || '', action_type: link.classList.contains('project-btn--secondary') ? 'secondary' : 'primary', action_url: link.getAttribute('href') || '' });
+                    } else {
+                        const card = link.closest('.project-card');
+                        if (card) {
+                            sa('project_card_click', { project_id: card.querySelector('h3')?.textContent || '', action_url: link.getAttribute('href') || '' });
+                        } else {
+                            const contact = link.closest('.contact-links');
+                            if (contact) {
+                                var href = link.getAttribute('href') || '';
+                                var linkType = href.startsWith('mailto:') ? 'email' : href.includes('github') ? 'github' : href.includes('linkedin') ? 'linkedin' : href.includes('instagram') ? 'instagram' : 'other';
+                                sa('contact_click', { link_type: linkType });
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         HOMEPAGE_STATE.sectionRegistry = sectionRegistry;
@@ -852,6 +884,7 @@ function initProgressIndicator(sectionRegistry) {
                     window.dispatchEvent(new CustomEvent('scrollToTop'));
                 }
                 el.scrollIntoView({ behavior: 'smooth' });
+                if (typeof sa === 'function') sa('progress_dot_click', { target_section: section.id });
             }
         });
         container.appendChild(dot);

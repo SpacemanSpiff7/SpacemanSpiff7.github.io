@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-P9G5CS83DZ');
-    </script>
+    <script defer src="/js/analytics.js?v=1"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2159,6 +2151,7 @@
 
                         // Show detail panel
                         this.showCollisionDetail(feature.properties);
+                        if (typeof sa === 'function') sa('collision_select', { collision_type: feature.properties.collision_type || '' });
                     }
                 });
 
@@ -3362,6 +3355,7 @@
                         c.setAttribute('aria-checked', 'false');
                     });
                     this.updateMapData();
+                    if (typeof sa === 'function') sa('filter_apply', { filter_type: 'reset', filter_value: 'all' });
                 });
 
                 document.getElementById('closeDetail').addEventListener('click', (e) => {

@@ -37,6 +37,12 @@ When modifying `js/animations.js`, `js/main.js`, or `js/blob-shapes.js`:
 3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only), `blob-shapes.js` has 1 (script tag only)
 4. Commit and push together
 
+When modifying `js/analytics.js`:
+1. Make your code changes
+2. Increment the version number across all 14 HTML pages that reference it (e.g., `?v=1` → `?v=2`)
+3. Pages: `index.html`, 7 files in `tools/`, `fakejira/index.html`, `fakejira/guide.html`, `traffic-therapy/index.html`, 2 files in `grocery-project-files/seasonal-produce/web/`
+4. Do NOT modify `curlbro/index.html` — it has its own GA4 setup
+
 This ensures users get fresh JavaScript immediately after deployment.
 
 ## Architecture Overview
@@ -60,6 +66,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 | `css/components.css` | Nav, hero, sections, scroll-snap, control panel, subnav dropdown |
 | `css/responsive.css` | Media queries, reduced motion, print styles, mobile subnav accordion |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
+| `js/analytics.js` | Shared GA4 module: Consent Mode v2, content grouping, `sa()` event helper (loaded on 14 pages, NOT CurlBro) |
 | `js/blob-shapes.js` | Shape preset registry (`window.BLOB_SHAPES`) with 10 presets (defaultBlob, curlbroDumbbell, + 8 OBJ-sourced meshes) |
 | `js/main.js` | Config reader, section renderers, `LINK_SETS`, grouped nav builder, progress indicator, carousel layout trigger |
 | `js/animations.js` | Starfield, 3D blob rendering, shape transitions, carousel system, control panel + gating |
@@ -318,6 +325,7 @@ One live tool in this repo integrates with Google services:
 │   ├── responsive.css      # Media queries, reduced motion, print styles
 │   └── style.css           # Import wrapper (for tools compatibility)
 ├── js/
+│   ├── analytics.js        # Shared GA4 module (consent, config, event helper)
 │   ├── blob-shapes.js      # Shape preset registry (window.BLOB_SHAPES)
 │   ├── main.js             # Config reader, section renderers, grouped nav, progress
 │   └── animations.js       # Starfield, 3D blob rendering, shape transitions

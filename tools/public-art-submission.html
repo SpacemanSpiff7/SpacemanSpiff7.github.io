@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-P9G5CS83DZ');
-    </script>
+    <script defer src="/js/analytics.js?v=1"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -864,7 +856,8 @@
                         accuracy: position.coords.accuracy,
                         timestamp: position.timestamp
                     };
-                    
+                    if (typeof sa === 'function') sa('location_used');
+
                     await this.reverseGeocode(this.locationData.latitude, this.locationData.longitude);
                     this.displayLocationInfo();
                     this.updateSubmitButton();
@@ -1179,6 +1172,7 @@
                     console.log('Location:', locationString);
                     
                     // Open Google Form in new tab
+                    if (typeof sa === 'function') sa('form_submit', { has_location: !!this.locationData, has_photo: !!document.getElementById('photo-preview')?.src });
                     window.open(prefilledUrl, '_blank');
                     
                     // Show success message

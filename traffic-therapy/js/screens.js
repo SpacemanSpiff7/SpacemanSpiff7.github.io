@@ -200,6 +200,7 @@ window.TT = window.TT || {};
 
     // engine.init() clears game-root and builds the gameplay DOM
     TT.engine.init(levelData);
+    if (typeof sa === 'function') sa('level_start', { level_id: levelId, level_number: levelData.number || 0 });
   }
 
   // ---------------------------------------------------------------------------
@@ -211,6 +212,7 @@ window.TT = window.TT || {};
 
     // Save progress (never downgrades -- storage handles that)
     TT.storage.completeLevel(data.levelId, starRating);
+    if (typeof sa === 'function') sa('level_end', { level_id: data.levelId, level_number: data.levelNumber || 0, star_rating: starRating, move_count: data.moves, success: true });
 
     // Trigger confetti
     if (TT.confetti && TT.confetti.start) {

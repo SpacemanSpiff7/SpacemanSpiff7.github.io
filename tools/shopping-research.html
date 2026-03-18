@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-P9G5CS83DZ');
-    </script>
+    <script defer src="/js/analytics.js?v=1"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -313,7 +305,9 @@ Begin your research systematically: identify sources → analyze location factor
                     alert('Please specify your custom budget range.');
                     return;
                 }
-                
+
+                if (typeof sa === 'function') sa('search_perform', { query_length: item.length });
+
                 // Generate prompt
                 const userInputs = {
                     location: location,

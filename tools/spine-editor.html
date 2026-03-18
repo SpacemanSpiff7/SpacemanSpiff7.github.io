@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spine Editor - Tube Mesh Shape Builder</title>
+    <script defer src="/js/analytics.js?v=1"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -997,6 +998,7 @@
         document.getElementById('btn-copy').addEventListener('click', () => {
             exportText.select();
             navigator.clipboard.writeText(exportText.value);
+            if (typeof sa === 'function') sa('shape_export');
         });
 
         // Start with one segment

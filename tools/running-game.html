@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-P9G5CS83DZ');
-  </script>
+  <script defer src="/js/analytics.js?v=1"></script>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -1177,13 +1169,15 @@
     msgWrap.style.display = "none"; 
     scoreEl.textContent = "Score 0";
     document.body.classList.remove('game-over');
+    if (typeof sa === 'function') sa('game_start');
   }
   function gameOver(){ 
     state.started=false; 
     msgWrap.style.display = "block"; 
     restartBtn.textContent = "Restart";
     document.body.classList.add('game-over');
-    
+    if (typeof sa === 'function') sa('game_over', { score: state.score });
+
     // Prompt for name entry for leaderboard
     promptForName(state.score);
   }

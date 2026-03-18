@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9G5CS83DZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-P9G5CS83DZ');
-    </script>
+    <script defer src="/js/analytics.js?v=1"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1060,7 +1052,7 @@
                 document.getElementById('sideViewBtn').addEventListener('click', () => this.setSideView());
 
                 // Preset selector
-                document.getElementById('presetSelect').addEventListener('change', (e) => this.loadPreset(e.target.value));
+                document.getElementById('presetSelect').addEventListener('change', (e) => { if (typeof sa === 'function') sa('preset_change', { preset_name: e.target.value }); this.loadPreset(e.target.value); });
                 
                 // Mouse controls for 3D view
                 this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
@@ -1733,6 +1725,7 @@
                 document.getElementById('loading').style.display = 'block';
                 
                 this.lastUpdateTime = performance.now();
+                if (typeof sa === 'function') sa('sim_start', { particle_count: parseInt(document.getElementById('particleCount')?.value || '0') });
                 this.simulationLoop();
             }
             
