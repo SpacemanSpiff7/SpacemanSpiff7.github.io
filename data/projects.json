@@ -10,6 +10,7 @@
     },
     "sectionOrder": [
       "hero",
+      "featured-chads-bach",
       "featured-curlbro",
       "featured-seasonal-produce",
       "featured-agile-this",
@@ -23,6 +24,14 @@
         "type": "hero",
         "groupId": "home",
         "shapeId": "defaultBlob"
+      },
+      "featured-chads-bach": {
+        "type": "projectFeature",
+        "groupId": "featured",
+        "projectId": "chads-bach",
+        "showInSubnav": true,
+        "shapeId": "racecar",
+        "blobColor": "#CC0000"
       },
       "featured-curlbro": {
         "type": "projectFeature",
@@ -81,6 +90,7 @@
     }
   },
   "featured": [
+    "chads-bach",
     "curlbro",
     "seasonal-produce",
     "agile-this",
@@ -95,6 +105,17 @@
     "showDescription": true
   },
   "projects": [
+    {
+      "id": "chads-bach",
+      "title": "Chad's Bachelor Party",
+      "shortDescription": "NASCAR-themed bachelor party HQ for Hurricane, UT -- March 2026",
+      "blobColor": "#CC0000",
+      "category": "Event",
+      "tags": ["Event"],
+      "actions": [
+        { "text": "Race Day", "url": "chads-bach/index.html", "type": "primary" }
+      ]
+    },
     {
       "id": "curlbro",
       "title": "CurlBro",

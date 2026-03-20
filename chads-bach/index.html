@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chad's Bachelor Party -- Hurricane, UT</title>
+  <meta name="description" content="NASCAR-themed bachelor party HQ for Hurricane, UT -- March 2026">
+  <meta property="og:title" content="Chad's Bachelor Party">
+  <meta property="og:description" content="Start your engines. Hurricane, UT. March 20-22, 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js" integrity="sha384-X9kJyAubVxnP0hcA+AMMs21U445qsnqhnUF8EBlEpP3a42Kh/JwWjlv2ZcvGfphb" crossorigin="anonymous"></script>
+  <script defer src="/js/analytics.js?v=1"></script>
+</head>
+<body x-data="app()" @click.once="playEngineRev()">
+
+  <!-- NAV -->
+  <nav class="race-nav" x-data="nav()">
+    <div class="nav-inner">
+      <span class="nav-logo">BACH '26</span>
+      <!-- Desktop nav links -->
+      <div class="nav-links-desktop">
+        <template x-for="s in sections" :key="'d-' + s.id">
+          <a :href="'#' + s.id" :class="{ active: activeSection === s.id }" x-text="s.label" @click.prevent="scrollTo(s.id)"></a>
+        </template>
+      </div>
+      <button class="mute-btn" @click.stop="toggleMute()" :title="muted ? 'Unmute' : 'Mute'">
+        <span x-text="muted ? 'MUTED' : 'LOUD'"></span>
+      </button>
+      <!-- Hamburger button (mobile) -->
+      <button class="hamburger-btn" @click="toggleMenu()" :class="{ open: menuOpen }" aria-label="Menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+    </div>
+    <!-- Mobile slide-out menu -->
+    <div class="nav-overlay" x-show="menuOpen" x-transition.opacity.duration.200ms @click="closeMenu()"></div>
+    <div class="nav-panel" :class="{ open: menuOpen }">
+      <div class="nav-panel-header">
+        <span class="nav-logo">BACH '26</span>
+        <button class="nav-panel-close" @click="closeMenu()">X</button>
+      </div>
+      <div class="nav-panel-links">
+        <template x-for="s in sections" :key="'m-' + s.id">
+          <a :href="'#' + s.id" class="nav-panel-item" :class="{ active: activeSection === s.id }" x-text="s.label" @click.prevent="scrollTo(s.id)"></a>
+        </template>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 1. HERO -->
+  <section id="hero" class="section hero-section">
+    <div class="checkered-border"></div>
+    <div class="hero-content">
+      <div class="hero-flag-strip"></div>
+      <h1 class="hero-title">CHAD'S<br>BACHELOR PARTY</h1>
+      <p class="hero-subtitle">HURRICANE, UT &mdash; MARCH 20-22, 2026</p>
+      <div class="hero-flag-strip"></div>
+      <a href="#race-schedule" class="cta-btn" @click.prevent="scrollTo('race-schedule')">START YOUR ENGINES</a>
+    </div>
+  </section>
+
+  <!-- 2. THE STARTING GRID -->
+  <section id="starting-grid" class="section" x-data="fuelPicker()">
+    <h2 class="section-header"><span>THE STARTING GRID</span></h2>
+    <div class="driver-grid">
+      <template x-for="driver in drivers" :key="driver.id">
+        <div class="driver-card" :class="'fuel-' + (fuelSelections[driver.id] || 'none')" @click="openPicker(driver.id)">
+          <div class="driver-number" x-text="driver.number"></div>
+          <div class="driver-info">
+            <h3 class="driver-name" x-text="driver.name"></h3>
+            <p class="driver-role" x-text="driver.role"></p>
+          </div>
+          <div class="fuel-badge" x-show="fuelSelections[driver.id]" x-text="(fuelSelections[driver.id] || '').toUpperCase()"></div>
+          <div class="driver-stripe"></div>
+        </div>
+      </template>
+    </div>
+    <!-- Fuel Picker Modal -->
+    <div class="fuel-modal" x-show="pickerOpen" x-transition @click.self="pickerOpen = false">
+      <div class="fuel-modal-content">
+        <h3>SELECT FUEL TYPE</h3>
+        <p class="fuel-player-name" x-text="pickerPlayer ? drivers.find(d => d.id === pickerPlayer)?.name : ''"></p>
+        <div class="fuel-options">
+          <button class="fuel-option fuel-gasoline" @click="selectFuel('gasoline')">
+            <strong>GASOLINE</strong>
+            <span>Drink</span>
+          </button>
+          <button class="fuel-option fuel-diesel" @click="selectFuel('diesel')">
+            <strong>DIESEL</strong>
+            <span>Smoke</span>
+          </button>
+          <button class="fuel-option fuel-nitro" @click="selectFuel('nitro')">
+            <strong>NITRO</strong>
+            <span>Both</span>
+          </button>
+          <button class="fuel-option fuel-water" @click="selectFuel('water')">
+            <strong>WATER</strong>
+            <span>Water</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. STANDINGS -->
+  <section id="standings" class="section" x-data="leaderboard()">
+    <h2 class="section-header" @click="handleHeaderTap()"><span>STANDINGS</span></h2>
+    <div class="leaderboard-table" x-show="Object.keys(events).length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>POS</th>
+            <th>DRIVER</th>
+            <th>PTS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(entry, i) in standings" :key="entry.name">
+            <tr @click="expandedDriver = expandedDriver === entry.name ? null : entry.name">
+              <td class="pos-cell" x-text="i + 1"></td>
+              <td class="driver-cell" x-text="entry.label"></td>
+              <td class="pts-cell" x-text="entry.total"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <!-- Per-event breakdown -->
+      <div class="event-breakdown" x-show="expandedDriver">
+        <h4 x-text="expandedDriver ? expandedDriver.toUpperCase() + ' -- EVENT BREAKDOWN' : ''"></h4>
+        <template x-for="(evt, eid) in events" :key="eid">
+          <div class="event-row" x-show="evt.active">
+            <span class="event-name" x-text="evt.name"></span>
+            <span class="event-pts" x-text="evt.results[expandedDriver] || '-'"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+    <p class="no-data" x-show="Object.keys(events).length === 0">No events scored yet. Check back after Friday night.</p>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" x-show="adminOpen" x-transition>
+      <h3>PIT BOSS ADMIN</h3>
+      <div class="admin-section">
+        <h4>ADD EVENT</h4>
+        <div class="admin-add-event">
+          <input type="text" x-model="newEventName" placeholder="Event name..." class="admin-input">
+          <button @click="addEvent()" class="admin-btn">ADD</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <h4>SCORE EVENT</h4>
+        <template x-for="(evt, eid) in events" :key="'admin-' + eid">
+          <div class="admin-event" x-show="evt.active">
+            <h5 x-text="evt.name"></h5>
+            <div class="admin-rankings">
+              <template x-for="pos in [1,2,3,4,5]" :key="pos">
+                <div class="admin-rank-row">
+                  <span class="rank-label" x-text="ordinal(pos)"></span>
+                  <select @change="setResult(eid, $event.target.value, 6 - pos)" class="admin-select">
+                    <option value="">--</option>
+                    <template x-for="d in playerIds" :key="d">
+                      <option :value="d" x-text="d" :selected="evt.results[d] === (6 - pos)"></option>
+                    </template>
+                  </select>
+                  <span class="rank-pts" x-text="(6 - pos) + 'pts'"></span>
+                </div>
+              </template>
+            </div>
+            <button @click="removeEvent(eid)" class="admin-btn admin-btn-danger">REMOVE</button>
+          </div>
+        </template>
+      </div>
+      <button @click="adminOpen = false" class="admin-btn">CLOSE ADMIN</button>
+    </div>
+  </section>
+
+  <!-- 4. RACE SCHEDULE -->
+  <section id="race-schedule" class="section">
+    <h2 class="section-header"><span>RACE SCHEDULE</span></h2>
+    <div class="timeline">
+      <!-- LAP 1 -->
+      <div class="timeline-lap">
+        <div class="lap-header">LAP 1 -- FRIDAY (MAR 20)</div>
+        <div class="timeline-item">
+          <div class="timeline-time">Afternoon</div>
+          <div class="timeline-content">
+            <h4>Arrive at the House</h4>
+            <p>1450 Torrey Pines Rd, Hurricane, UT 84737</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Evening</div>
+          <div class="timeline-content">
+            <h4>Dinner -- LongHorn Steakhouse</h4>
+            <p>St. George, UT</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Night</div>
+          <div class="timeline-content">
+            <h4>Pit Stop Putting Tournament</h4>
+            <p>Backyard putting green -- full rules in Tournament Rules</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Late Night</div>
+          <div class="timeline-content">
+            <h4>Poker Night</h4>
+            <p>Cards, chips, and fuel penalties</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAP 2 -->
+      <div class="timeline-lap">
+        <div class="lap-header">LAP 2 -- SATURDAY (MAR 21)</div>
+        <div class="timeline-item">
+          <div class="timeline-time">Mid-Morning</div>
+          <div class="timeline-content">
+            <h4>ATV/UTV Riding</h4>
+            <p>Groom arranged this one</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Afternoon</div>
+          <div class="timeline-content">
+            <h4>Zion Canyon Hot Springs</h4>
+            <p>202 W 300th S, La Verkin, UT 84745 -- (435) 503-3575<br>
+            32 geothermal pools, cold plunges, barrel saunas. 21+ Premier Access area.<br>
+            Open 10 AM - 10 PM. ~10 min from the house.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Evening</div>
+          <div class="timeline-content">
+            <h4>Dinner -- Stage Coach Grille</h4>
+            <p>99 N State St, La Verkin -- (435) 635-7400<br>
+            Hand-cut USDA Prime steaks, seafood, Mediterranean. Fri-Sat 4-10 PM.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">Night</div>
+          <div class="timeline-content">
+            <h4>RC Car Grand Prix</h4>
+            <div x-show="!$store.reveal.revealed" class="reveal-countdown">
+              <p class="blurred-text">CLASSIFIED -- REVEAL AT 3:00 PM SATURDAY</p>
+              <p class="countdown-timer" x-text="$store.reveal.countdown"></p>
+            </div>
+            <div x-show="$store.reveal.revealed">
+              <p>Build an obstacle course in the garage. Time trials, 1v1 bracket, best of 3 final. Full rules below.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAP 3 -->
+      <div class="timeline-lap">
+        <div class="lap-header">LAP 3 -- SUNDAY (MAR 22)</div>
+        <div class="timeline-item">
+          <div class="timeline-time">Morning</div>
+          <div class="timeline-content">
+            <h4>Lebanese Breakfast</h4>
+            <p>Za'atar manakish, halloumi, shakshuka -- for the groom</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">10:00 AM</div>
+          <div class="timeline-content">
+            <h4>Checkered Flag -- Checkout</h4>
+            <p>Strip beds, group towels, start laundry, load dishwasher, trash to garage bins</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. PIT STOP -- HOME BASE -->
+  <section id="pit-stop" class="section">
+    <h2 class="section-header"><span>PIT STOP -- HOME BASE</span></h2>
+    <div class="home-base">
+      <div class="home-card home-address">
+        <h3>HQ</h3>
+        <p><strong>1450 Torrey Pines Rd, Hurricane, UT 84737</strong></p>
+        <p>WiFi: <code>legohome140</code></p>
+      </div>
+
+      <div class="home-card">
+        <h3>MAIN HOUSE (3 bed / 3 bath)</h3>
+        <ul>
+          <li><strong>Bedroom 1:</strong> King bed, en-suite, walk-in closet, back patio access</li>
+          <li><strong>Bedroom 2:</strong> Queen bed, custom-painted wall, adjacent bathroom</li>
+          <li><strong>Bedroom 3 (Master):</strong> King bed, large TV, double sinks, tub, kitchenette with wine fridge + microwave, private backyard door</li>
+        </ul>
+      </div>
+
+      <div class="home-card">
+        <h3>GUEST HOUSE (2 bed, full kitchen)</h3>
+        <ul>
+          <li><strong>Bedroom 4:</strong> Queen bed, en-suite, walk-in closet, patio near putting green</li>
+          <li><strong>Bedroom 5:</strong> Bunk beds, TV, books (gear/overflow room)</li>
+          <li>Full kitchen with electric stove, high-end fridge with sphere ice cube maker</li>
+          <li>Pull-out couch in living room</li>
+        </ul>
+      </div>
+
+      <div class="home-card">
+        <h3>OUTDOOR AMENITIES</h3>
+        <div class="amenity-grid">
+          <div class="amenity">Cocktail Pool</div>
+          <div class="amenity">Rooftop Hot Tub</div>
+          <div class="amenity">Putting Green</div>
+          <div class="amenity">Cornhole</div>
+          <div class="amenity">Covered Grill</div>
+          <div class="amenity">Outdoor Dining</div>
+          <div class="amenity">Gas Fireplace</div>
+          <div class="amenity">2 Rooftop Decks</div>
+        </div>
+      </div>
+
+      <div class="home-card home-rules">
+        <h3>HOUSE RULES</h3>
+        <ul>
+          <li><strong>No smoking inside</strong> -- $300 fee. Smoke outside, dispose of butts properly.</li>
+          <li><strong>Quiet hours:</strong> 10 PM - 8 AM</li>
+          <li><strong>AC:</strong> Remote on wall near kitchen door. Keep 71-73F, close doors/windows.</li>
+          <li><strong>Grill:</strong> Turn off propane tank after use, clean grill.</li>
+          <li><strong>Coffee:</strong> Keurig + K-Cups provided, bring your own creamer.</li>
+          <li><strong>Checkout:</strong> Strip beds, group towels, start laundry, load dishwasher, trash to garage bins.</li>
+        </ul>
+      </div>
+
+      <div class="home-card home-emergency">
+        <h3>EMERGENCY NUMBERS</h3>
+        <ul>
+          <li><strong>Emergency:</strong> 911</li>
+          <li><strong>Non-Emergency Police:</strong> (435) 627-4999</li>
+          <li><strong>InstaCare St. George (24/7):</strong> (435) 688-6300</li>
+          <li><strong>St. George Regional Hospital:</strong> (435) 251-1000</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. THE GARAGE -- ACTIVITIES -->
+  <section id="garage" class="section">
+    <h2 class="section-header"><span>THE GARAGE</span></h2>
+    <div class="activity-grid">
+      <div class="activity-card">
+        <h3>Putting Tournament</h3>
+        <p>Friday Night -- Backyard putting green</p>
+        <a href="#tournament-rules" class="card-link">See Rules</a>
+      </div>
+      <div class="activity-card">
+        <h3>Poker Night</h3>
+        <p>Friday Night -- Cards, chips, and fuel penalties</p>
+      </div>
+      <div class="activity-card">
+        <template x-if="!$store.reveal.revealed">
+          <div class="blurred-card">
+            <h3>RC Car Grand Prix</h3>
+            <p>CLASSIFIED -- SATURDAY</p>
+            <p class="countdown-timer-small" x-text="$store.reveal.countdown"></p>
+          </div>
+        </template>
+        <template x-if="$store.reveal.revealed">
+          <div>
+            <h3>RC Car Grand Prix</h3>
+            <p>Saturday Night -- Garage obstacle course, time trials, bracket racing</p>
+            <a href="#tournament-rules" class="card-link">See Rules</a>
+          </div>
+        </template>
+      </div>
+      <div class="activity-card">
+        <h3>Pickleball</h3>
+        <p>Sky Ridge Park (5 min) -- 63 S 200 W, Hurricane<br>
+        Little Valley (33 courts) -- St. George (~25 min)</p>
+      </div>
+      <div class="activity-card">
+        <h3>Cornhole</h3>
+        <p>Backyard -- anytime</p>
+      </div>
+      <div class="activity-card">
+        <h3>Rooftop Hot Tub</h3>
+        <p>Best after dark -- blunts + stargazing</p>
+      </div>
+      <div class="activity-card">
+        <h3>Codenames</h3>
+        <p>Team word game -- browser-based</p>
+        <a href="https://horsepaste.com" target="_blank" rel="noopener" class="card-link">Play on horsepaste.com</a>
+      </div>
+      <div class="activity-card">
+        <h3>Heads Up</h3>
+        <p>Hold phone on forehead, guess the word</p>
+        <button class="card-link" @click="$dispatch('launch-headsup')">Play Now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TOURNAMENT RULES -->
+  <section id="tournament-rules" class="section">
+    <h2 class="section-header"><span>TOURNAMENT RULES</span></h2>
+
+    <div class="rules-block">
+      <h3>FUEL TYPE SYSTEM</h3>
+      <div class="fuel-legend">
+        <div class="fuel-legend-item">
+          <span class="fuel-dot fuel-gasoline"></span>
+          <div><strong>GASOLINE</strong> = drink (beer, seltzer, tequila shot)</div>
+        </div>
+        <div class="fuel-legend-item">
+          <span class="fuel-dot fuel-diesel"></span>
+          <div><strong>DIESEL</strong> = smoke (hit from blunt or vape)</div>
+        </div>
+        <div class="fuel-legend-item">
+          <span class="fuel-dot fuel-nitro"></span>
+          <div><strong>NITRO</strong> = both</div>
+        </div>
+        <div class="fuel-legend-item">
+          <span class="fuel-dot fuel-water"></span>
+          <div><strong>WATER</strong> = water (no judgment)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-block">
+      <h3>PIT STOP PUTTING (FRIDAY NIGHT)</h3>
+      <h4>Rounds 1-3: Qualifying</h4>
+      <ul>
+        <li>Closest to the pin, increasing distance each round</li>
+        <li>Worst = fuel penalty. Best = assigns a bonus penalty to anyone.</li>
+        <li>Points: 1st=5, 2nd=4, 3rd=3, 4th=2, 5th=1</li>
+        <li>Ties: sudden-death putt-off, loser takes double</li>
+      </ul>
+      <h4>Rounds 4-5: Elimination</h4>
+      <ul>
+        <li>Round 4: 5 players to 4 (farthest eliminated + penalty)</li>
+        <li>Round 5: 4 to 2 (two eliminated)</li>
+        <li>Final: best of 3, loser takes DOUBLE fuel penalty</li>
+      </ul>
+      <h4>Bonus</h4>
+      <ul>
+        <li>Hole-in-one = everyone ELSE takes a penalty</li>
+        <li>Eliminated players become designated hecklers</li>
+      </ul>
+    </div>
+
+    <div class="rules-block">
+      <h3>RC CAR GRAND PRIX (SATURDAY)</h3>
+      <div x-show="!$store.reveal.revealed" class="blurred-rules">
+        <p>CLASSIFIED -- DETAILS REVEALED AT 3:00 PM SATURDAY</p>
+        <p class="countdown-timer" x-text="$store.reveal.countdown"></p>
+      </div>
+      <div x-show="$store.reveal.revealed">
+        <h4>Setup</h4>
+        <ul>
+          <li>Build obstacle course in garage (shoes, cups, boxes, tape for start/finish)</li>
+        </ul>
+        <h4>Qualifying</h4>
+        <ul>
+          <li>2 solo timed laps each. Best time sets grid position.</li>
+        </ul>
+        <h4>Heats</h4>
+        <ul>
+          <li>1v1 bracket, 3 laps. Loser = fuel penalty.</li>
+        </ul>
+        <h4>Final</h4>
+        <ul>
+          <li>Best of 3 laps. Loser = DOUBLE penalty. Winner = RC Grand Prix Champion.</li>
+        </ul>
+        <h4>Rules</h4>
+        <ul>
+          <li><strong>Crash:</strong> Restart from where stopped (no penalty, just lost time). Both crash = re-race.</li>
+          <li><strong>Sabotage:</strong> Trash talk OK. Touching car or driver = automatic fuel penalty.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rules-block">
+      <h3>HEADS UP (PARTY GAME -- JUST FOR FUN)</h3>
+      <ul>
+        <li>Hold phone on forehead, tilt to skip or guess</li>
+        <li>60-second rounds</li>
+        <li>NOT on the leaderboard -- just for laughs</li>
+      </ul>
+    </div>
+
+    <div class="rules-block">
+      <h3>SCORING</h3>
+      <ul>
+        <li>Every scored event: 1st = 5pts, 2nd = 4, 3rd = 3, 4th = 2, 5th = 1</li>
+        <li>Scored events: Putting, Poker, RC Cars (+ any added via admin)</li>
+        <li>Cornhole, Pickleball, and others can be added on the fly</li>
+        <li>Weekend champion = highest total points</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. FUEL STOP -- SHOPPING LIST -->
+  <section id="fuel-stop" class="section" x-data="shoppingList()">
+    <h2 class="section-header"><span>FUEL STOP -- SHOPPING LIST</span></h2>
+    <p class="shopping-store">Walmart (180 N 3400 W, Hurricane) or Lin's Fresh Market</p>
+
+    <div class="shopping-categories">
+      <template x-for="cat in categories" :key="cat.name">
+        <div class="shopping-category">
+          <h3 x-text="cat.name"></h3>
+          <template x-for="item in cat.items" :key="item.id">
+            <label class="shopping-item" :class="{ checked: items[item.id] }">
+              <input type="checkbox" :checked="items[item.id]" @change="toggle(item.id)">
+              <span x-text="item.label"></span>
+            </label>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <!-- Custom items added by crew -->
+    <div class="shopping-category" x-show="customItems.length > 0">
+      <h3>Added by Crew</h3>
+      <template x-for="item in customItems" :key="item.id">
+        <label class="shopping-item" :class="{ checked: item.checked }">
+          <input type="checkbox" :checked="item.checked" @change="toggleCustom(item.id)">
+          <span x-text="item.label"></span>
+          <button class="remove-custom-btn" @click.stop="removeCustom(item.id)" title="Remove">X</button>
+        </label>
+      </template>
+    </div>
+
+    <!-- Add item input -->
+    <div class="shopping-add-bar">
+      <input type="text" x-model="newItemText" placeholder="Add item..."
+             @keydown.enter="addItem()" class="shopping-add-input" maxlength="60">
+      <button @click="addItem()" class="shopping-add-btn">ADD</button>
+    </div>
+
+    <button class="clear-btn" @click="clearAll()">CLEAR ALL</button>
+  </section>
+
+  <!-- 9. RACE DAY FORECAST -->
+  <section id="weather" class="section" x-data="weather()">
+    <h2 class="section-header"><span>RACE DAY FORECAST</span></h2>
+    <div class="weather-grid" x-show="days.length > 0">
+      <template x-for="day in days" :key="day.date">
+        <div class="weather-card">
+          <h3 x-text="day.label"></h3>
+          <div class="weather-temp">
+            <span class="temp-high" x-text="day.high + '\u00B0F'"></span>
+            <span class="temp-low" x-text="day.low + '\u00B0F'"></span>
+          </div>
+          <p class="weather-condition" x-text="day.condition"></p>
+        </div>
+      </template>
+    </div>
+    <p x-show="days.length === 0" class="weather-fallback">
+      Weather data unavailable.
+      <a href="https://forecast.weather.gov/MapClick.php?lat=37.175&lon=-113.29" target="_blank" rel="noopener">Check NWS forecast</a>
+    </p>
+  </section>
+
+  <!-- 10. PHOTO PIT -->
+  <section id="photo-pit" class="section">
+    <h2 class="section-header"><span>PHOTO PIT</span></h2>
+    <div class="photo-pit-content">
+      <p>Drop your photos and videos here so we can relive the glory.</p>
+      <a href="https://photos.app.goo.gl/zNzuzZEdnp2HabaG9" target="_blank" rel="noopener" class="cta-btn">OPEN SHARED ALBUM</a>
+    </div>
+  </section>
+
+  <!-- 11. CARGO MANIFEST -->
+  <section id="cargo" class="section">
+    <h2 class="section-header"><span>CARGO MANIFEST</span></h2>
+    <div class="cargo-list">
+      <div class="cargo-item">
+        <h4>RC Cars</h4>
+        <p>Arrive Saturday</p>
+      </div>
+      <div class="cargo-item">
+        <h4>Weed / Blunts / Vapes</h4>
+        <p>+ custom lighters for everyone</p>
+      </div>
+      <div class="cargo-item">
+        <h4>Poker Set</h4>
+        <p>Cards + chips</p>
+      </div>
+      <div class="cargo-item">
+        <h4>Pickleball Paddles + Balls</h4>
+        <p>If no one has them already</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HEADS UP GAME OVERLAY -->
+  <div class="headsup-overlay" x-data="headsUp()" @launch-headsup.window="startSetup()" x-show="active || setup" x-transition>
+    <template x-if="setup && !active">
+      <div class="headsup-setup">
+        <h2>HEADS UP</h2>
+        <p>Pick a category:</p>
+        <div class="headsup-categories">
+          <template x-for="cat in categoryNames" :key="cat">
+            <button class="headsup-cat-btn" :class="{ selected: category === cat }" @click="category = cat" x-text="cat"></button>
+          </template>
+        </div>
+        <button class="cta-btn" @click="start()">GO</button>
+        <button class="close-btn" @click="setup = false">CLOSE</button>
+      </div>
+    </template>
+    <template x-if="active">
+      <div class="headsup-game" :class="paused ? '' : feedbackClass">
+        <div class="headsup-controls">
+          <button class="headsup-flag-btn" @click="paused ? quit() : pause()" x-text="paused ? 'BLACK FLAG' : 'YELLOW FLAG'"></button>
+        </div>
+        <template x-if="paused">
+          <div class="headsup-paused">
+            <h3>YELLOW FLAG</h3>
+            <p>Game paused</p>
+            <div class="headsup-paused-score">Score so far: <strong x-text="score"></strong></div>
+            <button class="cta-btn" @click="resume()">RESUME</button>
+            <button class="close-btn" @click="quit()">QUIT</button>
+          </div>
+        </template>
+        <template x-if="!paused">
+          <div class="headsup-play-area">
+            <div class="headsup-timer" x-text="timeLeft"></div>
+            <div class="headsup-word" x-text="currentWord"></div>
+            <div class="headsup-score">Score: <span x-text="score"></span></div>
+            <div class="headsup-hint">Tilt DOWN = correct / Tilt UP = skip</div>
+          </div>
+        </template>
+      </div>
+    </template>
+    <template x-if="!active && !setup && gameOver">
+      <div class="headsup-results">
+        <h2>TIME'S UP</h2>
+        <p>Score: <strong x-text="score"></strong></p>
+        <button class="cta-btn" @click="startSetup()">PLAY AGAIN</button>
+        <button class="close-btn" @click="gameOver = false">CLOSE</button>
+      </div>
+    </template>
+  </div>
+
+  <footer class="race-footer">
+    <div class="footer-stripe"></div>
+    <p>BACH '26 -- HURRICANE, UT</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

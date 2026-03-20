@@ -1,0 +1,14 @@
+name = "bach-party-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "BACH_PARTY"
+id = "45df650b0f924754b3eeb18b03895256"
+
+[[routes]]
+pattern = "bach-api.simonelongo.com/*"
+zone_name = "simonelongo.com"
