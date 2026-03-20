@@ -301,11 +301,16 @@ function leaderboard() {
     },
 
     handleHeaderTap() {
+      if (this.adminOpen) {
+        this.adminOpen = false;
+        return;
+      }
       this.tapCount++;
       clearTimeout(this.tapTimer);
       if (this.tapCount >= 3) {
-        this.adminOpen = !this.adminOpen;
         this.tapCount = 0;
+        const answer = prompt('Enter admin mode?');
+        if (answer === 'YA') this.adminOpen = true;
         return;
       }
       this.tapTimer = setTimeout(() => { this.tapCount = 0; }, 500);

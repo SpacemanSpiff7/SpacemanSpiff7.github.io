@@ -59,7 +59,7 @@
       <h1 class="hero-title">CHAD'S<br>BACHELOR PARTY</h1>
       <p class="hero-subtitle">HURRICANE, UT &mdash; MARCH 20-22, 2026</p>
       <div class="hero-flag-strip"></div>
-      <a href="#race-schedule" class="cta-btn" @click.prevent="scrollTo('race-schedule')">START YOUR ENGINES</a>
+      <a href="#race-schedule" class="cta-btn" @click.prevent="document.getElementById('race-schedule').scrollIntoView({behavior:'smooth'})">START YOUR ENGINES</a>
     </div>
   </section>
 
@@ -285,7 +285,7 @@
       <div class="home-card home-address">
         <h3>HQ</h3>
         <p><strong>1450 Torrey Pines Rd, Hurricane, UT 84737</strong></p>
-        <p>WiFi: <code>legohome140</code></p>
+        <p>WiFi: <code>legohome1450</code></p>
       </div>
 
       <div class="home-card">
