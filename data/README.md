@@ -119,6 +119,7 @@ The `projects` array is the canonical inventory of all projects.
 
 - `type: "primary"`: Main action button
 - `type: "secondary"`: Secondary action button
+- `badge: "<path>"`: Render the action as an image badge link (e.g. the App Store badge) instead of a text button. The `text` value becomes the image `alt`. Takes precedence over `type`.
 
 ## How to Remove a Project
 

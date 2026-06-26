@@ -96,6 +96,29 @@
   },
   "projects": [
     {
+      "id": "curlbro",
+      "title": "CurlBro",
+      "shortDescription": "Gym workout builder with an workout timer and log",
+      "description": "A free workout builder and tracker all in the browser.",
+      "blobColor": "#7A0A45",
+      "category": "Fitness",
+      "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop&crop=center",
+      "tags": ["Fitness"],
+      "actions": [
+        {
+          "text": "Download on the App Store",
+          "url": "https://apps.apple.com/us/app/curlbro/id6762241598",
+          "badge": "assets/images/app-store-badge.svg",
+          "external": true
+        },
+        {
+          "text": "Website",
+          "url": "https://www.curlbro.com",
+          "type": "primary"
+        }
+      ]
+    },
+    {
       "id": "luna-tv",
       "title": "Luna TV",
       "shortDescription": "A simple sideloadable app for Sony Bravia TVs to launch Amazon Luna",
@@ -119,23 +142,6 @@
       "tags": ["Event"],
       "actions": [
         { "text": "Race Day", "url": "chads-bach/index.html", "type": "primary" }
-      ]
-    },
-    {
-      "id": "curlbro",
-      "title": "CurlBro",
-      "shortDescription": "Gym workout builder with an workout timer and log",
-      "description": "A free workout builder and tracker all in the browser.",
-      "blobColor": "#7A0A45",
-      "category": "Fitness",
-      "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop&crop=center",
-      "tags": ["Fitness"],
-      "actions": [
-        {
-          "text": "Use App",
-          "url": "https://www.curlbro.com",
-          "type": "primary"
-        }
       ]
     },
     {

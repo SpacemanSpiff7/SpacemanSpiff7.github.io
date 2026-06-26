@@ -321,6 +321,14 @@
         justify-content: center;
     }
 
+    .app-store-badge img {
+        height: 40px;
+    }
+
+    .project-card .app-store-badge img {
+        height: 34px;
+    }
+
     .snap-section:not(#hero) .section-title,
     .snap-section:not(#hero) > h2 {
         margin-top: 25vh;

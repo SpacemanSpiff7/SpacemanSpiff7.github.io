@@ -84,6 +84,20 @@ function renderLinkSet(linkSetId, wrapperClass) {
     return linksHtml;
 }
 
+function renderProjectActions(actions) {
+    if (!actions || !actions.length) return '';
+    return actions.map(a => {
+        const isScroll = a.url && a.url.startsWith('#');
+        const scrollAttr = isScroll ? ` data-scroll-to="${a.url.slice(1)}"` : '';
+        const targetAttrs = (a.url && !isScroll) ? ' target="_blank" rel="noopener noreferrer"' : '';
+        if (a.badge) {
+            return `<a href="${a.url}" class="app-store-badge"${scrollAttr}${targetAttrs}><img src="${a.badge}" alt="${a.text}"></a>`;
+        }
+        const secondaryClass = a.type === 'secondary' ? ' project-btn--secondary' : '';
+        return `<a href="${a.url}" class="project-btn${secondaryClass}"${scrollAttr}${targetAttrs}>${a.text}</a>`;
+    }).join('');
+}
+
 function renderProjectFeatureSection(sectionConfig, project, sectionId, blobColor) {
     const bodyId = `${sectionId}-body`;
     const section = document.createElement('section');
@@ -105,7 +119,7 @@ function renderProjectFeatureSection(sectionConfig, project, sectionId, blobColo
                     <div class="featured-project-body" id="${bodyId}">
                         <p>${project.shortDescription}</p>
                         <div class="project-actions">
-                            ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                            ${renderProjectActions(project.actions)}
                         </div>
                     </div>
                 </div>
@@ -794,7 +808,7 @@ async function loadProjects() {
                     <h3>${project.title}</h3>
                     <p>${project.shortDescription}</p>
                     <div class="project-actions">
-                        ${project.actions.map(a => `<a href="${a.url}" class="project-btn${a.type === 'secondary' ? ' project-btn--secondary' : ''}" ${a.url && a.url.startsWith('#') ? `data-scroll-to="${a.url.slice(1)}"` : ''} ${a.url && !a.url.startsWith('#') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${a.text}</a>`).join('')}
+                        ${renderProjectActions(project.actions)}
                     </div>
                 </div>
             `).join('');
