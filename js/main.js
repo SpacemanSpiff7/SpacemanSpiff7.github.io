@@ -84,6 +84,11 @@ function renderLinkSet(linkSetId, wrapperClass) {
     return linksHtml;
 }
 
+// Icon-only action links (logo only, no button chrome)
+const ACTION_ICONS = {
+    instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r=".5"/></svg>'
+};
+
 function renderProjectActions(actions) {
     if (!actions || !actions.length) return '';
     return actions.map(a => {
@@ -92,6 +97,9 @@ function renderProjectActions(actions) {
         const targetAttrs = (a.url && !isScroll) ? ' target="_blank" rel="noopener noreferrer"' : '';
         if (a.badge) {
             return `<a href="${a.url}" class="app-store-badge"${scrollAttr}${targetAttrs}><img src="${a.badge}" alt="${a.text}"></a>`;
+        }
+        if (a.icon && ACTION_ICONS[a.icon]) {
+            return `<a href="${a.url}" class="project-icon-link" aria-label="${a.text}"${scrollAttr}${targetAttrs}>${ACTION_ICONS[a.icon]}</a>`;
         }
         const secondaryClass = a.type === 'secondary' ? ' project-btn--secondary' : '';
         return `<a href="${a.url}" class="project-btn${secondaryClass}"${scrollAttr}${targetAttrs}>${a.text}</a>`;

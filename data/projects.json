@@ -98,7 +98,7 @@
     {
       "id": "curlbro",
       "title": "CurlBro",
-      "shortDescription": "Gym workout builder with an workout timer and log",
+      "shortDescription": "App for building, tracking, and sharing workouts.",
       "description": "A free workout builder and tracker all in the browser.",
       "blobColor": "#7A0A45",
       "category": "Fitness",
@@ -115,6 +115,12 @@
           "text": "Website",
           "url": "https://www.curlbro.com",
           "type": "primary"
+        },
+        {
+          "text": "CurlBro on Instagram",
+          "url": "https://www.instagram.com/lift_with_curlbro/",
+          "icon": "instagram",
+          "external": true
         }
       ]
     },

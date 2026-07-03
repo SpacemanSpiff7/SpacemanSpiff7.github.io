@@ -1074,6 +1074,32 @@
     height: 36px;
 }
 
+/* Icon-only action link (logo, no button chrome) */
+.project-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: rgba(255, 255, 255, 0.75);
+    transition: color 0.2s ease;
+}
+
+.project-icon-link:hover {
+    color: white;
+}
+
+.project-icon-link svg {
+    width: 26px;
+    height: 26px;
+    display: block;
+}
+
+.project-card .project-icon-link svg {
+    width: 22px;
+    height: 22px;
+}
+
 /* Silkscreen link buttons - minimal style */
 .link-btn {
     font-family: 'Silkscreen', cursive;
