@@ -140,17 +140,6 @@
       ]
     },
     {
-      "id": "chads-bach",
-      "title": "Chad's Bachelor Party",
-      "shortDescription": "NASCAR-themed bachelor party HQ for Hurricane, UT -- March 2026",
-      "blobColor": "#CC0000",
-      "category": "Event",
-      "tags": ["Event"],
-      "actions": [
-        { "text": "Race Day", "url": "chads-bach/index.html", "type": "primary" }
-      ]
-    },
-    {
       "id": "seasonal-produce",
       "title": "California Seasonal Produce",
       "shortDescription": "What's in season in California right now, where it's from, and when peak flavor hits",
