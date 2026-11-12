@@ -360,6 +360,38 @@
 
 }
 
+@media (max-width: 768px) {
+    /* Blob controls mobile */
+    .blob-controls {
+        width: 100%;
+        max-width: none;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+    }
+
+    .blob-controls.open .controls-drawer {
+        max-height: calc(60vh - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .control-item {
+        grid-template-columns: 120px minmax(0, 1fr) 50px;
+        gap: 8px;
+    }
+
+    .control-item label {
+        font-size: 0.8rem;
+    }
+
+    .control-value {
+        font-size: 0.8rem;
+    }
+    .blob-controls { padding-bottom: env(safe-area-inset-bottom); }
+}
+
 @media (max-width: 480px) {
     .hero-content {
         padding: var(--space-12) var(--space-4);

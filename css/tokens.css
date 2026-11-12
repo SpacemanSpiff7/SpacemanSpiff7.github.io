@@ -104,6 +104,6 @@
 
     /* Scroll-snap layout constants */
     --nav-height: 73px;
-    --bottom-chrome-height: 0px;
+    --bottom-chrome-height: 60px;
     --snap-bottom-offset: calc(var(--nav-height) + var(--bottom-chrome-height));
 }

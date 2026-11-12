@@ -13,7 +13,6 @@
       "featured-curlbro",
       "featured-airlock",
       "featured-seasonal-produce",
-      "featured-agile-this",
       "about",
       "contact"
     ],
@@ -38,14 +37,6 @@
         "showInSubnav": true,
         "shapeId": "produceApple",
         "blobColor": "#4A9068"
-      },
-      "featured-agile-this": {
-        "type": "projectFeature",
-        "groupId": "featured",
-        "projectId": "agile-this",
-        "showInSubnav": true,
-        "shapeId": "kanbanBoard",
-        "blobColor": "#39FF14"
       },
       "featured-airlock": {
         "type": "projectFeature",
@@ -76,8 +67,7 @@
   "featured": [
     "curlbro",
     "airlock",
-    "seasonal-produce",
-    "agile-this"
+    "seasonal-produce"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",
@@ -125,6 +115,12 @@
       "category": "Focus & Breathwork",
       "tags": ["iPhone", "Breathwork", "Screen Time"],
       "actions": [
+        {
+          "text": "Download on the App Store",
+          "url": "https://apps.apple.com/us/app/airlock-breathe-focus/id6808816509",
+          "badge": "assets/images/app-store-badge.svg",
+          "external": true
+        },
         {
           "text": "Website",
           "url": "https://airlockapp.org",

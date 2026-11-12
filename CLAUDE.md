@@ -62,6 +62,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 - **Scroll morphs**: `js/blob-motion.js` samples section anchors so shape and color follow scroll position in either direction
 - **Grouped nav**: Nav links generated from `homepage.groupOrder` with hover-to-expand subnav (desktop) / accordion subnav (mobile)
 - **Motion preferences**: reduced motion renders on interaction or layout changes; hidden tabs pause the shared loop
+- **Bottom controls**: shape/style/star controls retain saved appearance preferences and the rainbow cloud easter egg
 - **Modular CSS**: Split into tokens, base, components, and responsive files
 
 ### Key Files
@@ -70,7 +71,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 | `index.html` | Main page with hero section inline, all other sections rendered dynamically |
 | `css/tokens.css` | CSS custom properties (design system tokens) |
 | `css/base.css` | Reset, typography, containers, buttons, cards |
-| `css/components.css` | Nav, hero, sections, scroll-snap, subnav dropdown |
+| `css/components.css` | Nav, hero, sections, scroll-snap, bottom controls, subnav dropdown |
 | `css/responsive.css` | Media queries, reduced motion, print styles, mobile subnav accordion |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
 | `js/analytics.js` | Shared GA4 module: Consent Mode v2, content grouping, `sa()` event helper (loaded on 14 pages, NOT CurlBro) |
@@ -145,6 +146,7 @@ When changing homepage layout, navigation, or project ordering, verify all of th
 7. The "Top" button returns to hero and restores its shape and color.
 8. Reduced motion keeps the scene visible while stopping ambient animation; hidden tabs pause rendering.
 9. Run `docs/blob-regression.md` when changing the renderer, presets, or scroll sampler.
+10. Verify control sliders, saved settings, reset, and rainbow activation/cancellation after renderer changes.
 
 ### Projects Data Contract
 
@@ -185,14 +187,21 @@ select presets with `shapeId` in `data/projects.json`.
 resize and font loading. `js/blob-motion.js` samples neighboring anchors
 without direction history or timers. Shape and color use the same eased mix.
 The workbench is the final anchor; scrolling through its grid keeps rotating
-the default blob. Dragging on non-interactive content adds mouse rotation.
+the default blob. Across the page, signed scroll impulses add spin with a smooth
+coast/decay. Dragging on non-interactive content adds mouse rotation. Keep these
+rotation inputs independent of the position-driven shape/color blend.
 
 The renderer caches custom surfaces in shared vertex buffers. Its starfield and
 blob share one loop, capped at 60 fps and 2x device pixel ratio. Reduced motion
 uses still frames on scroll, drag, layout, or preference changes. The scene
-pauses while the document is hidden. Appearance follows section configuration.
+pauses while the document is hidden. Section configuration provides the automatic
+appearance; the bottom panel can override it. `blobSettings` stores appearance
+preferences with compatibility for the original panel. Manual shape selection
+and rainbow mode remain session-only; reset resumes the current section's shape
+and color. The color slider's 1.6-second hold at maximum activates the rainbow
+cloud. Preserve early-release cancellation, keyboard access, and reduced motion.
 
-The old control panel, rainbow override, and shape carousel have been retired.
+The standalone shape carousel has been retired.
 `scripts/obj-to-preset.py` remains a legacy standalone wireframe exporter;
 its `arbitraryMesh` output is incompatible with the current renderer, and its
 `--inject` option refuses to modify the site. Author new `getPosition` surfaces
@@ -208,7 +217,7 @@ The CSS is split into modular files for easier maintenance:
 
 - **tokens.css**: Design tokens (colors, typography, spacing, shadows, transitions)
 - **base.css**: Reset, typography, containers, buttons, cards, utility classes
-- **components.css**: Navigation, hero, sections, animations, scroll-snap
+- **components.css**: Navigation, hero, sections, animations, scroll-snap, bottom controls
 - **responsive.css**: Media queries, reduced motion, print styles
 
 **For index.html**: Links all four CSS files directly for optimal loading.
@@ -270,7 +279,7 @@ One live tool in this repo integrates with Google services:
 ├── css/
 │   ├── tokens.css          # CSS custom properties (design tokens)
 │   ├── base.css            # Reset, typography, containers, buttons, cards
-│   ├── components.css      # Nav, hero, sections, scroll-snap
+│   ├── components.css      # Nav, hero, sections, scroll-snap, bottom controls
 │   ├── responsive.css      # Media queries, reduced motion, print styles
 │   └── style.css           # Import wrapper (for tools compatibility)
 ├── js/

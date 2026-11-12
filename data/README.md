@@ -155,16 +155,25 @@ Only the default blob samples noise each frame; settled custom shapes do not.
 
 Homepage section centers form one scroll timeline. `js/blob-motion.js` samples
 adjacent anchors without timers: reversing scroll restores the same blend, and
-stopping holds it while ambient breathing continues. Workbench is the last anchor
-and returns to the default blob, which rotates half a turn per viewport scrolled
-through the grid (disabled for reduced motion).
+stopping holds the shape/color blend while ambient breathing continues. Scrolling
+also spins the mesh, with a signed impulse that coasts and slows after input ends.
+Workbench is the last anchor and returns to the default blob, with an additional
+half turn per viewport scrolled through the grid. Reduced motion disables the
+inertial spin and extra Workbench rotation.
 The presets are the default blob, CurlBro dumbbell, produce apple, three-column Kanban board, and Airlock airplane.
 
 The two canvases share one animation loop. It pauses in hidden tabs; reduced motion
 renders only on interaction or layout changes. Device pixel ratio is capped at 2.
 The scroll sheen and gentle banking settle after scrolling and are disabled under
-reduced motion. There are no persisted appearance overrides or public controls.
+reduced motion. The bottom control panel adjusts shape, size, noise, color, line
+style, glow, and stars. Appearance settings use the existing `blobSettings` storage
+key; a selected shape is session-only and `Follow page` resumes section morphs.
+Noise and morph controls are disabled on settled custom surfaces. Reset restores
+device defaults and the current section's shape/color. Hold the color slider at
+its maximum for 1.6 seconds to activate the rainbow cloud; releasing early cancels
+it. Rainbow mode is session-only and stops animating under reduced motion.
 
 Run `node scripts/verify-blob-motion.js` for surface seam/pole validation,
 desktop/mobile transition continuity, reverse scrolling, render operation counts,
-and visibility/reduced-motion scheduling checks.
+visibility/reduced-motion scheduling, scroll spin/coasting, control input,
+saved-settings migration, and rainbow activation/cancellation checks.
