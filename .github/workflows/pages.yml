@@ -35,6 +35,10 @@ jobs:
         run: node --test scripts/test-site-build.mjs
       - name: Test retired API cannot access stored data
         run: node --test worker/tests/*.test.js
+      - name: Verify homepage shape surfaces
+        run: node scripts/verify-blob-shapes.js
+      - name: Verify scroll morphs and motion preferences
+        run: node scripts/verify-blob-motion.js
       - name: Build only reviewed public files
         run: node scripts/build-site.mjs
       - name: Configure Pages

@@ -398,9 +398,6 @@
         scroll-behavior: auto;
     }
 
-    #blob-canvas {
-        display: none;
-    }
 }
 
 /* ==========================================

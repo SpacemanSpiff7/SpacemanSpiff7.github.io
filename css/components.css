@@ -918,12 +918,8 @@
     margin-top: 30vh;
 }
 
-/* About & Contact: center the entire content group vertically.
-   Other non-hero sections (featured projects) keep flex-start + margin-top
-   because their content is structured differently (images, feature links).
-   scroll-padding-top on .scroll-container already offsets for the nav,
-   so padding-top stays 0. padding-bottom accounts for the section
-   extending below the viewport (73px) plus the bottom chrome overlay (60px). */
+/* About & Contact center their content group within the section.
+   Bottom padding balances the fixed nav using the shared layout offset. */
 #about.snap-section,
 #contact.snap-section {
     justify-content: center;

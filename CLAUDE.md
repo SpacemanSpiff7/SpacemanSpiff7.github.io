@@ -4,37 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-This is a static GitHub Pages site with no build process. Simply push to the `master` branch to deploy.
+This static GitHub Pages site publishes the reviewed `_site/` artifact through
+`.github/workflows/pages.yml` on pushes to `master`. Build that artifact before
+previewing or publishing; its manifest excludes internal and retired files.
 
 ### Python Usage
 - Always use `python` (not `python3`) and run through a virtual environment (venv).
 
 ### Local Development
 ```bash
-# Serve locally using Python (Python 3)
-python -m http.server 8000
+# Build the exact public artifact first
+node scripts/build-site.mjs
+
+# Serve using Python from a virtual environment
+python -m http.server 8000 --directory _site
 
 # Or using Node.js (if you have http-server installed)
-npx http-server -p 8000
+npx http-server _site -p 8000
 
 # Or using PHP
-php -S localhost:8000
+php -S localhost:8000 -t _site
 ```
 
 ### Git Workflow
 ```bash
-# Standard workflow - site deploys automatically on push to master
-git add .
-git commit -m "Your commit message"
-git push origin master
+# Validate locally before committing; push when the user requests publication
+node --test scripts/test-site-build.mjs
+node --test worker/tests/*.test.js
+node scripts/verify-blob-shapes.js
+node scripts/verify-blob-motion.js
+node scripts/build-site.mjs
 ```
 
 ### Cache Busting
 JavaScript files use version query strings for cache busting.
-When modifying `js/animations.js`, `js/main.js`, or `js/blob-shapes.js`:
+When modifying `js/animations.js`, `js/main.js`, `js/blob-shapes.js`, or `js/blob-motion.js`:
 1. Make your code changes
 2. Increment the version number in index.html (e.g., `?v=4` → `?v=5`)
-3. Update all references: `main.js` has 2 (preload hint + script tag), `animations.js` has 1 (script tag only), `blob-shapes.js` has 1 (script tag only)
+3. Update all references: `main.js` has 2 (preload hint + script tag); the other modules each have 1 script tag
 4. Commit and push together
 
 When modifying `js/analytics.js`:
@@ -49,12 +56,12 @@ This ensures users get fresh JavaScript immediately after deployment.
 
 ### Current Design
 - **Scroll-snap single page** with animated backgrounds
-- **Fixed canvas layers**: starfield + 3D morphing blob (js/animations.js) with HiDPI scaling and quadratic curve wireframe
+- **Fixed canvas layers**: starfield + 3D blob share one visibility-aware loop in `js/animations.js`, with capped HiDPI scaling and quadratic curve wireframes
 - **Dynamic content**: All non-hero sections driven by `homepage` registry in `data/projects.json`
-- **Shape presets**: Per-section wireframe shapes via `js/blob-shapes.js` (10 shapes: defaultBlob, curlbroDumbbell, and 8 OBJ-sourced arbitrary meshes)
-- **3D shape carousel**: `#blob-showcase` is a tall virtual-scroll section that cycles through all shape presets with scroll-driven rotation and horizontal slide transitions
+- **Shape presets**: continuous surfaces in `js/blob-shapes.js` share one sphere grid
+- **Scroll morphs**: `js/blob-motion.js` samples section anchors so shape and color follow scroll position in either direction
 - **Grouped nav**: Nav links generated from `homepage.groupOrder` with hover-to-expand subnav (desktop) / accordion subnav (mobile)
-- **Control panel**: 13-slider control panel with 3 collapsible sections (Shape, Style, Stars), hue override, rainbow easter egg, and per-shape control gating
+- **Motion preferences**: reduced motion renders on interaction or layout changes; hidden tabs pause the shared loop
 - **Modular CSS**: Split into tokens, base, components, and responsive files
 
 ### Key Files
@@ -63,24 +70,24 @@ This ensures users get fresh JavaScript immediately after deployment.
 | `index.html` | Main page with hero section inline, all other sections rendered dynamically |
 | `css/tokens.css` | CSS custom properties (design system tokens) |
 | `css/base.css` | Reset, typography, containers, buttons, cards |
-| `css/components.css` | Nav, hero, sections, scroll-snap, control panel, subnav dropdown |
+| `css/components.css` | Nav, hero, sections, scroll-snap, subnav dropdown |
 | `css/responsive.css` | Media queries, reduced motion, print styles, mobile subnav accordion |
 | `css/style.css` | Import wrapper for all CSS (used by tools) |
 | `js/analytics.js` | Shared GA4 module: Consent Mode v2, content grouping, `sa()` event helper (loaded on 14 pages, NOT CurlBro) |
-| `js/blob-shapes.js` | Shape preset registry (`window.BLOB_SHAPES`) with 10 presets (defaultBlob, curlbroDumbbell, + 8 OBJ-sourced meshes) |
-| `js/main.js` | Config reader, section renderers, `LINK_SETS`, grouped nav builder, progress indicator, carousel layout trigger |
-| `js/animations.js` | Starfield, 3D blob rendering, shape transitions, carousel system, control panel + gating |
+| `js/blob-shapes.js` | Shape preset registry (`window.BLOB_SHAPES`) of shared-grid surfaces |
+| `js/blob-motion.js` | Pure section-anchor sampling for reversible scroll morphs |
+| `js/main.js` | Config reader, section renderers, `LINK_SETS`, grouped nav builder, progress indicator |
+| `js/animations.js` | Shared starfield/blob loop, surface buffers, scroll morphs and drag rotation |
 | `components/nav.html` | Navigation shell (logo + hamburger + empty container; links built by JS) |
 | `data/projects.json` | Single source of truth for projects and homepage layout (`homepage` registry) |
 
 ### Section Structure
 All non-hero sections are defined in `data/projects.json` under `homepage.sectionOrder`:
 1. **Hero** - Name + title (static HTML)
-2. **Featured 1-4** - Featured projects (type: `projectFeature`, rendered from JSON)
+2. **Featured projects** - Sections of type `projectFeature`, rendered from JSON
 3. **About** - Bio section (type: `text`, rendered from JSON)
 4. **Contact** - Contact info (type: `linkList`, rendered from JSON)
 5. **Projects Grid** - Workbench (hardcoded terminal section)
-6. **Blob Showcase** - 3D shape carousel (hardcoded terminal section, tall virtual-scroll zone)
 
 ### Typography
 
@@ -105,7 +112,7 @@ All non-hero sections are defined in `data/projects.json` under `homepage.sectio
 Treat the homepage scroll system as an interaction contract, not cosmetic CSS.
 
 - **The snap container is `.scroll-container`**. Do not move scrolling back to `body`/`html` without updating observers, nav clicks, progress dots, and mobile viewport logic together.
-- **Snap sections are explicit**. `#hero`, dynamic featured sections, `#about`, and `#contact` use `.snap-section`. `#projects-grid` is the free-scroll workbench section. `#blob-showcase` has `scroll-snap-align: start` but NOT `.snap-section` — its height is set dynamically by the carousel system in `js/animations.js`.
+- **Snap sections are explicit**. `#hero`, dynamic featured sections, `#about`, and `#contact` use `.snap-section`. `#projects-grid` is the oversized final snap area and allows free scrolling through the workbench.
 - **Viewport math is centralized**. `js/main.js` sets `--vh`; `css/tokens.css` owns `--nav-height`, `--bottom-chrome-height`, and `--snap-bottom-offset`. Do not re-hardcode those values elsewhere.
 - **Section identity matters**. `js/main.js` now builds a shared section registry from `homepage.sectionsById` that drives section rendering, grouped nav, scroll highlighting, progress dots, blob color/shape transitions together. Keep those concerns unified.
 - **Nav is config-driven**. `components/nav.html` is a shell. `js/main.js` populates nav links from `homepage.groupOrder` + `homepage.groupsById`. Sections with `showInSubnav: true` become subnav items. Do not hardcode nav links in `components/nav.html`.
@@ -133,16 +140,11 @@ When changing homepage layout, navigation, or project ordering, verify all of th
 2. Mobile swipe scrolling still snaps cleanly with browser chrome expanded and collapsed.
 3. Nav logo, nav links, and progress dots all scroll to the same targets.
 4. Active nav state still matches the visible section during manual and programmatic scroll.
-5. Blob color transitions still change at the intended sections.
-6. `#projects-grid` still allows free scrolling and does not trap the user in a snap loop.
-7. The `glowy-blob-ball` CTA still reaches `#blob-showcase`.
-8. Shape presets morph correctly when scrolling between sections (e.g. sphere to dumbbell on CurlBro).
-9. Control panel sliders gate correctly per shape (noise/morph disabled on custom shapes).
-10. Run the blob-specific checks in `docs/blob-regression.md` when changing `js/animations.js` or `js/blob-shapes.js`.
-11. Carousel: scroll into blob-showcase and verify shapes cycle with rotation + horizontal slide transitions.
-12. Carousel: scroll back up from carousel and verify the blob restores to the correct shape/color for the visible section.
-13. Carousel: click "Top" button and verify it scrolls to top and blob restores to default.
-14. Carousel: on mobile, verify shapes are proportionally sized (not oversized at desktop radius).
+5. Shape and color follow the same scroll anchors, hold when scrolling stops, and reverse without jumps.
+6. `#projects-grid` allows free scrolling and returns to the default blob, with position-driven rotation through the grid.
+7. The "Top" button returns to hero and restores its shape and color.
+8. Reduced motion keeps the scene visible while stopping ambient animation; hidden tabs pause rendering.
+9. Run `docs/blob-regression.md` when changing the renderer, presets, or scroll sampler.
 
 ### Projects Data Contract
 
@@ -156,10 +158,9 @@ When changing homepage layout, navigation, or project ordering, verify all of th
 - Relative action URLs must resolve from the repository root, because `js/main.js` renders them directly into `index.html`
 - `featured` and `featuredConfig` top-level keys remain in the file but are not read at runtime
 
-Current reality:
+Registry details:
 
-- There are **11** projects in `data/projects.json`
-- There are **4** featured projects (defined in `homepage.sectionOrder` as `projectFeature` sections)
+- Derive project counts and featured order from `data/projects.json`
 - Several metadata fields (`image`, `category`, `tags`, `description`) are only partially used by the current homepage renderer. Do not assume they are dead.
 - Featured sections can define `blobColor` in `sectionsById` or inherit from the project's `blobColor`; if both are absent, `js/main.js` assigns a color from the featured palette
 - Each section can specify a `shapeId` referencing a preset in `window.BLOB_SHAPES`
@@ -172,82 +173,30 @@ Current reality:
 - This includes code comments, UI elements, and generated content
 - Use text or icons instead for visual indicators
 
-### Rainbow Easter Egg
+### Shape Presets and Scroll Motion
 
-The blob control panel hue slider has a rainbow easter egg: hold the slider at max (360) for ~2 seconds to activate rainbow mode. This is intentional — the blob cycles through hues rapidly with a pulsing glow, and the panel caret glows rainbow. It is session-only (not persisted to localStorage). Do not remove it.
+Before changing a preset or its sampling, read **Continuous Shape Surfaces** in
+`data/README.md`. It defines the topology, size, and scheduling contracts.
+The live registry is `window.BLOB_SHAPES` in `js/blob-shapes.js`; section configs
+select presets with `shapeId` in `data/projects.json`.
 
-### Shape Preset System
+`js/main.js` emits `blobSectionsReady` after rendering the sections.
+`js/animations.js` builds anchors from those elements and rebuilds them after
+resize and font loading. `js/blob-motion.js` samples neighboring anchors
+without direction history or timers. Shape and color use the same eased mix.
+The workbench is the final anchor; scrolling through its grid keeps rotating
+the default blob. Dragging on non-interactive content adds mouse rotation.
 
-`js/blob-shapes.js` defines `window.BLOB_SHAPES` — a registry of 10 wireframe shape presets. Each section in the homepage config can specify a `shapeId` that controls the blob's geometry.
+The renderer caches custom surfaces in shared vertex buffers. Its starfield and
+blob share one loop, capped at 60 fps and 2x device pixel ratio. Reduced motion
+uses still frames on scroll, drag, layout, or preference changes. The scene
+pauses while the document is hidden. Appearance follows section configuration.
 
-**Shape types**:
-- **`defaultBlob`** (`mode: 'defaultBlob'`): Standard noise-based morphing sphere. All 13 controls enabled.
-- **`curlbroDumbbell`** (`mode: 'customSurface'`): Dumbbell shape via piecewise-linear radial profile. Deterministic, no noise/morph controls.
-- **8 arbitrary mesh shapes** (`mode: 'arbitraryMesh'`): `goofDog`, `elephant`, `gallopingHorse`, `racecar`, `palmTree`, `gummyBear`, `hotAirBalloon`, `airplane`. Sourced from OBJ models via the conversion pipeline. Each has inline vertex/edge arrays and `buildMesh()` with `_cachedMesh` for lazy caching.
-
-Shape morphing blends radius outputs from two presets per frame at ~0.05 lerp/frame, matching the color transition speed. Mode changes (sphereGrid <-> arbitraryMesh) use a shrink/swap/expand transition. Custom shapes use scroll-velocity rotation only (no noise).
-
-When adding new shapes, either add a manual preset or use the OBJ pipeline (see below). Reference the preset ID in a section's `shapeId` field in `projects.json` and add it to `CAROUSEL_CONFIG.sequence` in `js/animations.js`.
-
-### 3D Shape Carousel
-
-`#blob-showcase` is a scroll-driven 3D shape carousel at the bottom of the page. It showcases all wireframe presets in sequence.
-
-**Architecture** (implemented in `js/animations.js` as `CAROUSEL_CONFIG`):
-- The section height is set dynamically: `(numShapes * scrollPerShape + unlimitedExtraScroll) * vh`
-- Scroll position within the section maps deterministically to: which shape is displayed, its rotation angle, and slide transition offset
-- Each shape gets `scrollPerShape` (3) viewport-heights of scroll for a full 360-degree rotation
-- The last 12% and first 12% of each shape's scroll budget are transition zones where the shape slides horizontally off/on screen
-- The last shape (`defaultBlob`) spins indefinitely in the unlimited zone
-- `CAROUSEL_CONFIG.active` suppresses the normal `sectionChanged` shape/color system
-- On carousel exit, `triggerMeshTransition(defaultBlob)` restores the default shape and a `carouselExited` event resets main.js's section cache
-
-**Configuring the carousel**:
-- Edit `CAROUSEL_CONFIG.sequence` array in `js/animations.js` to change shape order
-- `scrollPerShape`: viewport-heights per 360-degree rotation (default: 3)
-- `transitionZone`: fraction of scroll budget for slide animation (default: 0.12)
-- `unlimitedExtraScroll`: extra vh for the final shape's infinite spin zone (default: 20)
-
-**Key constraints**:
-- `recalcCarouselLayout()` sets `showcase.style.height` which triggers resize events. A re-entrancy guard (`_recalcingCarousel`) prevents infinite recursion. Do not remove it.
-- Layout must be recalculated after main.js renders dynamic sections (carousel `offsetTop` depends on content above it). main.js calls `window.recalcCarouselLayout()` after section rendering.
-- The carousel section uses `scroll-snap-align: start` but NOT `.snap-section` class — it needs its own dynamic height.
-- Mesh shapes define `defaultBaseRadius: 420` (desktop). The carousel scales this proportionally for mobile: `shapeRadius * (mobileDefault / desktopDefault)`.
-
-### OBJ-to-Preset Pipeline
-
-New 3D shapes are added from Wavefront OBJ files via `scripts/obj-to-preset.py`.
-
-**Usage**:
-```bash
-# Print JS preset to stdout
-python scripts/obj-to-preset.py ~/Downloads/Dog.obj houndDog "Hound Dog"
-
-# Auto-inject into blob-shapes.js and bump cache version
-python scripts/obj-to-preset.py ~/Downloads/F1.obj racecar "Racecar" --inject
-
-# With options
-python scripts/obj-to-preset.py model.obj myShape "My Shape" --target 1200 --rotate 90 --inject --preview preview.png
-```
-
-**Pipeline steps**:
-1. Load OBJ via trimesh (handles quads, Z-up, multi-mesh, materials)
-2. Merge all meshes into a single mesh
-3. Simplify via quadric edge collapse to ~target edges (default: 1200)
-4. Extract wireframe edges from simplified faces
-5. Normalize to -0.5..0.5, negate Y for canvas, optional rotation
-6. Generate JS preset with inline vertex/edge arrays
-
-**Options**: `--target N` (edge count), `--rotate N` (Z-axis degrees), `--inject` (auto-insert), `--preview P` (wireframe PNG), `--exclude A,B` (exclude mesh components), `--crop-x N` (crop faces), `--merge` (force merge)
-
-**Setup**: `pip install trimesh matplotlib` (use the project venv)
-
-**Verification**: `node scripts/verify-blob-shapes.js` validates all presets load correctly and reports vertex/edge counts.
-
-**After adding a new shape**:
-1. Add to `CAROUSEL_CONFIG.sequence` in `js/animations.js` (or it won't appear in the carousel)
-2. Optionally reference via `shapeId` in a section config in `data/projects.json`
-3. Bump `blob-shapes.js` cache version in `index.html`
+The old control panel, rainbow override, and shape carousel have been retired.
+`scripts/obj-to-preset.py` remains a legacy standalone wireframe exporter;
+its `arbitraryMesh` output is incompatible with the current renderer, and its
+`--inject` option refuses to modify the site. Author new `getPosition` surfaces
+directly and run both blob verification scripts before previewing.
 
 ### LINK_SETS (Code-Owned Markup)
 
@@ -259,7 +208,7 @@ The CSS is split into modular files for easier maintenance:
 
 - **tokens.css**: Design tokens (colors, typography, spacing, shadows, transitions)
 - **base.css**: Reset, typography, containers, buttons, cards, utility classes
-- **components.css**: Navigation, hero, sections, animations, scroll-snap, control panel
+- **components.css**: Navigation, hero, sections, animations, scroll-snap
 - **responsive.css**: Media queries, reduced motion, print styles
 
 **For index.html**: Links all four CSS files directly for optimal loading.
@@ -321,12 +270,13 @@ One live tool in this repo integrates with Google services:
 ├── css/
 │   ├── tokens.css          # CSS custom properties (design tokens)
 │   ├── base.css            # Reset, typography, containers, buttons, cards
-│   ├── components.css      # Nav, hero, sections, scroll-snap, control panel
+│   ├── components.css      # Nav, hero, sections, scroll-snap
 │   ├── responsive.css      # Media queries, reduced motion, print styles
 │   └── style.css           # Import wrapper (for tools compatibility)
 ├── js/
 │   ├── analytics.js        # Shared GA4 module (consent, config, event helper)
 │   ├── blob-shapes.js      # Shape preset registry (window.BLOB_SHAPES)
+│   ├── blob-motion.js      # Pure scroll-anchor sampler
 │   ├── main.js             # Config reader, section renderers, grouped nav, progress
 │   └── animations.js       # Starfield, 3D blob rendering, shape transitions
 ├── components/
@@ -340,7 +290,7 @@ One live tool in this repo integrates with Google services:
 │   ├── images/             # All images (simone_pic.png, og-image.png, etc.)
 │   └── collisions/tiles/   # 421 JSON tile files
 ├── scripts/
-│   ├── obj-to-preset.py            # OBJ model to blob shape preset converter
+│   ├── obj-to-preset.py            # Legacy standalone wireframe exporter
 │   ├── verify-blob-shapes.js       # Validate all shape presets load correctly
 │   └── preprocess-collisions.js    # Collision tile data preprocessing
 ├── docs/                   # Setup guides for Google API tools
@@ -365,14 +315,14 @@ One live tool in this repo integrates with Google services:
 ## Projects Configuration
 
 The site features are managed through `data/projects.json`:
-- **11 total projects** (mix of tools, games, applications, and archive links)
-- **4 featured projects** highlighted on home page
+- `projects` contains tools, games, applications, and archive links
+- `homepage.sectionOrder` selects and orders the featured projects
 - Each project has metadata: title, description, tech stack, links, and images
 - **Source of truth**: projects.json (not CLAUDE.md - see `data/README.md`)
 
 ## GitHub Pages Configuration
 
 - **Custom domain**: Configured via CNAME file (simonelongo.com)
-- **Branch**: Deploys from `master` branch
+- **Branch**: The GitHub Actions Pages workflow runs on pushes to `master`
 - **HTTPS**: Enabled for security (required for geolocation API)
-- **Build process**: None - static files served directly
+- **Build process**: `node scripts/build-site.mjs` produces `_site/` from the public manifest; only `_site/` is uploaded

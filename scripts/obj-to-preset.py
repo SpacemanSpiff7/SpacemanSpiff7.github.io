@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-OBJ-to-Preset Converter for blob-shapes.js
-===========================================
+Legacy OBJ Wireframe Exporter
+============================
 
 Converts a Wavefront .obj 3D model into a JavaScript wireframe preset
-for the blob renderer. Uses trimesh for robust OBJ parsing and mesh
-simplification.
+for standalone previews. Its arbitraryMesh format belongs to the retired
+renderer. The current renderer uses continuous sphere-grid surfaces documented
+in data/README.md; --inject is retired and refuses to modify the site.
+Uses trimesh for robust OBJ parsing and mesh simplification.
 
 USAGE:
     python scripts/obj-to-preset.py <obj_file> <preset_id> <label> [options]
@@ -13,13 +15,10 @@ USAGE:
     # Just print the JS preset to stdout:
     python scripts/obj-to-preset.py ~/Downloads/Dog.obj houndDog "Hound Dog"
 
-    # Auto-inject into blob-shapes.js and bump cache version:
-    python scripts/obj-to-preset.py ~/Downloads/F1.obj racecar "Racecar" --inject
-
 OPTIONS:
     --target N    Target edge count for decimation (default: 1200)
     --rotate N    Rotate model N degrees around Z axis (screen-space tilt)
-    --inject      Auto-insert into js/blob-shapes.js and bump cache version
+    --inject      Retired; exits without modifying the site
     --preview P   Save a 3-view wireframe preview PNG to path P
     --exclude A,B Case-insensitive substring match to exclude mesh components
     --crop-x N    Drop all faces with all 3 vertices having X > N (original coords)
@@ -40,9 +39,22 @@ PIPELINE:
 
 import sys
 import os
-import re
 import math
 import argparse
+
+
+def inject_preset(preset_js, preset_id):
+    """Reject legacy mesh injection before either site file can be modified."""
+    raise SystemExit(
+        "--inject is retired: the current renderer requires continuous sphere-grid "
+        "surfaces. Add a getPosition preset in js/blob-shapes.js; see data/README.md."
+    )
+
+
+# Reject the retired CLI operation before loading model files or optional packages.
+if __name__ == '__main__' and '--inject' in sys.argv:
+    inject_preset(None, None)
+
 import numpy as np
 
 try:
@@ -508,69 +520,14 @@ def generate_preset(verts, edges, preset_id, label):
     }},"""
 
 
-def inject_preset(preset_js, preset_id):
-    """Insert or replace a preset in js/blob-shapes.js and bump cache version."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.dirname(script_dir)
-    blob_path = os.path.join(repo_root, 'js', 'blob-shapes.js')
-    index_path = os.path.join(repo_root, 'index.html')
-
-    with open(blob_path) as f:
-        content = f.read()
-
-    # Remove existing preset with this id if present
-    marker = f'    {preset_id}: {{'
-    if marker in content:
-        start = content.index(marker)
-        ac = "applicableControls: ['base-radius','perspective','line-width','brightness','glow-intensity','hue-slider']"
-        ac_pos = content.index(ac, start)
-        end_match = re.search(r'\n    \},?\n', content[ac_pos:])
-        if end_match:
-            end = ac_pos + end_match.end()
-            while end < len(content) and content[end] == '\n':
-                end += 1
-            content = content[:start] + content[end:]
-            print(f"  Replaced existing '{preset_id}' preset", file=sys.stderr)
-
-    # Insert before closing "};"
-    close_pos = content.rstrip().rfind('};')
-    content = content[:close_pos] + '\n' + preset_js + '\n' + content[close_pos:]
-
-    with open(blob_path, 'w') as f:
-        f.write(content)
-
-    # Bump blob-shapes.js cache version in index.html
-    with open(index_path) as f:
-        html = f.read()
-
-    def bump_version(match):
-        v = int(match.group(1)) + 1
-        return f'blob-shapes.js?v={v}'
-
-    new_html = re.sub(r'blob-shapes\.js\?v=(\d+)', bump_version, html)
-    if new_html != html:
-        with open(index_path, 'w') as f:
-            f.write(new_html)
-        print(f"  Bumped blob-shapes.js cache version in index.html", file=sys.stderr)
-
-    # Verify presets
-    verify_script = os.path.join(script_dir, 'verify-blob-shapes.js')
-    verify = os.popen(f'node "{verify_script}" 2>&1').read()
-    if 'FAIL' in verify:
-        print(f"  WARNING: Verification failed!", file=sys.stderr)
-        print(f"  {verify.strip()}", file=sys.stderr)
-    else:
-        print(f"  {verify.strip()}", file=sys.stderr)
-
-
 def main():
-    parser = argparse.ArgumentParser(description='Convert OBJ to blob-shapes.js preset')
+    parser = argparse.ArgumentParser(description='Export legacy OBJ wireframes for standalone previews')
     parser.add_argument('obj_file', help='Path to .obj file')
     parser.add_argument('preset_id', help='JS property name (e.g. houndDog)')
     parser.add_argument('label', help='Display label (e.g. "Hound Dog")')
     parser.add_argument('--target', type=int, default=1200, help='Target edge count (default: 1200)')
     parser.add_argument('--rotate', type=float, default=0, help='Rotate model by N degrees around Z axis')
-    parser.add_argument('--inject', action='store_true', help='Auto-insert into blob-shapes.js and bump cache version')
+    parser.add_argument('--inject', action='store_true', help='Retired: current shapes require getPosition surfaces')
     parser.add_argument('--preview', type=str, metavar='PATH', help='Save 3-view wireframe preview PNG')
     parser.add_argument('--exclude', type=str, help='Comma-separated component name substrings to exclude')
     parser.add_argument('--crop-x', type=float, metavar='N', help='Drop faces where all vertices have X > N')
@@ -600,7 +557,6 @@ def main():
 
     if args.inject:
         inject_preset(js, args.preset_id)
-        print(f"  Injected '{args.preset_id}' into js/blob-shapes.js", file=sys.stderr)
     else:
         print(js)
 
