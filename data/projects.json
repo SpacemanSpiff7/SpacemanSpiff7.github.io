@@ -126,12 +126,6 @@
           "url": "https://airlockapp.org",
           "type": "primary",
           "external": true
-        },
-        {
-          "text": "Join the TestFlight Beta",
-          "url": "https://testflight.apple.com/join/g6s6Mywm",
-          "type": "secondary",
-          "external": true
         }
       ]
     },
