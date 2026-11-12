@@ -438,63 +438,17 @@
 
             <h3 id="living-geometry">The Living Geometry</h3>
 
-            <p>Behind every page of this site lives a wireframe sphere. Not a static model, but a continuously deforming surface driven by 3D simplex noise. The mesh is built from a grid of 60 latitude lines by 60 longitude lines -- 3,600 vertices in total, recalculated every frame.</p>
+            <p>Behind the main page lives one continuous wireframe surface. The blob, flower, animals, and other silhouettes all share the same grid, so its lines can flow from one shape into the next. Desktop uses 60 by 60 segments; mobile uses 40 by 40.</p>
 
-            <p>Each vertex sits on a unit sphere, then gets displaced outward by a noise function that samples three-dimensional space. The noise field itself drifts over time, so the surface never repeats. The result is something that looks organic -- like a deep-sea creature caught mid-thought.</p>
+            <p>The default blob ripples with drifting noise. Other shapes sculpt that same sphere into rounded forms. Airlock takes the shape of an airplane.</p>
 
             <p>The wireframe renders using quadratic Bezier curves rather than straight line segments. This gives the mesh a smoother appearance even at lower resolutions, and makes the whole shape feel less like a polygon and more like a living membrane.</p>
 
-            <h3>The Control Panel</h3>
-
-            <p>At the bottom of the main page, a small caret hides a 13-slider control panel. It is organized into three collapsible sections.</p>
-
-            <h3>Shape</h3>
-            <table class="slider-table">
-                <thead>
-                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Size</td><td>30 - 500 px</td><td>Base radius of the sphere before noise displacement</td></tr>
-                    <tr><td>Noise Amount</td><td>0 - 0.5</td><td>How far vertices push outward from the surface</td></tr>
-                    <tr><td>Noise Detail</td><td>Smooth - Chaotic</td><td>Frequency of the simplex noise field</td></tr>
-                    <tr><td>Morph Speed</td><td>Slow - Fast</td><td>How quickly the noise field drifts through time</td></tr>
-                    <tr><td>Perspective</td><td>200 - 1200</td><td>Camera distance. Lower values create more dramatic foreshortening</td></tr>
-                </tbody>
-            </table>
-
-            <h3>Style</h3>
-            <table class="slider-table">
-                <thead>
-                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Hue</td><td>0 - 360 deg</td><td>Override the section-driven color with a custom hue</td></tr>
-                    <tr><td>Brightness</td><td>0.2 - 3.0</td><td>Multiplier on the wireframe luminance</td></tr>
-                    <tr><td>Line Width</td><td>0.5 - 4.0 px</td><td>Thickness of each wireframe curve</td></tr>
-                    <tr><td>Glow Intensity</td><td>0 - 0.5</td><td>Opacity of the radial glow halo behind the blob</td></tr>
-                </tbody>
-            </table>
-
-            <h3>Stars</h3>
-            <table class="slider-table">
-                <thead>
-                    <tr><th>Slider</th><th>Range</th><th>Effect</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Star Count</td><td>0 - 600</td><td>Number of twinkling stars in the background field</td></tr>
-                    <tr><td>Twinkle Speed</td><td>0.1 - 3.0x</td><td>Multiplier on each star's oscillation rate</td></tr>
-                    <tr><td>Star Size</td><td>0.5 - 5.0 px</td><td>Maximum radius of the largest stars</td></tr>
-                    <tr><td>Star Brightness</td><td>0.1 - 2.0x</td><td>Opacity multiplier across all stars</td></tr>
-                </tbody>
-            </table>
-
-            <p>All slider positions persist to <code>localStorage</code>. A "Reset to Defaults" button at the bottom of the panel returns everything to factory settings. The HiDPI canvas scales to <code>devicePixelRatio</code>, so the wireframe stays crisp on Retina displays.</p>
-
             <h3 id="scroll-current">The Scroll Current</h3>
 
-            <p>The blob responds to scrolling. Scroll fast enough and the geometry spins with you -- the Y-axis rotation tracks scroll velocity, so quick flicks send it whirling. Stop, and it breathes deeper. The idle morph speed is set higher than the active speed, which means the shape actually moves more when you are still.</p>
+            <p>Your scroll position controls the transformation. Move between sections and the surface changes shape and color together. Stop halfway and the blend holds, with its gentle breathing continuing. Scroll backward and the transformation reverses.</p>
 
-            <p>Each section of the main page assigns a different hue to the wireframe. The transitions between them are not instant -- the color lerps smoothly from one value to the next using linear interpolation on the RGB channels. Scroll from the hero into the first featured project and watch the purple bleed into deep pink. The section detection fires a custom <code>sectionChanged</code> event on the window, and the animation system begins interpolating toward the new target. If you have set a hue override through the control panel, the section colors are bypassed entirely.</p>
+            <p>A faint sheen follows your scrolling and gently settles when you stop. The background pauses when the tab is hidden. With reduced motion enabled, ambient movement stops and the scene updates only when you interact.</p>
         </section>
 
         <!-- Section 3: Projects -->
@@ -546,23 +500,6 @@
         <section id="secrets">
             <h2>Secrets</h2>
 
-            <h3>Prismatic Override</h3>
-
-            <p>There is something hidden at the far end of the hue slider.</p>
-
-            <div class="spoiler" role="button" tabindex="0" aria-label="Click to reveal spoiler">
-                <div class="spoiler-overlay">[click to reveal]</div>
-                <div class="spoiler-content">
-                    <p>Drag the hue slider to its maximum value -- 360 degrees -- and hold it there. After roughly 1.6 seconds, the wireframe ignites.</p>
-
-                    <p>Rainbow mode. Each latitude and longitude line of the wireframe gets its own hue, cycling rapidly through the spectrum. A pulsing glow radiates outward. The control panel caret itself glows with a shifting rainbow border.</p>
-
-                    <p>This state is session-only. Refresh the page and it vanishes. It was never meant to be permanent -- just a reward for the curious.</p>
-
-                    <p>To deactivate, drag the hue slider away from the maximum, or hit "Reset to Defaults." The blob returns to its section-controlled colors as if nothing happened.</p>
-                </div>
-            </div>
-
             <h3>Traffic Therapy Admin Mode</h3>
 
             <div class="spoiler" role="button" tabindex="0" aria-label="Click to reveal spoiler">
@@ -590,22 +527,9 @@
             <p>A running inventory of things to find. Check them off as you go. Your progress saves automatically.</p>
 
             <div class="discovery-section">
-                <div class="discovery-counter" id="discovery-counter">0 / 9 discovered</div>
+                <div class="discovery-counter" id="discovery-counter">0 / 6 discovered</div>
 
-                <div class="discovery-item" data-id="blob-panel">
-                    <input type="checkbox" class="discovery-checkbox" id="disc-blob-panel">
-                    <label class="discovery-label" for="disc-blob-panel">Open the blob control panel on the main page</label>
-                </div>
 
-                <div class="discovery-item" data-id="rainbow">
-                    <input type="checkbox" class="discovery-checkbox" id="disc-rainbow">
-                    <label class="discovery-label" for="disc-rainbow">Activate rainbow mode</label>
-                </div>
-
-                <div class="discovery-item" data-id="blob-showcase">
-                    <input type="checkbox" class="discovery-checkbox" id="disc-blob-showcase">
-                    <label class="discovery-label" for="disc-blob-showcase">Scroll to the blob showcase section</label>
-                </div>
 
                 <div class="discovery-item" data-id="traffic-win">
                     <input type="checkbox" class="discovery-checkbox" id="disc-traffic-win">

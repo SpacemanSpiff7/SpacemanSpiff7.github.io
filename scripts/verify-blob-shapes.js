@@ -54,22 +54,12 @@ for (const key of keys) {
     if (!preset.id) issues.push('missing id');
     if (!preset.label) issues.push('missing label');
     if (!preset.mode) issues.push('missing mode');
-    if (!preset.applicableControls) issues.push('missing applicableControls');
-
-    if (preset.mode === 'arbitraryMesh') {
-        if (typeof preset.buildMesh !== 'function') {
-            issues.push('missing buildMesh()');
-        } else {
-            const mesh = preset.buildMesh();
-            if (!mesh || !mesh.vertices || !mesh.edges) {
-                issues.push('buildMesh() returned invalid data');
-            } else if (verbose) {
-                console.log(`  ${key}: ${mesh.vertices.length} verts, ${mesh.edges.length} edges`);
-            }
-        }
-    } else if (verbose) {
-        console.log(`  ${key}: mode=${preset.mode}`);
+    if (preset.mode === 'customSurface' && typeof preset.getPosition !== 'function') {
+        issues.push('missing getPosition()');
     }
+
+    if (preset.mode !== 'defaultBlob' && preset.mode !== 'customSurface') issues.push('unsupported surface mode');
+    if (verbose) console.log(`  ${key}: mode=${preset.mode}`);
 
     if (issues.length > 0) {
         console.error(`  FAIL ${key}: ${issues.join(', ')}`);

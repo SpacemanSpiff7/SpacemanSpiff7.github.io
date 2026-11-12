@@ -357,34 +357,7 @@
         box-shadow: 0 0 0 6px #000000, 0 0 8px rgba(255, 255, 255, 0.4);
     }
 
-    /* Blob controls mobile */
-    .blob-controls {
-        width: 100%;
-        max-width: none;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        transform: none;
-    }
 
-    .blob-controls.open .controls-drawer {
-        max-height: calc(60vh - env(safe-area-inset-bottom));
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
-    .control-item {
-        grid-template-columns: 120px 1fr 50px;
-        gap: 8px;
-    }
-
-    .control-item label {
-        font-size: 0.8rem;
-    }
-
-    .control-value {
-        font-size: 0.8rem;
-    }
 }
 
 @media (max-width: 480px) {

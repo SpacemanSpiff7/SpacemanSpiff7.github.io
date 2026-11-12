@@ -11,10 +11,9 @@
     "sectionOrder": [
       "hero",
       "featured-curlbro",
+      "featured-airlock",
       "featured-seasonal-produce",
       "featured-agile-this",
-      "featured-traffic-therapy",
-      "featured-glowy-blob-ball",
       "about",
       "contact"
     ],
@@ -37,7 +36,7 @@
         "groupId": "featured",
         "projectId": "seasonal-produce",
         "showInSubnav": true,
-        "shapeId": "defaultBlob",
+        "shapeId": "produceApple",
         "blobColor": "#4A9068"
       },
       "featured-agile-this": {
@@ -45,22 +44,16 @@
         "groupId": "featured",
         "projectId": "agile-this",
         "showInSubnav": true,
-        "shapeId": "palmTree",
+        "shapeId": "kanbanBoard",
         "blobColor": "#39FF14"
       },
-      "featured-traffic-therapy": {
+      "featured-airlock": {
         "type": "projectFeature",
         "groupId": "featured",
-        "projectId": "traffic-therapy",
+        "projectId": "airlock",
         "showInSubnav": true,
-        "shapeId": "gummyBear"
-      },
-      "featured-glowy-blob-ball": {
-        "type": "projectFeature",
-        "groupId": "featured",
-        "projectId": "glowy-blob-ball",
-        "showInSubnav": true,
-        "shapeId": "defaultBlob"
+        "shapeId": "airplane",
+        "blobColor": "#D87962"
       },
       "about": {
         "type": "text",
@@ -82,10 +75,9 @@
   },
   "featured": [
     "curlbro",
+    "airlock",
     "seasonal-produce",
-    "agile-this",
-    "traffic-therapy",
-    "glowy-blob-ball"
+    "agile-this"
   ],
   "featuredConfig": {
     "sectionTitle": "Tools",
@@ -125,6 +117,29 @@
       ]
     },
     {
+      "id": "airlock",
+      "title": "Airlock",
+      "shortDescription": "Take a breath before you scroll. Airlock turns guided breathing into time to use your blocked apps.",
+      "description": "An iPhone app that turns guided breathing into temporary Airtime for the apps and websites you choose to block.",
+      "blobColor": "#D87962",
+      "category": "Focus & Breathwork",
+      "tags": ["iPhone", "Breathwork", "Screen Time"],
+      "actions": [
+        {
+          "text": "Website",
+          "url": "https://airlockapp.org",
+          "type": "primary",
+          "external": true
+        },
+        {
+          "text": "Join the TestFlight Beta",
+          "url": "https://testflight.apple.com/join/g6s6Mywm",
+          "type": "secondary",
+          "external": true
+        }
+      ]
+    },
+    {
       "id": "luna-tv",
       "title": "Luna TV",
       "shortDescription": "A simple sideloadable app for Sony Bravia TVs to launch Amazon Luna",
@@ -137,17 +152,6 @@
           "type": "primary",
           "external": true
         }
-      ]
-    },
-    {
-      "id": "chads-bach",
-      "title": "Chad's Bachelor Party",
-      "shortDescription": "NASCAR-themed bachelor party HQ for Hurricane, UT -- March 2026",
-      "blobColor": "#CC0000",
-      "category": "Event",
-      "tags": ["Event"],
-      "actions": [
-        { "text": "Race Day", "url": "chads-bach/index.html", "type": "primary" }
       ]
     },
     {
@@ -321,22 +325,6 @@
         {
           "text": "Use It",
           "url": "fakejira/index.html",
-          "type": "primary"
-        }
-      ]
-    },
-    {
-      "id": "glowy-blob-ball",
-      "title": "Glowy Blob Ball",
-      "shortDescription": "Glowy. Blob. Ball. And other assorted 3D things.",
-      "description": "Glowy. Blob. Ball. And other assorted 3D things.",
-      "blobColor": "#3E2C5A",
-      "category": "Background",
-      "tags": ["Background"],
-      "actions": [
-        {
-          "text": "See It",
-          "url": "#blob-showcase",
           "type": "primary"
         }
       ]

@@ -14,3 +14,21 @@ grocery-project-files/seasonal-produce/data/compiled.json
 # Original seed files duplicated in input/ and data/
 grocery-project-files/produce_items.csv
 grocery-project-files/produce_seasons_seed.json
+
+# Only the reviewed contents of _site are uploaded by the Pages workflow.
+/_site/
+/_site-build-*/
+
+# Local secrets and developer credentials must never be committed.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.bak
+*.swp
+*~
+.DS_Store

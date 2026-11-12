@@ -249,17 +249,6 @@ function buildSectionRegistry(homepage, projectsMap) {
         groupId: 'workbench',
         showInSubnav: false
     });
-    registry.push({
-        id: 'blob-showcase',
-        label: 'Blob Showcase',
-        navTarget: 'projects-grid',
-        progressTarget: 'blob-showcase',
-        includeInProgress: true,
-        blobColor: null,
-        shapeId: 'defaultBlob',
-        groupId: 'workbench',
-        showInSubnav: false
-    });
 
     return registry;
 }
@@ -636,6 +625,13 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
         }))
         .filter(section => section.element);
 
+    window.dispatchEvent(new CustomEvent('blobSectionsReady', {
+        detail: sectionRegistry.map(({id, shapeId, blobColor}) => ({id, shapeId, blobColor}))
+    }));
+    document.fonts?.ready.then(() => {
+        if (typeof rebuildScrollAnchors === 'function') rebuildScrollAnchors();
+    });
+
     function applySectionState(sectionConfig) {
         if (!sectionConfig) {
             return;
@@ -697,8 +693,7 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
         let nearestDistance = Infinity;
 
         sectionElements.forEach(section => {
-            // For very tall sections (carousel), use top edge + 1vh as the
-            // anchor point so it only activates when viewport is actually there
+            // Anchor tall sections to their first viewport.
             const effectiveHeight = Math.min(section.element.offsetHeight, window.innerHeight);
             const sectionMidpoint = section.element.offsetTop + (effectiveHeight / 2);
             const distance = Math.abs(sectionMidpoint - viewportMidpoint);
@@ -729,12 +724,6 @@ function setupScrollHighlighting(navLinks, sectionRegistry) {
     const scrollTarget = scrollContainer || window;
     scrollTarget.addEventListener('scroll', requestSectionUpdate, { passive: true });
     window.addEventListener('resize', requestSectionUpdate);
-
-    // When carousel exits, reset cached section so we re-dispatch sectionChanged
-    window.addEventListener('carouselExited', () => {
-        currentBlobSection = '';
-        requestSectionUpdate();
-    });
 
     requestSectionUpdate();
 }
@@ -822,7 +811,7 @@ async function loadProjects() {
             `).join('');
         }
 
-        // Handle scroll-to links (e.g. #blob-showcase)
+        // Handle in-page action links
         document.addEventListener('click', (e) => {
             const scrollLink = e.target.closest('[data-scroll-to]');
             if (scrollLink) {
@@ -867,9 +856,9 @@ async function loadProjects() {
         initProgressIndicator(sectionRegistry);
         maybeInitScrollHighlighting();
 
-        // Recalculate carousel layout now that dynamic sections are in the DOM
-        if (typeof window.recalcCarouselLayout === 'function') {
-            window.recalcCarouselLayout();
+        // Rebuild scroll anchors after inserting the dynamic sections
+        if (typeof window.rebuildScrollAnchors === 'function') {
+            window.rebuildScrollAnchors();
         }
 
     } catch (error) {

@@ -52,7 +52,7 @@ The `homepage` object controls all non-hero sections on the homepage, navigation
 | `showDot` | `true` | Show in progress indicator |
 | `showInSubnav` | `false` | Show as subnav item under parent group |
 | `navSubLabel` | -- | Subnav label (falls back to project title or section title) |
-| `shapeId` | `"defaultBlob"` | Blob shape preset from `window.BLOB_SHAPES`. Also used by carousel in `js/animations.js` |
+| `shapeId` | `"defaultBlob"` | Blob shape preset from `window.BLOB_SHAPES`. |
 | `blobColor` | -- | Override blob color (falls back to project blobColor, then palette) |
 | `projectId` | -- | For `projectFeature`: references project in `projects` array |
 | `title` | -- | For `text`/`linkList`: section heading |
@@ -140,6 +140,31 @@ Before pushing changes:
 3. Confirm every relative action URL exists on disk
 4. Load the homepage and click every featured CTA
 5. Scroll through all snap sections on desktop and mobile
-6. Confirm the `glowy-blob-ball` CTA still reaches `#blob-showcase`
-7. On mobile, confirm featured project content is visually centered
-8. If changing `shapeId` values, verify shapes appear correctly in both featured sections and the blob carousel
+6. On mobile, confirm featured project content is visually centered
+7. If changing `shapeId` values, verify the transitions into and out of the featured section
+
+## Continuous Shape Surfaces
+
+All presets use the same sphere grid in `js/blob-shapes.js`. A custom preset
+implements `getPosition(theta, phi, time, config)` and returns `{x, y, z}`.
+Keep the same theta/phi orientation, a closed longitude seam, and a single
+position at each pole. Build connected silhouettes rather than separate meshes.
+Coordinates scale with `config.baseRadius`; normalize shapes to comparable size.
+Presets are sampled once per grid rebuild and stored in reusable buffers.
+Only the default blob samples noise each frame; settled custom shapes do not.
+
+Homepage section centers form one scroll timeline. `js/blob-motion.js` samples
+adjacent anchors without timers: reversing scroll restores the same blend, and
+stopping holds it while ambient breathing continues. Workbench is the last anchor
+and returns to the default blob, which rotates half a turn per viewport scrolled
+through the grid (disabled for reduced motion).
+The presets are the default blob, CurlBro dumbbell, produce apple, three-column Kanban board, and Airlock airplane.
+
+The two canvases share one animation loop. It pauses in hidden tabs; reduced motion
+renders only on interaction or layout changes. Device pixel ratio is capped at 2.
+The scroll sheen and gentle banking settle after scrolling and are disabled under
+reduced motion. There are no persisted appearance overrides or public controls.
+
+Run `node scripts/verify-blob-motion.js` for surface seam/pole validation,
+desktop/mobile transition continuity, reverse scrolling, render operation counts,
+and visibility/reduced-motion scheduling checks.

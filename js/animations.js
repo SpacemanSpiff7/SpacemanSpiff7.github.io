@@ -1,308 +1,24 @@
-// ==========================================
-// 3D MORPHING BLOB ANIMATION SYSTEM
-// Simplified: Always morphs, rotates on scroll
-// ==========================================
-
-// ==========================================
-// CONFIGURATION
-// ==========================================
-const MOBILE_DEFAULT_BASE_RADIUS = 120;
-const DESKTOP_DEFAULT_BASE_RADIUS = 200;
-const SETTINGS_STORAGE_KEY = 'blobSettings';
-
-function isMobileViewport() {
-    return window.innerWidth < 768;
-}
-
-function getViewportMode() {
-    return isMobileViewport() ? 'mobile' : 'desktop';
-}
-
-function getDefaultBaseRadius() {
-    return isMobileViewport() ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
-}
-
-function getCurrentGridResolution() {
-    return isMobileViewport() ? CONFIG.gridResolutionMobile : CONFIG.gridResolution;
-}
-
-function getDefaultBlobSettings() {
-    return {
-        noiseAmplitude: 0.10,
-        noiseFrequency: 0.003,
-        idleMorphSpeed: 0.005,
-        baseRadius: getDefaultBaseRadius(),
-        brightnessMultiplier: 1.0,
-        lineWidth: 1.0,
-        perspective: 600,
-        glowMaxOpacity: 0.15,
-        hueOverride: null,
-        starCount: 250,
-        starTwinkleSpeed: 1.0,
-        starMaxRadius: 2.0,
-        starBrightness: 1.0
-    };
-}
-
-const CONTROL_DEFS = [
-    {
-        key: 'baseRadius',
-        elementId: 'base-radius',
-        configKey: 'baseRadius',
-        parse: value => parseInt(value, 10),
-        format: value => ({ text: value, suffix: 'px' })
-    },
-    {
-        key: 'noiseAmplitude',
-        elementId: 'noise-amplitude',
-        configKey: 'noiseAmplitude',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(2) })
-    },
-    {
-        key: 'noiseFrequency',
-        elementId: 'noise-frequency',
-        configKey: 'noiseFrequency',
-        parse: value => parseFloat(value),
-        format: value => ({ text: getNoiseDetailLabel(value) })
-    },
-    {
-        key: 'morphSpeed',
-        elementId: 'morph-speed',
-        configKey: 'idleMorphSpeed',
-        parse: value => parseFloat(value),
-        apply: value => {
-            CONFIG.idleMorphSpeed = value;
-            CONFIG.morphSpeed = value * 0.6;
-        },
-        read: () => CONFIG.idleMorphSpeed,
-        format: value => ({ text: getMorphSpeedLabel(value) })
-    },
-    {
-        key: 'perspective',
-        elementId: 'perspective',
-        configKey: 'perspective',
-        parse: value => parseInt(value, 10),
-        format: value => ({ text: value })
-    },
-    {
-        key: 'brightness',
-        elementId: 'brightness',
-        configKey: 'brightnessMultiplier',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(2) })
-    },
-    {
-        key: 'lineWidth',
-        elementId: 'line-width',
-        configKey: 'lineWidth',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(1) })
-    },
-    {
-        key: 'glowIntensity',
-        elementId: 'glow-intensity',
-        configKey: 'glowMaxOpacity',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(2) })
-    },
-    {
-        key: 'starCount',
-        elementId: 'star-count',
-        configKey: 'starCount',
-        parse: value => parseInt(value, 10),
-        format: value => ({ text: value }),
-        liveDisplayOnly: true,
-        afterCommit: value => {
-            CONFIG.starCount = value;
-            regenerateStars(CONFIG.starCount);
-        }
-    },
-    {
-        key: 'starTwinkle',
-        elementId: 'star-twinkle',
-        configKey: 'starTwinkleSpeed',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(1) })
-    },
-    {
-        key: 'starSize',
-        elementId: 'star-size',
-        configKey: 'starMaxRadius',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(1) }),
-        liveDisplayOnly: true,
-        afterCommit: value => {
-            CONFIG.starMaxRadius = value;
-            regenerateStars(CONFIG.starCount);
-        }
-    },
-    {
-        key: 'starBrightness',
-        elementId: 'star-brightness',
-        configKey: 'starBrightness',
-        parse: value => parseFloat(value),
-        format: value => ({ text: value.toFixed(1) })
-    }
-];
-
+// One continuous surface, with a single visibility-aware animation loop.
 const CONFIG = {
-    // Blob parameters
-    gridResolution: { lat: 60, lon: 60 },
-    gridResolutionMobile: { lat: 40, lon: 40 },
-    noiseAmplitude: 0.10,  // Subtle morphing
-    noiseFrequency: 0.003,
-    morphSpeed: 0.003,     // Base morph speed when scrolling
-    idleMorphSpeed: 0.005, // Faster morph speed when idle
-    idleThreshold: 0.001,  // Velocity below this = idle
-    baseRadius: getDefaultBaseRadius(),
-    brightnessMultiplier: 1.0,
-    lineWidth: 1.0,
-    perspective: 600,
-    glowMaxOpacity: 0.15,
-    hueOverride: null,    // null = section-controlled, 0-360 = user hue
-    rainbowMode: false,
-    rainbowHue: 0,
-    starTwinkleSpeed: 1.0,  // multiplier on per-star twinkleSpeed
-    starMaxRadius: 2.0,     // max star radius in px
-    starBrightness: 1.0,    // multiplier on per-star opacity
-
-    // Color themes per section (dark enough to not interfere with text)
-    sectionColors: {
-        'hero': '#5A0080',           // Dark purple
-        'about': '#006640',          // Dark green
-        'contact': '#6B5A00',        // Dark gold
-        'projects-grid': '#6B1F00',  // Dark orange
-        'blob-showcase': '#FFFF33'   // Highlighter yellow
-    },
-    currentSection: 'hero',  // Track current section
-
-    // Color transition
-    targetColor: '#5A0080',      // Color we're transitioning TO
-    displayColor: '#5A0080',     // Color currently being rendered
-    colorTransitionSpeed: 0.05,  // Lerp factor per frame (0-1)
-
-    // Shape transition
-    currentPreset: null,         // Set in initBlobSystem from BLOB_SHAPES
-    targetPreset: null,          // Preset we're transitioning TO
-    shapeTransitionProgress: 1,  // 0 = fully current, 1 = transition complete
-    shapeTransitionSpeed: 0.05,  // Lerp factor per frame (matches color speed)
-
-    // Arbitrary mesh rendering
-    renderMode: 'sphereGrid',         // 'sphereGrid' | 'arbitraryMesh'
-    meshTransitionState: 'idle',      // 'idle' | 'shrinking' | 'expanding'
-    meshTransitionProgress: 0,        // 0..1 progress through shrink or expand phase
-    meshTransitionScale: 1,           // computed from progress via easing
-    activeMesh: null,                 // cached {vertices, edges, projected} for current mesh
-    _pendingMeshPreset: null,         // preset waiting to be swapped in at scale=0
-
-    // Starfield
-    starCount: 250,
-
-    carouselXOffset: 0,         // X pixel shift during carousel transitions
-
-    // Performance
-    targetFPS: 60,
-    targetFPSMobile: 30,
+    sectionRegistry: [], scrollAnchors: [], currentPreset: null, targetPreset: null,
+    shapeTransitionProgress: 0, scrollRotation: 0, currentSection: 'hero',
+    displayColor: '#5A0080', targetColor: '#5A0080',
+    baseRadius: 200, noiseAmplitude: 0.10, noiseFrequency: 0.09,
+    sectionColors: {hero: '#5A0080', about: '#006640', contact: '#6B5A00', 'projects-grid': '#6B1F00'}
 };
+let blobCanvas, blobCtx, starfieldCanvas, starfieldCtx, scrollContainer;
+let width = 0, height = 0, dpr = 1, gridResolution = 60;
+let directions, projectedX, projectedY, vertexLight;
+let surfaceBuffers = {}, lines = [], stars = [];
+const starBuckets = Array.from({length: 8}, () => []);
+let time = 0, motionEnergy = 0, bank = 0, scrollDirection = 1;
+let lastScrollY = 0, scrollDirty = true, rafId = null, lastFrameAt = null;
+let drag = null;
+const rotation = {x: 0, y: 0};
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+let glowGradient = null, glowKey = '';
+const frameStats = {vertices: 0, surfaceSamples: 0, noiseSamples: 0, lineStrokes: 0, starFills: 0};
 
-// ==========================================
-// CAROUSEL CONFIG
-// ==========================================
-const CAROUSEL_CONFIG = {
-    sequence: [
-        'curlbroDumbbell', 'goofDog', 'elephant',
-        'gallopingHorse', 'racecar', 'palmTree', 'gummyBear',
-        'hotAirBalloon', 'airplane', 'defaultBlob'
-    ],
-    scrollPerShape: 3,          // viewport-heights per 360° rotation
-    transitionZone: 0.12,       // fraction of scrollPerShape for slide transition (entry + exit)
-    slideOffsetMax: 0.5,        // max X offset as fraction of viewport width
-    unlimitedExtraScroll: 20,   // extra vh after last shape for unlimited spin
-    active: false,
-    currentIndex: -1,
-    progress: 0,                // 0-1 within current shape
-    _resolvedSequence: [],
-    _lastRenderedIndex: -1,
-    _showcaseTop: 0,
-    _sectionHeight: 0,
-    _scrollPerShapePx: 0,
-};
-
-function getSectionColor(sectionId, explicitColor) {
-    return explicitColor || CONFIG.sectionColors[sectionId] || CONFIG.sectionColors.hero;
-}
-
-function serializeBlobSettings() {
-    return {
-        morphSpeed: CONFIG.idleMorphSpeed,
-        noiseAmplitude: CONFIG.noiseAmplitude,
-        noiseFrequency: CONFIG.noiseFrequency,
-        baseRadius: CONFIG.baseRadius,
-        brightnessMultiplier: CONFIG.brightnessMultiplier,
-        lineWidth: CONFIG.lineWidth,
-        perspective: CONFIG.perspective,
-        glowMaxOpacity: CONFIG.glowMaxOpacity,
-        hueOverride: CONFIG.hueOverride,
-        starCount: CONFIG.starCount,
-        starTwinkleSpeed: CONFIG.starTwinkleSpeed,
-        starMaxRadius: CONFIG.starMaxRadius,
-        starBrightness: CONFIG.starBrightness,
-        shapeOverride: null
-    };
-}
-
-function readControlValue(def) {
-    if (typeof def.read === 'function') {
-        return def.read();
-    }
-    return CONFIG[def.configKey];
-}
-
-function applyControlValue(def, value) {
-    if (typeof def.apply === 'function') {
-        def.apply(value);
-        return;
-    }
-    CONFIG[def.configKey] = value;
-}
-
-function createBlobDebug() {
-    return {
-        getState() {
-            return {
-                currentSection: CONFIG.currentSection,
-                targetColor: CONFIG.targetColor,
-                displayColor: CONFIG.displayColor,
-                hueOverride: CONFIG.hueOverride,
-                rainbowMode: CONFIG.rainbowMode,
-                baseRadius: CONFIG.baseRadius,
-                perspective: CONFIG.perspective,
-                lineWidth: CONFIG.lineWidth,
-                glowMaxOpacity: CONFIG.glowMaxOpacity,
-                noiseAmplitude: CONFIG.noiseAmplitude,
-                noiseFrequency: CONFIG.noiseFrequency,
-                idleMorphSpeed: CONFIG.idleMorphSpeed,
-                morphSpeed: CONFIG.morphSpeed,
-                starCount: CONFIG.starCount,
-                starTwinkleSpeed: CONFIG.starTwinkleSpeed,
-                starMaxRadius: CONFIG.starMaxRadius,
-                starBrightness: CONFIG.starBrightness,
-                scrollVelocity,
-                rotation: { ...rotation },
-                defaults: getDefaultBlobSettings(),
-                persisted: serializeBlobSettings()
-            };
-        }
-    };
-}
-
-const dpr = window.devicePixelRatio || 1;
-let viewportMode = getViewportMode();
-
-// ==========================================
-// SIMPLEX NOISE (Inline Implementation)
-// ==========================================
 class SimplexNoise {
     constructor() {
         this.grad3 = [
@@ -433,1529 +149,321 @@ function lerpColor(colorA, colorB, t) {
     );
 }
 
-function rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-        h = s = 0;
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-            case g: h = ((b - r) / d + 2) / 6; break;
-            case b: h = ((r - g) / d + 4) / 6; break;
-        }
-    }
-
-    return { h, s, l };
+function getBlobScrollTop() {
+    return scrollContainer ? scrollContainer.scrollTop : window.scrollY;
 }
 
-function hslToRgb(h, s, l) {
-    let r, g, b;
-
-    if (s === 0) {
-        r = g = b = l;
-    } else {
-        const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1/6) return p + (q - p) * 6 * t;
-            if (t < 1/2) return q;
-            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
+function rebuildScrollAnchors() {
+    const vh = window.innerHeight;
+    CONFIG.scrollAnchors = CONFIG.sectionRegistry.map(section => {
+        const element = document.getElementById(section.id);
+        if (!element) return null;
+        return {
+            at: element.offsetTop + Math.min(element.offsetHeight, vh) / 2 - vh / 2,
+            shapeId: section.shapeId || 'defaultBlob',
+            color: section.blobColor || CONFIG.sectionColors[section.id] || CONFIG.sectionColors.hero,
+            sectionId: section.id
         };
+    }).filter(Boolean).sort((a, b) => a.at - b.at);
+    CONFIG.scrollAnchors.forEach((anchor, index) => { anchor.rotation = index * 0.24; });
+    lastScrollY = getBlobScrollTop();
+    updateScrollMorph(lastScrollY);
+    requestSceneFrame();
+}
 
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
+function updateScrollMorph(scrollTop) {
+    const sample = window.BLOB_MOTION.sample(CONFIG.scrollAnchors, scrollTop);
+    if (!sample) return;
+    const {from, to, mix, fraction} = sample;
+    CONFIG.currentPreset = window.BLOB_SHAPES[from.shapeId] || window.BLOB_SHAPES.defaultBlob;
+    CONFIG.targetPreset = window.BLOB_SHAPES[to.shapeId] || window.BLOB_SHAPES.defaultBlob;
+    CONFIG.shapeTransitionProgress = mix;
+    CONFIG.scrollRotation = from.rotation + (to.rotation - from.rotation) * fraction;
+    // Keep rotating after the final shape anchor as the project grid scrolls.
+    // Position-driven rotation reverses exactly and stops when scrolling stops.
+    if (from.sectionId === 'projects-grid' && !motionPreference.matches) {
+        CONFIG.scrollRotation += Math.max(0, scrollTop - from.at) / Math.max(1, window.innerHeight) * Math.PI;
     }
-
-    return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
-    };
+    CONFIG.displayColor = CONFIG.targetColor = lerpColor(from.color, to.color, mix);
 }
-
-function hslToHex(h, s, l) {
-    const rgb = hslToRgb(h, s, l);
-    return rgbToHex(rgb.r, rgb.g, rgb.b);
-}
-
-function getMorphSpeedLabel(value) {
-    const pct = value / 0.02;
-    if (pct <= 0.25) return 'Slow';
-    if (pct <= 0.75) return 'Medium';
-    return 'Fast';
-}
-
-function getNoiseDetailLabel(value) {
-    const pct = (value - 0.001) / (0.01 - 0.001);
-    if (pct <= 0.33) return 'Smooth';
-    if (pct <= 0.66) return 'Textured';
-    return 'Chaotic';
-}
-
-function adjustBrightness(hexColor, multiplier) {
-    const rgb = hexToRgb(hexColor);
-    if (!rgb) return hexColor;
-
-    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-    hsl.l = Math.min(1, Math.max(0, hsl.l * multiplier));
-
-    const newRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-    return '#' + [newRgb.r, newRgb.g, newRgb.b].map(x => x.toString(16).padStart(2, '0')).join('');
-}
-
-// ==========================================
-// STARFIELD RENDERING
-// ==========================================
-let starfieldCanvas, starfieldCtx, stars = [];
-
-function regenerateStars(count) {
-    stars.length = 0;
-    const maxR = CONFIG.starMaxRadius;
-    for (let i = 0; i < count; i++) {
-        stars.push({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            radius: Math.random() * (maxR - 0.3) + 0.3,
-            opacity: Math.random() * 0.5 + 0.5,
-            twinkleSpeed: Math.random() * 0.02 + 0.01,
-            twinklePhase: Math.random() * Math.PI * 2,
-        });
-    }
-}
-
-function initStarfield() {
-    starfieldCanvas = document.getElementById('starfield');
-    if (!starfieldCanvas) return;
-
-    starfieldCtx = starfieldCanvas.getContext('2d');
-
-    function resizeStarfield() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-
-        starfieldCanvas.width = w * dpr;
-        starfieldCanvas.height = h * dpr;
-        starfieldCanvas.style.width = w + 'px';
-        starfieldCanvas.style.height = h + 'px';
-        starfieldCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    resizeStarfield();
-    window.addEventListener('resize', resizeStarfield);
-
-    regenerateStars(CONFIG.starCount);
-}
-
-function renderStarfield(time) {
-    if (!starfieldCtx) return;
-
-    starfieldCtx.fillStyle = '#000000';
-    starfieldCtx.fillRect(0, 0, starfieldCanvas.width / dpr, starfieldCanvas.height / dpr);
-
-    stars.forEach(star => {
-        const twinkle = Math.sin(time * star.twinkleSpeed * CONFIG.starTwinkleSpeed + star.twinklePhase);
-        const opacity = (star.opacity + twinkle * 0.3) * CONFIG.starBrightness;
-
-        starfieldCtx.beginPath();
-        starfieldCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        starfieldCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`;
-        starfieldCtx.fill();
-    });
-}
-
-// ==========================================
-// 3D BLOB MESH GENERATION
-// ==========================================
-let blobCanvas, blobCtx, vertices = [];
-let rotation = { x: 0, y: 0, z: 0 };
 
 function buildBlobVertices() {
-    vertices = [];
-    const gridRes = getCurrentGridResolution();
-
-    for (let lat = 0; lat <= gridRes.lat; lat++) {
-        for (let lon = 0; lon <= gridRes.lon; lon++) {
-            const theta = (lat / gridRes.lat) * Math.PI;
-            const phi = (lon / gridRes.lon) * Math.PI * 2;
-
-            vertices.push({
-                lat,
-                lon,
-                theta,
-                phi,
-                x: 0,
-                y: 0,
-                z: 0,
-                projected: { x: 0, y: 0 }
+    const side = gridResolution + 1;
+    const count = side * side;
+    directions = new Float64Array(count * 3);
+    projectedX = new Float32Array(count);
+    projectedY = new Float32Array(count);
+    vertexLight = new Float32Array(count);
+    surfaceBuffers = {};
+    const presets = Object.values(window.BLOB_SHAPES).filter(preset => preset.getPosition);
+    presets.forEach(preset => { surfaceBuffers[preset.id] = new Float32Array(count * 3); });
+    for (let lat = 0; lat < side; lat++) {
+        const theta = lat / gridResolution * Math.PI;
+        for (let lon = 0; lon < side; lon++) {
+            const phi = lon / gridResolution * Math.PI * 2;
+            const offset = (lat * side + lon) * 3;
+            directions[offset] = Math.sin(theta) * Math.cos(phi);
+            directions[offset + 1] = Math.sin(theta) * Math.sin(phi);
+            directions[offset + 2] = Math.cos(theta);
+            presets.forEach(preset => {
+                const p = preset.getPosition(theta, phi, 0, {baseRadius: 1});
+                const buffer = surfaceBuffers[preset.id];
+                buffer[offset] = p.x;
+                buffer[offset + 1] = p.y;
+                buffer[offset + 2] = p.z;
             });
         }
     }
+    lines = [];
+    for (let lat = 0; lat < side; lat++) {
+        lines.push({indices: Uint16Array.from({length: side}, (_, lon) => lat * side + lon), latitude: lat / gridResolution});
+    }
+    for (let lon = 0; lon < side; lon++) {
+        lines.push({indices: Uint16Array.from({length: side}, (_, lat) => lat * side + lon), latitude: null});
+    }
+    frameStats.vertices = count;
+    frameStats.surfaceSamples = count * presets.length;
 }
 
-function syncBlobSizeToViewportMode(previousMode, nextMode) {
-    if (previousMode === nextMode) {
-        return;
+function resizeScene() {
+    const previousResolution = gridResolution;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    // 2x is crisp on Retina without paying for a 3x/4x full-screen canvas.
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    gridResolution = width < 768 ? 40 : 60;
+    CONFIG.baseRadius = width < 768 ? 120 : 200;
+    for (const canvas of [blobCanvas, starfieldCanvas]) {
+        if (!canvas) continue;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-
-    const previousDefault = previousMode === 'mobile' ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
-    const nextDefault = nextMode === 'mobile' ? MOBILE_DEFAULT_BASE_RADIUS : DESKTOP_DEFAULT_BASE_RADIUS;
-
-    if (CONFIG.baseRadius === previousDefault) {
-        CONFIG.baseRadius = nextDefault;
-        const baseRadiusSlider = document.getElementById('base-radius');
-        const baseRadiusValue = document.getElementById('base-radius-value');
-        if (baseRadiusSlider) {
-            baseRadiusSlider.value = nextDefault;
-        }
-        if (baseRadiusValue) {
-            baseRadiusValue.textContent = `${nextDefault}px`;
-        }
-        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(serializeBlobSettings()));
+    if (!directions || previousResolution !== gridResolution) buildBlobVertices();
+    if (!stars.length) {
+        stars = Array.from({length: 250}, () => ({
+            x: Math.random(), y: Math.random(), radius: 0.35 + Math.random() * 1.5,
+            phase: Math.random() * Math.PI * 2, speed: 0.35 + Math.random() * 0.5
+        }));
     }
+    glowGradient = null;
+    rebuildScrollAnchors();
 }
 
-function handleViewportModeChange() {
-    const nextMode = getViewportMode();
-    if (nextMode === viewportMode) {
-        return;
-    }
-
-    const previousMode = viewportMode;
-    viewportMode = nextMode;
-    buildBlobVertices();
-    syncBlobSizeToViewportMode(previousMode, nextMode);
-
-    // Invalidate cached meshes so they rebuild at new density
-    if (window.BLOB_SHAPES) {
-        Object.values(window.BLOB_SHAPES).forEach(shape => {
-            if (shape._cachedMesh !== undefined) shape._cachedMesh = null;
-        });
-    }
-    // Rebuild active mesh if currently showing one
-    if (CONFIG.renderMode === 'arbitraryMesh' && CONFIG.currentPreset && CONFIG.currentPreset.buildMesh) {
-        CONFIG.activeMesh = CONFIG.currentPreset.buildMesh();
-    }
-}
-
-function initBlobMesh() {
-    blobCanvas = document.getElementById('blob-canvas');
-    if (!blobCanvas) return;
-
-    blobCtx = blobCanvas.getContext('2d');
-
-    function resizeBlob() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-
-        blobCanvas.width = w * dpr;
-        blobCanvas.height = h * dpr;
-        blobCanvas.style.width = w + 'px';
-        blobCanvas.style.height = h + 'px';
-        blobCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        handleViewportModeChange();
-        recalcCarouselLayout();
-    }
-    resizeBlob();
-    window.addEventListener('resize', resizeBlob);
-
-    buildBlobVertices();
-}
-
-// ==========================================
-// CLICK-DRAG ROTATION (all sections)
-// ==========================================
-let isDragging = false;
-let dragLastX = 0, dragLastY = 0;
-
-function initDragRotation() {
-    const scrollContainer = document.querySelector('.scroll-container');
-    if (!scrollContainer) return;
-
-    scrollContainer.addEventListener('pointerdown', (e) => {
-        if (CAROUSEL_CONFIG.active) return;
-        // Don't interfere with links, buttons, inputs, nav, or control panel
-        if (e.target.closest('a, button, input, select, nav, .blob-controls, .nav-container')) return;
-        isDragging = true;
-        dragLastX = e.clientX;
-        dragLastY = e.clientY;
-        scrollContainer.style.cursor = 'grabbing';
+function renderStars() {
+    if (!starfieldCtx) return;
+    const ctx = starfieldCtx;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    starBuckets.forEach(bucket => { bucket.length = 0; });
+    stars.forEach(star => {
+        const brightness = 0.45 + 0.25 * Math.sin(time * star.speed + star.phase);
+        starBuckets[Math.min(7, Math.floor(brightness * 8))].push(star);
     });
-
-    scrollContainer.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - dragLastX;
-        const dy = e.clientY - dragLastY;
-        rotation.y += dx * 0.005;
-        rotation.x += dy * 0.005;
-        dragLastX = e.clientX;
-        dragLastY = e.clientY;
-    });
-
-    const endDrag = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        scrollContainer.style.cursor = '';
-    };
-    scrollContainer.addEventListener('pointerup', endDrag);
-    scrollContainer.addEventListener('pointercancel', endDrag);
-}
-
-// ==========================================
-// 3D TRANSFORMATIONS
-// ==========================================
-function rotateX(x, y, z, angle) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    return {
-        x,
-        y: y * cos - z * sin,
-        z: y * sin + z * cos,
-    };
-}
-
-function rotateY(x, y, z, angle) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    return {
-        x: x * cos + z * sin,
-        y,
-        z: -x * sin + z * cos,
-    };
-}
-
-function rotateZ(x, y, z, angle) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    return {
-        x: x * cos - y * sin,
-        y: x * sin + y * cos,
-        z,
-    };
-}
-
-function project3D(x, y, z) {
-    const perspective = CONFIG.perspective;
-    const scale = perspective / (perspective + z);
-    return {
-        x: (blobCanvas.width / dpr) / 2 + CONFIG.carouselXOffset + x * scale,
-        y: (blobCanvas.height / dpr) / 2 + y * scale,
-        scale,
-    };
-}
-
-// ==========================================
-// SCROLL-BASED ROTATION
-// ==========================================
-let scrollVelocity = 0;
-let lastScrollY = 0;
-window.__blobDebug = createBlobDebug();
-
-function setupScrollListener() {
-    const scrollContainer = document.querySelector('.scroll-container');
-
-    // Back-to-top button: visible whenever not at the top
-    const backToTop = document.getElementById('back-to-top');
-    if (backToTop) {
-        backToTop.addEventListener('click', () => {
-            const sc = document.querySelector('.scroll-container');
-            if (!sc) return;
-            window.dispatchEvent(new CustomEvent('scrollToTop'));
-            sc.scrollTo({ top: 0, behavior: 'smooth' });
-            if (typeof sa === 'function') sa('back_to_top');
+    frameStats.starFills = 0;
+    starBuckets.forEach((bucket, index) => {
+        if (!bucket.length) return;
+        ctx.beginPath();
+        bucket.forEach(star => {
+            const x = star.x * width, y = star.y * height;
+            ctx.moveTo(x + star.radius, y);
+            ctx.arc(x, y, star.radius, 0, Math.PI * 2);
         });
-    }
-
-    // Suppress intermediate shape transitions during smooth scroll to top.
-    // Any code can dispatch 'scrollToTop' before scrolling to hero.
-    window.addEventListener('scrollToTop', () => {
-        CONFIG._scrollingToTop = true;
-        const defaultPreset = window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob;
-        if (defaultPreset) triggerMeshTransition(defaultPreset);
-    });
-
-    function updateBackToTop(scrollY) {
-        if (!backToTop) return;
-        backToTop.classList.toggle('visible', scrollY > window.innerHeight * 0.5);
-        // Clear scroll-to-top suppression once we've arrived
-        if (CONFIG._scrollingToTop && scrollY < window.innerHeight * 0.5) {
-            CONFIG._scrollingToTop = false;
-        }
-    }
-
-    if (!scrollContainer) {
-        // Fallback to window scroll
-        window.addEventListener('scroll', () => {
-            const currentScrollY = window.scrollY;
-            scrollVelocity = (currentScrollY - lastScrollY) * 0.008;
-            lastScrollY = currentScrollY;
-            updateBackToTop(currentScrollY);
-        }, { passive: true });
-        return;
-    }
-
-    scrollContainer.addEventListener('scroll', () => {
-        const currentScrollY = scrollContainer.scrollTop;
-        scrollVelocity = (currentScrollY - lastScrollY) * 0.008;
-        lastScrollY = currentScrollY;
-        updateCarouselState(currentScrollY);
-        updateBackToTop(currentScrollY);
-    }, { passive: true });
-}
-
-// ==========================================
-// MESH TRANSITION HELPERS
-// ==========================================
-function meshEaseInOut(t) {
-    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-}
-
-function getPresetRenderMode(preset) {
-    return (preset && preset.mode === 'arbitraryMesh') ? 'arbitraryMesh' : 'sphereGrid';
-}
-
-function triggerMeshTransition(newPreset) {
-    CONFIG._pendingMeshPreset = newPreset;
-    CONFIG.meshTransitionState = 'shrinking';
-    CONFIG.meshTransitionProgress = 0;
-}
-
-function completeMeshSwap() {
-    const pending = CONFIG._pendingMeshPreset;
-    CONFIG._pendingMeshPreset = null;
-    CONFIG.currentPreset = pending;
-    CONFIG.targetPreset = null;
-    CONFIG.shapeTransitionProgress = 1;
-    CONFIG.renderMode = getPresetRenderMode(pending);
-    if (CONFIG.renderMode === 'arbitraryMesh' && pending.buildMesh) {
-        CONFIG.activeMesh = pending.buildMesh();
-    } else {
-        CONFIG.activeMesh = null;
-    }
-    // Apply preset's preferred base radius, or restore viewport default
-    const targetRadius = pending.defaultBaseRadius || getDefaultBaseRadius();
-    CONFIG.baseRadius = targetRadius;
-    const slider = document.getElementById('base-radius');
-    const valEl = document.getElementById('base-radius-value');
-    if (slider) slider.value = targetRadius;
-    if (valEl) valEl.textContent = targetRadius + 'px';
-    CONFIG.meshTransitionState = 'expanding';
-    CONFIG.meshTransitionProgress = 0;
-}
-
-// ==========================================
-// BLOB RENDERING
-// ==========================================
-let time = 0;
-let lastFrameTime = 0;
-
-function renderBlob(currentTime) {
-    if (!blobCtx) {
-        requestAnimationFrame(renderBlob);
-        return;
-    }
-
-    const frameInterval = 1000 / (isMobileViewport() ? CONFIG.targetFPSMobile : CONFIG.targetFPS);
-    if (currentTime - lastFrameTime < frameInterval) {
-        requestAnimationFrame(renderBlob);
-        return;
-    }
-    lastFrameTime = currentTime;
-
-    // Dynamic morph speed based on idle state
-    const isIdle = Math.abs(scrollVelocity) < CONFIG.idleThreshold;
-    const currentMorphSpeed = isIdle ? CONFIG.idleMorphSpeed : CONFIG.morphSpeed;
-    time += currentMorphSpeed;
-
-    // Clear canvas
-    blobCtx.clearRect(0, 0, blobCanvas.width / dpr, blobCanvas.height / dpr);
-
-    // Update rotation based on scroll velocity or carousel position
-    if (CAROUSEL_CONFIG.active) {
-        // Position-locked: rotation directly tied to scroll progress
-        rotation.y = CAROUSEL_CONFIG.progress * Math.PI * 2;
-        scrollVelocity = 0;
-    } else {
-        rotation.y += scrollVelocity;
-        scrollVelocity *= 0.95;  // Decay when not scrolling
-    }
-
-    // Subtle idle rotation on X and Z
-    rotation.x += 0.0002;
-    rotation.z += 0.0001;
-
-    // Carousel: update X offset and swap shapes
-    if (CAROUSEL_CONFIG.active) {
-        const vw = window.innerWidth;
-        const tz = CAROUSEL_CONFIG.transitionZone;
-        const progress = CAROUSEL_CONFIG.progress;
-
-        if (progress < tz && CAROUSEL_CONFIG.currentIndex > 0) {
-            // Sliding in from right (entry zone)
-            const entryT = progress / tz;
-            const eased = meshEaseInOut(entryT);
-            CONFIG.carouselXOffset = (1 - eased) * CAROUSEL_CONFIG.slideOffsetMax * vw;
-        } else if (progress > (1 - tz) && CAROUSEL_CONFIG.currentIndex < CAROUSEL_CONFIG._resolvedSequence.length - 1) {
-            // Sliding out to left (exit zone)
-            const exitT = (progress - (1 - tz)) / tz;
-            const eased = meshEaseInOut(exitT);
-            CONFIG.carouselXOffset = -eased * CAROUSEL_CONFIG.slideOffsetMax * vw;
-        } else {
-            CONFIG.carouselXOffset = 0;
-        }
-
-        // Instant shape swap when carousel index changes
-        if (CAROUSEL_CONFIG.currentIndex !== CAROUSEL_CONFIG._lastRenderedIndex && CAROUSEL_CONFIG.currentIndex >= 0) {
-            const shapeId = CAROUSEL_CONFIG._resolvedSequence[CAROUSEL_CONFIG.currentIndex];
-            const preset = window.BLOB_SHAPES[shapeId];
-            if (preset) {
-                CONFIG.currentPreset = preset;
-                CONFIG.targetPreset = null;
-                CONFIG.shapeTransitionProgress = 1;
-                CONFIG.renderMode = getPresetRenderMode(preset);
-                CONFIG.activeMesh = (CONFIG.renderMode === 'arbitraryMesh' && preset.buildMesh)
-                    ? preset.buildMesh() : null;
-                CONFIG.meshTransitionScale = 1;
-                CONFIG.meshTransitionState = 'idle';
-                // Scale radius for mobile — shapes define desktop radius (420),
-                // so scale proportionally to the viewport default
-                const desktopDefault = DESKTOP_DEFAULT_BASE_RADIUS;
-                const shapeRadius = preset.defaultBaseRadius || desktopDefault;
-                const viewportDefault = getDefaultBaseRadius();
-                CONFIG.baseRadius = isMobileViewport()
-                    ? Math.round(shapeRadius * (viewportDefault / desktopDefault))
-                    : shapeRadius;
-                // Set carousel-specific color
-                CONFIG.targetColor = CONFIG.sectionColors['blob-showcase'];
-                // Sync shape dropdown
-                const shapeDropdown = document.getElementById('shape-select');
-                if (shapeDropdown) shapeDropdown.value = shapeId;
-            }
-            CAROUSEL_CONFIG._lastRenderedIndex = CAROUSEL_CONFIG.currentIndex;
-            if (typeof sa === 'function') sa('carousel_shape', { shape_id: shapeId, shape_index: CAROUSEL_CONFIG.currentIndex });
-        }
-    } else {
-        CONFIG.carouselXOffset = 0;
-    }
-
-    const gridRes = getCurrentGridResolution();
-    const currentRadius = CONFIG.baseRadius;
-
-    // Mesh transition state machine (shrink/expand)
-    if (CONFIG.meshTransitionState === 'shrinking') {
-        CONFIG.meshTransitionProgress = Math.min(1, CONFIG.meshTransitionProgress + CONFIG.shapeTransitionSpeed);
-        CONFIG.meshTransitionScale = 1 - meshEaseInOut(CONFIG.meshTransitionProgress);
-        if (CONFIG.meshTransitionProgress >= 1) {
-            completeMeshSwap();
-        }
-    } else if (CONFIG.meshTransitionState === 'expanding') {
-        CONFIG.meshTransitionProgress = Math.min(1, CONFIG.meshTransitionProgress + CONFIG.shapeTransitionSpeed);
-        CONFIG.meshTransitionScale = meshEaseInOut(CONFIG.meshTransitionProgress);
-        if (CONFIG.meshTransitionProgress >= 1) {
-            CONFIG.meshTransitionState = 'idle';
-            CONFIG.meshTransitionScale = 1;
-            CONFIG.meshTransitionProgress = 0;
-        }
-    }
-
-    const mScale = CONFIG.meshTransitionScale;
-
-    // Advance sphere-grid shape transition (only when in sphereGrid mode)
-    if (CONFIG.renderMode === 'sphereGrid' && CONFIG.shapeTransitionProgress < 1 && CONFIG.targetPreset) {
-        CONFIG.shapeTransitionProgress = Math.min(1, CONFIG.shapeTransitionProgress + CONFIG.shapeTransitionSpeed);
-        if (CONFIG.shapeTransitionProgress >= 1) {
-            CONFIG.currentPreset = CONFIG.targetPreset;
-            CONFIG.targetPreset = null;
-        }
-    }
-
-    const activePreset = CONFIG.currentPreset;
-    const blendTarget = CONFIG.targetPreset;
-    const blendProgress = CONFIG.shapeTransitionProgress;
-
-    // Light direction (shared between both render modes)
-    const lightDir = { x: 0.5, y: -0.5, z: 1 };
-    const lightMag = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
-    const lightNorm = { x: lightDir.x / lightMag, y: lightDir.y / lightMag, z: lightDir.z / lightMag };
-
-    // --- Arbitrary mesh vertex computation ---
-    let meshProjected = null;
-    if (CONFIG.renderMode === 'arbitraryMesh' && CONFIG.activeMesh) {
-        const mesh = CONFIG.activeMesh;
-        meshProjected = new Array(mesh.vertices.length);
-        for (let i = 0; i < mesh.vertices.length; i++) {
-            const v = mesh.vertices[i];
-            let x = v.x * currentRadius * mScale;
-            let y = v.y * currentRadius * mScale;
-            let z = v.z * currentRadius * mScale;
-
-            let rotated = rotateX(x, y, z, rotation.x);
-            rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
-            rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
-
-            const proj = project3D(rotated.x, rotated.y, rotated.z);
-            const mag = Math.sqrt(rotated.x ** 2 + rotated.y ** 2 + rotated.z ** 2);
-            const nx = mag > 0 ? rotated.x / mag : 0;
-            const ny = mag > 0 ? rotated.y / mag : 0;
-            const nz = mag > 0 ? rotated.z / mag : 0;
-            const lighting = Math.max(0, nx * lightNorm.x + ny * lightNorm.y + nz * lightNorm.z);
-            const depthFade = currentRadius > 0 ? (rotated.z / (currentRadius * mScale || 1) + 1) / 2 : 0.5;
-
-            meshProjected[i] = {
-                x: proj.x,
-                y: proj.y,
-                z: rotated.z,
-                lighting,
-                depthFade
-            };
-        }
-    }
-
-    // --- Sphere grid vertex computation ---
-    if (CONFIG.renderMode === 'sphereGrid') {
-        vertices.forEach(vertex => {
-            const noiseValue = simplex.noise3D(
-                Math.cos(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
-                Math.sin(vertex.phi) * Math.sin(vertex.theta) + time * CONFIG.noiseFrequency * 100,
-                Math.cos(vertex.theta) + time * CONFIG.noiseFrequency * 100
-            );
-
-            // Compute position for current preset
-            let cx, cy, cz;
-            if (activePreset && activePreset.getPosition) {
-                const pos = activePreset.getPosition(vertex.theta, vertex.phi, time, CONFIG);
-                cx = pos.x; cy = pos.y; cz = pos.z;
-            } else if (activePreset && activePreset.mode === 'customSurface') {
-                const r = activePreset.getRadius(vertex.theta, vertex.phi, time, CONFIG);
-                cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                cz = r * Math.cos(vertex.theta);
-            } else {
-                const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
-                cx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                cy = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                cz = r * Math.cos(vertex.theta);
-            }
-
-            // Blend with target preset if transitioning
-            let x, y, z;
-            if (blendTarget && blendProgress < 1) {
-                let tx, ty, tz;
-                if (blendTarget.getPosition) {
-                    const pos = blendTarget.getPosition(vertex.theta, vertex.phi, time, CONFIG);
-                    tx = pos.x; ty = pos.y; tz = pos.z;
-                } else if (blendTarget.mode === 'customSurface') {
-                    const r = blendTarget.getRadius(vertex.theta, vertex.phi, time, CONFIG);
-                    tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                    ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                    tz = r * Math.cos(vertex.theta);
-                } else {
-                    const r = currentRadius * (1 + noiseValue * CONFIG.noiseAmplitude);
-                    tx = r * Math.sin(vertex.theta) * Math.cos(vertex.phi);
-                    ty = r * Math.sin(vertex.theta) * Math.sin(vertex.phi);
-                    tz = r * Math.cos(vertex.theta);
-                }
-                x = cx + (tx - cx) * blendProgress;
-                y = cy + (ty - cy) * blendProgress;
-                z = cz + (tz - cz) * blendProgress;
-            } else {
-                x = cx; y = cy; z = cz;
-            }
-
-            // Apply mesh transition scale for shrink/expand
-            x *= mScale;
-            y *= mScale;
-            z *= mScale;
-
-            let rotated = rotateX(x, y, z, rotation.x);
-            rotated = rotateY(rotated.x, rotated.y, rotated.z, rotation.y);
-            rotated = rotateZ(rotated.x, rotated.y, rotated.z, rotation.z);
-
-            vertex.x = rotated.x;
-            vertex.y = rotated.y;
-            vertex.z = rotated.z;
-
-            vertex.projected = project3D(rotated.x, rotated.y, rotated.z);
-        });
-
-        // Calculate normals and lighting for sphere grid
-        vertices.forEach(vertex => {
-            const mag = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
-            vertex.normal = {
-                x: mag > 0 ? vertex.x / mag : 0,
-                y: mag > 0 ? vertex.y / mag : 0,
-                z: mag > 0 ? vertex.z / mag : 0,
-            };
-            vertex.lighting = Math.max(0, vertex.normal.x * lightNorm.x + vertex.normal.y * lightNorm.y + vertex.normal.z * lightNorm.z);
-        });
-    }
-
-    // Color logic: rainbow > hue override > section color
-    let blobColor;
-    const isRainbow = CONFIG.rainbowMode;
-    if (!isRainbow) {
-        if (CONFIG.hueOverride !== null) {
-            blobColor = adjustBrightness(hslToHex(CONFIG.hueOverride / 360, 1, 0.3), CONFIG.brightnessMultiplier);
-        } else {
-            if (CONFIG.displayColor !== CONFIG.targetColor) {
-                CONFIG.displayColor = lerpColor(CONFIG.displayColor, CONFIG.targetColor, CONFIG.colorTransitionSpeed);
-            }
-            blobColor = adjustBrightness(CONFIG.displayColor, CONFIG.brightnessMultiplier);
-        }
-    }
-
-    // Draw 3D shading glow behind wireframe
-    const centerX = (blobCanvas.width / dpr) / 2 + CONFIG.carouselXOffset;
-    const centerY = (blobCanvas.height / dpr) / 2;
-    const glowRadius = currentRadius * 1.5 * mScale;
-
-    if (isRainbow) {
-        // Multi-colored rotating glow blobs — neon party sign look
-        const neonColors = [
-            [255, 30, 80],   // hot pink
-            [0, 255, 140],   // neon green
-            [80, 40, 255],   // electric purple
-            [255, 220, 0],   // neon yellow
-            [0, 180, 255],   // cyan
-            [255, 100, 0],   // neon orange
-        ];
-        const glowR = glowRadius * 1.3;
-        neonColors.forEach((c, i) => {
-            const phase = time * 2.5 + i * Math.PI * 2 / neonColors.length;
-            const ox = Math.sin(phase) * currentRadius * 0.4;
-            const oy = Math.cos(phase) * currentRadius * 0.4;
-            const pulse = (Math.sin(time * 6 + i * 1.7) + 1) / 2;
-            const intensity = 0.25 + pulse * 0.35;
-            const g = blobCtx.createRadialGradient(centerX + ox, centerY + oy, 0, centerX, centerY, glowR);
-            g.addColorStop(0, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${intensity})`);
-            g.addColorStop(0.4, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${intensity * 0.4})`);
-            g.addColorStop(1, `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0)`);
-            blobCtx.fillStyle = g;
-            blobCtx.beginPath();
-            blobCtx.arc(centerX, centerY, glowR, 0, Math.PI * 2);
-            blobCtx.fill();
-        });
-    } else {
-        const gradient = blobCtx.createRadialGradient(
-            centerX - currentRadius * 0.3,
-            centerY - currentRadius * 0.3,
-            0,
-            centerX,
-            centerY,
-            glowRadius
-        );
-        const rgb = hexToRgb(blobColor);
-        if (rgb) {
-            const glowOpacity = CONFIG.glowMaxOpacity;
-            gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowOpacity})`);
-            gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowOpacity * 0.33})`);
-            gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
-            blobCtx.fillStyle = gradient;
-            blobCtx.beginPath();
-            blobCtx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2);
-            blobCtx.fill();
-        }
-    }
-
-    // Draw wireframe
-    blobCtx.lineJoin = 'round';
-    blobCtx.lineCap = 'round';
-
-    // --- Arbitrary mesh wireframe (batched for performance) ---
-    if (CONFIG.renderMode === 'arbitraryMesh' && meshProjected) {
-        const mesh = CONFIG.activeMesh;
-
-        if (isRainbow) {
-            // Batch edges into 16 hue groups for glow + crisp passes
-            const hueBuckets = new Array(16).fill(null).map(() => []);
-            for (let e = 0; e < mesh.edges.length; e++) {
-                hueBuckets[Math.floor(e / mesh.edges.length * 16) % 16].push(e);
-            }
-
-            function drawMeshRainbow(lineWidthMult, opacityVal) {
-                blobCtx.lineWidth = CONFIG.lineWidth * lineWidthMult;
-                for (let b = 0; b < 16; b++) {
-                    if (hueBuckets[b].length === 0) continue;
-                    const hue = (b / 16 * 360 + time * 200) % 360;
-                    const pulse = (Math.sin(time * 10 + b * 0.5) + 1) / 2;
-                    const l = 0.45 + pulse * 0.25;
-                    const color = hslToRgb(hue / 360, 1, l);
-                    blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityVal})`;
-                    blobCtx.beginPath();
-                    for (const e of hueBuckets[b]) {
-                        const [i, j] = mesh.edges[e];
-                        blobCtx.moveTo(meshProjected[i].x, meshProjected[i].y);
-                        blobCtx.lineTo(meshProjected[j].x, meshProjected[j].y);
-                    }
-                    blobCtx.stroke();
-                }
-            }
-            drawMeshRainbow(5, 0.25);
-            drawMeshRainbow(1.5, 0.95);
-        } else {
-            // Batch edges into 8 opacity levels
-            blobCtx.lineWidth = CONFIG.lineWidth;
-            const NUM_BUCKETS = 8;
-            const opBuckets = new Array(NUM_BUCKETS).fill(null).map(() => []);
-            for (let e = 0; e < mesh.edges.length; e++) {
-                const [i, j] = mesh.edges[e];
-                const a = meshProjected[i];
-                const b = meshProjected[j];
-                const opacity = Math.min(1, 0.15 + (a.lighting + b.lighting) * 0.35 + (a.depthFade + b.depthFade) * 0.2);
-                opBuckets[Math.min(NUM_BUCKETS - 1, Math.floor(opacity * NUM_BUCKETS))].push(e);
-            }
-            for (let b = 0; b < NUM_BUCKETS; b++) {
-                if (opBuckets[b].length === 0) continue;
-                const opacity = (b + 0.5) / NUM_BUCKETS;
-                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
-                blobCtx.beginPath();
-                for (const e of opBuckets[b]) {
-                    const [i, j] = mesh.edges[e];
-                    blobCtx.moveTo(meshProjected[i].x, meshProjected[i].y);
-                    blobCtx.lineTo(meshProjected[j].x, meshProjected[j].y);
-                }
-                blobCtx.stroke();
-            }
-        }
-    }
-
-    // --- Sphere grid wireframe ---
-    if (CONFIG.renderMode === 'sphereGrid') {
-
-    if (isRainbow) {
-        // Per-line rainbow: each lat/lon line gets its own hue, two-pass for neon glow
-        // Pass 1: thick transparent lines (glow halo)
-        // Pass 2: crisp bright lines on top
-
-        function drawRainbowWireframe(lineWidthMult, opacityMult) {
-            blobCtx.lineWidth = CONFIG.lineWidth * lineWidthMult;
-
-            // Latitude lines
-            for (let lat = 0; lat <= gridRes.lat; lat++) {
-                const hue = (lat / gridRes.lat * 360 + time * 200) % 360;
-                const pulse = (Math.sin(time * 10 + lat * 0.7) + 1) / 2;
-                const l = 0.45 + pulse * 0.25;
-                const color = hslToRgb(hue / 360, 1, l);
-
-                blobCtx.beginPath();
-                blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityMult})`;
-
-                for (let lon = 0; lon <= gridRes.lon; lon++) {
-                    const index = lat * (gridRes.lon + 1) + lon;
-                    const vertex = vertices[index];
-
-                    if (lon === 0) {
-                        blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-                    } else if (lon === 1) {
-                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                        blobCtx.lineTo((prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
-                    } else if (lon === gridRes.lon) {
-                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-                    } else {
-                        const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, (prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
-                    }
-                }
-                blobCtx.stroke();
-            }
-
-            // Longitude lines
-            for (let lon = 0; lon <= gridRes.lon; lon++) {
-                const hue = (lon / gridRes.lon * 360 + time * 200 + 180) % 360;
-                const pulse = (Math.sin(time * 10 + lon * 0.9 + 2) + 1) / 2;
-                const l = 0.45 + pulse * 0.25;
-                const color = hslToRgb(hue / 360, 1, l);
-
-                blobCtx.beginPath();
-                blobCtx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityMult})`;
-
-                for (let lat = 0; lat <= gridRes.lat; lat++) {
-                    const index = lat * (gridRes.lon + 1) + lon;
-                    const vertex = vertices[index];
-
-                    if (lat === 0) {
-                        blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-                    } else if (lat === 1) {
-                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                        blobCtx.lineTo((prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
-                    } else if (lat === gridRes.lat) {
-                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-                    } else {
-                        const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                        blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, (prev.projected.x + vertex.projected.x) / 2, (prev.projected.y + vertex.projected.y) / 2);
-                    }
-                }
-                blobCtx.stroke();
-            }
-        }
-
-        // Glow pass — thick, semi-transparent
-        drawRainbowWireframe(5, 0.25);
-        // Crisp pass — normal width, bright
-        drawRainbowWireframe(1.5, 0.95);
-    } else {
-        // Normal single-color wireframe
-        blobCtx.lineWidth = CONFIG.lineWidth;
-
-        // Draw latitude lines
-        for (let lat = 0; lat <= gridRes.lat; lat++) {
-            blobCtx.beginPath();
-            for (let lon = 0; lon <= gridRes.lon; lon++) {
-                const index = lat * (gridRes.lon + 1) + lon;
-                const vertex = vertices[index];
-
-                const depthFade = (vertex.z / currentRadius + 1) / 2;
-                const lighting = vertex.lighting;
-
-                const baseOpacity = 0.15;
-                const lightBoost = lighting * 0.7;
-                const depthBoost = depthFade * 0.4;
-                const opacity = baseOpacity + lightBoost + depthBoost;
-
-                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
-
-                if (lon === 0) {
-                    blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-                } else if (lon === 1) {
-                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                    const midX = (prev.projected.x + vertex.projected.x) / 2;
-                    const midY = (prev.projected.y + vertex.projected.y) / 2;
-                    blobCtx.lineTo(midX, midY);
-                } else if (lon === gridRes.lon) {
-                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-                } else {
-                    const prev = vertices[lat * (gridRes.lon + 1) + (lon - 1)];
-                    const midX = (prev.projected.x + vertex.projected.x) / 2;
-                    const midY = (prev.projected.y + vertex.projected.y) / 2;
-                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
-                }
-            }
-            blobCtx.stroke();
-        }
-
-        // Draw longitude lines
-        for (let lon = 0; lon <= gridRes.lon; lon++) {
-            blobCtx.beginPath();
-            for (let lat = 0; lat <= gridRes.lat; lat++) {
-                const index = lat * (gridRes.lon + 1) + lon;
-                const vertex = vertices[index];
-
-                const depthFade = (vertex.z / currentRadius + 1) / 2;
-                const lighting = vertex.lighting;
-
-                const baseOpacity = 0.15;
-                const lightBoost = lighting * 0.7;
-                const depthBoost = depthFade * 0.4;
-                const opacity = baseOpacity + lightBoost + depthBoost;
-
-                blobCtx.strokeStyle = blobColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
-
-                if (lat === 0) {
-                    blobCtx.moveTo(vertex.projected.x, vertex.projected.y);
-                } else if (lat === 1) {
-                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                    const midX = (prev.projected.x + vertex.projected.x) / 2;
-                    const midY = (prev.projected.y + vertex.projected.y) / 2;
-                    blobCtx.lineTo(midX, midY);
-                } else if (lat === gridRes.lat) {
-                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, vertex.projected.x, vertex.projected.y);
-                } else {
-                    const prev = vertices[(lat - 1) * (gridRes.lon + 1) + lon];
-                    const midX = (prev.projected.x + vertex.projected.x) / 2;
-                    const midY = (prev.projected.y + vertex.projected.y) / 2;
-                    blobCtx.quadraticCurveTo(prev.projected.x, prev.projected.y, midX, midY);
-                }
-            }
-            blobCtx.stroke();
-        }
-    }
-
-    } // end sphere grid wireframe conditional
-
-    requestAnimationFrame(renderBlob);
-}
-
-// ==========================================
-// ANIMATION LOOP (Starfield)
-// ==========================================
-function animate(currentTime) {
-    renderStarfield(currentTime * 0.001);
-    requestAnimationFrame(animate);
-}
-
-// ==========================================
-// INITIALIZATION
-// ==========================================
-/**
- * Enable/disable control panel sliders based on the active shape preset.
- * @param {string[]} applicableControls - Element IDs of controls that remain enabled
- */
-function gateControlPanel(applicableControls) {
-    const allControlIds = [
-        'base-radius', 'noise-amplitude', 'noise-frequency',
-        'morph-speed', 'perspective', 'brightness', 'line-width',
-        'glow-intensity', 'hue-slider', 'star-count', 'star-twinkle',
-        'star-size', 'star-brightness'
-    ];
-    const enabledSet = new Set(applicableControls);
-
-    allControlIds.forEach(id => {
-        const controlItem = document.getElementById(id)?.closest('.control-item');
-        if (!controlItem) return;
-
-        if (enabledSet.has(id)) {
-            controlItem.classList.remove('control-disabled');
-            controlItem.style.pointerEvents = '';
-            controlItem.removeAttribute('title');
-        } else {
-            controlItem.classList.add('control-disabled');
-            controlItem.style.pointerEvents = 'none';
-            controlItem.setAttribute('title', 'Not available for this shape');
-        }
+        ctx.fillStyle = `rgba(255,255,255,${(index + 1) / 8})`;
+        ctx.fill();
+        frameStats.starFills++;
     });
 }
 
-// ==========================================
-// CAROUSEL SYSTEM
-// ==========================================
-function initCarousel() {
-    const shapes = window.BLOB_SHAPES;
-    if (!shapes) return;
-
-    // Filter sequence to only existing shapes
-    CAROUSEL_CONFIG._resolvedSequence = CAROUSEL_CONFIG.sequence.filter(id => shapes[id]);
-    if (CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
-
-    // Pre-build all meshes to avoid jank
-    CAROUSEL_CONFIG._resolvedSequence.forEach(id => {
-        const preset = shapes[id];
-        if (preset.buildMesh && !preset._cachedMesh) {
-            preset._cachedMesh = preset.buildMesh();
+function renderBlob() {
+    if (!blobCtx || !directions) return;
+    const ctx = blobCtx;
+    const reduced = motionPreference.matches;
+    const radius = CONFIG.baseRadius;
+    let mix = CONFIG.shapeTransitionProgress;
+    let source = surfaceBuffers[CONFIG.currentPreset?.id];
+    let target = surfaceBuffers[CONFIG.targetPreset?.id];
+    // A settled custom shape never evaluates the noise field or a second shape.
+    if (mix === 1) { source = target; mix = 0; }
+    if (source === target) mix = 0;
+    const needsNoise = !source || (mix > 0 && !target);
+    const yaw = rotation.y + CONFIG.scrollRotation;
+    const pitch = rotation.x + (reduced ? 0 : Math.sin(time * 0.10) * 0.035);
+    const roll = reduced ? 0 : bank + Math.sin(time * 0.08) * 0.018;
+    const cx = Math.cos(pitch), sx = Math.sin(pitch);
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cz = Math.cos(roll), sz = Math.sin(roll);
+    const breath = reduced ? 1 : 1 + Math.sin(time * 0.8) * 0.007;
+    const noiseTime = time * CONFIG.noiseFrequency;
+    const count = projectedX.length;
+    frameStats.noiseSamples = 0;
+    for (let i = 0, offset = 0; i < count; i++, offset += 3) {
+        const dx = directions[offset], dy = directions[offset + 1], dz = directions[offset + 2];
+        const r = needsNoise ? 1 + simplex.noise3D(dx + noiseTime, dy + noiseTime, dz + noiseTime) * CONFIG.noiseAmplitude : 1;
+        if (needsNoise) frameStats.noiseSamples++;
+        let x = source ? source[offset] : dx * r;
+        let y = source ? source[offset + 1] : dy * r;
+        let z = source ? source[offset + 2] : dz * r;
+        if (mix > 0) {
+            x += ((target ? target[offset] : dx * r) - x) * mix;
+            y += ((target ? target[offset + 1] : dy * r) - y) * mix;
+            z += ((target ? target[offset + 2] : dz * r) - z) * mix;
         }
-    });
-
-    // Defer layout calculation — main.js inserts dynamic sections after DOMContentLoaded,
-    // so showcase.offsetTop is wrong until those sections are in the DOM.
-    // Use a short delay + recalc on first scroll to ensure correctness.
-    CAROUSEL_CONFIG._layoutReady = false;
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            recalcCarouselLayout();
-        });
-    });
+        x *= radius * breath; y *= radius * breath; z *= radius * breath;
+        const y1 = y * cx - z * sx, z1 = y * sx + z * cx;
+        const x2 = x * cy + z1 * sy, z2 = -x * sy + z1 * cy;
+        const rx = x2 * cz - y1 * sz, ry = x2 * sz + y1 * cz;
+        const scale = 600 / (600 + z2);
+        projectedX[i] = width / 2 + rx * scale;
+        projectedY[i] = height / 2 + ry * scale;
+        const length = Math.hypot(rx, ry, z2) || 1;
+        const lighting = Math.max(0, (rx * 0.408 - ry * 0.408 + z2 * 0.816) / length);
+        vertexLight[i] = 0.20 + lighting * 0.6 + (z2 / radius + 1) * 0.15;
+    }
+    ctx.clearRect(0, 0, width, height);
+    const color = CONFIG.displayColor;
+    const rgb = hexToRgb(color);
+    const key = `${color}:${radius}:${width}:${height}`;
+    if (!glowGradient || key !== glowKey) {
+        glowKey = key;
+        glowGradient = ctx.createRadialGradient(width / 2 - radius * 0.3, height / 2 - radius * 0.3, 0,
+            width / 2, height / 2, radius * 1.5);
+        glowGradient.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)`);
+        glowGradient.addColorStop(0.5, `rgba(${rgb.r},${rgb.g},${rgb.b},0.05)`);
+        glowGradient.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
+    }
+    ctx.fillStyle = glowGradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.lineWidth = 1;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    const sheenPosition = (time * 0.35) % 1;
+    frameStats.lineStrokes = 0;
+    for (const line of lines) {
+        const indices = line.indices;
+        let light = 0;
+        for (const index of indices) light += vertexLight[index];
+        const sheen = reduced || line.latitude === null ? 0 :
+            Math.max(0, 1 - Math.abs(line.latitude - sheenPosition) / 0.16) ** 2 * motionEnergy * 0.18;
+        const opacity = Math.min(1, light / indices.length + sheen);
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${opacity})`;
+        ctx.beginPath();
+        const first = indices[0];
+        ctx.moveTo(projectedX[first], projectedY[first]);
+        for (let j = 1; j < indices.length - 1; j++) {
+            const current = indices[j], next = indices[j + 1];
+            ctx.quadraticCurveTo(projectedX[current], projectedY[current],
+                (projectedX[current] + projectedX[next]) / 2, (projectedY[current] + projectedY[next]) / 2);
+        }
+        const last = indices[indices.length - 1];
+        ctx.lineTo(projectedX[last], projectedY[last]);
+        ctx.stroke();
+        frameStats.lineStrokes++;
+    }
 }
 
-// recalcCarouselLayout is global (no module scope) — callable from main.js directly
-
-function updateCarouselState(scrollTop) {
-    if (!CAROUSEL_CONFIG._layoutReady || CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
-
-    const localScroll = scrollTop - CAROUSEL_CONFIG._showcaseTop;
-    const wasActive = CAROUSEL_CONFIG.active;
-
-    if (localScroll < 0 || CAROUSEL_CONFIG._sectionHeight === 0) {
-        CAROUSEL_CONFIG.active = false;
-        if (wasActive) {
-            // Exiting carousel - restore default blob and reset state
-            CONFIG.carouselXOffset = 0;
-            CAROUSEL_CONFIG._lastRenderedIndex = -1;
-            CAROUSEL_CONFIG.currentIndex = -1;
-
-            // Restore default blob shape immediately
-            const defaultPreset = window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob;
-            if (defaultPreset) {
-                triggerMeshTransition(defaultPreset);
-            }
-
-            // Force main.js to re-dispatch sectionChanged on next scroll frame
-            // by resetting its cached section via a custom event
-            window.dispatchEvent(new CustomEvent('carouselExited'));
-        }
-        return;
+function renderScene(elapsed) {
+    if (scrollDirty) {
+        updateScrollMorph(getBlobScrollTop());
+        scrollDirty = false;
     }
-
-    CAROUSEL_CONFIG.active = true;
-    const seq = CAROUSEL_CONFIG._resolvedSequence;
-    const scrollPerShapePx = CAROUSEL_CONFIG._scrollPerShapePx;
-    const rawIndex = localScroll / scrollPerShapePx;
-
-    if (rawIndex >= seq.length) {
-        // Unlimited blob zone - continuous spin (no wrapping)
-        CAROUSEL_CONFIG.currentIndex = seq.length - 1;
-        CAROUSEL_CONFIG.progress = rawIndex - (seq.length - 1);
+    if (!motionPreference.matches) {
+        time += elapsed / 1000;
+        motionEnergy *= Math.exp(-elapsed / 350);
+        bank += (scrollDirection * motionEnergy * 0.025 - bank) * (1 - Math.exp(-elapsed / 120));
     } else {
-        CAROUSEL_CONFIG.currentIndex = Math.max(0, Math.floor(rawIndex));
-        CAROUSEL_CONFIG.progress = rawIndex - CAROUSEL_CONFIG.currentIndex;
+        motionEnergy = 0;
+        bank = 0;
     }
-
-    // Field-notes visibility (only in carousel zone)
-    const fnLink = document.querySelector('.field-notes-link');
-    if (fnLink) fnLink.classList.toggle('visible', CAROUSEL_CONFIG.active);
+    renderStars();
+    renderBlob();
 }
 
-let _recalcingCarousel = false;
-function recalcCarouselLayout() {
-    if (_recalcingCarousel) return;
-    const showcase = document.getElementById('blob-showcase');
-    if (!showcase || CAROUSEL_CONFIG._resolvedSequence.length === 0) return;
+function requestSceneFrame() {
+    if (rafId === null && !document.hidden) rafId = requestAnimationFrame(animate);
+}
 
-    _recalcingCarousel = true;
-    const vh = window.innerHeight;
-    const seq = CAROUSEL_CONFIG._resolvedSequence;
-    const totalVH = seq.length * CAROUSEL_CONFIG.scrollPerShape + CAROUSEL_CONFIG.unlimitedExtraScroll;
-    CAROUSEL_CONFIG._sectionHeight = totalVH * vh;
-    showcase.style.height = CAROUSEL_CONFIG._sectionHeight + 'px';
-
-    // offsetTop must be read AFTER setting height, since it can shift layout
-    CAROUSEL_CONFIG._showcaseTop = showcase.offsetTop;
-    CAROUSEL_CONFIG._scrollPerShapePx = CAROUSEL_CONFIG.scrollPerShape * vh;
-    CAROUSEL_CONFIG._layoutReady = true;
-    _recalcingCarousel = false;
+function animate(timestamp) {
+    rafId = null;
+    if (document.hidden) return;
+    const elapsed = lastFrameAt === null ? 1000 / 60 : timestamp - lastFrameAt;
+    // Limit high-refresh displays to 60fps, allowing normal frame timing jitter.
+    if (elapsed >= 1000 / 60 - 0.5 || motionPreference.matches) {
+        lastFrameAt = timestamp;
+        renderScene(Math.min(elapsed, 50));
+    }
+    if (!motionPreference.matches) requestSceneFrame();
 }
 
 function initBlobSystem() {
-    // Initialize shape preset from BLOB_SHAPES registry
-    const shapes = window.BLOB_SHAPES;
-    if (shapes && shapes.defaultBlob) {
-        CONFIG.currentPreset = shapes.defaultBlob;
-    }
-
-    initStarfield();
-    initBlobMesh();
-    initDragRotation();
-    setupScrollListener();
-    initCarousel();
-
-    requestAnimationFrame(animate);
-    requestAnimationFrame(renderBlob);
-}
-
-// Listen for section changes from script.js
-window.addEventListener('sectionChanged', (event) => {
-    if (CAROUSEL_CONFIG.active) return;
-    CONFIG.currentSection = event.detail.section;
-    if (CONFIG.hueOverride === null && !CONFIG.rainbowMode) {
-        CONFIG.targetColor = getSectionColor(CONFIG.currentSection, event.detail.color);
-    }
-
-    // Shape transition (skip while scrolling to top)
-    if (!CONFIG._scrollingToTop) {
-        const shapeId = event.detail.shapeId || 'defaultBlob';
-        const shapes = window.BLOB_SHAPES;
-        if (shapes && shapes[shapeId]) {
-            const newPreset = shapes[shapeId];
-            const current = CONFIG._pendingMeshPreset || CONFIG.targetPreset || CONFIG.currentPreset;
-            if (!current || current.id !== newPreset.id) {
-                const currentMode = getPresetRenderMode(CONFIG.currentPreset);
-                const newMode = getPresetRenderMode(newPreset);
-                if (currentMode !== newMode || newMode === 'arbitraryMesh') {
-                    triggerMeshTransition(newPreset);
-                } else {
-                    CONFIG.targetPreset = newPreset;
-                    CONFIG.shapeTransitionProgress = 0;
-                }
-                gateControlPanel(newPreset.applicableControls);
-            }
-        }
-    }
-});
-
-// Auto-init when DOM ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBlobSystem);
-} else {
-    initBlobSystem();
-}
-
-// ==========================================
-// CONTROL PANEL
-// ==========================================
-function initControlPanel() {
-    const controlPanel = document.getElementById('blob-control-panel');
-    const toggleBtn = document.getElementById('controls-toggle');
-    const resetBtn = document.getElementById('controls-reset');
-
-    if (!controlPanel || !toggleBtn || !resetBtn) return;
-    const DEFAULT_CONFIG = getDefaultBlobSettings();
-
-    // Toggle panel open/closed
-    toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        controlPanel.classList.toggle('open');
-        if (typeof sa === 'function') sa('panel_toggle', { panel_state: controlPanel.classList.contains('open') ? 'open' : 'closed' });
-    });
-
-    // Close panel when clicking outside
-    document.addEventListener('click', (e) => {
-        if (controlPanel.classList.contains('open') && !controlPanel.contains(e.target)) {
-            controlPanel.classList.remove('open');
-        }
-    });
-
-    controlPanel.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    // Section collapse
-    document.querySelectorAll('.controls-section-header').forEach(header => {
-        header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
-    });
-    if (isMobileViewport()) {
-        document.querySelectorAll('.controls-section').forEach(s => s.classList.add('collapsed'));
-    }
-
-    // Update display value helper
-    function updateValueDisplay(sliderId, value, suffix = '') {
-        const display = document.getElementById(sliderId + '-value');
-        if (display) {
-            display.textContent = value + suffix;
-        }
-    }
-
-    function updateControlDisplay(def, value) {
-        const formatted = def.format(value);
-        updateValueDisplay(def.elementId, formatted.text, formatted.suffix || '');
-    }
-
-    // Slider references
-    const sliders = {
-        morphSpeed: document.getElementById('morph-speed'),
-        noiseAmplitude: document.getElementById('noise-amplitude'),
-        noiseFrequency: document.getElementById('noise-frequency'),
-        baseRadius: document.getElementById('base-radius'),
-        perspective: document.getElementById('perspective'),
-        hueSlider: document.getElementById('hue-slider'),
-        brightness: document.getElementById('brightness'),
-        lineWidth: document.getElementById('line-width'),
-        glowIntensity: document.getElementById('glow-intensity'),
-        starCount: document.getElementById('star-count'),
-        starTwinkle: document.getElementById('star-twinkle'),
-        starSize: document.getElementById('star-size'),
-        starBrightness: document.getElementById('star-brightness')
+    blobCanvas = document.getElementById('blob-canvas');
+    starfieldCanvas = document.getElementById('starfield');
+    if (!blobCanvas || !starfieldCanvas) return;
+    blobCtx = blobCanvas.getContext('2d');
+    starfieldCtx = starfieldCanvas.getContext('2d');
+    scrollContainer = document.querySelector('.scroll-container');
+    resizeScene();
+    const backToTop = document.getElementById('back-to-top');
+    const onScroll = () => {
+        const y = getBlobScrollTop(), delta = y - lastScrollY;
+        lastScrollY = y;
+        if (delta) scrollDirection = Math.sign(delta);
+        motionEnergy = Math.min(1, motionEnergy + Math.abs(delta) / height * 2);
+        scrollDirty = true;
+        backToTop?.classList.toggle('visible', y > height * 0.5);
+        requestSceneFrame();
     };
-
-    const sliderControls = new Map(
-        CONTROL_DEFS.map(def => [def.key, { ...def, element: sliders[def.key] }])
-    );
-
-    function saveSettings() {
-        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(serializeBlobSettings()));
-    }
-
-    function commitSliderValue(def, rawValue) {
-        const value = def.parse(rawValue);
-        if (typeof def.afterCommit === 'function') {
-            def.afterCommit(value);
-        } else {
-            applyControlValue(def, value);
-        }
-        updateControlDisplay(def, readControlValue(def));
-        saveSettings();
-    }
-
-    function setSliderUIValue(def, value) {
-        if (def.element) {
-            def.element.value = value;
-        }
-        updateControlDisplay(def, value);
-    }
-
-    sliderControls.forEach(def => {
-        if (!def.element) return;
-
-        def.element.addEventListener('input', (e) => {
-            const value = def.parse(e.target.value);
-            if (def.liveDisplayOnly) {
-                updateControlDisplay(def, value);
-                return;
-            }
-            applyControlValue(def, value);
-            updateControlDisplay(def, readControlValue(def));
-            saveSettings();
-            if (typeof sa === 'function') sa('panel_slider', { slider_name: def.key });
-        });
-
-        if (def.liveDisplayOnly || typeof def.afterCommit === 'function') {
-            def.element.addEventListener('change', (e) => {
-                commitSliderValue(def, e.target.value);
-            });
-        }
+    (scrollContainer || window).addEventListener('scroll', onScroll, {passive: true});
+    backToTop?.addEventListener('click', () => {
+        (scrollContainer || window).scrollTo({top: 0, behavior: motionPreference.matches ? 'instant' : 'smooth'});
+        if (typeof sa === 'function') sa('back_to_top');
     });
-
-    // --- Shape selector dropdown ---
-    const shapeSelect = document.getElementById('shape-select');
-    if (shapeSelect && window.BLOB_SHAPES) {
-        // Populate options from BLOB_SHAPES registry
-        Object.keys(window.BLOB_SHAPES).forEach(key => {
-            const shape = window.BLOB_SHAPES[key];
-            const opt = document.createElement('option');
-            opt.value = shape.id;
-            opt.textContent = shape.label || shape.id;
-            shapeSelect.appendChild(opt);
-        });
-
-        // Set initial value to current preset
-        const activeId = (CONFIG.targetPreset || CONFIG.currentPreset)?.id || 'defaultBlob';
-        shapeSelect.value = activeId;
-
-        shapeSelect.addEventListener('change', (e) => {
-            const shapeId = e.target.value;
-            if (!window.BLOB_SHAPES || !window.BLOB_SHAPES[shapeId]) return;
-            if (typeof sa === 'function') sa('panel_shape', { shape_id: shapeId });
-
-            // Always scroll to the shape's position in the carousel
-            const carouselIdx = CAROUSEL_CONFIG._resolvedSequence.indexOf(shapeId);
-            if (carouselIdx >= 0 && CAROUSEL_CONFIG._layoutReady) {
-                const scrollTarget = CAROUSEL_CONFIG._showcaseTop +
-                    (carouselIdx * CAROUSEL_CONFIG._scrollPerShapePx) +
-                    (CAROUSEL_CONFIG._scrollPerShapePx * 0.5);
-                const sc = document.querySelector('.scroll-container');
-                if (sc) sc.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-            }
-        });
-
-        // Sync dropdown with section-driven shape changes
-        window.addEventListener('sectionChanged', () => {
-            const currentId = (CONFIG.targetPreset || CONFIG.currentPreset)?.id || 'defaultBlob';
-            shapeSelect.value = currentId;
-        });
-    }
-
-    // --- Hue slider + rainbow cloud easter egg ---
-    const hueSlider = sliders.hueSlider;
-    const easterEggIcon = document.getElementById('easter-egg-icon');
-    const hueClear = document.getElementById('hue-clear');
-
-    let eggFillTimer = null;
-    let eggActivated = false;
-
-    function updateEasterEggPosition() {
-        if (!hueSlider || !easterEggIcon) return;
-        const rect = hueSlider.getBoundingClientRect();
-        const thumbWidth = 16;
-        const pct = (hueSlider.value - hueSlider.min) / (hueSlider.max - hueSlider.min);
-        const trackWidth = rect.width - thumbWidth;
-        const left = thumbWidth / 2 + pct * trackWidth;
-        easterEggIcon.style.left = left + 'px';
-    }
-
-    function startEggFill() {
-        if (eggActivated || eggFillTimer) return;
-        if (easterEggIcon) easterEggIcon.classList.add('is-filling');
-        eggFillTimer = setTimeout(() => {
-            // Timer completed — activate permanently
-            eggActivated = true;
-            eggFillTimer = null;
-            if (easterEggIcon) {
-                easterEggIcon.classList.remove('is-filling');
-                easterEggIcon.classList.add('is-activated');
-            }
-            activateGlobalRainbowMode();
-            if (typeof sa === 'function') sa('rainbow_activate');
-        }, 1600);
-    }
-
-    function cancelEggFill() {
-        if (eggActivated) return; // Already won, no cancellation
-        if (eggFillTimer) { clearTimeout(eggFillTimer); eggFillTimer = null; }
-        if (easterEggIcon) easterEggIcon.classList.remove('is-filling');
-    }
-
-    function activateGlobalRainbowMode() {
-        CONFIG.rainbowMode = true;
-        CONFIG.hueOverride = null;
-        controlPanel.classList.add('rainbow-active');
-        updateValueDisplay('hue-slider', 'Rainbow');
-        if (hueClear) hueClear.classList.remove('hidden');
-    }
-
-    function deactivateRainbow() {
-        CONFIG.rainbowMode = false;
-        eggActivated = false;
-        cancelEggFill();
-        if (easterEggIcon) easterEggIcon.classList.remove('is-filling', 'is-activated');
-        controlPanel.classList.remove('rainbow-active');
-    }
-
-    if (hueSlider) {
-        hueSlider.addEventListener('input', (e) => {
-            updateEasterEggPosition();
-            const val = parseInt(e.target.value);
-
-            if (eggActivated) {
-                // Dragging away from max deactivates rainbow
-                if (val < parseInt(hueSlider.max)) {
-                    deactivateRainbow();
-                    CONFIG.hueOverride = val;
-                    updateValueDisplay('hue-slider', val + ' deg');
-                    if (hueClear) hueClear.classList.remove('hidden');
-                    saveSettings();
-                }
-                return;
-            }
-
-            if (val === parseInt(hueSlider.max)) {
-                startEggFill();
-            } else {
-                cancelEggFill();
-                CONFIG.hueOverride = val;
-                updateValueDisplay('hue-slider', val + ' deg');
-                if (hueClear) hueClear.classList.remove('hidden');
-            }
-            saveSettings();
-        });
-
-        // Handle click directly on max — pointerdown starts fill if already at max
-        hueSlider.addEventListener('pointerdown', () => {
-            if (eggActivated) return;
-            if (parseInt(hueSlider.value) === parseInt(hueSlider.max)) {
-                startEggFill();
-            }
-        });
-
-        // Cancel on release if not yet activated
-        const cancelEvents = ['pointerup', 'pointercancel', 'pointerleave'];
-        cancelEvents.forEach(evt => {
-            hueSlider.addEventListener(evt, () => {
-                cancelEggFill();
-            });
-        });
-    }
-
-    function clearHueOverride() {
-        deactivateRainbow();
-        CONFIG.hueOverride = null;
-        CONFIG.targetColor = getSectionColor(CONFIG.currentSection);
-        updateValueDisplay('hue-slider', 'Auto');
-        if (hueClear) hueClear.classList.add('hidden');
-        saveSettings();
-    }
-
-    if (easterEggIcon) {
-        easterEggIcon.addEventListener('click', () => {
-            if (!eggActivated) return;
-            clearHueOverride();
-        });
-    }
-
-    if (hueClear) {
-        hueClear.addEventListener('click', clearHueOverride);
-    }
-
-    function loadSettings() {
-        const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
-        if (!saved) return;
-        try {
-            const s = JSON.parse(saved);
-            const configValues = {
-                morphSpeed: s.morphSpeed,
-                noiseAmplitude: s.noiseAmplitude,
-                noiseFrequency: s.noiseFrequency,
-                baseRadius: s.baseRadius,
-                brightness: s.brightnessMultiplier,
-                lineWidth: s.lineWidth,
-                perspective: s.perspective,
-                glowIntensity: s.glowMaxOpacity,
-                starCount: s.starCount,
-                starTwinkle: s.starTwinkleSpeed,
-                starSize: s.starMaxRadius,
-                starBrightness: s.starBrightness
-            };
-
-            sliderControls.forEach(def => {
-                const value = configValues[def.key];
-                if (value === undefined) return;
-                if (typeof def.afterCommit === 'function') {
-                    def.afterCommit(value);
-                } else {
-                    applyControlValue(def, value);
-                }
-                setSliderUIValue(def, readControlValue(def));
-            });
-
-            if (s.hueOverride !== undefined && s.hueOverride !== null) {
-                CONFIG.hueOverride = s.hueOverride;
-                if (hueSlider) hueSlider.value = s.hueOverride;
-                updateValueDisplay('hue-slider', s.hueOverride + ' deg');
-                if (hueClear) hueClear.classList.remove('hidden');
-                updateEasterEggPosition();
-            }
-            if (s.hueOverride === undefined || s.hueOverride === null) {
-                if (hueSlider) {
-                    hueSlider.value = 0;
-                }
-                updateValueDisplay('hue-slider', 'Auto');
-            }
-            if (s.starCount === undefined && s.starMaxRadius === undefined) {
-                regenerateStars(CONFIG.starCount);
-            }
-            // Legacy: ignore persisted shapeOverride (shape is now section-driven)
-        } catch (e) {
-            console.error('Failed to load settings:', e);
-        }
-    }
-
-    // Reset to defaults
-    resetBtn.addEventListener('click', () => {
-        if (typeof sa === 'function') sa('panel_reset');
-        // Deactivate rainbow
-        deactivateRainbow();
-
-        // Reset all CONFIG
-        sliderControls.forEach(def => {
-            const defaultValue = DEFAULT_CONFIG[def.configKey];
-            if (typeof def.afterCommit === 'function') {
-                def.afterCommit(defaultValue);
-            } else {
-                applyControlValue(def, defaultValue);
-            }
-            setSliderUIValue(def, readControlValue(def));
-        });
-        CONFIG.hueOverride = null;
-
-        // Reset shape to section-driven
-        CONFIG.renderMode = 'sphereGrid';
-        CONFIG.activeMesh = null;
-        CONFIG.meshTransitionState = 'idle';
-        CONFIG.meshTransitionScale = 1;
-        CONFIG.meshTransitionProgress = 0;
-        CONFIG._pendingMeshPreset = null;
-        if (window.BLOB_SHAPES && window.BLOB_SHAPES.defaultBlob) {
-            CONFIG.targetPreset = window.BLOB_SHAPES.defaultBlob;
-            CONFIG.shapeTransitionProgress = 0;
-            gateControlPanel(window.BLOB_SHAPES.defaultBlob.applicableControls);
-        }
-        if (shapeSelect) shapeSelect.value = 'defaultBlob';
-
-        // Re-sync section color
-        CONFIG.targetColor = getSectionColor(CONFIG.currentSection);
-
-        if (hueSlider) { hueSlider.value = 0; updateValueDisplay('hue-slider', 'Auto'); updateEasterEggPosition(); }
-        if (hueClear) hueClear.classList.add('hidden');
-        saveSettings();
+    scrollContainer?.addEventListener('pointerdown', event => {
+        if (event.pointerType !== 'mouse' || event.button !== 0 || event.target.closest('a, button, input, select, nav')) return;
+        drag = {x: event.clientX, y: event.clientY};
+        scrollContainer.setPointerCapture(event.pointerId);
+        scrollContainer.style.cursor = 'grabbing';
     });
-
-    loadSettings();
-    updateEasterEggPosition();
+    scrollContainer?.addEventListener('pointermove', event => {
+        if (!drag) return;
+        rotation.y += (event.clientX - drag.x) * 0.005;
+        rotation.x += (event.clientY - drag.y) * 0.005;
+        drag.x = event.clientX; drag.y = event.clientY;
+        requestSceneFrame();
+    });
+    const endDrag = () => {
+        drag = null;
+        if (scrollContainer) scrollContainer.style.cursor = '';
+    };
+    for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) scrollContainer?.addEventListener(name, endDrag);
+    window.addEventListener('resize', resizeScene);
+    document.addEventListener('visibilitychange', () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
+        lastFrameAt = null;
+        requestSceneFrame();
+    });
+    motionPreference.addEventListener('change', () => {
+        lastFrameAt = null;
+        requestSceneFrame();
+    });
+    onScroll();
 }
 
-// Initialize control panel when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initControlPanel);
-} else {
-    initControlPanel();
-}
+window.addEventListener('blobSectionsReady', event => {
+    CONFIG.sectionRegistry = event.detail;
+    rebuildScrollAnchors();
+});
+window.addEventListener('sectionChanged', event => { CONFIG.currentSection = event.detail.section; });
+window.__blobDebug = {
+    getState: () => ({currentSection: CONFIG.currentSection,
+        fromShape: CONFIG.currentPreset?.id, toShape: CONFIG.targetPreset?.id,
+        shapeMix: CONFIG.shapeTransitionProgress, targetColor: CONFIG.targetColor,
+        baseRadius: CONFIG.baseRadius, scrollRotation: CONFIG.scrollRotation,
+        scrollTop: getBlobScrollTop(), anchors: CONFIG.scrollAnchors.map(anchor => ({...anchor})),
+        frame: {...frameStats}, reducedMotion: motionPreference.matches, dpr, motionEnergy, bank, time})
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBlobSystem);
+else initBlobSystem();
