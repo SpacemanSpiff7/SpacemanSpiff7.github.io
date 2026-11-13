@@ -57,7 +57,7 @@ function controlElements(elements) {
     return makeElement;
 }
 
-function fixture(width, height, {controls = false, savedSettings = null, storageBlocked = false} = {}) {
+function fixture(width, height, {controls = false, savedSettings = null, storageBlocked = false, starsOnly = false} = {}) {
     const events = new Map();
     const listen = (name, callback) => {
         const previous = events.get(name);
@@ -100,13 +100,13 @@ function fixture(width, height, {controls = false, savedSettings = null, storage
             return true;
         }
     });
-    elements.set('blob-canvas', {style: {}, getContext: () => canvasContext});
+    if (!starsOnly) elements.set('blob-canvas', {style: {}, getContext: () => canvasContext});
     elements.set('starfield', {style: {}, getContext: () => canvasContext});
     const document = {
         readyState: 'loading', hidden: false, addEventListener: (name, cb) => listen('document:' + name, cb),
         getElementById: id => elements.get(id),
         createElement: tag => makeElement(tag),
-        querySelector: selector => selector === '.scroll-container' ? scroller : null
+        querySelector: selector => selector === '.scroll-container' && !starsOnly ? scroller : null
     };
     const media = {matches: false, addEventListener: (name, cb) => listen('media:' + name, cb)};
     const pendingFrames = new Map();
@@ -132,11 +132,11 @@ function fixture(width, height, {controls = false, savedSettings = null, storage
         clearTimeout: id => timers.delete(id),
         requestAnimationFrame: cb => { pendingFrames.set(++frameId, cb); return frameId; },
         cancelAnimationFrame: id => pendingFrames.delete(id)});
-    for (const file of ['blob-shapes.js', 'blob-motion.js', 'animations.js']) {
+    for (const file of starsOnly ? ['animations.js'] : ['blob-shapes.js', 'blob-motion.js', 'animations.js']) {
         vm.runInContext(fs.readFileSync(path.join(root, 'js', file), 'utf8'), ctx);
     }
     vm.runInContext('initBlobSystem();', ctx);
-    events.get('blobSectionsReady')({detail: registry});
+    if (!starsOnly) events.get('blobSectionsReady')({detail: registry});
     return {ctx, window, scroller, elements, events, document, media, pendingFrames, operations, strokeColors, lastStyles, storage, timers, advanceTimers};
 }
 
@@ -430,4 +430,36 @@ for (const resolution of [40, 60]) {
         }
     }
 }
+for (const [width, height] of [[1440, 900], [390, 844]]) {
+    const {ctx, window, events, document, media, pendingFrames, operations} = fixture(width, height, {
+        starsOnly: true, savedSettings: {starCount: 310, starBrightness: 0.8}
+    });
+    assert.equal(window.BLOB_SHAPES, undefined, 'Blog stars do not require shape modules');
+    vm.runInContext('renderScene(1000 / 60);', ctx);
+    assert.equal(vm.runInContext('stars.length', ctx), 310, 'Stars retain the saved appearance');
+    assert(operations.arc > 0, 'Stars are actually drawn without a mesh canvas');
+    assert.equal(vm.runInContext('directions', ctx), undefined, 'No mesh geometry is allocated');
+    assert.equal(window.__blobDebug.getState().frame.noiseSamples, 0);
+
+    document.hidden = true;
+    events.get('document:visibilitychange')();
+    assert.equal(pendingFrames.size, 0);
+    document.hidden = false;
+    events.get('document:visibilitychange')();
+    media.matches = true;
+    events.get('media:change')();
+    const [id, callback] = pendingFrames.entries().next().value;
+    pendingFrames.delete(id);
+    callback(1000);
+    assert.equal(pendingFrames.size, 0, 'Reduced motion draws a still sky');
+    assert.equal(window.__blobDebug.getState().frame.starFills > 0, true);
+    events.get('resize')();
+    assert.equal(pendingFrames.size, 1, 'Resizing repaints the still starfield');
+    const [resizeId, resizeCallback] = pendingFrames.entries().next().value;
+    pendingFrames.delete(resizeId);
+    resizeCallback(2000);
+    assert.equal(pendingFrames.size, 0);
+    console.log(`${width}x${height}: standalone blog stars, saved appearance, hidden-tab pause and reduced motion passed.`);
+}
+
 console.log('All surfaces are finite, bounded, periodic and closed at both desktop/mobile resolutions.');

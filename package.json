@@ -1,0 +1,19 @@
+{
+  "name": "simone-longo-portfolio",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "dev": "node scripts/preview-site.mjs --drafts",
+    "preview": "node scripts/preview-site.mjs",
+    "post:new": "node scripts/new-post.mjs",
+    "test": "node --test scripts/test-site-build.mjs scripts/test-blog.mjs scripts/test-homepage-navigation.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "3.1.8",
+    "@11ty/eleventy-plugin-rss": "2.0.4",
+    "gray-matter": "4.0.3"
+  }
+}

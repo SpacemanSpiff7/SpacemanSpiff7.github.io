@@ -1,0 +1,9 @@
+{
+  "title": "Blog",
+  "description": "Notes on building apps, working with AI, and making things useful.",
+  "author": "Simone Longo",
+  "baseUrl": "https://simonelongo.com",
+  "postsPerPage": 10,
+  "homepagePostCount": 3,
+  "defaultImage": "/assets/images/og-image.png"
+}

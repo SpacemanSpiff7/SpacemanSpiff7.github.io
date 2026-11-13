@@ -931,6 +931,26 @@
     margin-top: 0;
 }
 
+/* Blog previews share the homepage's scroll and background contracts. */
+.homepage-blog.snap-section {
+    justify-content: center;
+    overflow: visible;
+    height: auto;
+    min-height: calc(var(--vh, 1vh) * 100);
+    padding: calc(var(--nav-height) + 1.5rem) 2rem calc(var(--bottom-chrome-height) + 2rem);
+}
+.homepage-blog-content { width: min(100%, 40rem); text-align: left; }
+.snap-section.homepage-blog .section-title { margin: 0 0 1rem; text-align: left; }
+.homepage-blog-intro { color: var(--color-text-secondary); font-family: var(--font-family); font-size: 0.9375rem; line-height: 1.6; }
+.homepage-blog-posts article { padding: 1.5rem 0; margin-top: 1rem; border-top: 1px solid rgb(255 255 255 / 20%); }
+.homepage-blog-posts time { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--color-text-secondary); }
+.homepage-blog-posts h3 { font-family: var(--font-family); font-size: clamp(1.25rem, 2vw, 1.75rem); font-weight: 500; line-height: 1.35; margin: 0.75rem 0; }
+.homepage-blog-posts h3 a { color: var(--color-text-primary); text-decoration: none; }
+.homepage-blog-posts h3 a:hover { color: #e79b88; }
+.homepage-blog-posts p { color: var(--color-text-secondary); font-family: var(--font-family); font-size: 0.9375rem; line-height: 1.65; }
+.homepage-blog-all { margin-top: 0.75rem; }
+.homepage-blog a:focus-visible { outline: 2px solid #e79b88; outline-offset: 5px; }
+
 /* Featured project sections */
 .featured-project.snap-section {
     justify-content: center;

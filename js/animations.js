@@ -283,10 +283,11 @@ function resizeScene() {
         canvas.style.height = height + 'px';
         canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    if (!directions || previousResolution !== gridResolution) buildBlobVertices();
+    if (blobCtx && (!directions || previousResolution !== gridResolution)) buildBlobVertices();
     if (stars.length !== CONFIG.starCount) regenerateStars();
     glowGradient = null;
-    rebuildScrollAnchors();
+    if (blobCtx) rebuildScrollAnchors();
+    else requestSceneFrame();
 }
 
 function regenerateStars() {
@@ -425,7 +426,7 @@ function renderBlob() {
 
 function renderScene(elapsed) {
     if (scrollDirty) {
-        updateScrollMorph(getBlobScrollTop());
+        if (blobCtx) updateScrollMorph(getBlobScrollTop());
         scrollDirty = false;
     }
     if (!motionPreference.matches) {
@@ -465,10 +466,14 @@ function animate(timestamp) {
 function initBlobSystem() {
     blobCanvas = document.getElementById('blob-canvas');
     starfieldCanvas = document.getElementById('starfield');
-    if (!blobCanvas || !starfieldCanvas) return;
-    blobCtx = blobCanvas.getContext('2d');
+    if (!starfieldCanvas) return;
+    blobCtx = blobCanvas?.getContext('2d');
     starfieldCtx = starfieldCanvas.getContext('2d');
     scrollContainer = document.querySelector('.scroll-container');
+    // Article pages share the stars and saved appearance, without a mesh canvas.
+    if (!blobCtx) {
+        try { restoreBlobSettings(JSON.parse(localStorage.getItem('blobSettings'))); } catch {}
+    }
     resizeScene();
     const backToTop = document.getElementById('back-to-top');
     const onScroll = () => {

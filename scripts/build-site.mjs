@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-// Dependency-free, fail-closed static publishing. Run: node scripts/build-site.mjs
+// Fail-closed static publishing with a scoped Eleventy blog. Run: npm run build
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertPublicPath, sourceFile } from './public-files.mjs';
+export { assertPublicPath, sourceFile } from './public-files.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 export const publicManifest = JSON.parse(fs.readFileSync(path.join(scriptDirectory, 'build-site-manifest.json'), 'utf8'));
@@ -33,36 +35,6 @@ function checkPublicContent(source, selected) {
     }
 }
 
-export function assertPublicPath(relativePath) {
-    if (typeof relativePath !== 'string' || !relativePath || relativePath.includes('\\') ||
-        relativePath.startsWith('/') || path.posix.normalize(relativePath) !== relativePath ||
-        relativePath.split('/').some(part => part.startsWith('.') ||
-            /^(?:worker|scripts|docs|reference|input|node_modules|chads-bach)$/i.test(part) ||
-            /(?:^|[-_.])(?:env|secret|secrets|credential|credentials|private|backup)(?:[-_.]|$)/i.test(part)) ||
-        /(?:\.(?:pem|key|p12|pfx|sql|sqlite3?|db|bak|old|orig|swp|map|log|zip|tar|gz)|~)$/i.test(relativePath) ||
-        /(?:^|\/)(?:AGENTS|CLAUDE|README)(?:\.|$)/i.test(relativePath)) {
-        throw new Error(`Forbidden public file: ${String(relativePath)}`);
-    }
-}
-
-function sourceFile(source, relativePath) {
-    assertPublicPath(relativePath);
-    let current = source;
-    const parts = relativePath.split('/');
-    for (const [index, part] of parts.entries()) {
-        current = path.join(current, part);
-        let stat;
-        try { stat = fs.lstatSync(current); }
-        catch { throw new Error(`Missing public file: ${relativePath}`); }
-        if (stat.isSymbolicLink()) throw new Error(`Symlink is not publishable: ${relativePath}`);
-        if (index < parts.length - 1 && !stat.isDirectory()) throw new Error(`Invalid public directory: ${relativePath}`);
-        if (index === parts.length - 1 && (!stat.isFile() || stat.nlink > 1)) {
-            throw new Error(`Only ordinary files are publishable: ${relativePath}`);
-        }
-    }
-    return current;
-}
-
 function localReference(reference, owner) {
     const value = reference.trim().replaceAll('&amp;', '&');
     if (!value || /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(value) || value.includes('${')) return null;
@@ -71,7 +43,8 @@ function localReference(reference, owner) {
     let decoded;
     try { decoded = decodeURIComponent(pathname); }
     catch { throw new Error(`Invalid URL in ${owner}: ${reference}`); }
-    return path.posix.normalize(decoded.startsWith('/') ? decoded.slice(1) : path.posix.join(path.posix.dirname(owner), decoded));
+    const resolved = path.posix.normalize(decoded.startsWith('/') ? decoded.slice(1) : path.posix.join(path.posix.dirname(owner), decoded));
+    return resolved === '.' ? 'index.html' : resolved;
 }
 
 function checkRuntimeReferences(source, selected) {
@@ -104,12 +77,14 @@ function checkRuntimeReferences(source, selected) {
         const html = content.replace(/<!--[\s\S]*?-->/g, '');
         // The nav fragment is inserted into the homepage, so its URLs resolve there.
         const documentPath = relativePath === 'components/nav.html' ? 'index.html' : relativePath;
-        for (const match of html.matchAll(/<(script|link|img|source|video|audio)\b[^>]*>/gi)) {
+        for (const match of html.matchAll(/<(script|link|img|source|video|audio|a)\b[^>]*>/gi)) {
             const tag = match[0];
             const attribute = /\b(?:src|href|poster)\s*=\s*(['"])([^'"]+)\1/i.exec(tag);
             if (!attribute) continue;
             const tagName = match[1].toLowerCase();
-            const required = tagName === 'script' || (tagName === 'link' && /\brel\s*=\s*['"](?:stylesheet|preload|modulepreload|manifest)['"]/i.test(tag));
+            const blogPage = relativePath.startsWith('blog/');
+            if (tagName === 'a' && !blogPage) continue;
+            const required = blogPage || tagName === 'script' || (tagName === 'link' && /\brel\s*=\s*['"](?:stylesheet|preload|modulepreload|manifest)['"]/i.test(tag));
             requireReference(attribute[2], documentPath, required);
             if (tagName === 'script') {
                 const target = localReference(attribute[2], documentPath);
@@ -122,7 +97,7 @@ function checkRuntimeReferences(source, selected) {
     return [...warnings].sort();
 }
 
-export function buildSite({ source = path.resolve(scriptDirectory, '..'), manifest = publicManifest } = {}) {
+export function buildSite({ source = path.resolve(scriptDirectory, '..'), manifest = publicManifest, blog = null } = {}) {
     source = fs.realpathSync(source);
     // Never accept a caller-controlled deletion destination. This is always generated output.
     const output = path.join(source, '_site');
@@ -144,9 +119,19 @@ export function buildSite({ source = path.resolve(scriptDirectory, '..'), manife
             selected.add(`assets/collisions/tiles/${tile.filename}`);
         }
     }
+    if (blog) {
+        if (manifest.blog !== true) throw new Error('Blog output requires an explicit manifest entry');
+        for (const asset of blog.assets) {
+            if (!/^assets\/blog\/.+\.(?:png|jpe?g|webp|avif|gif|svg|pdf)$/i.test(asset)) throw new Error(`Invalid blog asset: ${asset}`);
+            selected.add(asset);
+        }
+        for (const file of blog.files.keys()) {
+            assertPublicPath(file);
+            if (!/^blog\/(?:index\.html|feed\.xml|[a-z0-9]+(?:-[a-z0-9]+)*\/index\.html|page\/(?:[2-9]|[1-9]\d+)\/index\.html)$/.test(file) &&
+                file !== 'data/blog-posts.json' && file !== 'sitemap.xml') throw new Error(`Invalid blog output: ${file}`);
+        }
+    }
     for (const relativePath of selected) sourceFile(source, relativePath);
-    checkPublicContent(source, selected);
-    const warnings = checkRuntimeReferences(source, selected);
     const staging = fs.mkdtempSync(path.join(source, '_site-build-'));
     try {
         for (const relativePath of [...selected].sort()) {
@@ -154,19 +139,32 @@ export function buildSite({ source = path.resolve(scriptDirectory, '..'), manife
             fs.mkdirSync(path.dirname(destination), { recursive: true });
             fs.copyFileSync(sourceFile(source, relativePath), destination, fs.constants.COPYFILE_EXCL);
         }
+        for (const [relativePath, content] of blog?.files ?? []) {
+            if (selected.has(relativePath) && relativePath !== 'sitemap.xml') throw new Error(`Blog output collides with public file: ${relativePath}`);
+            const destination = path.join(staging, relativePath);
+            fs.mkdirSync(path.dirname(destination), { recursive: true });
+            fs.writeFileSync(destination, content);
+            selected.add(relativePath);
+        }
+        checkPublicContent(staging, selected);
+        const warnings = checkRuntimeReferences(staging, selected);
         fs.renameSync(staging, output);
+        return { output, files: [...selected].sort(), warnings };
     } catch (error) {
         fs.rmSync(staging, { recursive: true, force: true });
         throw error;
     }
-    return { output, files: [...selected].sort(), warnings };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     try {
         const args = process.argv.slice(2);
-        if (args.length && (args.length !== 2 || args[0] !== '--source')) throw new Error('Usage: node scripts/build-site.mjs [--source <checkout>]');
-        const result = buildSite(args.length ? { source: args[1] } : {});
+        const includeDrafts = args.includes('--drafts');
+        const remaining = args.filter(arg => arg !== '--drafts');
+        if (remaining.length && (remaining.length !== 2 || remaining[0] !== '--source')) throw new Error('Usage: node scripts/build-site.mjs [--source <checkout>] [--drafts]');
+        const source = remaining.length ? path.resolve(remaining[1]) : path.resolve(scriptDirectory, '..');
+        const blog = publicManifest.blog ? await (await import('./build-blog.mjs')).generateBlog({ source, includeDrafts }) : null;
+        const result = buildSite({ source, blog });
         console.log(`Built ${result.files.length} reviewed public files in ${result.output}`);
         for (const warning of result.warnings) console.warn(`Optional asset warning: ${warning}`);
     } catch (error) {

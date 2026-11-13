@@ -4,6 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+Before adding, editing, previewing, or publishing a blog post, read
+`docs/blog-publishing.md` for the paste-to-agent workflow and content schema.
+The blog uses Eleventy at build time; run `npm ci` on a fresh checkout.
+`npm run dev` previews drafts, `npm run preview` previews production content,
+and `npm run build` produces the reviewed `_site/` artifact.
+
 This static GitHub Pages site publishes the reviewed `_site/` artifact through
 `.github/workflows/pages.yml` on pushes to `master`. Build that artifact before
 previewing or publishing; its manifest excludes internal and retired files.
@@ -86,9 +92,10 @@ This ensures users get fresh JavaScript immediately after deployment.
 All non-hero sections are defined in `data/projects.json` under `homepage.sectionOrder`:
 1. **Hero** - Name + title (static HTML)
 2. **Featured projects** - Sections of type `projectFeature`, rendered from JSON
-3. **About** - Bio section (type: `text`, rendered from JSON)
-4. **Contact** - Contact info (type: `linkList`, rendered from JSON)
-5. **Projects Grid** - Workbench (hardcoded terminal section)
+3. **Blog** - Latest generated posts (type: `postList`); navigation opens `/blog/`
+4. **About** - Bio section (type: `text`, rendered from JSON)
+5. **Contact** - Contact info (type: `linkList`, rendered from JSON)
+6. **Projects Grid** - Workbench (hardcoded terminal section)
 
 ### Typography
 
@@ -117,6 +124,7 @@ Treat the homepage scroll system as an interaction contract, not cosmetic CSS.
 - **Viewport math is centralized**. `js/main.js` sets `--vh`; `css/tokens.css` owns `--nav-height`, `--bottom-chrome-height`, and `--snap-bottom-offset`. Do not re-hardcode those values elsewhere.
 - **Section identity matters**. `js/main.js` now builds a shared section registry from `homepage.sectionsById` that drives section rendering, grouped nav, scroll highlighting, progress dots, blob color/shape transitions together. Keep those concerns unified.
 - **Nav is config-driven**. `components/nav.html` is a shell. `js/main.js` populates nav links from `homepage.groupOrder` + `homepage.groupsById`. Sections with `showInSubnav: true` become subnav items. Do not hardcode nav links in `components/nav.html`.
+- **Page links use `href`**. A nav group with `href` opens that page without the in-page scroll handler. Homepage history restoration runs after dynamic sections are available; preserve direct links such as `/#blog` and browser Back restoration.
 - **Keep one scroll owner**. Avoid mixing CSS smooth scrolling, `scrollIntoView()`, touch handlers, and custom scroll math unless there is a clear reason.
 
 ### Section Layout Contract

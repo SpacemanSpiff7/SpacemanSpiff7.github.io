@@ -31,8 +31,10 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      - name: Install locked build dependencies
+        run: npm ci
       - name: Test publication boundaries
-        run: node --test scripts/test-site-build.mjs
+        run: npm test
       - name: Test retired API cannot access stored data
         run: node --test worker/tests/*.test.js
       - name: Verify homepage shape surfaces

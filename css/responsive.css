@@ -2,6 +2,11 @@
    RESPONSIVE DESIGN - Mobile-First Excellence
    ========================================== */
 
+@media (min-width: 769px) and (max-width: 1100px) {
+    .nav-links { gap: var(--space-2); }
+    .nav-link { padding-inline: var(--space-2); }
+}
+
 @media (max-width: 1200px) {
     .tools-grid {
         grid-template-columns: 1fr;

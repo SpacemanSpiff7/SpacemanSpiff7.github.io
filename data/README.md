@@ -42,12 +42,13 @@ The `homepage` object controls all non-hero sections on the homepage, navigation
 |-------|------|-------------|
 | `label` | `string` | Nav link text |
 | `hasSubnav` | `boolean` | Show subnav dropdown with child sections |
+| `href` | `string` | Optional page URL, e.g. `/blog/`. Opens the page instead of scrolling to a section. |
 
 ### Section Fields
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| `type` | required | `hero`, `projectFeature`, `text`, `linkList` |
+| `type` | required | `hero`, `projectFeature`, `postList`, `text`, `linkList` |
 | `groupId` | required | Nav group this section belongs to |
 | `showDot` | `true` | Show in progress indicator |
 | `showInSubnav` | `false` | Show as subnav item under parent group |
@@ -60,6 +61,11 @@ The `homepage` object controls all non-hero sections on the homepage, navigation
 | `linkSetId` | -- | For `text`/`linkList`: key into code-owned `LINK_SETS` map in `js/main.js` |
 
 ### Adding a New Section
+
+The `postList` section renders generated blog previews from `data/blog-posts.json`.
+Post sources and the publishing workflow are documented in
+[`docs/blog-publishing.md`](../docs/blog-publishing.md). Shared blog settings live
+in `data/blog.json`; adding posts never requires editing `projects.json`.
 
 To add a new "Skills" section with its own nav link:
 

@@ -172,6 +172,80 @@ function renderLinkListSection(sectionConfig, sectionId) {
 }
 
 // ==========================================
+// BLOG PREVIEW AND CROSS-PAGE NAVIGATION
+// ==========================================
+
+function renderBlogSection(sectionConfig, sectionId, blogData) {
+    const section = document.createElement('section');
+    section.id = sectionId;
+    section.className = 'snap-section homepage-blog';
+    const content = document.createElement('div');
+    content.className = 'homepage-blog-content';
+    const title = document.createElement('h2');
+    title.className = 'section-title';
+    title.textContent = sectionConfig.title;
+    content.appendChild(title);
+    const intro = document.createElement('p');
+    intro.className = 'homepage-blog-intro';
+    intro.textContent = blogData.description;
+    content.appendChild(intro);
+    const list = document.createElement('div');
+    list.className = 'homepage-blog-posts';
+    blogData.posts.forEach(post => {
+        const article = document.createElement('article');
+        const date = document.createElement('time');
+        date.dateTime = post.date;
+        date.textContent = `${post.dateLabel} · ${post.minutes} min read${post.draft ? ' · Draft' : ''}`;
+        const heading = document.createElement('h3');
+        const link = document.createElement('a');
+        link.href = post.url;
+        link.textContent = post.title;
+        heading.appendChild(link);
+        const summary = document.createElement('p');
+        summary.textContent = post.summary;
+        article.append(date, heading, summary);
+        list.appendChild(article);
+    });
+    content.appendChild(list);
+    const archive = document.createElement('a');
+    archive.className = 'project-btn homepage-blog-all';
+    archive.href = '/blog/';
+    archive.textContent = 'View all posts →';
+    content.appendChild(archive);
+    section.appendChild(content);
+    return section;
+}
+
+// Restore the inner scroll container after its data-driven sections exist.
+function setupHomepageHistory() {
+    const container = document.querySelector('.scroll-container');
+    if (!container) return;
+    const save = () => {
+        history.replaceState({ ...history.state, portfolioScrollTop: container.scrollTop }, '', location.href);
+    };
+    const restore = () => {
+        const top = history.state?.portfolioScrollTop;
+        let target;
+        try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch {}
+        if (Number.isFinite(top)) container.scrollTo({ top, behavior: 'instant' });
+        else if (target) target.scrollIntoView({ behavior: 'instant' });
+    };
+    window.addEventListener('pagehide', save);
+    document.addEventListener('click', event => {
+        if (event.target.closest('a[href]')) save();
+    });
+    window.addEventListener('pageshow', restore);
+    window.addEventListener('hashchange', () => {
+        const state = { ...history.state };
+        delete state.portfolioScrollTop;
+        history.replaceState(state, '', location.href);
+        restore();
+    });
+    requestAnimationFrame(restore);
+    document.fonts?.ready.then(restore);
+}
+
+// ==========================================
 // CONFIG-DRIVEN SECTION REGISTRY BUILDER
 // ==========================================
 
@@ -219,6 +293,7 @@ function buildSectionRegistry(homepage, projectsMap) {
                 break;
             }
 
+            case 'postList':
             case 'text':
                 entry.label = sectionConfig.title;
                 entry.navTarget = sectionId;
@@ -502,9 +577,9 @@ function buildGroupedNav(homepage, sectionRegistry) {
         const firstSectionId = firstSectionByGroup.get(groupId) || groupId;
 
         const a = document.createElement('a');
-        a.href = '#';
+        a.href = group.href || `#${firstSectionId}`;
         a.className = 'nav-link';
-        a.dataset.section = firstSectionId;
+        if (!group.href) a.dataset.section = firstSectionId;
         a.textContent = group.label;
         if (groupId === 'home') {
             a.classList.add('active');
@@ -750,6 +825,13 @@ async function loadProjects() {
             return;
         }
 
+        let blogData = { description: '', posts: [] };
+        if (homepage.sectionOrder.some(id => homepage.sectionsById[id]?.type === 'postList')) {
+            const blogResponse = await fetch('data/blog-posts.json');
+            if (!blogResponse.ok) throw new Error(`Blog data HTTP error: ${blogResponse.status}`);
+            blogData = await blogResponse.json();
+        }
+
         // Remove hardcoded about and contact sections from DOM
         const aboutSection = document.getElementById('about');
         const contactSection = document.getElementById('contact');
@@ -786,6 +868,9 @@ async function loadProjects() {
                     break;
                 case 'linkList':
                     sectionEl = renderLinkListSection(sectionConfig, sectionId);
+                    break;
+                case 'postList':
+                    sectionEl = renderBlogSection(sectionConfig, sectionId, blogData);
                     break;
                 default:
                     return;
@@ -855,6 +940,7 @@ async function loadProjects() {
         initFeaturedSectionCollapse();
         initProgressIndicator(sectionRegistry);
         maybeInitScrollHighlighting();
+        setupHomepageHistory();
 
         // Rebuild scroll anchors after inserting the dynamic sections
         if (typeof window.rebuildScrollAnchors === 'function') {

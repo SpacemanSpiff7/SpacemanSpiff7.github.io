@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title | escape }} | {{ blog.author | escape }}</title>
+  <meta name="description" content="{{ summary | escape }}">
+  <meta name="author" content="{{ blog.author | escape }}">
+  <link rel="canonical" href="{{ blog.baseUrl }}{{ page.url }}">
+  {% if previewDrafts %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <meta property="og:type" content="{% if isBlogPost %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{{ title | escape }}">
+  <meta property="og:description" content="{{ summary | escape }}">
+  <meta property="og:url" content="{{ blog.baseUrl }}{{ page.url }}">
+  <meta property="og:image" content="{{ blog.baseUrl }}{{ cover or blog.defaultImage }}">
+  <meta property="og:site_name" content="{{ blog.author | escape }}">
+  <meta name="twitter:card" content="summary_large_image">
+  {% if isBlogPost %}<meta property="article:published_time" content="{{ isoDate }}">{% endif %}
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title="{{ blog.author | escape }} — Blog" href="/blog/feed.xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css?v=3">
+  <link rel="stylesheet" href="/css/blog.css?v=2">
+  <script defer src="/js/analytics.js?v=1"></script>
+  <script defer src="/js/animations.js?v=19"></script>
+  {% if articleSchema %}<script type="application/ld+json">{{ articleSchema | jsonScript | safe }}</script>{% endif %}
+</head>
+<body class="blog-page">
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="blog-header">
+    <a class="blog-brand" href="/" aria-label="Simone Longo, home"><img src="/assets/images/simone_logo.png" alt="SL" height="40"></a>
+    <nav aria-label="Main navigation">
+      <a href="/#blog"><span class="portfolio-back-label">Back to </span>portfolio <span aria-hidden="true">↗</span></a>
+      <a class="current" href="/blog/" {% if not isBlogPost %}aria-current="page"{% endif %}>Blog</a>
+    </nav>
+  </header>
+  {% if previewDrafts %}<div class="draft-banner">Local preview · includes drafts · not published</div>{% endif %}
+  <main id="main" class="blog-main">{{ content | safe }}</main>
+  <footer class="blog-footer">
+    <a href="/#blog">← Back to portfolio</a>
+    <a href="/blog/feed.xml">RSS feed</a>
+    <span>{{ blog.author | escape }}</span>
+  </footer>
+</body>
+</html>

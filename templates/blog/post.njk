@@ -1,0 +1,15 @@
+---
+layout: base.njk
+---
+<article class="blog-article">
+  <header class="article-header">
+    <a class="back-link" href="/blog/">← All posts</a>
+    <div class="post-meta"><time datetime="{{ isoDate }}">{{ dateLabel }}</time><span aria-hidden="true">/</span><span>{{ minutes }} min read</span>{% if draft %}<span class="draft-label">Draft</span>{% endif %}</div>
+    <h1>{{ title | escape }}</h1>
+    <p class="article-byline">By {{ blog.author | escape }}</p>
+    {% if tags.length %}<ul class="post-tags" aria-label="Topics">{% for tag in tags %}<li>{{ tag | escape }}</li>{% endfor %}</ul>{% endif %}
+    {% if cover %}<figure class="article-cover"><img src="{{ cover | escape }}" alt="{{ coverAlt | escape }}"></figure>{% endif %}
+  </header>
+  <div class="article-body">{{ content | safe }}</div>
+  <nav class="article-end" aria-label="Continue reading"><a href="/blog/">← All posts</a><a href="/#blog">Back to portfolio ↗</a></nav>
+</article>

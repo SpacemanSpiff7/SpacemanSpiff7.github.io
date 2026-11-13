@@ -1,5 +1,6 @@
 {
   "description": "Only these reviewed public files may be deployed. New files require an explicit manifest change. Collision tiles are separately selected from the validated public collision manifest.",
+  "blog": true,
   "files": [
     "CNAME",
     "ads.txt",
@@ -16,6 +17,7 @@
     "assets/images/simone_pic.png",
     "components/nav.html",
     "css/base.css",
+    "css/blog.css",
     "css/components.css",
     "css/responsive.css",
     "css/style.css",

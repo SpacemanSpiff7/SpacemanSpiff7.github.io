@@ -1,9 +1,10 @@
 {
   "homepage": {
-    "groupOrder": ["home", "featured", "about", "contact", "workbench"],
+    "groupOrder": ["home", "featured", "blog", "about", "contact", "workbench"],
     "groupsById": {
       "home":      { "label": "Home" },
       "featured":  { "label": "Featured", "hasSubnav": true },
+      "blog":      { "label": "Blog", "href": "/blog/" },
       "about":     { "label": "About" },
       "contact":   { "label": "Contact" },
       "workbench": { "label": "Workbench" }
@@ -13,6 +14,7 @@
       "featured-curlbro",
       "featured-airlock",
       "featured-seasonal-produce",
+      "blog",
       "about",
       "contact"
     ],
@@ -44,6 +46,13 @@
         "projectId": "airlock",
         "showInSubnav": true,
         "shapeId": "airplane",
+        "blobColor": "#D87962"
+      },
+      "blog": {
+        "type": "postList",
+        "groupId": "blog",
+        "title": "Blog",
+        "shapeId": "defaultBlob",
         "blobColor": "#D87962"
       },
       "about": {
