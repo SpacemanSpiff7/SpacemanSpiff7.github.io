@@ -80,7 +80,7 @@ Useful URLs:
 - `http://127.0.0.1:4173/blog/` — archive
 - `http://127.0.0.1:4173/blog/<slug>/` — article
 
-Archive pages show newest posts first, then paginate using `postsPerPage`. The main Blog navigation link opens `/blog/` in the same tab. Article and archive headers/footers provide explicit links to `/#blog`, and articles link back to `/blog/`. Homepage history restoration waits for the dynamically loaded sections so direct return links and browser Back work with the custom scroll container.
+Archive pages show newest posts first, then paginate using `postsPerPage`. The homepage's Blog navigation link scrolls to its `#blog` section. The section's “View all posts” link opens `/blog/` in the same tab, and post titles open individual articles. Article and archive headers/footers provide explicit links to `/#blog`, and articles link back to `/blog/`. Homepage history restoration waits for the dynamically loaded sections so direct return links and browser Back work with the custom scroll container. Keep the homepage Blog nav group free of an `href` override so it retains section navigation.
 
 Blog pages share the homepage logo proportions (40px high with intrinsic width) and starfield renderer. `js/animations.js` runs with only the starfield canvas on blog pages, reuses saved appearance preferences, pauses while hidden, and renders still stars for reduced motion. Keep the starfield behind the text and preserve normal article scrolling.
 

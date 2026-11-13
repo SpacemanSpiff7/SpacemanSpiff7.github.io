@@ -42,16 +42,30 @@ function harness(hash = '#blog') {
     return { context, nav, scroll, history, windowEvents, documentEvents };
 }
 
-test('Blog navigation is a native page link while other groups retain section navigation', () => {
+test('homepage Blog scrolls to its section while explicit page links remain native', () => {
     const h = harness();
-    h.context.buildGroupedNav({ groupOrder: ['home', 'blog'], groupsById: { home: { label: 'Home' }, blog: { label: 'Blog', href: '/blog/' } } },
-        [{ id: 'hero', groupId: 'home' }, { id: 'blog', groupId: 'blog' }]);
-    const [home, blog] = h.nav.querySelectorAll('.nav-link');
+    const data = JSON.parse(fs.readFileSync(new URL('../data/projects.json', import.meta.url), 'utf8'));
+    const homepage = { ...data.homepage,
+        groupOrder: [...data.homepage.groupOrder, 'guide'],
+        groupsById: { ...data.homepage.groupsById, guide: { label: 'Guide', href: '/tools/guide.html' } }
+    };
+    const registry = h.context.buildSectionRegistry(homepage, Object.fromEntries(data.projects.map(project => [project.id, project])));
+    h.context.buildGroupedNav(homepage, registry);
+    const links = h.nav.querySelectorAll('.nav-link');
+    const home = links.find(link => link.textContent === 'Home');
+    const blog = links.find(link => link.textContent === 'Blog');
+    const guide = links.find(link => link.textContent === 'Guide');
     assert.equal(home.dataset.section, 'hero');
-    assert.equal(blog.href, '/blog/');
-    assert.equal(blog.dataset.section, undefined);
+    assert.equal(blog.href, '#blog');
+    assert.equal(blog.dataset.section, 'blog');
     let prevented = false;
     for (const callback of blog.events.get('click') || []) callback({ preventDefault() { prevented = true; } });
+    assert.equal(prevented, true);
+    assert.equal(h.scroll.scrollTop, 3200);
+    assert.equal(guide.href, '/tools/guide.html');
+    assert.equal(guide.dataset.section, undefined);
+    prevented = false;
+    for (const callback of guide.events.get('click') || []) callback({ preventDefault() { prevented = true; } });
     assert.equal(prevented, false);
 });
 

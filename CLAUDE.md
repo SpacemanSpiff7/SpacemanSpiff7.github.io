@@ -92,7 +92,7 @@ This ensures users get fresh JavaScript immediately after deployment.
 All non-hero sections are defined in `data/projects.json` under `homepage.sectionOrder`:
 1. **Hero** - Name + title (static HTML)
 2. **Featured projects** - Sections of type `projectFeature`, rendered from JSON
-3. **Blog** - Latest generated posts (type: `postList`); navigation opens `/blog/`
+3. **Blog** - Latest generated posts (type: `postList`); homepage navigation scrolls to `#blog`, and “View all posts” opens `/blog/`
 4. **About** - Bio section (type: `text`, rendered from JSON)
 5. **Contact** - Contact info (type: `linkList`, rendered from JSON)
 6. **Projects Grid** - Workbench (hardcoded terminal section)

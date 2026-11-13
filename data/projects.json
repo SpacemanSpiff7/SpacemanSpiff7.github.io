@@ -4,7 +4,7 @@
     "groupsById": {
       "home":      { "label": "Home" },
       "featured":  { "label": "Featured", "hasSubnav": true },
-      "blog":      { "label": "Blog", "href": "/blog/" },
+      "blog":      { "label": "Blog" },
       "about":     { "label": "About" },
       "contact":   { "label": "Contact" },
       "workbench": { "label": "Workbench" }

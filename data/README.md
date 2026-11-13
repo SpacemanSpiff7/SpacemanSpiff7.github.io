@@ -42,7 +42,7 @@ The `homepage` object controls all non-hero sections on the homepage, navigation
 |-------|------|-------------|
 | `label` | `string` | Nav link text |
 | `hasSubnav` | `boolean` | Show subnav dropdown with child sections |
-| `href` | `string` | Optional page URL, e.g. `/blog/`. Opens the page instead of scrolling to a section. |
+| `href` | `string` | Optional page URL, e.g. `/tools/guide.html`. Opens the page instead of scrolling to a section. Omit for Blog so its nav link scrolls to `#blog`. |
 
 ### Section Fields
 
