@@ -91,3 +91,21 @@ test('malformed and unknown hashes leave the page usable', () => {
         assert.equal(h.scroll.scrollTop, 0);
     }
 });
+
+test('initial frames and late fonts do not undo navigation after clicking a link', async () => {
+    const h = harness('');
+    let initialFrame;
+    h.context.requestAnimationFrame = callback => { initialFrame = callback; };
+    let finishFonts;
+    const ready = new Promise(resolve => { finishFonts = resolve; });
+    h.context.document.fonts = { ready };
+    h.context.setupHomepageHistory();
+    // The click saves the departing position before smooth scrolling finishes.
+    for (const callback of h.documentEvents.get('click')) callback({ target: { closest: () => ({}) } });
+    h.scroll.scrollTop = 3200;
+    initialFrame();
+    assert.equal(h.scroll.scrollTop, 3200);
+    finishFonts();
+    await ready;
+    assert.equal(h.scroll.scrollTop, 3200);
+});

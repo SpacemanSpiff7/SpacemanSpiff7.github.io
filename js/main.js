@@ -220,7 +220,9 @@ function renderBlogSection(sectionConfig, sectionId, blogData) {
 function setupHomepageHistory() {
     const container = document.querySelector('.scroll-container');
     if (!container) return;
+    let initialRestorePending = true;
     const save = () => {
+        initialRestorePending = false;
         history.replaceState({ ...history.state, portfolioScrollTop: container.scrollTop }, '', location.href);
     };
     const restore = () => {
@@ -241,8 +243,12 @@ function setupHomepageHistory() {
         history.replaceState(state, '', location.href);
         restore();
     });
-    requestAnimationFrame(restore);
-    document.fonts?.ready.then(restore);
+    const restoreInitial = () => {
+        // Initial rendering and delayed fonts must not undo a new section scroll.
+        if (initialRestorePending) restore();
+    };
+    requestAnimationFrame(restoreInitial);
+    document.fonts?.ready.then(restoreInitial);
 }
 
 // ==========================================
